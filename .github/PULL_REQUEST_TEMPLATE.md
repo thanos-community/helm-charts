@@ -1,5 +1,5 @@
 <!--
-Thank you for contributing to kiwigrid/charts. Before you submit this PR we'd like to
+Thank you for contributing to thanos-community/helm-charts. Before you submit this PR we'd like to
 make sure you are aware of our technical requirements and best practices:
 
 * https://github.com/helm/charts/blob/master/CONTRIBUTING.md#technical-requirements
@@ -19,7 +19,7 @@ anyways when it is merged. Thanks.
 
 For fast feedback, please @-mention maintainers that are listed in the Chart.yaml file.
 
-Please make sure you test your changes before you push them. Once pushed, a CircleCI
+Please make sure you test your changes before you push them. Once pushed, a GitHub Actions pipeline
 will run across your changes and do some initial checks and linting. These checks run
 very quickly. Please check the results. We would like these checks to pass before we
 even continue reviewing your changes.
