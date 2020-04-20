@@ -6,4 +6,4 @@ chart-dirs:
   - charts
 chart-repos:
   - stable=https://kubernetes-charts.storage.googleapis.com/
-  - kiwigrid=https://kiwigrid.github.io
+
