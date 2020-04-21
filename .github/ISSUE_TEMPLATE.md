@@ -30,7 +30,7 @@ explain why.
 **Version of Kubernetes**:
 
 
-**Which chart in which version**:
+**Chart version**:
 
 
 **What happened**:
