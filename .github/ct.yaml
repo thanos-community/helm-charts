@@ -1,0 +1,9 @@
+# consider helm install to be failed after 10 minutes
+helm-extra-args: --timeout 600
+check-version-increment: true
+debug: true
+chart-dirs: 
+  - charts
+chart-repos:
+  - stable=https://kubernetes-charts.storage.googleapis.com/
+
