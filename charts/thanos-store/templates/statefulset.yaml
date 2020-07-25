@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos-store.fullname" . }}
+  labels:
+    {{- include "thanos-store.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+{{- with .Values.updateStrategy }}
+  updateStrategy: {{ toYaml . | nindent 4 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "thanos-store.selectorLabels" . | nindent 6 }}
+      {{- with .Values.statefulsetMatchLabels }}{{ toYaml . | nindent }}{{ end }}
+  serviceName: {{ include "thanos-store.fullname" . }}-grpc
+  template:
+    metadata:
+      labels:
+        {{- include "thanos-store.selectorLabels" . | nindent 8 }}
+{{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "thanos-store.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: OBJSTORE_CONFIG
+            valueFrom:
+              secretKeyRef:
+                key: thanos.yaml
+                name: thanos-objectstore
+          {{- with .Values.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+          args:
+            - "store"
+            - "--data-dir=/var/thanos/store"
+            - "--http-address=0.0.0.0:{{ .Values.http.port }}"
+            - "--grpc-address=0.0.0.0:{{ .Values.grpc.port }}"
+            - "--objstore.config=$(OBJSTORE_CONFIG)"
+          ports:
+            - name: http
+              containerPort: {{ .Values.http.port }}
+            - name: grpc
+              containerPort: {{ .Values.grpc.port }}
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

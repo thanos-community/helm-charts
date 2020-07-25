@@ -1,0 +1,87 @@
+{{- if .Values.http.ingress.enabled -}}
+{{- $fullName := include "thanos-query.fullname" . -}}
+{{- $svcPort := .Values.http.port -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-http
+  labels:
+    {{- include "thanos-query.labels" . | nindent 4 }}
+{{- with .Values.http.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.http.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.http.ingress.tls }}
+  tls:
+    {{- range .Values.http.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.http.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $fullName }}-http
+              servicePort: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+  {{- end }}
+
+---
+
+{{- if .Values.grpc.ingress.enabled -}}
+{{- $fullName := include "thanos-query.fullname" . -}}
+{{- $svcPort := .Values.grpc.port -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-grpc
+  labels:
+    {{- include "thanos-query.labels" . | nindent 4 }}
+{{- with .Values.grpc.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.grpc.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.grpc.ingress.tls }}
+  tls:
+    {{- range .Values.grpc.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.grpc.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $fullName }}-grpc
+              servicePort: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+  {{- end }}
