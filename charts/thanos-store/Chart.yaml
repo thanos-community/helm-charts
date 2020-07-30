@@ -13,3 +13,4 @@ sources:
   - https://github.com/thanos-community/helm-charts
 icon: https://raw.githubusercontent.com/thanos-io/thanos/master/docs/img/Thanos-logo_fullmedium.png
 maintainers:
+  - name: spencergilbert
