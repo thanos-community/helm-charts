@@ -1,5 +1,5 @@
 {{- if .Values.http.ingress.enabled -}}
-{{- $fullName := include "thanos-query.fullname" . -}}
+{{- $fullName := include "thanos-store.fullname" . -}}
 {{- $svcPort := .Values.http.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
@@ -10,7 +10,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-http
   labels:
-    {{- include "thanos-query.labels" . | nindent 4 }}
+    {{- include "thanos-store.labels" . | nindent 4 }}
 {{- with .Values.http.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
   {{- with .Values.http.ingress.annotations }}
   annotations:
@@ -44,7 +44,7 @@ spec:
 ---
 
 {{- if .Values.grpc.ingress.enabled -}}
-{{- $fullName := include "thanos-query.fullname" . -}}
+{{- $fullName := include "thanos-store.fullname" . -}}
 {{- $svcPort := .Values.grpc.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
@@ -55,7 +55,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}-grpc
   labels:
-    {{- include "thanos-query.labels" . | nindent 4 }}
+    {{- include "thanos-store.labels" . | nindent 4 }}
 {{- with .Values.grpc.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
   {{- with .Values.grpc.ingress.annotations }}
   annotations:
