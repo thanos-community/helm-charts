@@ -82,7 +82,7 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           terminationMessagePolicy: FallbackToLogsOnError
-        terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 120
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
