@@ -158,3 +158,12 @@ grpc:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
+
+serviceMonitor:
+  enabled: true
+  relabelings:
+  - separator: /
+    sourceLabels:
+    - namespace
+    - pod
+    targetLabel: instance
