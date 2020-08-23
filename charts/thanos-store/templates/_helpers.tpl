@@ -49,6 +49,7 @@ Selector labels
 {{- define "thanos-store.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "thanos-store.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: object-store-gateway
 {{- end }}
 
 {{/*

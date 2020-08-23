@@ -78,7 +78,7 @@ serviceMonitor:
     targetLabel: instance
 
 persistentVolume:
-  enabled: false
+  enabled: true
   existingClaim: ""
   annotations: {}
   labels: {}

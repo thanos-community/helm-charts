@@ -49,7 +49,7 @@ Selector labels
 {{- define "thanos-compact.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "thanos-compact.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: data-compactor
+app.kubernetes.io/component: database-compactor
 {{- end }}
 
 {{/*

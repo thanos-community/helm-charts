@@ -62,6 +62,11 @@ tolerations: []
 
 affinity: {}
 
+# Log filtering level
+logLevel: info
+# Log format to use. Possible options: logfmt or json
+logFormat: logfmt
+
 updateStrategy:
   type: RollingUpdate
 
@@ -99,3 +104,20 @@ grpc:
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
+
+serviceMonitor:
+  enabled: false
+  relabelings:
+  - separator: /
+    sourceLabels:
+    - namespace
+    - pod
+    targetLabel: instance
+
+persistentVolume:
+  enabled: true
+  existingClaim: ""
+  annotations: {}
+  labels: {}
+  size: 10Gi
+  storageClass: "-"

@@ -99,28 +99,27 @@ spec:
             claimName: {{ .Values.persistentVolume.existingClaim }}
         {{- end }}
     {{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
-    volumeClaimTemplates:
-    - metadata:
-        name: data
-        labels:
-          {{- include "thanos-compact.selectorLabels" . | nindent 10 }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "thanos-compact.selectorLabels" . | nindent 10 }}
 {{- with .Values.persistentVolume.labels }}{{ toYaml . | nindent 10 }}{{ end }}
-      {{- with .Values.persistentVolume.annotations }}
-        annotations:
-          {{- toYaml . | nindent 10 }}
-      {{- end }}
-      spec:
-        accessModes:
-        - ReadWriteOnce
-        resources:
-          requests:
-            storage: "{{ .Values.persistentVolume.size }}"
-        {{- if .Values.persistentVolume.storageClass }}
-        {{- if (eq "-" .Values.persistentVolume.storageClass) }}
-        storageClassName: ""
-        {{- else }}
-        storageClassName: "{{ .Values.persistentVolume.storageClass }}"
-        {{- end }}
-        {{- end }}
+    {{- with .Values.persistentVolume.annotations }}
+      annotations:
+        {{- toYaml . | nindent 10 }}
     {{- end }}
-
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: "{{ .Values.persistentVolume.size }}"
+      {{- if .Values.persistentVolume.storageClass }}
+      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+      {{- end }}
+      {{- end }}
+  {{- end }}

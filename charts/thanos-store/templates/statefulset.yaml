@@ -46,6 +46,8 @@ spec:
           {{- with .Values.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
           args:
             - "store"
+            - "--log.level={{ .Values.logLevel }}"
+            - "--log.format={{ .Values.logFormat }}"
             - "--data-dir=/var/thanos/store"
             - "--http-address=0.0.0.0:{{ .Values.http.port }}"
             - "--grpc-address=0.0.0.0:{{ .Values.grpc.port }}"
@@ -79,3 +81,37 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        {{- if not .Values.persistentVolume.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.persistentVolume.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistentVolume.existingClaim }}
+        {{- end }}
+    {{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "thanos-store.selectorLabels" . | nindent 10 }}
+{{- with .Values.persistentVolume.labels }}{{ toYaml . | nindent 10 }}{{ end }}
+    {{- with .Values.persistentVolume.annotations }}
+      annotations:
+        {{- toYaml . | nindent 10 }}
+    {{- end }}
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: "{{ .Values.persistentVolume.size }}"
+      {{- if .Values.persistentVolume.storageClass }}
+      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+      {{- end }}
+      {{- end }}
+  {{- end }}
