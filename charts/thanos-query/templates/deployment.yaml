@@ -64,18 +64,25 @@ spec:
             - name: grpc
               containerPort: {{ .Values.grpc.port }}
           livenessProbe:
+            failureThreshold: 4
             httpGet:
               path: /-/healthy
               port: http
+              scheme: HTTP
+            periodSeconds: 30
           readinessProbe:
+            failureThreshold: 20 
             httpGet:
               path: /-/ready
               port: http
+              scheme: HTTP
+            periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           terminationMessagePolicy: FallbackToLogsOnError
+        terminationGracePeriodSeconds: 120
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

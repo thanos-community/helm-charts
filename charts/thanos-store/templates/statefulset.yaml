@@ -58,13 +58,19 @@ spec:
             - name: grpc
               containerPort: {{ .Values.grpc.port }}
           livenessProbe:
+            failureThreshold: 8
             httpGet:
               path: /-/healthy
               port: http
+              scheme: HTTP
+            periodSeconds: 30
           readinessProbe:
+            failureThreshold: 20
             httpGet:
               path: /-/ready
               port: http
+              scheme: HTTP
+            periodSeconds: 5
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
@@ -91,7 +97,8 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistentVolume.existingClaim }}
         {{- end }}
-    {{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
+    terminationGracePeriodSeconds: 120
+{{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
       name: data
