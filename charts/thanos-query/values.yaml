@@ -160,7 +160,7 @@ grpc:
     #      - chart-example.local
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   relabelings:
   - separator: /
     sourceLabels:

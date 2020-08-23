@@ -69,7 +69,7 @@ http:
     labels: {}
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   relabelings:
   - separator: /
     sourceLabels:
