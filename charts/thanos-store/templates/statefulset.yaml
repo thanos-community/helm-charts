@@ -81,6 +81,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      terminationMessagePolicy: FallbackToLogsOnError
       volumes:
         {{- if not .Values.persistentVolume.enabled }}
         - name: data

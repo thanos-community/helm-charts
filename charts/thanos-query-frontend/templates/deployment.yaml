@@ -82,6 +82,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
             - name: cache-config
               mountPath: /var/thanos/
