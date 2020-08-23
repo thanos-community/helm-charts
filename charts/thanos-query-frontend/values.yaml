@@ -1,0 +1,147 @@
+# Default values for thanos-query-frontend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/thanos/thanos
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "master-2020-08-11-2ea2c2b7"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Labels to add to the service account
+  labels: {}
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Add extra labels to deployment
+deploymentLabels: {}
+  # extraLabel: extraLabelValue
+
+# Add extra annotations to deployment
+deploymentAnnotations: {}
+  # extraAnnotation: extraAnnotationValue
+
+# Add extra labels to pod template
+podLabels: {}
+  # extraLabel: extraLabelValue
+
+# Add extra annotations to pod template
+podAnnotations: {}
+  # extraAnnotation: extraAnnotationValue
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Kubernetes deployment strategy object as documented in https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+strategy: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Add extra environment variables
+extraEnv: []
+# - name: ENV
+#   value: value
+
+# Add extra arguments
+extraArgs:
+# - "--extraargs=extravalue"
+
+# Log filtering level
+logLevel: info
+# Log format to use. Possible options: logfmt or json
+logFormat: logfmt
+
+compressResponses: true
+downstreamUrl: http://thanos-query.default.svc.cluster.local.
+downstreamPort: 9090
+splitInterval: 24h
+maxRetries: 5
+logQueriesLongerThan: 5s
+responseCacheConfig:
+  type: IN-MEMORY
+  config:
+    max_size: 0
+    max_size_items: 2048
+    validity: 6h
+
+http:
+  port: 9090
+  service:
+    # Add extra labels to http service
+    labels: {}
+      # extraLabel: extraLabelValue
+    # Add annotations to http service
+    annotations: {}
+      # extraAnnotation: extraAnnotationValue
+    type: ClusterIP
+    # Add labels for http service selector
+    matchLabels: {}
+  ingress:
+    enabled: false
+    # Add extra labels to http ingress
+    labels: {}
+      # extraLabel: extraLabelValue
+    # Add annotations to http ingress
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - "/"
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+serviceMonitor:
+  enabled: false
+  relabelings:
+  - separator: /
+    sourceLabels:
+    - namespace
+    - pod
+    targetLabel: instance

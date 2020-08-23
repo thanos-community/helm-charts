@@ -1,0 +1,104 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thanos-query-frontend.fullname" . }}
+  labels:
+    {{- include "thanos-query-frontend.labels" . | nindent 4 }}
+{{- with .Values.deploymentLabels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount | default 1 }}
+{{- end }}
+{{- with .Values.strategy }}
+  strategy: {{ toYaml . | nindent 4 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "thanos-query-frontend.selectorLabels" . | nindent 6 }}
+      {{- with .Values.deploymentMatchLabels }}{{ toYaml . | nindent }}{{ end }}
+  template:
+    metadata:
+      labels:
+        {{- include "thanos-query-frontend.selectorLabels" . | nindent 8 }}
+{{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "thanos-query-frontend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.extraEnv }}
+          env: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          args:
+            - "query-frontend"
+            {{- if .Values.compressResponses }}
+            - "--query-frontend.compress-responses"
+            {{- end }}
+            - "--log.level={{ .Values.logLevel }}"
+            - "--log.format={{ .Values.logFormat }}"
+            - "--http-address=0.0.0.0:{{ .Values.http.port }}"
+            - "--query-frontend.downstream-url={{ .Values.downstreamUrl }}:{{ .Values.downstreamPort }}"
+            - "--query-range.split-interval={{ .Values.splitInterval }}"
+            - "--query-range.max-retries-per-request={{ .Values.maxRetries }}"
+            - "--query-frontend.log_queries_longer_than={{ .Values.logQueriesLongerThan }}"
+            - "--query-range.response-cache-config-file=/var/thanos/cache-config.yaml"
+            {{- with .Values.extraArgs }}
+            {{ toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.http.port }}
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 4
+            httpGet:
+              path: /-/healthy
+              port: http
+              scheme: HTTP
+            periodSeconds: 30
+          readinessProbe:
+            failureThreshold: 20
+            httpGet:
+              path: /-/ready
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: cache-config
+              mountPath: /var/thanos/
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: cache-config
+          configMap:
+            name: query-frontend-config
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
