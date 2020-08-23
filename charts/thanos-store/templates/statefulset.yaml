@@ -75,6 +75,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          terminationMessagePolicy: FallbackToLogsOnError
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -87,7 +88,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      terminationMessagePolicy: FallbackToLogsOnError
       volumes:
         {{- if not .Values.persistentVolume.enabled }}
         - name: data
@@ -97,7 +97,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistentVolume.existingClaim }}
         {{- end }}
-    terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 120
 {{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
   volumeClaimTemplates:
   - metadata:
