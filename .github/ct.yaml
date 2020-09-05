@@ -1,5 +1,5 @@
 # consider helm install to be failed after 10 minutes
-helm-extra-args: --timeout 600
+helm-extra-args: --timeout 600s
 check-version-increment: true
 debug: true
 chart-dirs: 
