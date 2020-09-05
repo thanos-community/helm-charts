@@ -1,0 +1,19 @@
+{{ if .Values.serviceMonitor.enabled }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: thanos-compact
+  labels:
+    {{- include "thanos-compact.labels" . | nindent 4 }}
+spec:
+  endpoints:
+  - port: {{ .Values.http.port }}
+    {{- with .Values.serviceMonitor.relabelings }}
+    relabelings: {{ toYaml . | nindent 4 }}
+    {{- end }}
+  selector:
+    matchLabels:
+      {{- include "thanos-compact.selectorLabels" . | nindent 6 }}
+  namespaceSelector: {{ .Release.Namespace }}
+{{ end }}

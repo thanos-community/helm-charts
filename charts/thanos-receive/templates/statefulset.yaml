@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos-receive.fullname" . }}
+  labels:
+    {{- include "thanos-receive.labels" . | nindent 4 }}
+spec:
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+{{- end }}
+{{- with .Values.updateStrategy }}
+  updateStrategy: {{ toYaml . | nindent 4 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "thanos-receive.selectorLabels" . | nindent 6 }}
+      {{- with .Values.statefulsetMatchLabels }}{{ toYaml . | nindent }}{{ end }}
+  serviceName: {{ include "thanos-receive.fullname" . }}-grpc
+  template:
+    metadata:
+      labels:
+        {{- include "thanos-receive.selectorLabels" . | nindent 8 }}
+{{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "thanos-receive.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: OBJSTORE_CONFIG
+            valueFrom:
+              secretKeyRef:
+                key: thanos.yaml
+                name: thanos-objectreceive
+          {{- with .Values.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+          args:
+            - "receive"
+            - "--log.level={{ .Values.logLevel }}"
+            - "--log.format={{ .Values.logFormat }}"
+            - "--data-dir=/var/thanos/receive"
+            - "--http-address=0.0.0.0:{{ .Values.http.port }}"
+            - "--grpc-address=0.0.0.0:{{ .Values.grpc.port }}"
+            - "--objreceive.config=$(OBJSTORE_CONFIG)"
+          ports:
+            - name: http
+              containerPort: {{ .Values.http.port }}
+            - name: grpc
+              containerPort: {{ .Values.grpc.port }}
+          livenessProbe:
+            failureThreshold: 8
+            httpGet:
+              path: /-/healthy
+              port: http
+              scheme: HTTP
+            periodSeconds: 30
+          readinessProbe:
+            failureThreshold: 20
+            httpGet:
+              path: /-/ready
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          terminationMessagePolicy: FallbackToLogsOnError
+        terminationGracePeriodSeconds: 900
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
