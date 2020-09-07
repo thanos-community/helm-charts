@@ -55,9 +55,9 @@ spec:
             {{- range .Values.selectorLabels }}
             - "--selector-label={{ . }}"
             {{- end }}
-						{{- range .Values.stores }}
-						- "--store={{ . }}"
-						{{- end }}
+            {{- range .Values.stores }}
+            - "--store={{ . }}"
+            {{- end }}
             {{- with .Values.extraArgs }}
             {{ toYaml . | nindent 12 }}
             {{- end }}
