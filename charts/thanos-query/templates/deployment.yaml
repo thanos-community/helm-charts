@@ -49,6 +49,11 @@ spec:
             - "--log.format={{ .Values.logFormat }}"
             - "--http-address=0.0.0.0:{{ .Values.http.port }}"
             - "--grpc-address=0.0.0.0:{{ .Values.grpc.port }}"
+            {{- if .Values.tracingConfig }}
+            - |
+              --tracing.config=
+            {{- toYaml .Values.tracingConfig | nindent 14 }}
+            {{- end }}
             {{- range .Values.replicaLabels }}
             - "--query.replica-label={{ . }}"
             {{- end }}
@@ -57,6 +62,14 @@ spec:
             {{- end }}
             {{- range .Values.stores }}
             - "--store={{ . }}"
+            {{- end }}
+            {{- if .Values.autoDownsampling }}
+            - "--query.auto-downsampling"
+            {{- end }}
+            {{- if .Values.partialResponse }}
+            - "--query.partial-response"
+            {{- else }}
+            - "--no-query.partial-response"
             {{- end }}
             {{- with .Values.extraArgs }}
             {{ toYaml . | nindent 12 }}

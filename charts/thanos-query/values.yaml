@@ -126,6 +126,15 @@ logLevel: info
 # Log format to use. Possible options: logfmt or json
 logFormat: logfmt
 
+# Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file
+# with tracing configuration. See format details: https://thanos.io/tip/thanos/tracing.md
+tracingConfig: {}
+#  type: STACKDRIVER
+#  config:
+#    service_name: ""
+#    project_id: ""
+#    sample_factor: 0
+
 # Labels to treat as a replica indicator along which data is deduplicated.
 # Still you will be able to query without deduplication using 'dedup=false' parameter.
 replicaLabels: []
@@ -141,6 +150,14 @@ selectorLabels: []
 # lookups.
 stores: []
 # - "dnssrv+_grpc._tcp.example-thanos-store.thanos.svc.cluster.local"
+
+# Enable automatic adjustment (step / 5) to what source of data should be used in store
+# gateways if no max_source_resolution param is specified.
+autoDownsampling: true
+
+# Enable partial response for queries if no partial_response param is specified.
+# Setting to `false` will set "--no-query.partial-response".
+partialResponse: true
 
 # Add extra arguments
 extraArgs:
