@@ -72,7 +72,7 @@ spec:
             - "--no-query.partial-response"
             {{- end }}
             {{- with .Values.extraArgs }}
-            {{ toYaml . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
           ports:
             - name: http

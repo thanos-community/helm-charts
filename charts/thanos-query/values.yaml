@@ -160,7 +160,7 @@ autoDownsampling: true
 partialResponse: true
 
 # Add extra arguments
-extraArgs:
+extraArgs: []
 # - "--extraargs=extravalue"
 
 http:
