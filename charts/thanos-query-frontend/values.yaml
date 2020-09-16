@@ -1,0 +1,189 @@
+# Default values for thanos-query-frontend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/thanos/thanos
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Labels to add to the service account
+  labels: {}
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Add extra labels to deployment
+deploymentLabels: {}
+  # extraLabel: extraLabelValue
+
+# Add extra annotations to deployment
+deploymentAnnotations: {}
+  # extraAnnotation: extraAnnotationValue
+
+# Add extra labels to pod template
+podLabels: {}
+  # extraLabel: extraLabelValue
+
+# Add extra annotations to pod template
+podAnnotations: {}
+  # extraAnnotation: extraAnnotationValue
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Kubernetes deployment strategy object as documented in https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+strategy: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Add extra environment variables
+extraEnv: []
+# - name: ENV
+#   value: value
+
+# Command flags
+# ref: https://thanos.io/tip/components/query/#flags
+
+# Log filtering level
+logLevel: info
+# Log format to use. Possible options: logfmt or json
+logFormat: logfmt
+
+# TODO: this should probably be a Secret because a number of configs require passwords/certs
+# Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file
+# with tracing configuration. See format details: https://thanos.io/tip/thanos/tracing.md
+tracingConfig: {}
+#  type: STACKDRIVER
+#  config:
+#    service_name: ""
+#    project_id: ""
+#    sample_factor: 0
+
+# Split queries by an interval and execute in parallel, 0 disables it.
+splitInterval: 24h
+
+# Maximum number of retries for a single request; beyond this, the downstream error is returned.
+maxRetries: 5
+
+# Limit the query time range (end - start time) in the query-frontend, 0 disables it.
+maxQueryLength: 0
+
+# Maximum number of queries will be scheduled in parallel by the frontend
+maxQueryParallelism: 14
+
+# Most recent allowed cacheable result, to prevent caching very recent results that might still
+# be in flux.
+responseCacheMaxFreshness: 1m
+
+# Enable partial response for queries if no partial_response param is specified.
+# 'no-query-range.partial-response for disabling.
+partialResponse: true
+
+# Response cache configuration for 'query-range.response-cache-config-file' flag
+responseCacheConfig:
+  type: IN-MEMORY
+  config:
+    max_size: 0
+    max_size_items: 2048
+    validity: 6h
+
+# Time to wait after an interrupt received for HTTP Server.
+httpGracePeriod: 2m
+
+# URL of downstream Prometheus Query compatible API.
+downstreamUrl: http://thanos-query.default.svc.cluster.local.9090
+
+# Compress HTTP responses.
+compressResponses: true
+
+# Log queries that are slower than the specified duration. Set to 0 to disable. Set to < 0 to
+# enable on all queries.
+logQueriesLongerThan: 5s
+
+# Request Logging for logging the start and end of requests. LogFinishCall is enabled by default.
+# LogFinishCall : Logs the finish call of the requests. LogStartAndFinshCall : Logs the start and
+# finish call of the requests. NoLogCall : Disable request logging.
+logRequestDecision: LogFinishCall
+
+service:
+  port: 9090
+  # Add extra labels to http service
+  labels: {}
+    # extraLabel: extraLabelValue
+  # Add annotations to http service
+  annotations: {}
+    # extraAnnotation: extraAnnotationValue
+  type: ClusterIP
+  # Add labels for http service selector
+  matchLabels: {}
+
+ingress:
+  enabled: false
+  # Add extra labels to ingress
+  labels: {}
+    # extraLabel: extraLabelValue
+  # Add annotations to ingress
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - "/"
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+serviceMonitor:
+  enabled: false
+  relabelings:
+  - separator: /
+    sourceLabels:
+    - namespace
+    - pod
+    targetLabel: instance
