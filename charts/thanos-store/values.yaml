@@ -1,0 +1,152 @@
+# Default values for thanos-store.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: quay.io/thanos/thanos
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# Add extra labels to statefulset
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+statefulsetLabels: {}
+
+# Add extra annotations to statefulset
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+statefulsetAnnotations: {}
+
+# Add extra labels to pod template
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+# Add extra annotations to pod template
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+
+# Kubernetes Security Context (pod)
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+podSecurityContext: {}
+  # fsGroup: 2000
+
+# Kubernetes Security Context (container)
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# Resource requests and limits
+# ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+updateStrategy:
+  type: RollingUpdate
+
+# Node labels for pod assignment
+# ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# Tolerations for pod assignment
+# ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+# Affinity for pod assignment
+# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+#  podAntiAffinity:
+#    preferredDuringSchedulingIgnoredDuringExecution:
+#    - podAffinityTerm:
+#        labelSelector:
+#          matchExpression:
+#          - key: app.kubernetes.io/name
+#            operator: In
+#            values:
+#            - thanos-store
+#        namespaces:
+#        - thanos
+#        topologyKey: kubernetes.io/hostname
+#      weight: 100
+
+# Command flags
+# ref: https://thanos.io/tip/components/query/#flags
+
+# Log filtering level
+logLevel: info
+# Log format to use. Possible options: logfmt or json
+logFormat: logfmt
+
+# Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file
+# with tracing configuration. See format details: https://thanos.io/tip/thanos/tracing.md
+tracingConfig: {}
+#  type: STACKDRIVER
+#  config:
+#    service_name: ""
+#    project_id: ""
+#    sample_factor: 0
+
+# Add extra arguments
+extraArgs: []
+  #- "--extraArgs=extraValue"
+
+service:
+  port:
+    http: 10902
+    grpc: 10901
+  # Add extra labels to service
+  labels: {}
+  # Add annotations to service
+  annotations: {}
+  type: ClusterIP
+  headless: true
+  # Add labels for service selector
+  matchLabels: {}
+
+
+# Prometheus Operator's ServiceMonitor configuration
+serviceMonitor:
+  enabled: false
+  relabelings:
+  - separator: /
+    sourceLabels:
+    - namespace
+    - pod
+    targetLabel: instance
+
+# Persistent Volume Claim
+# ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+persistentVolume:
+  enabled: false
+  existingClaim: ""
+  annotations: {}
+  labels: {}
+  size: 10Gi
+  storageClass: "-"

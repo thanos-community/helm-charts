@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos-store.fullname" . }}
+  labels:
+    {{- include "thanos-store.labels" . | nindent 4 }}
+{{- with .Values.statefulsetLabels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.statefulsetAnnotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+{{- with .Values.updateStrategy }}
+  updateStrategy: {{ toYaml . | nindent 4 }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "thanos-store.selectorLabels" . | nindent 6 }}
+      {{- with .Values.statefulsetMatchLabels }}{{ toYaml . | nindent }}{{ end }}
+  serviceName: {{ include "thanos-store.fullname" . }}-grpc
+  template:
+    metadata:
+      labels:
+        {{- include "thanos-store.selectorLabels" . | nindent 8 }}
+{{- with .Values.podLabels }}{{ toYaml . | nindent 8 }}{{ end }}
+    {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "thanos-store.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: OBJSTORE_CONFIG
+            valueFrom:
+              secretKeyRef:
+                key: thanos.yaml
+                name: thanos-objectstore
+          {{- with .Values.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+          args:
+            - "store"
+            - "--log.level={{ .Values.logLevel }}"
+            - "--log.format={{ .Values.logFormat }}"
+            - "--data-dir=/var/thanos/store"
+            - "--http-address=0.0.0.0:{{ .Values.service.port.http }}"
+            - "--grpc-address=0.0.0.0:{{ .Values.service.port.grpc }}"
+            - "--objstore.config=$(OBJSTORE_CONFIG)"
+            {{- with .Values.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port.http }}
+            - name: grpc
+              containerPort: {{ .Values.service.port.grpc }}
+          livenessProbe:
+            failureThreshold: 8
+            httpGet:
+              path: /-/healthy
+              port: http
+              scheme: HTTP
+            periodSeconds: 30
+          readinessProbe:
+            failureThreshold: 20
+            httpGet:
+              path: /-/ready
+              port: http
+              scheme: HTTP
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          terminationMessagePolicy: FallbackToLogsOnError
+          volumeMounts:
+          - mountPath: /var/thanos/store
+            name: data
+            readOnly: false
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- if not .Values.persistentVolume.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.persistentVolume.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistentVolume.existingClaim }}
+        {{- end }}
+      terminationGracePeriodSeconds: 120
+{{- if and .Values.persistentVolume.enabled (not .Values.persistentVolume.existingClaim) }}
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        {{- include "thanos-store.selectorLabels" . | nindent 10 }}
+{{- with .Values.persistentVolume.labels }}{{ toYaml . | nindent 10 }}{{ end }}
+    {{- with .Values.persistentVolume.annotations }}
+      annotations:
+        {{- toYaml . | nindent 10 }}
+    {{- end }}
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: "{{ .Values.persistentVolume.size }}"
+      {{- if .Values.persistentVolume.storageClass }}
+      {{- if (eq "-" .Values.persistentVolume.storageClass) }}
+      storageClassName: ""
+      {{- else }}
+      storageClassName: "{{ .Values.persistentVolume.storageClass }}"
+      {{- end }}
+      {{- end }}
+  {{- end }}
