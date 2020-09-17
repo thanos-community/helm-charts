@@ -47,8 +47,8 @@ spec:
             - "query"
             - "--log.level={{ .Values.logLevel }}"
             - "--log.format={{ .Values.logFormat }}"
-            - "--http-address=0.0.0.0:{{ .Values.http.port }}"
-            - "--grpc-address=0.0.0.0:{{ .Values.grpc.port }}"
+            - "--http-address=0.0.0.0:{{ .Values.service.port.http }}"
+            - "--grpc-address=0.0.0.0:{{ .Values.service.port.grpc }}"
             {{- if .Values.tracingConfig }}
             - |
               --tracing.config=
@@ -76,9 +76,9 @@ spec:
             {{- end }}
           ports:
             - name: http
-              containerPort: {{ .Values.http.port }}
+              containerPort: {{ .Values.service.port.http }}
             - name: grpc
-              containerPort: {{ .Values.grpc.port }}
+              containerPort: {{ .Values.service.port.grpc }}
           livenessProbe:
             failureThreshold: 4
             httpGet:

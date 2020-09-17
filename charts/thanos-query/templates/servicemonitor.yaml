@@ -8,7 +8,7 @@ metadata:
     {{- include "thanos-query.labels" . | nindent 4 }}
 spec:
   endpoints:
-  - port: {{ .Values.http.port }}
+  - port: http
     {{- with .Values.serviceMonitor.relabelings }}
     relabelings: {{ toYaml . | nindent 4 }}
     {{- end }}

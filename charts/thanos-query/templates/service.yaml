@@ -4,44 +4,27 @@ metadata:
   name: {{ include "thanos-query.fullname" . }}-http
   labels:
     {{- include "thanos-query.labels" . | nindent 4 }}
-{{- with .Values.http.service.labels }}{{ toYaml . | nindent 4 }}{{ end }}
-  {{- with .Values.http.service.annotations }}
+{{- with .Values.service.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.service.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.http.service.type }}
-  {{- if .Values.http.service.externalTrafficPolicy }}
-  externalTrafficPolicy: {{ .Values.http.service.externalTrafficPolicy }}
+  {{- if and .Values.service.headless (eq .Values.service.type "ClusterIP") }}
+  clusterIP: None
+  {{- end }}
+  type: {{ .Values.service.type }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
   {{- end }}
   ports:
-    - port: {{ .Values.http.port }}
+    - port: {{ .Values.service.port.http }}
       targetPort: http
       protocol: TCP
       name: http
-  selector:
-    {{- include "thanos-query.selectorLabels" . | nindent 4 }}
-{{- with .Values.http.service.matchLabels }}{{ toYaml . | nindent 4 }}{{ end }}
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "thanos-query.fullname" . }}-grpc
-  labels:
-    {{- include "thanos-query.labels" . | nindent 4 }}
-{{- with .Values.grpc.service.labels }}{{ toYaml . | nindent 4 }}{{ end }}
-  {{- with .Values.grpc.service.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-    - port: {{ .Values.grpc.port }}
+    - port: {{ .Values.service.port.grpc }}
       targetPort: grpc
       protocol: TCP
       name: grpc
   selector:
     {{- include "thanos-query.selectorLabels" . | nindent 4 }}
-{{- with .Values.grpc.service.matchLabels }}{{ toYaml . | nindent 4 }}{{ end }}
+{{- with .Values.service.matchLabels }}{{ toYaml . | nindent 4 }}{{ end }}

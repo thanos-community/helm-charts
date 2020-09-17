@@ -1,6 +1,6 @@
-{{- if .Values.http.ingress.enabled -}}
+{{- if .Values.httpIngress.enabled -}}
 {{- $fullName := include "thanos-query.fullname" . -}}
-{{- $svcPort := .Values.http.port -}}
+{{- $svcPort := .Values.service.port.http -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
@@ -11,15 +11,15 @@ metadata:
   name: {{ $fullName }}-http
   labels:
     {{- include "thanos-query.labels" . | nindent 4 }}
-{{- with .Values.http.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
-  {{- with .Values.http.ingress.annotations }}
+{{- with .Values.httpIngress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.httpIngress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.http.ingress.tls }}
+  {{- if .Values.httpIngress.tls }}
   tls:
-    {{- range .Values.http.ingress.tls }}
+    {{- range .Values.httpIngress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -28,7 +28,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.http.ingress.hosts }}
+    {{- range .Values.httpIngress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -43,9 +43,9 @@ spec:
 
 ---
 
-{{- if .Values.grpc.ingress.enabled -}}
+{{- if .Values.grpcIngress.enabled -}}
 {{- $fullName := include "thanos-query.fullname" . -}}
-{{- $svcPort := .Values.grpc.port -}}
+{{- $svcPort := .Values.service.port.grpc -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1beta1
 {{- else -}}
@@ -56,15 +56,15 @@ metadata:
   name: {{ $fullName }}-grpc
   labels:
     {{- include "thanos-query.labels" . | nindent 4 }}
-{{- with .Values.grpc.ingress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
-  {{- with .Values.grpc.ingress.annotations }}
+{{- with .Values.grpcIngress.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.grpcIngress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.grpc.ingress.tls }}
+  {{- if .Values.grpcIngress.tls }}
   tls:
-    {{- range .Values.grpc.ingress.tls }}
+    {{- range .Values.grpcIngress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -73,7 +73,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.grpc.ingress.hosts }}
+    {{- range .Values.grpcIngress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
