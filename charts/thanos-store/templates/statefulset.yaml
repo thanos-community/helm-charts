@@ -50,10 +50,28 @@ spec:
             - "store"
             - "--log.level={{ .Values.logLevel }}"
             - "--log.format={{ .Values.logFormat }}"
-            - "--data-dir=/var/thanos/store"
+            {{- if .Values.tracingConfig }}
+            - |
+              --tracing.config=
+            {{- toYaml .Values.tracingConfig | nindent 14 }}
+            {{- end }}
             - "--http-address=0.0.0.0:{{ .Values.service.port.http }}"
             - "--grpc-address=0.0.0.0:{{ .Values.service.port.grpc }}"
+            - "--data-dir=/var/thanos/store"
+            - "--index-cache-size={{ .Values.indexCacheSize }}"
+            {{- if .Values.indexCacheConfig }}
+            - |
+              --index-cache.config=
+            {{- toYaml .Values.indexCacheConfig | nindent 14 }}
+            {{- end }}
+            - "--chunk-pool-size={{ .Values.chunkPoolSize }}"
             - "--objstore.config=$(OBJSTORE_CONFIG)"
+            {{- if .Values.minTime }}
+            - "--min-time={{ .Values.minTime }}"
+            {{- end }}
+            {{- if .Values.maxTime }}
+            - "--max-time={{ .Values.maxTime }}"
+            {{- end }}
             {{- with .Values.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

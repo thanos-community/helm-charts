@@ -113,9 +113,36 @@ tracingConfig: {}
 #    project_id: ""
 #    sample_factor: 0
 
+# Maximum size of items held in the in-memory index cache. Ignored if '--index-cache.config'
+# or '--index-cache.config-file' option is specified
+indexCacheSize: 250MB
+
+# Alternative to 'index-cache.config-file' flag (lower priority). Content of YAML file that
+# contains index cache configuration. See format details:
+# https://thanos.io/tip/components/store.md/#index-cache
+indexCacheConfig: {}
+#  type: IN-MEMORY
+#  config:
+#    max_size: 250MB
+#    max_item_size: 125MB
+
+# Maximum size of concurrently allocatable bytes reserved strictly to reuse for chunnks
+# in memory.
+chunkPoolSize: 2GB
+
+# Start of time range limit to serve. Thanos Store will serve only metrics, which happened
+# later than this value. Option can be a constant time in RFC3339 format or time duration
+# relative to current time such as -1d or 2h45m. Valid duration units are ms, s, m, h, d, w, y.
+minTime: ""
+
+# End of time range limit to serve. Thanos Store will serve only blocks, which happened
+# earlier than this value. Option can be a constant time in RFC3339 format or time duration
+# relative to current time, such as -1d or 2h45m. Valid duration units are ms, s, m, h, d, w, y.
+maxTime: ""
+
 # Add extra arguments
 extraArgs: []
-  #- "--extraArgs=extraValue"
+  # - "--extraArgs=extraValue"
 
 service:
   port:
