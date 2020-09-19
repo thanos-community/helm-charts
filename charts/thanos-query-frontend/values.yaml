@@ -145,7 +145,7 @@ compressResponses: true
 logQueriesLongerThan: 5s
 
 # Request Logging for logging the start and end of requests. LogFinishCall is enabled by default.
-# LogFinishCall : Logs the finish call of the requests. LogStartAndFinshCall : Logs the start and
+# LogFinishCall : Logs the finish call of the requests. LogStartAndFinishCall : Logs the start and
 # finish call of the requests. NoLogCall : Disable request logging.
 logRequestDecision: LogFinishCall
 
