@@ -135,7 +135,7 @@ responseCacheConfig:
 httpGracePeriod: 2m
 
 # URL of downstream Prometheus Query compatible API.
-downstreamUrl: http://thanos-query.default.svc.cluster.local.9090
+downstreamUrl: http://thanos-query.default.svc.cluster.local:9090
 
 # Compress HTTP responses.
 compressResponses: true
