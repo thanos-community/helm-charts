@@ -15,5 +15,7 @@ spec:
   selector:
     matchLabels:
       {{- include "thanos-query.selectorLabels" . | nindent 6 }}
-  namespaceSelector: {{ .Release.Namespace }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
 {{ end }}
