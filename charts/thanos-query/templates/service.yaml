@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos-query.fullname" . }}
+  labels:
+    {{- include "thanos-query.labels" . | nindent 4 }}
+{{- with .Values.service.labels }}{{ toYaml . | nindent 4 }}{{ end }}
+  {{- with .Values.service.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.service.headless (eq .Values.service.type "ClusterIP") }}
+  clusterIP: None
+  {{- end }}
+  type: {{ .Values.service.type }}
+  {{- if .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.service.port.http }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.service.port.grpc }}
+      targetPort: grpc
+      protocol: TCP
+      name: grpc
+  selector:
+    {{- include "thanos-query.selectorLabels" . | nindent 4 }}
+{{- with .Values.service.matchLabels }}{{ toYaml . | nindent 4 }}{{ end }}
