@@ -70,7 +70,7 @@ spec:
             {{- if .Values.compressResponses }}
             - "--query-frontend.compress-responses"
             {{- end }}
-            - "--query-frontend.log_queries_longer_than={{ .Values.logQueriesLongerThan }}"
+            - "--query-frontend.log-queries-longer-than={{ .Values.logQueriesLongerThan }}"
             - "--log.request.decision={{ .Values.logRequestDecision }}"
           ports:
             - name: http
