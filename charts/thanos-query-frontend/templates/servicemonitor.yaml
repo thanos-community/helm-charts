@@ -3,7 +3,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: thanos-query-frontend
+  name: {{ include "thanos-query-frontend.fullname" . }}
   labels:
     {{- include "thanos-query-frontend.labels" . | nindent 4 }}
 spec:

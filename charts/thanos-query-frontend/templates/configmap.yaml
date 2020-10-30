@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: query-frontend-config
+  name: {{ include "thanos-query-frontend.fullname" . }}
   labels:
     {{- include "thanos-query-frontend.labels" . | nindent 4 }}
 data:

@@ -102,7 +102,7 @@ spec:
       volumes:
         - name: cache-config
           configMap:
-            name: query-frontend-config
+            name: {{ include "thanos-query-frontend.fullname" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
