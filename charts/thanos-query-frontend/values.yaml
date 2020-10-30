@@ -123,13 +123,16 @@ responseCacheMaxFreshness: 1m
 # 'no-query-range.partial-response for disabling.
 partialResponse: true
 
-# Response cache configuration for 'query-range.response-cache-config-file' flag
+# Response cache configuration for 'query-range.response-cache-config-file' flag.
 responseCacheConfig:
   type: IN-MEMORY
   config:
     max_size: 0
     max_size_items: 2048
     validity: 6h
+
+# Use compression in results cache. Supported values are: "snappy" and "" (disable compression).
+cacheCompressionType: ""
 
 # Time to wait after an interrupt received for HTTP Server.
 httpGracePeriod: 2m

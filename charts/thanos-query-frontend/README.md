@@ -24,6 +24,7 @@ A Helm chart for deploying thanos-query-frontend on Kubernetes.
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity for pod assignment ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | autoscaling | object | `{"enabled":false,"maxReplicas":10,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Horizontal Pod Autoscaler configuration ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
+| cacheCompressionType | string | `""` | Use compression in results cache. Supported values are: "snappy" and "" (disable compression). |
 | deploymentAnnotations | object | `{}` | Add extra annotations to deployment ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | deploymentLabels | object | `{}` | Add extra labels to deployment ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | downstreamUrl | string | `http://thanos-query.default.svc.cluster.local:9090` | URL of downstream Prometheus Query compatible API. | compressResponses | bool | `true` | Compress HTTP responses. |
@@ -72,7 +73,4 @@ A Helm chart for deploying thanos-query-frontend on Kubernetes.
 | strategy | object | `{}` | Kubernetes deployment strategy object ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | tolerations | list | `[]` | Tolerations for pod assignment ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | tracingConfig | object | `{}` | Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file with tracing configuration. See format details: https://thanos.io/tip/thanos/tracing.md |
-
-
-
 
