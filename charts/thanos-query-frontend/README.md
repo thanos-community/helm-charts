@@ -40,6 +40,7 @@ A Helm chart for deploying thanos-query-frontend on Kubernetes.
 | image.repository | string | `"quay.io/thanos/thanos"` |  |
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` |  |
+| initContainers | string | `""` | Add initContainers to deployment ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | logFormat | string | `"logfmt"` | Log format to use. Possible options: logfmt or json |
 | logLevel | string | `"info"` |  |
 | logQueriesLongerThan | string | `5s` | Log queries that are slower than the specified duration. Set to 0 to disable. Set to `< 0` to enable on all queries. |

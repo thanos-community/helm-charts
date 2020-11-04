@@ -25,6 +25,10 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# -- Add initContainers to deployment
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+initContainers: |
+
 # Add extra labels to deployment
 deploymentLabels: {}
   # extraLabel: extraLabelValue
