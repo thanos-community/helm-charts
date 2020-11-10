@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos-query-frontend.fullname" . }}
+  labels:
+    {{- include "thanos-query-frontend.labels" . | nindent 4 }}
+data:
+  cache-config.yaml: |
+{{- with .Values.responseCacheConfig }}{{ toYaml . | nindent 4 }}{{ end }}
