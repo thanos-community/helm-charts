@@ -127,7 +127,7 @@ extraEnv: []
 #   value: value
 
 # Command flags
-# ref: https://thanos.io/tip/components/query/#flags
+# ref: https://thanos.io/tip/components/query.md/#flags
 
 # -- Log filtering level
 logLevel: info
