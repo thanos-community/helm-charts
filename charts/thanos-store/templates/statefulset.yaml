@@ -39,18 +39,18 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.extraEnv }}
           env:
-          - name: OBJSTORE_CONFIG
-            valueFrom:
-              secretKeyRef:
-                key: thanos.yaml
-                name: thanos-objectstore
-          {{- with .Values.extraEnv }}{{ toYaml . | nindent 12 }}{{- end }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - "store"
             - "--log.level={{ .Values.logLevel }}"
             - "--log.format={{ .Values.logFormat }}"
-            {{- if .Values.tracingConfig }}
+            {{- if .Values.tracingConfigFile }}
+            - "--tracing.config-file={{ .Values.tracingConfigFile }}"
+            {{- end }}
+            {{- if and .Values.tracingConfig (not .Values.tracingConfigFile) }}
             - |
               --tracing.config=
             {{- toYaml .Values.tracingConfig | nindent 14 }}
@@ -59,13 +59,31 @@ spec:
             - "--grpc-address=0.0.0.0:{{ .Values.service.port.grpc }}"
             - "--data-dir=/var/thanos/store"
             - "--index-cache-size={{ .Values.indexCacheSize }}"
-            {{- if .Values.indexCacheConfig }}
+            {{- if .Values.indexCacheConfigFile }}
+            - "--index-cache.config-file={{ .Values.indexCacheConfigFile }}"
+            {{- end }}
+            {{- if and .Values.indexCacheConfig (not .Values.indexCacheConfigFile) }}
             - |
               --index-cache.config=
             {{- toYaml .Values.indexCacheConfig | nindent 14 }}
             {{- end }}
+            {{- if .Values.cachingBucketConfigFile }}
+            - "--store.caching-bucket.config-file={{ .Values.cachingBucketConfigFile }}"
+            {{- end }}
+            {{- if and .Values.cachingBucketConfig (not .Values.cachingBucketConfigFile) }}
+            - |
+              --store.caching-bucket.config=
+            {{- toYaml .Values.cachingBucketConfig | nindent 14 }}
+            {{- end }}
             - "--chunk-pool-size={{ .Values.chunkPoolSize }}"
-            - "--objstore.config=$(OBJSTORE_CONFIG)"
+            {{- if .Values.objstoreConfigFile }}
+            - "--objstore.config-file={{ .Values.objstoreConfigFile }}"
+            {{- end }}
+            {{- if and .Values.objstoreConfig (not .Values.objstoreConfigFile) }}
+            - |
+              --objstore.config=
+            {{- toYaml .Values.objstoreConfig | nindent 14 }}
+            {{- end }}
             {{- if .Values.minTime }}
             - "--min-time={{ .Values.minTime }}"
             {{- end }}

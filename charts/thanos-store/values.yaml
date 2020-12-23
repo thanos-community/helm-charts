@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: quay.io/thanos/thanos
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
 imagePullSecrets: []
@@ -15,36 +15,44 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-# Add extra labels to statefulset
+# -- Add extra containers to statefulset
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+initContainers: |
+
+# -- Add initContainers to statefulset
+# ref: https://kubernetes.io/docs/concepts/workloads/pods/
+extraContainers: |
+
+# -- Add extra labels to statefulset
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 statefulsetLabels: {}
 
-# Add extra annotations to statefulset
+# -- Add extra annotations to statefulset
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 statefulsetAnnotations: {}
 
-# Add extra labels to pod template
+# -- Add extra labels to pod template
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
 
-# Add extra annotations to pod template
+# -- Add extra annotations to pod template
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
 
-# Kubernetes Security Context (pod)
+# -- Kubernetes Security Context (pod)
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 podSecurityContext: {}
   # fsGroup: 2000
 
-# Kubernetes Security Context (container)
+# -- Kubernetes Security Context (container)
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 securityContext: {}
   # capabilities:
@@ -54,7 +62,7 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-# Resource requests and limits
+# -- Resource requests and limits
 # ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -68,18 +76,20 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+# -- Statefulset updateStrategy
+# ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
 updateStrategy:
   type: RollingUpdate
 
-# Node labels for pod assignment
+# -- Node labels for pod assignment
 # ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector: {}
 
-# Tolerations for pod assignment
+# -- Tolerations for pod assignment
 # ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations: []
 
-# Affinity for pod assignment
+# -- Affinity for pod assignment
 # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 #  podAntiAffinity:
@@ -96,15 +106,28 @@ affinity: {}
 #        topologyKey: kubernetes.io/hostname
 #      weight: 100
 
-# Command flags
-# ref: https://thanos.io/tip/components/query/#flags
+# -- Add extra environment variables
+extraEnv: 
+  - name: OBJSTORE_CONFIG
+    valueFrom: 
+      secretKeyRef:
+        key: thanos.yaml
+        name: thanos-objstorage
 
-# Log filtering level
+# Command flags
+# ref: https://thanos.io/tip/components/store.md/#flags
+
+# -- Log filtering level
 logLevel: info
-# Log format to use. Possible options: logfmt or json
+
+# -- Log format to use. Possible options: logfmt or json
 logFormat: logfmt
 
-# Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file
+# -- Path to YAML file with tracing configuration. See format details:
+# https://thanos.io/tip/thanos/tracing.md/#configuration
+tracingConfigFile: ""
+
+# -- Alternative to 'tracing.config-file' flag (lower priority). Content of YAML file
 # with tracing configuration. See format details: https://thanos.io/tip/thanos/tracing.md
 tracingConfig: {}
 #  type: STACKDRIVER
@@ -113,11 +136,11 @@ tracingConfig: {}
 #    project_id: ""
 #    sample_factor: 0
 
-# Maximum size of items held in the in-memory index cache. Ignored if '--index-cache.config'
+# -- Maximum size of items held in the in-memory index cache. Ignored if '--index-cache.config'
 # or '--index-cache.config-file' option is specified
 indexCacheSize: 250MB
 
-# Alternative to 'index-cache.config-file' flag (lower priority). Content of YAML file that
+# -- Alternative to 'index-cache.config-file' flag (lower priority). Content of YAML file that
 # contains index cache configuration. See format details:
 # https://thanos.io/tip/components/store.md/#index-cache
 indexCacheConfig: {}
@@ -126,21 +149,90 @@ indexCacheConfig: {}
 #    max_size: 250MB
 #    max_item_size: 125MB
 
-# Maximum size of concurrently allocatable bytes reserved strictly to reuse for chunnks
+# -- Thanos Store Gateway supports a “caching bucket” with chunks and metadata caching to
+# speed up loading of chunks from TSDB blocks. To configure caching, one needs to
+# use --store.caching-bucket.config=<yaml content> or --store.caching-bucket.config-file=<file.yaml>.
+# Currently only memcached “backend” is supported.
+# ref: https://thanos.io/v0.16/components/store.md/#caching-bucket
+cachingBucketConfig: {}
+# type: MEMCACHED
+# config:
+#   addresses:
+#     - localhost:11211
+
+
+# -- Maximum size of concurrently allocatable bytes reserved strictly to reuse for chunnks
 # in memory.
 chunkPoolSize: 2GB
 
-# Start of time range limit to serve. Thanos Store will serve only metrics, which happened
+# -- Maximum amount of samples returned via a single Series call. The Series call fails if this
+# limit is exceeded. 0 means no limit. NOTE: For efficiency the limit is internally implemented
+# as 'chunks limit' considering each chunk contains 120 samples (it's the max number of
+# samples each chunk can contain), so the actual number of samples might be lower, even though
+# the maximum could be hit.
+seriesSampleLimit: 0
+
+# -- Maximum number of concurrent Series calls.
+seriesMaxConcurrency: 20
+
+# -- YAML file that contains object store configuration. See format details:
+# https://thanos.io/tip/thanos/storage.md/#configuration
+objstoreConfigFile: ""
+
+# -- Alternative to 'objstore.config-file' flag (lower priority). Content of YAML file that
+# contains object store configuration. See format details: https://thanos.io/tip/thanos/storage.md/#configuration
+objstoreConfig: {}
+# type: GCS
+# config:
+#   bucket: example-bucket
+
+# -- Repeat interval for syncing the blocks between local and remote view.
+syncBlockDuration: 3m
+
+# -- Number of goroutines to use when constructing index-cache.json blocks from object storage.
+blockSyncConcurrency: 20
+
+# -- Start of time range limit to serve. Thanos Store will serve only metrics, which happened
 # later than this value. Option can be a constant time in RFC3339 format or time duration
 # relative to current time such as -1d or 2h45m. Valid duration units are ms, s, m, h, d, w, y.
 minTime: ""
 
-# End of time range limit to serve. Thanos Store will serve only blocks, which happened
+# -- End of time range limit to serve. Thanos Store will serve only blocks, which happened
 # earlier than this value. Option can be a constant time in RFC3339 format or time duration
 # relative to current time, such as -1d or 2h45m. Valid duration units are ms, s, m, h, d, w, y.
 maxTime: ""
 
-# Add extra arguments
+# -- YAML file that contains relabeling configuration that allows selecting blocks. It
+# follows native Prometheus relabel-config syntax. See format details:
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+relabelConfigFile: ""
+
+# -- Alternative to 'selector.relabel-config-file' flag (lower priority). Content of YAML file
+# that contains relabeling configuration that allows selecting blocks. It follows native
+# Prometheus relabel-config syntax. See format details:
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config
+relabelConfig: {}
+
+# -- Minimum age of all blocks before they are being read. Set it to safe value (e.g 30m) if your
+# object storage is eventually consistent. GCS and S3 are (roughly) strongly consistent.
+consistencyDelay: 0s
+
+# -- Duration after which the blocks marked for deletion will be filtered out while fetching
+# blocks. The idea of ignore-deletion-marks-delay is to ignore blocks that are marked for
+# deletion with some delay. This ensures store can still serve blocks that are meant to be
+# deleted but do not have a replacement yet. If delete-delay duration is provided to compactor
+# or bucket verify component, it will upload deletion-mark.json file to mark after what
+# duration the block should be deleted rather than deleting the block straight away. If
+# delete-delay is non-zero for compactor or bucket verify component,
+# ignore-deletion-marks-delay should be set to (delete-delay)/2 so that blocks marked for
+# deletion are filtered out while fetching blocks before being deleted from bucket. Default is
+# 24h, half of the default value for --delete-delay on compactor.
+ignoreDeletionMarksDelay: 24h
+
+# -- If true, Store Gateway will lazy memory map index-header only once the block is required by a query.
+indexHeaderLazyReader: false
+
+# -- Add extra arguments
 extraArgs: []
   # - "--extraArgs=extraValue"
 
@@ -148,17 +240,19 @@ service:
   port:
     http: 10902
     grpc: 10901
-  # Add extra labels to service
+  # -- Add extra labels to service
   labels: {}
-  # Add annotations to service
+    # extraLabel: value
+  # -- Add annotations to service
   annotations: {}
+    # extraAnnotation: value
   type: ClusterIP
   headless: true
-  # Add labels for service selector
+  # -- Add labels for service selector
   matchLabels: {}
 
 
-# Prometheus Operator's ServiceMonitor configuration
+# -- Prometheus Operator's ServiceMonitor configuration
 serviceMonitor:
   enabled: false
   relabelings:
@@ -168,7 +262,7 @@ serviceMonitor:
     - pod
     targetLabel: instance
 
-# Persistent Volume Claim
+# -- Persistent Volume Claim
 # ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistentVolume:
   enabled: false
