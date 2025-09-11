@@ -1,0 +1,20 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.bucket.bucketweb.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "thanos.compName" (list . "bucketweb") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: bucketweb
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.bucket.bucketweb.pdb.minAvailable }}
+  minAvailable: {{ .Values.bucket.bucketweb.pdb.minAvailable | quote }}
+  {{- else if .Values.bucket.bucketweb.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.bucket.bucketweb.pdb.maxUnavailable | quote }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,5812 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": true,
+  "properties": {
+    "bucket": {
+      "additionalProperties": true,
+      "description": "======================================================================\nBucketweb component\nWeb UI for bucket inspection. Often disabled in production.\n======================================================================",
+      "properties": {
+        "bucketweb": {
+          "additionalProperties": true,
+          "properties": {
+            "affinity": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "affinity",
+              "type": "object"
+            },
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations only for bucketweb",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "autoscaling": {
+              "additionalProperties": true,
+              "description": "HorizontalPodAutoscaler for bucketweb only",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "maxReplicas": {
+                  "default": 3,
+                  "required": [],
+                  "title": "maxReplicas",
+                  "type": "integer"
+                },
+                "minReplicas": {
+                  "default": 1,
+                  "required": [],
+                  "title": "minReplicas",
+                  "type": "integer"
+                },
+                "targetCPUUtilizationPercentage": {
+                  "default": 80,
+                  "required": [],
+                  "title": "targetCPUUtilizationPercentage",
+                  "type": "integer"
+                },
+                "targetMemoryUtilizationPercentage": {
+                  "default": "null",
+                  "required": [],
+                  "title": "targetMemoryUtilizationPercentage",
+                  "type": "null"
+                }
+              },
+              "required": [
+                "enabled",
+                "minReplicas",
+                "maxReplicas",
+                "targetCPUUtilizationPercentage",
+                "targetMemoryUtilizationPercentage"
+              ],
+              "title": "autoscaling",
+              "type": "object"
+            },
+            "containerSecurityContext": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "containerSecurityContext",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Enable the bucketweb deployment",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "extraArgs": {
+              "description": "Add any additional CLI flags",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraArgs",
+              "type": "array"
+            },
+            "extraContainers": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraContainers",
+              "type": "array"
+            },
+            "extraEnv": {
+              "description": "Optional environment variables",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraEnv",
+              "type": "array"
+            },
+            "extraEnvFrom": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraEnvFrom",
+              "type": "array"
+            },
+            "extraInitContainers": {
+              "description": "Optional sidecars and init containers",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraInitContainers",
+              "type": "array"
+            },
+            "extraVolumeMounts": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraVolumeMounts",
+              "type": "array"
+            },
+            "extraVolumes": {
+              "description": "Extra volumes and mounts only for bucketweb",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "extraVolumes",
+              "type": "array"
+            },
+            "ingress": {
+              "additionalProperties": true,
+              "description": "Ingress configuration for bucketweb only",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "List of host rules",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "bucketweb.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "ingress",
+              "type": "object"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "description": "Extra labels only for bucketweb",
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "nodeSelector": {
+              "additionalProperties": true,
+              "description": "Scheduling and topology per component",
+              "required": [],
+              "title": "nodeSelector",
+              "type": "object"
+            },
+            "pdb": {
+              "additionalProperties": true,
+              "description": "PodDisruptionBudget for bucketweb",
+              "properties": {
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "maxUnavailable": {
+                  "default": "",
+                  "required": [],
+                  "title": "maxUnavailable",
+                  "type": "string"
+                },
+                "minAvailable": {
+                  "default": "",
+                  "required": [],
+                  "title": "minAvailable",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "minAvailable",
+                "maxUnavailable"
+              ],
+              "title": "pdb",
+              "type": "object"
+            },
+            "persistence": {
+              "additionalProperties": true,
+              "description": "Storage not required for bucketweb, leave empty",
+              "required": [],
+              "title": "persistence",
+              "type": "object"
+            },
+            "podSecurityContext": {
+              "additionalProperties": true,
+              "description": "Pod and container security contexts",
+              "required": [],
+              "title": "podSecurityContext",
+              "type": "object"
+            },
+            "priorityClassName": {
+              "default": "",
+              "required": [],
+              "title": "priorityClassName",
+              "type": "string"
+            },
+            "probes": {
+              "additionalProperties": true,
+              "description": "Probes for health and readiness",
+              "properties": {
+                "liveness": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "failureThreshold": {
+                      "default": 6,
+                      "required": [],
+                      "title": "failureThreshold",
+                      "type": "integer"
+                    },
+                    "initialDelaySeconds": {
+                      "default": 30,
+                      "required": [],
+                      "title": "initialDelaySeconds",
+                      "type": "integer"
+                    },
+                    "path": {
+                      "default": "/-/healthy",
+                      "required": [],
+                      "title": "path",
+                      "type": "string"
+                    },
+                    "periodSeconds": {
+                      "default": 10,
+                      "required": [],
+                      "title": "periodSeconds",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 10902,
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "successThreshold": {
+                      "default": 1,
+                      "required": [],
+                      "title": "successThreshold",
+                      "type": "integer"
+                    },
+                    "timeoutSeconds": {
+                      "default": 5,
+                      "required": [],
+                      "title": "timeoutSeconds",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "path",
+                    "port",
+                    "initialDelaySeconds",
+                    "periodSeconds",
+                    "timeoutSeconds",
+                    "failureThreshold",
+                    "successThreshold"
+                  ],
+                  "title": "liveness",
+                  "type": "object"
+                },
+                "readiness": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "failureThreshold": {
+                      "default": 6,
+                      "required": [],
+                      "title": "failureThreshold",
+                      "type": "integer"
+                    },
+                    "initialDelaySeconds": {
+                      "default": 5,
+                      "required": [],
+                      "title": "initialDelaySeconds",
+                      "type": "integer"
+                    },
+                    "path": {
+                      "default": "/-/ready",
+                      "required": [],
+                      "title": "path",
+                      "type": "string"
+                    },
+                    "periodSeconds": {
+                      "default": 10,
+                      "required": [],
+                      "title": "periodSeconds",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 10902,
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "successThreshold": {
+                      "default": 1,
+                      "required": [],
+                      "title": "successThreshold",
+                      "type": "integer"
+                    },
+                    "timeoutSeconds": {
+                      "default": 5,
+                      "required": [],
+                      "title": "timeoutSeconds",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "path",
+                    "port",
+                    "initialDelaySeconds",
+                    "periodSeconds",
+                    "timeoutSeconds",
+                    "failureThreshold",
+                    "successThreshold"
+                  ],
+                  "title": "readiness",
+                  "type": "object"
+                },
+                "startup": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "enabled": {
+                      "default": true,
+                      "required": [],
+                      "title": "enabled",
+                      "type": "boolean"
+                    },
+                    "failureThreshold": {
+                      "default": 60,
+                      "required": [],
+                      "title": "failureThreshold",
+                      "type": "integer"
+                    },
+                    "initialDelaySeconds": {
+                      "default": 0,
+                      "required": [],
+                      "title": "initialDelaySeconds",
+                      "type": "integer"
+                    },
+                    "path": {
+                      "default": "/-/ready",
+                      "required": [],
+                      "title": "path",
+                      "type": "string"
+                    },
+                    "periodSeconds": {
+                      "default": 5,
+                      "required": [],
+                      "title": "periodSeconds",
+                      "type": "integer"
+                    },
+                    "port": {
+                      "default": 10902,
+                      "required": [],
+                      "title": "port",
+                      "type": "integer"
+                    },
+                    "successThreshold": {
+                      "default": 1,
+                      "required": [],
+                      "title": "successThreshold",
+                      "type": "integer"
+                    },
+                    "timeoutSeconds": {
+                      "default": 5,
+                      "required": [],
+                      "title": "timeoutSeconds",
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "path",
+                    "port",
+                    "initialDelaySeconds",
+                    "periodSeconds",
+                    "timeoutSeconds",
+                    "failureThreshold",
+                    "successThreshold"
+                  ],
+                  "title": "startup",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "readiness",
+                "liveness",
+                "startup"
+              ],
+              "title": "probes",
+              "type": "object"
+            },
+            "replicaCount": {
+              "default": 1,
+              "description": "Number of replicas. HPA can override effective replica count when enabled.",
+              "required": [],
+              "title": "replicaCount",
+              "type": "integer"
+            },
+            "resources": {
+              "additionalProperties": true,
+              "description": "Resource requests and limits for the bucketweb container",
+              "required": [],
+              "title": "resources",
+              "type": "object"
+            },
+            "service": {
+              "additionalProperties": true,
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra Service annotations if needed",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "labels": {
+                  "additionalProperties": true,
+                  "description": "Extra labels for the Service",
+                  "required": [],
+                  "title": "labels",
+                  "type": "object"
+                },
+                "port": {
+                  "default": 10902,
+                  "description": "HTTP port for bucketweb",
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "type": {
+                  "default": "ClusterIP",
+                  "description": "Service type: ClusterIP NodePort LoadBalancer",
+                  "required": [],
+                  "title": "type",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type",
+                "port",
+                "annotations",
+                "labels"
+              ],
+              "title": "service",
+              "type": "object"
+            },
+            "serviceMonitor": {
+              "additionalProperties": true,
+              "description": "ServiceMonitor for bucketweb",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "interval": {
+                  "default": "",
+                  "required": [],
+                  "title": "interval",
+                  "type": "string"
+                },
+                "labels": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "labels",
+                  "type": "object"
+                },
+                "metricRelabelings": {
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "metricRelabelings",
+                  "type": "array"
+                },
+                "relabelings": {
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "relabelings",
+                  "type": "array"
+                },
+                "scheme": {
+                  "default": "",
+                  "required": [],
+                  "title": "scheme",
+                  "type": "string"
+                },
+                "scrapeTimeout": {
+                  "default": "",
+                  "required": [],
+                  "title": "scrapeTimeout",
+                  "type": "string"
+                },
+                "tlsConfig": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "tlsConfig",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "enabled",
+                "labels",
+                "annotations",
+                "interval",
+                "scrapeTimeout",
+                "scheme",
+                "tlsConfig",
+                "relabelings",
+                "metricRelabelings"
+              ],
+              "title": "serviceMonitor",
+              "type": "object"
+            },
+            "tolerations": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tolerations",
+              "type": "array"
+            },
+            "topologySpreadConstraints": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "topologySpreadConstraints",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "replicaCount",
+            "service",
+            "ingress",
+            "autoscaling",
+            "extraArgs",
+            "resources",
+            "podSecurityContext",
+            "containerSecurityContext",
+            "extraEnv",
+            "extraEnvFrom",
+            "extraInitContainers",
+            "extraContainers",
+            "probes",
+            "persistence",
+            "nodeSelector",
+            "tolerations",
+            "affinity",
+            "topologySpreadConstraints",
+            "priorityClassName",
+            "annotations",
+            "labels",
+            "extraVolumes",
+            "extraVolumeMounts",
+            "serviceMonitor",
+            "pdb"
+          ],
+          "title": "bucketweb",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Toggle the umbrella bucket group",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "bucketweb"
+      ],
+      "title": "bucket",
+      "type": "object"
+    },
+    "compactor": {
+      "additionalProperties": true,
+      "description": "======================================================================\nCompactor component\nCompacts, downscales and deduplicates blocks in the object store\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "description": "CLI flags for compactor",
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              },
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "compactor.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "persistence": {
+          "additionalProperties": true,
+          "properties": {
+            "accessModes": {
+              "description": "Access modes when PVC is created",
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "accessModes",
+              "type": "array"
+            },
+            "enabled": {
+              "default": true,
+              "description": "Enable a PVC for compactor work dir",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "size": {
+              "default": "10Gi",
+              "description": "Requested storage size",
+              "required": [],
+              "title": "size",
+              "type": "string"
+            },
+            "storageClass": {
+              "default": "",
+              "description": "Storage class name, empty uses cluster default",
+              "required": [],
+              "title": "storageClass",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "size",
+            "storageClass",
+            "accessModes"
+          ],
+          "title": "persistence",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "properties": {
+            "fsGroup": {
+              "default": 1000,
+              "required": [],
+              "title": "fsGroup",
+              "type": "integer"
+            },
+            "fsGroupChangePolicy": {
+              "default": "OnRootMismatch",
+              "required": [],
+              "title": "fsGroupChangePolicy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fsGroup",
+            "fsGroupChangePolicy"
+          ],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 1,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "port": {
+              "default": 10902,
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "port",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        },
+        "vpa": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxAllowed": {
+              "additionalProperties": true,
+              "properties": {
+                "cpu": {
+                  "default": 4,
+                  "required": [],
+                  "title": "cpu",
+                  "type": "integer"
+                },
+                "memory": {
+                  "default": "8Gi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "maxAllowed",
+              "type": "object"
+            },
+            "minAllowed": {
+              "additionalProperties": true,
+              "properties": {
+                "cpu": {
+                  "default": "500m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "512Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "minAllowed",
+              "type": "object"
+            },
+            "targetKind": {
+              "default": "StatefulSet",
+              "required": [],
+              "title": "targetKind",
+              "type": "string"
+            },
+            "updateMode": {
+              "default": "Auto",
+              "required": [],
+              "title": "updateMode",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "targetKind",
+            "updateMode",
+            "minAllowed",
+            "maxAllowed"
+          ],
+          "title": "vpa",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "persistence",
+        "service",
+        "ingress",
+        "vpa",
+        "extraArgs",
+        "resources",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "annotations",
+        "labels",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "compactor",
+      "type": "object"
+    },
+    "global": {
+      "additionalProperties": true,
+      "description": "--------------------------------------------------------------------\nGlobal settings applied as sensible defaults to all components\nEach component can override with its own section if needed\n--------------------------------------------------------------------",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "clusterDomain": {
+          "default": "cluster.local",
+          "description": "Cluster domain, usually cluster.local, used in DNS names",
+          "required": [],
+          "title": "clusterDomain",
+          "type": "string"
+        },
+        "commonLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to all Kubernetes resources",
+          "required": [],
+          "title": "commonLabels",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "description": "Container security context applied to all components unless overridden",
+          "properties": {
+            "allowPrivilegeEscalation": {
+              "default": false,
+              "required": [],
+              "title": "allowPrivilegeEscalation",
+              "type": "boolean"
+            },
+            "capabilities": {
+              "additionalProperties": true,
+              "properties": {
+                "drop": {
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "drop",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "drop"
+              ],
+              "title": "capabilities",
+              "type": "object"
+            },
+            "readOnlyRootFilesystem": {
+              "default": true,
+              "required": [],
+              "title": "readOnlyRootFilesystem",
+              "type": "boolean"
+            },
+            "runAsNonRoot": {
+              "default": true,
+              "required": [],
+              "title": "runAsNonRoot",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "allowPrivilegeEscalation",
+            "readOnlyRootFilesystem",
+            "capabilities",
+            "runAsNonRoot"
+          ],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "description": "Environment variables applied to main containers globally",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "description": "Optional init containers and sidecars applied globally",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "description": "Extra volume mounts applied to main containers by default",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "description": "Extra volumes available to all pods by default",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "image": {
+          "additionalProperties": true,
+          "properties": {
+            "pullPolicy": {
+              "default": "IfNotPresent",
+              "description": "Image pull policy: Always IfNotPresent Never",
+              "required": [],
+              "title": "pullPolicy",
+              "type": "string"
+            },
+            "repository": {
+              "default": "quay.io/thanos/thanos",
+              "description": "Docker repository for all Thanos containers by default",
+              "required": [],
+              "title": "repository",
+              "type": "string"
+            },
+            "tag": {
+              "default": "v0.39.2",
+              "description": "Container image tag",
+              "required": [],
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [
+            "repository",
+            "tag",
+            "pullPolicy"
+          ],
+          "title": "image",
+          "type": "object"
+        },
+        "imagePullSecrets": {
+          "description": "Optional list of image pull secrets to use across all components",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "imagePullSecrets",
+          "type": "array"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "description": "Node scheduling defaults for all components",
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "objstore": {
+          "additionalProperties": true,
+          "description": "------------------------------------------------------------------\nObject store configuration shared by components that need it\nEither create a Secret or provide inline config here\n------------------------------------------------------------------",
+          "properties": {
+            "config": {
+              "default": "type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n  \n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n",
+              "description": "Inline object store configuration used when createSecret is false\nRefer to Thanos docs for exact schema",
+              "required": [],
+              "title": "config",
+              "type": "string"
+            },
+            "createSecret": {
+              "default": false,
+              "description": "Create a Secret named secretName with key secretKey containing config below",
+              "required": [],
+              "title": "createSecret",
+              "type": "boolean"
+            },
+            "secretKey": {
+              "default": "objstore.yml",
+              "description": "Key inside the Secret that stores the object store yaml",
+              "required": [],
+              "title": "secretKey",
+              "type": "string"
+            },
+            "secretName": {
+              "default": "thanos-objstore",
+              "description": "Name of the Kubernetes Secret that carries the object store config",
+              "required": [],
+              "title": "secretName",
+              "type": "string"
+            }
+          },
+          "required": [
+            "createSecret",
+            "secretName",
+            "secretKey",
+            "config"
+          ],
+          "title": "objstore",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "description": "------------------------------------------------------------------\nPodDisruptionBudget defaults\nComponents can override under their own .pdb blocks\n------------------------------------------------------------------",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "podAnnotations": {
+          "additionalProperties": true,
+          "description": "Extra annotations applied to all pods",
+          "required": [],
+          "title": "podAnnotations",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "description": "Pod security context applied to all components unless overridden",
+          "required": [],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "rbac": {
+          "additionalProperties": true,
+          "description": "------------------------------------------------------------------\nRBAC and ServiceAccount defaults\nComponents will use their own service accounts if enabled\n------------------------------------------------------------------",
+          "properties": {
+            "create": {
+              "default": true,
+              "description": "Create RBAC resources globally where needed",
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "create"
+          ],
+          "title": "rbac",
+          "type": "object"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "description": "Default resource requests and limits for all components",
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations applied to ServiceAccounts",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "create": {
+              "default": true,
+              "description": "Create a ServiceAccount per component by default",
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            },
+            "name": {
+              "default": "",
+              "description": "Optional name override for ServiceAccounts, empty means autogenerate",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "create",
+            "annotations",
+            "name"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "description": "------------------------------------------------------------------\nServiceMonitor defaults for Prometheus Operator scraping\nComponents can override under their own .serviceMonitor blocks\n------------------------------------------------------------------",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "namespace": {
+              "default": "",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "namespace",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "thanosRules": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "forDefaults": {
+              "additionalProperties": true,
+              "properties": {
+                "componentDown": {
+                  "default": "5m",
+                  "required": [],
+                  "title": "componentDown",
+                  "type": "string"
+                },
+                "default": {
+                  "default": "2m",
+                  "required": [],
+                  "title": "default",
+                  "type": "string"
+                },
+                "short": {
+                  "default": "1m",
+                  "required": [],
+                  "title": "short",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "componentDown",
+                "default",
+                "short"
+              ],
+              "title": "forDefaults",
+              "type": "object"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "severity": {
+              "additionalProperties": true,
+              "properties": {
+                "componentDown": {
+                  "default": "critical",
+                  "required": [],
+                  "title": "componentDown",
+                  "type": "string"
+                },
+                "critical": {
+                  "default": "critical",
+                  "required": [],
+                  "title": "critical",
+                  "type": "string"
+                },
+                "warning": {
+                  "default": "warning",
+                  "required": [],
+                  "title": "warning",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "critical",
+                "warning",
+                "componentDown"
+              ],
+              "title": "severity",
+              "type": "object"
+            },
+            "thresholds": {
+              "additionalProperties": true,
+              "properties": {
+                "blockSyncFailures": {
+                  "default": 0,
+                  "required": [],
+                  "title": "blockSyncFailures",
+                  "type": "integer"
+                },
+                "bucketOperationFailures": {
+                  "default": 0,
+                  "required": [],
+                  "title": "bucketOperationFailures",
+                  "type": "integer"
+                },
+                "query5xxRate": {
+                  "default": 0,
+                  "required": [],
+                  "title": "query5xxRate",
+                  "type": "integer"
+                },
+                "receive5xxRate": {
+                  "default": 0,
+                  "required": [],
+                  "title": "receive5xxRate",
+                  "type": "integer"
+                },
+                "ruleEvalFailures": {
+                  "default": 0,
+                  "required": [],
+                  "title": "ruleEvalFailures",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "bucketOperationFailures",
+                "blockSyncFailures",
+                "query5xxRate",
+                "ruleEvalFailures",
+                "receive5xxRate"
+              ],
+              "title": "thresholds",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "thresholds",
+            "forDefaults",
+            "severity"
+          ],
+          "title": "thanosRules",
+          "type": "object"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "image",
+        "imagePullSecrets",
+        "commonLabels",
+        "clusterDomain",
+        "podAnnotations",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "resources",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "objstore",
+        "rbac",
+        "serviceAccount",
+        "thanosRules",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "global",
+      "type": "object"
+    },
+    "query": {
+      "additionalProperties": true,
+      "description": "======================================================================\nQuery component\nFan out engine that queries multiple store APIs and deduplicates\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 5,
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 2,
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 80,
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": "null"
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas",
+            "targetCPUUtilizationPercentage",
+            "targetMemoryUtilizationPercentage"
+          ],
+          "title": "autoscaling",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "thanos-query.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "annotations",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 2,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "replicaLabels": {
+          "description": "Label names used to mark replica identity for deduplication",
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "replicaLabels",
+          "type": "array"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "grpcPort": {
+              "default": 10901,
+              "required": [],
+              "title": "grpcPort",
+              "type": "integer"
+            },
+            "httpPort": {
+              "default": 9090,
+              "required": [],
+              "title": "httpPort",
+              "type": "integer"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "httpPort",
+            "grpcPort",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "stores": {
+          "description": "List of store gRPC endpoints the query component should connect to\nExample:\nstores:\n  - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "stores",
+          "type": "array"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "service",
+        "ingress",
+        "autoscaling",
+        "stores",
+        "replicaLabels",
+        "extraArgs",
+        "resources",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "query",
+      "type": "object"
+    },
+    "queryFrontend": {
+      "additionalProperties": true,
+      "description": "======================================================================\nQuery Frontend component\nCaches and shards queries in front of thanos query\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 5,
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 2,
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 80,
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": "null"
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas",
+            "targetCPUUtilizationPercentage",
+            "targetMemoryUtilizationPercentage"
+          ],
+          "title": "autoscaling",
+          "type": "object"
+        },
+        "cacheConfig": {
+          "default": "",
+          "description": "Optional caching config file content as string or reference via volume",
+          "required": [],
+          "title": "cacheConfig",
+          "type": "string"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "downstreamUrl": {
+          "default": "",
+          "required": [],
+          "title": "downstreamUrl",
+          "type": "string"
+        },
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "thanos-query-frontend.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "annotations",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 9090,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 2,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "port": {
+              "default": 9090,
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "port",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "downstreamUrl",
+        "cacheConfig",
+        "service",
+        "ingress",
+        "autoscaling",
+        "resources",
+        "extraArgs",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "queryFrontend",
+      "type": "object"
+    },
+    "receive": {
+      "additionalProperties": true,
+      "description": "======================================================================\nReceive component\nRemote write endpoint that splits and forwards samples, optionally sharded\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 10,
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 3,
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 70,
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": "null"
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas",
+            "targetCPUUtilizationPercentage",
+            "targetMemoryUtilizationPercentage"
+          ],
+          "title": "autoscaling",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "hashrings": {
+          "additionalProperties": true,
+          "description": "existing fields...",
+          "properties": {
+            "autogen": {
+              "additionalProperties": true,
+              "description": "if enabled true, autogenerate a single ring named default with endpoints\nreceive-0.receive:10901 ... receive-(replicaCount-1).receive:10901",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "name": {
+                  "default": "default",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "name"
+              ],
+              "title": "autogen",
+              "type": "object"
+            },
+            "static": {
+              "description": "optional static configuration to fully control rings\nwhen non empty, it overrides autogen",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "static",
+              "type": "array"
+            }
+          },
+          "required": [
+            "autogen",
+            "static"
+          ],
+          "title": "hashrings",
+          "type": "object"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "thanos-receive.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "annotations",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "persistence": {
+          "additionalProperties": true,
+          "properties": {
+            "accessModes": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "accessModes",
+              "type": "array"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "size": {
+              "default": "10Gi",
+              "required": [],
+              "title": "size",
+              "type": "string"
+            },
+            "storageClass": {
+              "default": "",
+              "required": [],
+              "title": "storageClass",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "size",
+            "storageClass",
+            "accessModes"
+          ],
+          "title": "persistence",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "properties": {
+            "fsGroup": {
+              "default": 1000,
+              "required": [],
+              "title": "fsGroup",
+              "type": "integer"
+            },
+            "fsGroupChangePolicy": {
+              "default": "OnRootMismatch",
+              "required": [],
+              "title": "fsGroupChangePolicy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fsGroup",
+            "fsGroupChangePolicy"
+          ],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 3,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "grpcPort": {
+              "default": 10901,
+              "required": [],
+              "title": "grpcPort",
+              "type": "integer"
+            },
+            "httpPort": {
+              "default": 10902,
+              "required": [],
+              "title": "httpPort",
+              "type": "integer"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "remoteWritePort": {
+              "default": 10908,
+              "required": [],
+              "title": "remoteWritePort",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "grpcPort",
+            "httpPort",
+            "remoteWritePort",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tenancyHeader": {
+          "default": "",
+          "description": "Optional multi tenancy header name to segregate tenants",
+          "required": [],
+          "title": "tenancyHeader",
+          "type": "string"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        },
+        "tsdb": {
+          "additionalProperties": true,
+          "description": "TSDB settings for local storage of samples before shipping to object store",
+          "properties": {
+            "retention": {
+              "default": "24h",
+              "description": "TSDB retention period for local WAL",
+              "required": [],
+              "title": "retention",
+              "type": "string"
+            },
+            "walCompression": {
+              "default": true,
+              "description": "Enable WAL compression to reduce IO and disk",
+              "required": [],
+              "title": "walCompression",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "retention",
+            "walCompression"
+          ],
+          "title": "tsdb",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "tenancyHeader",
+        "tsdb",
+        "hashrings",
+        "service",
+        "ingress",
+        "autoscaling",
+        "persistence",
+        "resources",
+        "extraArgs",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "receive",
+      "type": "object"
+    },
+    "ruler": {
+      "additionalProperties": true,
+      "description": "======================================================================\nRuler component\nEvaluates alerting and recording rules using query and sends to Alertmanager\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "alertQueryUrl": {
+          "default": "",
+          "description": "URL used in rule alerts to link back to a UI",
+          "required": [],
+          "title": "alertQueryUrl",
+          "type": "string"
+        },
+        "alertmanagers": {
+          "additionalProperties": true,
+          "description": "Alertmanager routing configuration in Thanos format",
+          "properties": {
+            "config": {
+              "default": "static_configs:\n  - targets: [\"alertmanager.monitoring.svc.cluster.local:9093\"]\n",
+              "required": [],
+              "title": "config",
+              "type": "string"
+            }
+          },
+          "required": [
+            "config"
+          ],
+          "title": "alertmanagers",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 5,
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 2,
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 80,
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": "null"
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas",
+            "targetCPUUtilizationPercentage",
+            "targetMemoryUtilizationPercentage"
+          ],
+          "title": "autoscaling",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "thanos-ruler.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "annotations",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "persistence": {
+          "additionalProperties": true,
+          "properties": {
+            "accessModes": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "accessModes",
+              "type": "array"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "size": {
+              "default": "10Gi",
+              "required": [],
+              "title": "size",
+              "type": "string"
+            },
+            "storageClass": {
+              "default": "",
+              "required": [],
+              "title": "storageClass",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "size",
+            "storageClass",
+            "accessModes"
+          ],
+          "title": "persistence",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "properties": {
+            "fsGroup": {
+              "default": 1000,
+              "required": [],
+              "title": "fsGroup",
+              "type": "integer"
+            },
+            "fsGroupChangePolicy": {
+              "default": "OnRootMismatch",
+              "required": [],
+              "title": "fsGroupChangePolicy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fsGroup",
+            "fsGroupChangePolicy"
+          ],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "query": {
+          "additionalProperties": true,
+          "properties": {
+            "urls": {
+              "description": "List of base URLs for query component to evaluate rules against",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "urls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "urls"
+          ],
+          "title": "query",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 2,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "rules": {
+          "additionalProperties": true,
+          "description": "Inline rule files. Use external ConfigMap volumes for large rule sets.",
+          "properties": {
+            "example-alerts.yaml": {
+              "default": "groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n",
+              "required": [],
+              "title": "example-alerts.yaml",
+              "type": "string"
+            }
+          },
+          "required": [
+            "example-alerts.yaml"
+          ],
+          "title": "rules",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "httpPort": {
+              "default": 10902,
+              "required": [],
+              "title": "httpPort",
+              "type": "integer"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "httpPort",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "query",
+        "alertmanagers",
+        "alertQueryUrl",
+        "rules",
+        "persistence",
+        "service",
+        "ingress",
+        "autoscaling",
+        "resources",
+        "extraArgs",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "ruler",
+      "type": "object"
+    },
+    "storegateway": {
+      "additionalProperties": true,
+      "description": "======================================================================\nStore Gateway component\nExposes historical blocks from object store via Store API\n======================================================================",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 6,
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 2,
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 80,
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": "null"
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas",
+            "targetCPUUtilizationPercentage",
+            "targetMemoryUtilizationPercentage"
+          ],
+          "title": "autoscaling",
+          "type": "object"
+        },
+        "cachingBucketConfig": {
+          "default": "",
+          "description": "Optional caching bucket config passed as a file or inline string",
+          "required": [],
+          "title": "cachingBucketConfig",
+          "type": "string"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ingress": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "className": {
+              "default": "",
+              "required": [],
+              "title": "className",
+              "type": "string"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hosts": {
+              "items": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "properties": {
+                      "host": {
+                        "default": "thanos-store.local",
+                        "required": [],
+                        "title": "host",
+                        "type": "string"
+                      },
+                      "paths": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": true,
+                              "properties": {
+                                "path": {
+                                  "default": "/",
+                                  "required": [],
+                                  "title": "path",
+                                  "type": "string"
+                                },
+                                "pathType": {
+                                  "default": "Prefix",
+                                  "required": [],
+                                  "title": "pathType",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "path",
+                                "pathType"
+                              ],
+                              "type": "object"
+                            }
+                          ],
+                          "required": []
+                        },
+                        "required": [],
+                        "title": "paths",
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "host",
+                      "paths"
+                    ],
+                    "type": "object"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "hosts",
+              "type": "array"
+            },
+            "tls": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "tls",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "className",
+            "annotations",
+            "hosts",
+            "tls"
+          ],
+          "title": "ingress",
+          "type": "object"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": "string"
+            },
+            "minAvailable": {
+              "default": "",
+              "required": [],
+              "title": "minAvailable",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "persistence": {
+          "additionalProperties": true,
+          "properties": {
+            "accessModes": {
+              "items": {
+                "anyOf": [
+                  {
+                    "required": [],
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "required": [],
+              "title": "accessModes",
+              "type": "array"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "size": {
+              "default": "10Gi",
+              "required": [],
+              "title": "size",
+              "type": "string"
+            },
+            "storageClass": {
+              "default": "",
+              "required": [],
+              "title": "storageClass",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "size",
+            "storageClass",
+            "accessModes"
+          ],
+          "title": "persistence",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "properties": {
+            "fsGroup": {
+              "default": 1000,
+              "required": [],
+              "title": "fsGroup",
+              "type": "integer"
+            },
+            "fsGroupChangePolicy": {
+              "default": "OnRootMismatch",
+              "required": [],
+              "title": "fsGroupChangePolicy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "fsGroup",
+            "fsGroupChangePolicy"
+          ],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": 10902,
+                  "required": [],
+                  "title": "port",
+                  "type": "integer"
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 2,
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "grpcPort": {
+              "default": 10901,
+              "required": [],
+              "title": "grpcPort",
+              "type": "integer"
+            },
+            "httpPort": {
+              "default": 10902,
+              "required": [],
+              "title": "httpPort",
+              "type": "integer"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "grpcPort",
+            "httpPort",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tolerations": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "service",
+        "ingress",
+        "autoscaling",
+        "persistence",
+        "cachingBucketConfig",
+        "resources",
+        "extraArgs",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb"
+      ],
+      "title": "storegateway",
+      "type": "object"
+    }
+  },
+  "required": [
+    "global",
+    "bucket",
+    "compactor",
+    "query",
+    "queryFrontend",
+    "storegateway",
+    "receive",
+    "ruler"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,83 @@
+{{- if .Values.compactor.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos.compName" (list . "compactor") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
+spec:
+  serviceName: {{ include "thanos.compName" (list . "compactor") }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: compactor
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: compactor
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "compactor") | nindent 6 }}
+      containers:
+        - name: compactor
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - compact
+            - --http-address=0.0.0.0:{{ .Values.compactor.service.port }}
+            - --objstore.config-file=/etc/thanos/objstore.yml
+            - --data-dir=/var/thanos/compact
+            - --compact.concurrency=1
+          {{- range .Values.compactor.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.compactor.service.port }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/thanos/compact
+            - name: objstore
+              mountPath: /etc/thanos
+              readOnly: true
+          {{ include "thanos.extraMountItems" (dict "root" . "key" "compactor") | nindent 10 }}
+          {{ include "thanos.containerSC" (dict "root" . "key" "compactor") | nindent 10 }}
+          resources:
+{{ toYaml .Values.compactor.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" . "key" "compactor" "port" .Values.compactor.service.port) | nindent 10 }}
+      volumes:
+        - name: objstore
+          secret:
+            secretName: {{ .Values.global.objstore.secretName }}
+            items:
+              - key: {{ .Values.global.objstore.secretKey }}
+                path: objstore.yml
+        {{- if not .Values.compactor.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") | nindent 6 }}
+  {{- if .Values.compactor.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+        {{- range .Values.compactor.persistence.accessModes | default (list "ReadWriteOnce") }}
+          - {{ . | quote }}
+        {{- end }}
+        {{- if .Values.compactor.persistence.storageClass }}
+        storageClassName: {{ .Values.compactor.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.compactor.persistence.size }}
+  {{- end }}
+{{- end }}

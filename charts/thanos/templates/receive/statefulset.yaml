@@ -1,0 +1,120 @@
+{{- if .Values.receive.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos.compName" (list . "receive") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+spec:
+  serviceName: {{ include "thanos.receiveHeadless" . }}
+  replicas: {{ .Values.receive.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: receive
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: receive
+      annotations:
+{{- $anns := dict -}}
+{{- if .Values.global.podAnnotations }}
+{{- $anns = merge $anns .Values.global.podAnnotations -}}
+{{- end }}
+{{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+{{ toYaml $anns | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "receive") | nindent 6 }}
+      containers:
+        - name: receive
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - receive
+            - --http-address=0.0.0.0:{{ default 10902 .Values.receive.service.httpPort }}
+            - --grpc-address=0.0.0.0:{{ .Values.receive.service.grpcPort }}
+            - --remote-write.address=0.0.0.0:{{ .Values.receive.service.remoteWritePort }}
+            - --objstore.config-file=/etc/thanos/objstore.yml
+            - --tsdb.path=/var/thanos/receive
+            - --label=receive_replica="$(HOSTNAME)"
+            - --receive.hashrings-file=/etc/thanos/hashrings.json
+            - --receive.hashrings-algorithm=ketama
+            - --receive.local-endpoint=$(NAME).{{ include "thanos.compName" (list . "receive") }}-headless.$(NAMESPACE).svc.cluster.local:{{ .Values.receive.service.grpcPort }}
+            {{- if .Values.receive.tenancyHeader }}
+            - --receive.tenant-header={{ .Values.receive.tenancyHeader }}
+            {{- end }}
+            {{- if .Values.receive.tsdb.walCompression }}
+            - --tsdb.wal-compression
+            {{- end }}
+            {{- range .Values.receive.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.receive.service.grpcPort }}
+            - name: http
+              containerPort: {{ default 10902 .Values.receive.service.httpPort }}
+            - name: remote-write 
+              containerPort: {{ .Values.receive.service.remoteWritePort }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAME 
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          volumeMounts:
+            - name: data
+              mountPath: /var/thanos/receive
+            - name: thanos-config
+              mountPath: /etc/thanos
+              readOnly: true
+{{ include "thanos.extraMountItems" (dict "root" . "key" "receive") | nindent 10 }}
+{{ include "thanos.containerSC" (dict "root" . "key" "receive") | nindent 10 }}
+          resources:
+{{ toYaml (.Values.receive.resources | default dict) | indent 12 }}
+{{ include "thanos.httpProbes" (dict "root" . "key" "receive" "port" (default 10902 .Values.receive.service.httpPort)) | nindent 10 }}
+      volumes:
+        - name: thanos-config
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.global.objstore.secretName }}
+                  items:
+                    - key: {{ .Values.global.objstore.secretKey }}
+                      path: objstore.yml
+              - configMap:
+                  name: {{ include "thanos.receive.hashringsConfigMapName" . }}
+                  items:
+                    - key: hashrings.json
+                      path: hashrings.json
+        {{- if not .Values.receive.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+{{ include "thanos.extraVolumeItems" (dict "root" . "key" "receive") | nindent 6 }}
+  {{- if .Values.receive.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.receive.persistence.storageClass }}
+        storageClassName: {{ .Values.receive.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.receive.persistence.size }}
+  {{- end }}
+{{- end }}

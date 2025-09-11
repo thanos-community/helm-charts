@@ -1,0 +1,15 @@
+Thanos installed.
+
+Components enabled:
+- bucket: {{ .Values.bucket.enabled }}
+- compactor: {{ .Values.compactor.enabled }}
+- query: {{ .Values.query.enabled }}
+- query-frontend: {{ .Values.queryFrontend.enabled }}
+- receive: {{ .Values.receive.enabled }}
+- ruler: {{ .Values.ruler.enabled }}
+- storegateway: {{ .Values.storegateway.enabled }}
+
+Objstore secret:
+- name: {{ .Values.global.objstore.secretName }}
+- key: {{ .Values.global.objstore.secretKey }}
+- createdFromValues: {{ .Values.global.objstore.createSecret }}

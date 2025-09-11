@@ -1,0 +1,45 @@
+{{- if and .Values.ruler.enabled .Values.ruler.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-rules") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ .Values.ruler.autoscaling.targetKind | default "StatefulSet" }}
+    name: {{ include "thanos.compName" (list . "ruler") }}
+  minReplicas: {{ .Values.ruler.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.ruler.autoscaling.maxReplicas }}
+  metrics:
+  {{- $cpu := .Values.ruler.autoscaling.targetCPUUtilizationPercentage }}
+  {{- $mem := .Values.ruler.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- if or $cpu $mem }}
+    {{- if $cpu }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $cpu }}
+    {{- end }}
+    {{- if $mem }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $mem }}
+    {{- end }}
+  {{- else }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  {{- end }}
+{{- end }}

@@ -1,0 +1,32 @@
+{{- if and .Values.query.enabled .Values.query.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "thanos.compName" (list . "query") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+{{ toYaml .Values.query.ingress.annotations | indent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+spec:
+  {{- with .Values.query.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- range .Values.query.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "thanos.compName" (list $ "query") }}
+                port:
+                  number: {{ $.Values.query.service.httpPort }}
+        {{- end }}
+  {{- end }}
+  tls:
+{{ toYaml .Values.query.ingress.tls | indent 4 }}
+{{- end }}

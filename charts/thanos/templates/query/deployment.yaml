@@ -1,0 +1,61 @@
+{{- if .Values.query.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thanos.compName" (list . "query") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+spec:
+  replicas: {{ .Values.query.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: query
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "query") | nindent 6 }}
+      containers:
+        - name: query
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - query
+            - --http-address=0.0.0.0:{{ .Values.query.service.httpPort }}
+            - --grpc-address=0.0.0.0:{{ .Values.query.service.grpcPort }}
+          {{- if .Values.storegateway.enabled }}
+            - --endpoint={{ include "thanos.compName" (list . "storegateway") }}:{{ .Values.storegateway.service.grpcPort }}
+          {{- end }}
+          {{- if .Values.receive.enabled }}
+            - --endpoint={{ include "thanos.compName" (list . "receive") }}-headless:{{ .Values.receive.service.grpcPort }}
+          {{- end }}
+          {{- range .Values.query.replicaLabels }}
+            - --query.replica-label={{ . }}
+          {{- end }}
+          {{- range .Values.query.stores }}
+            - --store={{ . }}
+          {{- end }}
+          {{- range .Values.query.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.query.service.httpPort }}
+            - name: grpc
+              containerPort: {{ .Values.query.service.grpcPort }}
+          {{ include "thanos.extraMountsBlock" (dict "root" . "key" "query") | nindent 10 }}
+          {{ include "thanos.containerSC" (dict "root" . "key" "query") | nindent 10 }}
+          resources:
+{{ toYaml .Values.query.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" . "key" "query" "port" .Values.query.service.httpPort) | nindent 10 }}
+      {{ include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
+{{- end }}

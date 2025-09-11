@@ -1,0 +1,32 @@
+{{- if and .Values.ruler.enabled .Values.ruler.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+{{ toYaml .Values.ruler.ingress.annotations | indent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
+spec:
+  {{- with .Values.ruler.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- range .Values.ruler.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "thanos.compName" (list $ "ruler") }}
+                port:
+                  number: {{ $.Values.ruler.service.httpPort }}
+        {{- end }}
+  {{- end }}
+  tls:
+{{ toYaml .Values.ruler.ingress.tls | indent 4 }}
+{{- end }}

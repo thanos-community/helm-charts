@@ -1,0 +1,97 @@
+{{- if and .Values.global .Values.global.thanosRules .Values.global.thanosRules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "thanos.fullname" . }}-rules
+  labels:
+    app.kubernetes.io/name: thanos
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: thanos
+    {{- with .Values.global.thanosRules.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "thanos-rules") | nindent 4 }}
+spec:
+  groups:
+    - name: thanos.availability
+      rules:
+        - alert: ThanosComponentDown
+          expr: |
+            sum by (job) (up{namespace="{{ .Release.Namespace }}", job=~".*thanos.*"}) == 0
+          for: {{ default "5m" .Values.global.thanosRules.forDefaults.componentDown }}
+          labels:
+            severity: {{ default "critical" .Values.global.thanosRules.severity.componentDown }}
+          annotations:
+            summary: A Thanos component has no healthy targets
+            description: Job {{`{{ $labels.job }}`}} has no scraped targets in namespace {{ .Release.Namespace }}.
+
+    - name: thanos.compactor
+      rules:
+        - alert: ThanosCompactorHalted
+          expr: thanos_compactor_halted{namespace="{{ .Release.Namespace }}"} == 1
+          for: {{ default "2m" .Values.global.thanosRules.forDefaults.default }}
+          labels:
+            severity: {{ default "critical" .Values.global.thanosRules.severity.critical }}
+          annotations:
+            summary: Thanos compactor halted
+            description: Compactor reports halted state. Check object store access and recent logs.
+
+        - alert: ThanosBucketOperationFailures
+          expr: |
+            rate(thanos_objstore_bucket_operation_failures_total{namespace="{{ .Release.Namespace }}"}[5m]) > {{ default 0 .Values.global.thanosRules.thresholds.bucketOperationFailures }}
+          for: {{ default "1m" .Values.global.thanosRules.forDefaults.short }}
+          labels:
+            severity: {{ default "warning" .Values.global.thanosRules.severity.warning }}
+          annotations:
+            summary: Thanos object store operations failing
+            description: Elevated bucket operation failures detected.
+
+    - name: thanos.storegateway
+      rules:
+        - alert: ThanosBlockSyncFailures
+          expr: |
+            rate(thanos_blocks_meta_sync_failures_total{namespace="{{ .Release.Namespace }}"}[5m]) > {{ default 0 .Values.global.thanosRules.thresholds.blockSyncFailures }}
+          for: {{ default "1m" .Values.global.thanosRules.forDefaults.short }}
+          labels:
+            severity: {{ default "warning" .Values.global.thanosRules.severity.warning }}
+          annotations:
+            summary: Thanos Store Gateway block sync failures
+            description: Store Gateway is failing to sync block metadata.
+
+    - name: thanos.query
+      rules:
+        - alert: ThanosQueryHighErrorRate
+          expr: |
+            sum by (job) (rate(http_requests_total{namespace="{{ .Release.Namespace }}", job=~".*thanos.*query.*", code=~"5.."}[5m])) > {{ default 0 .Values.global.thanosRules.thresholds.query5xxRate }}
+          for: {{ default "1m" .Values.global.thanosRules.forDefaults.short }}
+          labels:
+            severity: {{ default "warning" .Values.global.thanosRules.severity.warning }}
+          annotations:
+            summary: Thanos Query high 5xx rate
+            description: Elevated 5xx responses on Query.
+
+    - name: thanos.ruler
+      rules:
+        - alert: ThanosRuleEvaluationFailures
+          expr: |
+            rate(thanos_rule_evaluation_failures_total{namespace="{{ .Release.Namespace }}"}[5m]) > {{ default 0 .Values.global.thanosRules.thresholds.ruleEvalFailures }}
+          for: {{ default "1m" .Values.global.thanosRules.forDefaults.short }}
+          labels:
+            severity: {{ default "warning" .Values.global.thanosRules.severity.warning }}
+          annotations:
+            summary: Thanos Ruler evaluation failures
+            description: Rules are failing to evaluate. Check Ruler and Query connectivity.
+
+    - name: thanos.receive
+      rules:
+        - alert: ThanosReceiveRequestErrors
+          expr: |
+            sum by (job) (rate(http_requests_total{namespace="{{ .Release.Namespace }}", job=~".*thanos.*receive.*", code=~"5.."}[5m])) > {{ default 0 .Values.global.thanosRules.thresholds.receive5xxRate }}
+          for: {{ default "1m" .Values.global.thanosRules.forDefaults.short }}
+          labels:
+            severity: {{ default "warning" .Values.global.thanosRules.severity.warning }}
+          annotations:
+            summary: Thanos Receive high 5xx rate
+            description: Elevated 5xx on Receive. Check hashrings and GRPC links between replicas.
+{{- end }}

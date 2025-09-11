@@ -1,0 +1,32 @@
+{{- if and .Values.queryFrontend.enabled .Values.queryFrontend.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "thanos.compName" (list . "query-frontend") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+{{ toYaml .Values.queryFrontend.ingress.annotations | indent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+spec:
+  {{- with .Values.queryFrontend.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- range .Values.queryFrontend.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "thanos.compName" (list $ "query-frontend") }}
+                port:
+                  number: {{ $.Values.queryFrontend.service.port }}
+        {{- end }}
+  {{- end }}
+  tls:
+{{ toYaml .Values.queryFrontend.ingress.tls | indent 4 }}
+{{- end }}

@@ -1,0 +1,989 @@
+# ======================================================================
+# Thanos umbrella chart values
+# Comprehensive and self documented
+# ======================================================================
+
+# ----------------------------------------------------------------------
+# Global settings applied as sensible defaults to all components
+# Each component can override with its own section if needed
+# ----------------------------------------------------------------------
+global:
+  image:
+    # Docker repository for all Thanos containers by default
+    repository: quay.io/thanos/thanos
+    # Container image tag
+    tag: v0.39.2
+    # Image pull policy: Always IfNotPresent Never
+    pullPolicy: IfNotPresent
+  # Optional list of image pull secrets to use across all components
+  imagePullSecrets: []
+  # Extra labels applied to all Kubernetes resources
+  commonLabels: {}
+  # Cluster domain, usually cluster.local, used in DNS names
+  clusterDomain: "cluster.local"
+  # Extra annotations applied to all pods
+  podAnnotations: {}
+  # Pod security context applied to all components unless overridden
+  podSecurityContext: {}
+  # Container security context applied to all components unless overridden
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    runAsNonRoot: true
+  # Extra volumes available to all pods by default
+  extraVolumes: []
+  # Extra volume mounts applied to main containers by default
+  extraVolumeMounts: []
+  # Default resource requests and limits for all components
+  resources: {}
+  # Node scheduling defaults for all components
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+  # Environment variables applied to main containers globally
+  extraEnv: []
+  extraEnvFrom: []
+  # Optional init containers and sidecars applied globally
+  extraInitContainers: []
+  extraContainers: []
+
+  # --------------------------------------------------------------------
+  # Object store configuration shared by components that need it
+  # Either create a Secret or provide inline config here
+  # --------------------------------------------------------------------
+  objstore:
+    # Create a Secret named secretName with key secretKey containing config below
+    createSecret: false
+    # Name of the Kubernetes Secret that carries the object store config
+    secretName: thanos-objstore
+    # Key inside the Secret that stores the object store yaml
+    secretKey: objstore.yml
+    # Inline object store configuration used when createSecret is false
+    # Refer to Thanos docs for exact schema
+    config: |
+      type: GCS
+      config:
+        bucket: change-me
+        endpoint: storage.googleapis.com
+        region: eu-west-1
+        insecure: false
+        
+      # Example for S3
+      # type: S3
+      # config:
+      #   bucket: my-s3-bucket
+      #   endpoint: s3.eu-west-1.amazonaws.com
+      #   region: eu-west-1
+      #   access_key: myaccess
+      #   secret_key: mysecret
+  # --------------------------------------------------------------------
+  # RBAC and ServiceAccount defaults
+  # Components will use their own service accounts if enabled
+  # --------------------------------------------------------------------
+  rbac:
+    # Create RBAC resources globally where needed
+    create: true
+  serviceAccount:
+    # Create a ServiceAccount per component by default
+    create: true
+    # Extra annotations applied to ServiceAccounts
+    annotations: {}
+    # Optional name override for ServiceAccounts, empty means autogenerate
+    name: ""
+
+  thanosRules:  
+    enabled: true
+    labels: {}
+    thresholds:
+      bucketOperationFailures: 0
+      blockSyncFailures: 0
+      query5xxRate: 0
+      ruleEvalFailures: 0
+      receive5xxRate: 0
+    forDefaults:
+      componentDown: 5m
+      default: 2m
+      short: 1m
+    severity:
+      critical: critical
+      warning: warning
+      componentDown: critical
+
+  # --------------------------------------------------------------------
+  # ServiceMonitor defaults for Prometheus Operator scraping
+  # Components can override under their own .serviceMonitor blocks
+  # --------------------------------------------------------------------
+  serviceMonitor:
+    enabled: true
+    namespace: ""
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  # --------------------------------------------------------------------
+  # PodDisruptionBudget defaults
+  # Components can override under their own .pdb blocks
+  # --------------------------------------------------------------------
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Bucketweb component
+# Web UI for bucket inspection. Often disabled in production.
+# ======================================================================
+bucket:
+  # Toggle the umbrella bucket group
+  enabled: true
+  bucketweb:
+    # Enable the bucketweb deployment
+    enabled: false
+
+    # Number of replicas. HPA can override effective replica count when enabled.
+    replicaCount: 1
+
+    service:
+      # Service type: ClusterIP NodePort LoadBalancer
+      type: ClusterIP
+      # HTTP port for bucketweb
+      port: 10902
+      # Extra Service annotations if needed
+      annotations: {}
+      # Extra labels for the Service
+      labels: {}
+
+    # Ingress configuration for bucketweb only
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      # List of host rules
+      hosts:
+        - host: bucketweb.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls: []
+      # Example:
+      # tls:
+      #   - secretName: bucketweb-tls
+      #     hosts:
+      #       - bucketweb.local
+
+    # HorizontalPodAutoscaler for bucketweb only
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 3
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: null
+
+    # Add any additional CLI flags
+    extraArgs: []
+    # Resource requests and limits for the bucketweb container
+    resources: {}
+    # Pod and container security contexts
+    podSecurityContext: {}
+    containerSecurityContext: {}
+    # Optional environment variables
+    extraEnv: []
+    extraEnvFrom: []
+    # Optional sidecars and init containers
+    extraInitContainers: []
+    extraContainers: []
+
+    # Probes for health and readiness
+    probes:
+      readiness:
+        enabled: true
+        path: /-/ready
+        port: 10902
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+        successThreshold: 1
+      liveness:
+        enabled: true
+        path: /-/healthy
+        port: 10902
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+        successThreshold: 1
+      startup:
+        enabled: true
+        path: /-/ready
+        port: 10902
+        initialDelaySeconds: 0
+        periodSeconds: 5
+        timeoutSeconds: 5
+        failureThreshold: 60
+        successThreshold: 1
+
+    # Storage not required for bucketweb, leave empty
+    persistence: {}
+
+    # Scheduling and topology per component
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    topologySpreadConstraints: []
+    priorityClassName: ""
+
+    # Extra annotations only for bucketweb
+    annotations: {}
+    # Extra labels only for bucketweb
+    labels: {}
+
+    # Extra volumes and mounts only for bucketweb
+    extraVolumes: []
+    extraVolumeMounts: []
+
+    # ServiceMonitor for bucketweb
+    serviceMonitor:
+      enabled: true
+      labels: {}
+      annotations: {}
+      interval: ""
+      scrapeTimeout: ""
+      scheme: ""
+      tlsConfig: {}
+      relabelings: []
+      metricRelabelings: []
+
+    # PodDisruptionBudget for bucketweb
+    pdb:
+      enabled: false
+      minAvailable: ""
+      maxUnavailable: ""
+
+# ======================================================================
+# Compactor component
+# Compacts, downscales and deduplicates blocks in the object store
+# ======================================================================
+compactor:
+  enabled: true
+  replicaCount: 1
+
+  persistence:
+    # Enable a PVC for compactor work dir
+    enabled: true
+    # Requested storage size
+    size: 10Gi
+    # Storage class name, empty uses cluster default
+    storageClass: ""
+    # Access modes when PVC is created
+    accessModes:
+      - ReadWriteOnce
+
+  service:
+    type: ClusterIP
+    port: 10902
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    hosts:
+      - host: compactor.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  vpa:
+    enabled: true
+    targetKind: StatefulSet
+    updateMode: Auto    # Options: "Auto" | "Off" | "Initial"
+    minAllowed:
+      cpu: 500m
+      memory: 512Mi
+    maxAllowed:
+      cpu: 4
+      memory: 8Gi
+
+  # CLI flags for compactor
+  extraArgs:
+    - --log.level=info
+    - --log.format=logfmt
+    - --retention.resolution-raw=30d
+    - --retention.resolution-5m=90d
+    - --retention.resolution-1h=365d
+    - --consistency-delay=30m
+    - --wait
+
+  resources: {}
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+  containerSecurityContext: {}
+
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 10902
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  annotations: {}
+  labels: {}
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Query component
+# Fan out engine that queries multiple store APIs and deduplicates
+# ======================================================================
+query:
+  enabled: true
+  replicaCount: 2
+
+  service:
+    type: ClusterIP
+    httpPort: 9090
+    grpcPort: 10901
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: thanos-query.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: null
+
+  # List of store gRPC endpoints the query component should connect to
+  # Example:
+  # stores:
+  #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
+  stores: []
+
+  # Label names used to mark replica identity for deduplication
+  replicaLabels:
+    - prometheus_replica
+
+  extraArgs:
+    - --log.level=info
+
+  resources: {}
+  podSecurityContext: {}
+  containerSecurityContext: {}
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 9090
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 9090
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 9090
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  annotations: {}
+  labels: {}
+
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Query Frontend component
+# Caches and shards queries in front of thanos query
+# ======================================================================
+queryFrontend:
+  enabled: false
+  replicaCount: 2
+
+  downstreamUrl: ""
+  # Optional caching config file content as string or reference via volume
+  cacheConfig: ""
+
+  service:
+    type: ClusterIP
+    port: 9090
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: thanos-query-frontend.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: null
+
+  resources: {}
+  extraArgs: []
+  podSecurityContext: {}
+  containerSecurityContext: {}
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 9090
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 9090
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 9090
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  annotations: {}
+  labels: {}
+
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Store Gateway component
+# Exposes historical blocks from object store via Store API
+# ======================================================================
+storegateway:
+  enabled: true
+  replicaCount: 2
+
+  service:
+    type: ClusterIP
+    grpcPort: 10901
+    httpPort: 10902
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: thanos-store.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: null
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+
+  # Optional caching bucket config passed as a file or inline string
+  cachingBucketConfig: ""
+
+  resources: {}
+  extraArgs: []
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+  containerSecurityContext: {}
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 10902
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  annotations: {}
+  labels: {}
+
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Receive component
+# Remote write endpoint that splits and forwards samples, optionally sharded
+# ======================================================================
+receive:
+  enabled: true
+  replicaCount: 3
+
+  # Optional multi tenancy header name to segregate tenants
+  tenancyHeader: ""
+  
+  # TSDB settings for local storage of samples before shipping to object store
+  tsdb:
+    # TSDB retention period for local WAL
+    retention: 24h
+    # Enable WAL compression to reduce IO and disk
+    walCompression: true
+
+
+  # existing fields...
+  hashrings:
+    # if enabled true, autogenerate a single ring named default with endpoints
+    # receive-0.receive:10901 ... receive-(replicaCount-1).receive:10901
+    autogen:
+      enabled: true
+      name: default
+    # optional static configuration to fully control rings
+    # when non empty, it overrides autogen
+    static: []
+    # example:
+    # static:
+    #   - hashring: default
+    #     endpoints:
+    #       - thanos-receive-0.thanos-receive:10901
+    #       - thanos-receive-1.thanos-receive:10901
+
+  service:
+    type: ClusterIP
+    grpcPort: 10901
+    httpPort: 10902
+    remoteWritePort: 10908
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: thanos-receive.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: null
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+
+  resources: {}
+  extraArgs: []
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+  containerSecurityContext: {}
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 10902
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  annotations: {}
+  labels: {}
+
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""
+
+# ======================================================================
+# Ruler component
+# Evaluates alerting and recording rules using query and sends to Alertmanager
+# ======================================================================
+ruler:
+  enabled: false
+  replicaCount: 2
+
+  query:
+    # List of base URLs for query component to evaluate rules against
+    urls: []
+  # Alertmanager routing configuration in Thanos format
+  alertmanagers:
+    config: |
+      static_configs:
+        - targets: ["alertmanager.monitoring.svc.cluster.local:9093"]
+
+  # URL used in rule alerts to link back to a UI
+  alertQueryUrl: ""
+
+  # Inline rule files. Use external ConfigMap volumes for large rule sets.
+  rules:
+    example-alerts.yaml: |
+      groups:
+        - name: thanos-example
+          rules:
+            - alert: ExampleAlwaysFiring
+              expr: vector(1)
+              for: 1m
+              labels:
+                severity: warning
+              annotations:
+                summary: Example alert firing
+
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+
+  service:
+    type: ClusterIP
+    httpPort: 10902
+    annotations: {}
+    labels: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: thanos-ruler.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: null
+
+  resources: {}
+  extraArgs: []
+  podSecurityContext:
+    fsGroup: 1000
+    fsGroupChangePolicy: OnRootMismatch
+  containerSecurityContext: {}
+  extraEnv: []
+  extraEnvFrom: []
+  extraInitContainers: []
+  extraContainers: []
+
+  probes:
+    readiness:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    liveness:
+      enabled: true
+      path: /-/healthy
+      port: 10902
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    startup:
+      enabled: true
+      path: /-/ready
+      port: 10902
+      initialDelaySeconds: 0
+      periodSeconds: 5
+      timeoutSeconds: 5
+      failureThreshold: 60
+      successThreshold: 1
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+  priorityClassName: ""
+
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  annotations: {}
+  labels: {}
+  
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    interval: ""
+    scrapeTimeout: ""
+    scheme: ""
+    tlsConfig: {}
+    relabelings: []
+    metricRelabelings: []
+
+  pdb:
+    enabled: false
+    minAvailable: ""
+    maxUnavailable: ""

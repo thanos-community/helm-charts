@@ -1,0 +1,95 @@
+{{- if .Values.ruler.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
+spec:
+  serviceName: {{ include "thanos.compName" (list . "ruler") }}
+  replicas: {{ .Values.ruler.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: ruler
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: ruler
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "ruler") | nindent 6 }}
+      containers:
+        - name: ruler
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - rule
+            - --http-address=0.0.0.0:{{ .Values.ruler.service.httpPort }}
+            - --data-dir=/var/thanos/ruler
+            - --rule-file=/etc/thanos/rules/*.yaml
+            - --alertmanagers.config-file=/etc/thanos/alertmanagers.yaml
+            - --query.config-file=/etc/thanos/query-urls.yaml
+          {{- if .Values.ruler.alertQueryUrl }}
+            - --alert.query-url={{ .Values.ruler.alertQueryUrl }}
+          {{- end }}
+          {{- range .Values.ruler.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.ruler.service.httpPort }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/thanos/ruler
+            - name: rules
+              mountPath: /etc/thanos/rules
+            - name: am
+              mountPath: /etc/thanos/alertmanagers.yaml
+              subPath: alertmanagers.yaml
+            - name: query
+              mountPath: /etc/thanos/query-urls.yaml
+              subPath: query-urls.yaml
+          {{ include "thanos.extraMountItems" (dict "root" . "key" "ruler") | nindent 10 }}
+          {{ include "thanos.containerSC" (dict "root" . "key" "ruler") | nindent 10 }}
+          resources:
+{{ toYaml .Values.ruler.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" . "key" "ruler" "port" .Values.ruler.service.httpPort) | nindent 10 }}
+      volumes:
+        - name: rules
+          configMap:
+            name: {{ include "thanos.compName" (list . "ruler") }}-rules
+        - name: am
+          configMap:
+            name: {{ include "thanos.compName" (list . "ruler") }}-am
+        - name: query
+          configMap:
+            name: {{ include "thanos.compName" (list . "ruler") }}-query
+        {{- if not .Values.ruler.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "ruler") | nindent 6 }}
+  {{- if .Values.ruler.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+        {{- range .Values.ruler.persistence.accessModes | default (list "ReadWriteOnce") }}
+          - {{ . | quote }}
+        {{- end }}
+        {{- if .Values.ruler.persistence.storageClass }}
+        storageClassName: {{ .Values.ruler.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.ruler.persistence.size }}
+  {{- end }}
+{{- end }}

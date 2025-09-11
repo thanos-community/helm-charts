@@ -1,0 +1,22 @@
+{{- if .Values.storegateway.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.compName" (list . "storegateway") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+spec:
+  type: {{ .Values.storegateway.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.storegateway.service.httpPort }}
+      targetPort: http
+    - name: grpc
+      port: {{ .Values.storegateway.service.grpcPort }}
+      targetPort: grpc
+  selector:
+    app.kubernetes.io/component: storegateway
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
