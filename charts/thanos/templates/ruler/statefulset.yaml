@@ -25,6 +25,7 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{ include "thanos.imagePullSecrets" . | nindent 6 }}
       {{ include "thanos.podSC" (dict "root" . "key" "ruler") | nindent 6 }}
+
       containers:
         - name: ruler
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -34,6 +35,9 @@ spec:
             - --http-address=0.0.0.0:{{ .Values.ruler.service.httpPort }}
             - --data-dir=/var/thanos/ruler
             - --rule-file=/etc/thanos/rules/*.yaml
+          {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
+            - --rule-file=/etc/thanos/rules/generated/*.yaml
+          {{- end }}
             - --alertmanagers.config-file=/etc/thanos/alertmanagers.yaml
             - --query.config-file=/etc/thanos/query-urls.yaml
           {{- if .Values.ruler.alertQueryUrl }}
@@ -50,6 +54,10 @@ spec:
               mountPath: /var/thanos/ruler
             - name: rules
               mountPath: /etc/thanos/rules
+          {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
+            - name: generated-rules
+              mountPath: /etc/thanos/rules/generated
+          {{- end }}
             - name: am
               mountPath: /etc/thanos/alertmanagers.yaml
               subPath: alertmanagers.yaml
@@ -61,21 +69,49 @@ spec:
           resources:
 {{ toYaml .Values.ruler.resources | indent 12 }}
           {{ include "thanos.httpProbes" (dict "root" . "key" "ruler" "port" .Values.ruler.service.httpPort) | nindent 10 }}
+
+        {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
+        - name: prometheus-rule-importer
+          image: "{{ .Values.ruler.autoImportPrometheusRules.sidecar.image.repository }}:{{ .Values.ruler.autoImportPrometheusRules.sidecar.image.tag }}"
+          imagePullPolicy: {{ .Values.ruler.autoImportPrometheusRules.sidecar.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - /scripts/import.sh
+          volumeMounts:
+            - name: generated-rules
+              mountPath: /generated
+            - name: rule-importer-script
+              mountPath: /scripts
+        {{- end }}
+
       volumes:
         - name: rules
           configMap:
             name: {{ include "thanos.compName" (list . "ruler") }}-rules
+
+      {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
+        - name: generated-rules
+          emptyDir: {}
+        - name: rule-importer-script
+          configMap:
+            name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
+            defaultMode: 0755
+      {{- end }}
+
         - name: am
           configMap:
             name: {{ include "thanos.compName" (list . "ruler") }}-am
         - name: query
           configMap:
             name: {{ include "thanos.compName" (list . "ruler") }}-query
-        {{- if not .Values.ruler.persistence.enabled }}
+
+      {{- if not .Values.ruler.persistence.enabled }}
         - name: data
           emptyDir: {}
-        {{- end }}
+      {{- end }}
+
       {{ include "thanos.extraVolumeItems" (dict "root" . "key" "ruler") | nindent 6 }}
+
   {{- if .Values.ruler.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:

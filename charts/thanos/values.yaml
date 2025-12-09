@@ -119,7 +119,7 @@ global:
   # Components can override under their own .serviceMonitor blocks
   # --------------------------------------------------------------------
   serviceMonitor:
-    enabled: true
+    enabled: false
     namespace: ""
     labels: {}
     annotations: {}
@@ -254,7 +254,7 @@ bucket:
 
     # ServiceMonitor for bucketweb
     serviceMonitor:
-      enabled: true
+      enabled: false
       labels: {}
       annotations: {}
       interval: ""
@@ -379,7 +379,7 @@ compactor:
   extraVolumeMounts: []
 
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""
@@ -490,7 +490,7 @@ query:
   labels: {}
 
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""
@@ -592,7 +592,7 @@ queryFrontend:
   labels: {}
 
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""
@@ -703,7 +703,7 @@ storegateway:
   labels: {}
 
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""
@@ -840,7 +840,7 @@ receive:
   labels: {}
 
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""
@@ -889,6 +889,16 @@ ruler:
               annotations:
                 summary: Example alert firing
 
+  autoImportPrometheusRules:
+    enabled: true
+    # Label selector to find PrometheusRule CRDs to import rules from
+    labelSelector: {}
+    sidecar:
+      image:
+        repository: alpine/kubectl
+        tag: latest
+        pullPolicy: IfNotPresent
+
   persistence:
     enabled: true
     size: 10Gi
@@ -912,13 +922,6 @@ ruler:
           - path: /
             pathType: Prefix
     tls: []
-
-  autoscaling:
-    enabled: false
-    minReplicas: 2
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 80
-    targetMemoryUtilizationPercentage: null
 
   resources: {}
   extraArgs: []
@@ -973,7 +976,7 @@ ruler:
   labels: {}
   
   serviceMonitor:
-    enabled: true
+    enabled: false
     labels: {}
     annotations: {}
     interval: ""

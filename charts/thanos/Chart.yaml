@@ -25,7 +25,7 @@ maintainers:
 dependencies:
   - name: kube-prometheus-stack
     alias: kube-prometheus-stack
-    version: 77.6.0
+    version: 80.2.0
     repository: https://prometheus-community.github.io/helm-charts
     condition: kube-prometheus-stack.enabled
 annotations: {}

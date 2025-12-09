@@ -579,7 +579,7 @@
                   "type": "object"
                 },
                 "enabled": {
-                  "default": true,
+                  "default": false,
                   "required": [],
                   "title": "enabled",
                   "type": "boolean"
@@ -1300,7 +1300,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -1835,7 +1835,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -2659,7 +2659,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -3342,7 +3342,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -4124,7 +4124,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -4314,48 +4314,69 @@
           "title": "annotations",
           "type": "object"
         },
-        "autoscaling": {
+        "autoImportPrometheusRules": {
           "additionalProperties": true,
           "properties": {
             "enabled": {
-              "default": false,
+              "default": true,
               "required": [],
               "title": "enabled",
               "type": "boolean"
             },
-            "maxReplicas": {
-              "default": 5,
+            "labelSelector": {
+              "additionalProperties": true,
+              "description": "Label selector to find PrometheusRule CRDs to import rules from",
               "required": [],
-              "title": "maxReplicas",
-              "type": "integer"
+              "title": "labelSelector",
+              "type": "object"
             },
-            "minReplicas": {
-              "default": 2,
-              "required": [],
-              "title": "minReplicas",
-              "type": "integer"
-            },
-            "targetCPUUtilizationPercentage": {
-              "default": 80,
-              "required": [],
-              "title": "targetCPUUtilizationPercentage",
-              "type": "integer"
-            },
-            "targetMemoryUtilizationPercentage": {
-              "default": "null",
-              "required": [],
-              "title": "targetMemoryUtilizationPercentage",
-              "type": "null"
+            "sidecar": {
+              "additionalProperties": true,
+              "properties": {
+                "image": {
+                  "additionalProperties": true,
+                  "properties": {
+                    "pullPolicy": {
+                      "default": "IfNotPresent",
+                      "required": [],
+                      "title": "pullPolicy",
+                      "type": "string"
+                    },
+                    "repository": {
+                      "default": "alpine/kubectl",
+                      "required": [],
+                      "title": "repository",
+                      "type": "string"
+                    },
+                    "tag": {
+                      "default": "latest",
+                      "required": [],
+                      "title": "tag",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "repository",
+                    "tag",
+                    "pullPolicy"
+                  ],
+                  "title": "image",
+                  "type": "object"
+                }
+              },
+              "required": [
+                "image"
+              ],
+              "title": "sidecar",
+              "type": "object"
             }
           },
           "required": [
             "enabled",
-            "minReplicas",
-            "maxReplicas",
-            "targetCPUUtilizationPercentage",
-            "targetMemoryUtilizationPercentage"
+            "labelSelector",
+            "sidecar"
           ],
-          "title": "autoscaling",
+          "title": "autoImportPrometheusRules",
           "type": "object"
         },
         "containerSecurityContext": {
@@ -4942,7 +4963,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"
@@ -5032,10 +5053,10 @@
         "alertmanagers",
         "alertQueryUrl",
         "rules",
+        "autoImportPrometheusRules",
         "persistence",
         "service",
         "ingress",
-        "autoscaling",
         "resources",
         "extraArgs",
         "podSecurityContext",
@@ -5682,7 +5703,7 @@
               "type": "object"
             },
             "enabled": {
-              "default": true,
+              "default": false,
               "required": [],
               "title": "enabled",
               "type": "boolean"

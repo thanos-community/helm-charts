@@ -1,0 +1,39 @@
+{{- if and .Values.ruler.enabled .Values.ruler.autoImportPrometheusRules.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
+data:
+  import.sh: |
+    set -e
+
+    SELECTOR="{{ .Values.ruler.autoImportPrometheusRules.labelSelector }}"
+
+    if [ -z "$SELECTOR" ] || [ "$SELECTOR" = "{}" ]; then
+      echo "No label selector provided, importing ALL PrometheusRules"
+      SELECTOR_ARG=""
+    else
+      echo "Using label selector: $SELECTOR"
+      SELECTOR_ARG="-l $SELECTOR"
+    fi
+
+    while true; do
+      echo "Syncing PrometheusRules"
+
+      rm -f /generated/*.yaml || true
+
+      kubectl get prometheusrules.monitoring.coreos.com -A $SELECTOR_ARG \
+        -o jsonpath='{range .items[*]}{.metadata.name}|{.metadata.namespace}{"\n"}{end}' | \
+      while read line; do
+        name=$(echo "$line" | cut -d"|" -f1)
+        ns=$(echo "$line" | cut -d"|" -f2)
+
+        echo "Processing $ns/$name"
+
+        kubectl get prometheusrule "$name" -n "$ns" -o yaml | \
+          yq -y '{groups: .spec.groups}' > "/generated/${ns}-${name}.yaml"
+      done
+
+      sleep 60
+    done
+{{- end }}
