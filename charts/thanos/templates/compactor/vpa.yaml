@@ -27,6 +27,6 @@ spec:
           memory: {{ .Values.compactor.vpa.maxAllowed.memory | default "8Gi" }}
 {{- else }}
 {{- if and .Values.compactor.enabled .Values.compactor.vpa.enabled }}
-{{- warn "VerticalPodAutoscaler CRD not detected on this cluster. Skipping VPA creation for compactor." }}
+{{- printf "# WARNING: VerticalPodAutoscaler CRD not detected on this cluster. Skipping VPA creation for compactor." }}
 {{- end }}
 {{- end }}
