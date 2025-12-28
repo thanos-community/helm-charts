@@ -773,12 +773,16 @@ receive:
             pathType: Prefix
     tls: []
 
-  autoscaling:
-    enabled: false
-    minReplicas: 3
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 70
-    targetMemoryUtilizationPercentage: null
+  vpa:
+    enabled: true
+    targetKind: StatefulSet
+    updateMode: Auto   # Auto | Off | Initial
+    minAllowed:
+      cpu: 500m
+      memory: 512Mi
+    maxAllowed:
+      cpu: "4"
+      memory: 8Gi
 
   persistence:
     enabled: true

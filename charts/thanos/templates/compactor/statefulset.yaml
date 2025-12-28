@@ -34,7 +34,6 @@ spec:
             - --http-address=0.0.0.0:{{ .Values.compactor.service.port }}
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --data-dir=/var/thanos/compact
-            - --compact.concurrency=1
           {{- range .Values.compactor.extraArgs }}
             - {{ . | quote }}
           {{- end }}

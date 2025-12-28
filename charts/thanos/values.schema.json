@@ -3473,50 +3473,6 @@
           "title": "annotations",
           "type": "object"
         },
-        "autoscaling": {
-          "additionalProperties": true,
-          "properties": {
-            "enabled": {
-              "default": false,
-              "required": [],
-              "title": "enabled",
-              "type": "boolean"
-            },
-            "maxReplicas": {
-              "default": 10,
-              "required": [],
-              "title": "maxReplicas",
-              "type": "integer"
-            },
-            "minReplicas": {
-              "default": 3,
-              "required": [],
-              "title": "minReplicas",
-              "type": "integer"
-            },
-            "targetCPUUtilizationPercentage": {
-              "default": 70,
-              "required": [],
-              "title": "targetCPUUtilizationPercentage",
-              "type": "integer"
-            },
-            "targetMemoryUtilizationPercentage": {
-              "default": "null",
-              "required": [],
-              "title": "targetMemoryUtilizationPercentage",
-              "type": "null"
-            }
-          },
-          "required": [
-            "enabled",
-            "minReplicas",
-            "maxReplicas",
-            "targetCPUUtilizationPercentage",
-            "targetMemoryUtilizationPercentage"
-          ],
-          "title": "autoscaling",
-          "type": "object"
-        },
         "containerSecurityContext": {
           "additionalProperties": true,
           "required": [],
@@ -4238,6 +4194,84 @@
           ],
           "title": "tsdb",
           "type": "object"
+        },
+        "vpa": {
+          "additionalProperties": true,
+          "properties": {
+            "enabled": {
+              "default": true,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxAllowed": {
+              "additionalProperties": true,
+              "properties": {
+                "cpu": {
+                  "default": "4",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "8Gi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "maxAllowed",
+              "type": "object"
+            },
+            "minAllowed": {
+              "additionalProperties": true,
+              "properties": {
+                "cpu": {
+                  "default": "500m",
+                  "required": [],
+                  "title": "cpu",
+                  "type": "string"
+                },
+                "memory": {
+                  "default": "512Mi",
+                  "required": [],
+                  "title": "memory",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "title": "minAllowed",
+              "type": "object"
+            },
+            "targetKind": {
+              "default": "StatefulSet",
+              "required": [],
+              "title": "targetKind",
+              "type": "string"
+            },
+            "updateMode": {
+              "default": "Auto",
+              "required": [],
+              "title": "updateMode",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "targetKind",
+            "updateMode",
+            "minAllowed",
+            "maxAllowed"
+          ],
+          "title": "vpa",
+          "type": "object"
         }
       },
       "required": [
@@ -4248,7 +4282,7 @@
         "hashrings",
         "service",
         "ingress",
-        "autoscaling",
+        "vpa",
         "persistence",
         "resources",
         "extraArgs",
