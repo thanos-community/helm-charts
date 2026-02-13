@@ -1,0 +1,4 @@
+chart-search-root: .
+
+template-files:
+  - README.md.gotmpl
