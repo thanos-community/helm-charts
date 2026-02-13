@@ -1,8 +1,24 @@
-# thanos
+# Thanos Helm Chart
 
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.39.2](https://img.shields.io/badge/AppVersion-v0.39.2-informational?style=flat-square)
 
-A Helm chart for Kubernetes
+![Thanos Logo](../../docs/imgs/thanos_logo_full.svg)
+
+A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
+
+**Homepage:** <https://thanos.io/>
+
+## TL;DR
+
+```bash
+helm install my-release oci://<registry>/thanos
+```
+
+## Architecture
+
+![Thanos High Level Arch Diagram](../../docs/imgs/thanos_hld_arch.png)
+
+Find more on Thanos components [](https://thanos.io/tip/thanos/quick-tutorial.md/#components)
 
 **Homepage:** <https://thanos.io/>
 
@@ -10,7 +26,7 @@ A Helm chart for Kubernetes
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| hamdikh |  |  |
+| hamdikh | <hamdi.khelil@kapheira.cloud> |  |
 
 ## Source Code
 
@@ -21,301 +37,93 @@ A Helm chart for Kubernetes
 
 Kubernetes: `>= 1.30.0-0`
 
+| Repository | Name | Version |
+|------------|------|---------|
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 80.2.0 |
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| bucket.bucketweb.containerSecurityContext | object | `{}` |  |
-| bucket.bucketweb.enabled | bool | `false` |  |
-| bucket.bucketweb.extraArgs | list | `[]` |  |
-| bucket.bucketweb.extraVolumeMounts | list | `[]` |  |
-| bucket.bucketweb.extraVolumes | list | `[]` |  |
-| bucket.bucketweb.podSecurityContext | object | `{}` |  |
-| bucket.bucketweb.probes.liveness.enabled | bool | `true` |  |
-| bucket.bucketweb.probes.liveness.failureThreshold | int | `6` |  |
-| bucket.bucketweb.probes.liveness.initialDelaySeconds | int | `30` |  |
-| bucket.bucketweb.probes.liveness.path | string | `"/-/healthy"` |  |
-| bucket.bucketweb.probes.liveness.periodSeconds | int | `10` |  |
-| bucket.bucketweb.probes.liveness.port | int | `10902` |  |
-| bucket.bucketweb.probes.liveness.successThreshold | int | `1` |  |
-| bucket.bucketweb.probes.liveness.timeoutSeconds | int | `5` |  |
-| bucket.bucketweb.probes.readiness.enabled | bool | `true` |  |
-| bucket.bucketweb.probes.readiness.failureThreshold | int | `6` |  |
-| bucket.bucketweb.probes.readiness.initialDelaySeconds | int | `5` |  |
-| bucket.bucketweb.probes.readiness.path | string | `"/-/ready"` |  |
-| bucket.bucketweb.probes.readiness.periodSeconds | int | `10` |  |
-| bucket.bucketweb.probes.readiness.port | int | `10902` |  |
-| bucket.bucketweb.probes.readiness.successThreshold | int | `1` |  |
-| bucket.bucketweb.probes.readiness.timeoutSeconds | int | `5` |  |
-| bucket.bucketweb.probes.startup.enabled | bool | `true` |  |
-| bucket.bucketweb.probes.startup.failureThreshold | int | `60` |  |
-| bucket.bucketweb.probes.startup.initialDelaySeconds | int | `0` |  |
-| bucket.bucketweb.probes.startup.path | string | `"/-/ready"` |  |
-| bucket.bucketweb.probes.startup.periodSeconds | int | `5` |  |
-| bucket.bucketweb.probes.startup.port | int | `10902` |  |
-| bucket.bucketweb.probes.startup.successThreshold | int | `1` |  |
-| bucket.bucketweb.probes.startup.timeoutSeconds | int | `5` |  |
-| bucket.bucketweb.resources | object | `{}` |  |
-| bucket.bucketweb.service.port | int | `10902` |  |
-| bucket.bucketweb.service.type | string | `"ClusterIP"` |  |
-| bucket.enabled | bool | `false` |  |
-| compactor.containerSecurityContext | object | `{}` |  |
-| compactor.enabled | bool | `true` |  |
-| compactor.extraArgs[0] | string | `"--log.level=info"` |  |
-| compactor.extraArgs[1] | string | `"--log.format=logfmt"` |  |
-| compactor.extraArgs[2] | string | `"--retention.resolution-raw=30d"` |  |
-| compactor.extraArgs[3] | string | `"--retention.resolution-5m=90d"` |  |
-| compactor.extraArgs[4] | string | `"--retention.resolution-1h=365d"` |  |
-| compactor.extraArgs[5] | string | `"--consistency-delay=30m"` |  |
-| compactor.extraArgs[6] | string | `"--wait"` |  |
-| compactor.persistence.enabled | bool | `true` |  |
-| compactor.persistence.size | string | `"10Gi"` |  |
-| compactor.persistence.storageClass | string | `""` |  |
-| compactor.podSecurityContext.fsGroup | int | `1000` |  |
-| compactor.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
-| compactor.probes.extraVolumeMounts | list | `[]` |  |
-| compactor.probes.extraVolumes | list | `[]` |  |
-| compactor.probes.liveness.enabled | bool | `true` |  |
-| compactor.probes.liveness.failureThreshold | int | `6` |  |
-| compactor.probes.liveness.initialDelaySeconds | int | `30` |  |
-| compactor.probes.liveness.path | string | `"/-/healthy"` |  |
-| compactor.probes.liveness.periodSeconds | int | `10` |  |
-| compactor.probes.liveness.port | int | `10902` |  |
-| compactor.probes.liveness.successThreshold | int | `1` |  |
-| compactor.probes.liveness.timeoutSeconds | int | `5` |  |
-| compactor.probes.readiness.enabled | bool | `true` |  |
-| compactor.probes.readiness.failureThreshold | int | `6` |  |
-| compactor.probes.readiness.initialDelaySeconds | int | `5` |  |
-| compactor.probes.readiness.path | string | `"/-/ready"` |  |
-| compactor.probes.readiness.periodSeconds | int | `10` |  |
-| compactor.probes.readiness.port | int | `10902` |  |
-| compactor.probes.readiness.successThreshold | int | `1` |  |
-| compactor.probes.readiness.timeoutSeconds | int | `5` |  |
-| compactor.probes.startup.enabled | bool | `true` |  |
-| compactor.probes.startup.failureThreshold | int | `60` |  |
-| compactor.probes.startup.initialDelaySeconds | int | `0` |  |
-| compactor.probes.startup.path | string | `"/-/ready"` |  |
-| compactor.probes.startup.periodSeconds | int | `5` |  |
-| compactor.probes.startup.port | int | `10902` |  |
-| compactor.probes.startup.successThreshold | int | `1` |  |
-| compactor.probes.startup.timeoutSeconds | int | `5` |  |
-| compactor.resources | object | `{}` |  |
-| compactor.service.port | int | `10902` |  |
-| compactor.service.type | string | `"ClusterIP"` |  |
-| global.commonLabels | object | `{}` |  |
-| global.containerSecurityContext.allowPrivilegeEscalation | bool | `false` |  |
-| global.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
-| global.containerSecurityContext.readOnlyRootFilesystem | bool | `true` |  |
-| global.containerSecurityContext.runAsNonRoot | bool | `true` |  |
-| global.extraVolumeMounts | list | `[]` |  |
-| global.extraVolumes | list | `[]` |  |
-| global.image.pullPolicy | string | `"IfNotPresent"` |  |
-| global.image.repository | string | `"quay.io/thanos/thanos"` |  |
-| global.image.tag | string | `"v0.39.2"` |  |
-| global.objstore.config | string | `"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  access_key: change-me\n  secret_key: change-me\n  insecure: false\n"` |  |
-| global.objstore.createSecret | bool | `false` |  |
-| global.objstore.secretKey | string | `"objstore.yml"` |  |
-| global.objstore.secretName | string | `"thanos-objstore"` |  |
-| global.podAnnotations | object | `{}` |  |
-| global.podSecurityContext | object | `{}` |  |
-| query.containerSecurityContext | object | `{}` |  |
-| query.enabled | bool | `true` |  |
-| query.extraArgs[0] | string | `"--log.level=info"` |  |
-| query.podSecurityContext | object | `{}` |  |
-| query.probes.extraVolumeMounts | list | `[]` |  |
-| query.probes.extraVolumes | list | `[]` |  |
-| query.probes.liveness.enabled | bool | `true` |  |
-| query.probes.liveness.failureThreshold | int | `6` |  |
-| query.probes.liveness.initialDelaySeconds | int | `30` |  |
-| query.probes.liveness.path | string | `"/-/healthy"` |  |
-| query.probes.liveness.periodSeconds | int | `10` |  |
-| query.probes.liveness.port | int | `9090` |  |
-| query.probes.liveness.successThreshold | int | `1` |  |
-| query.probes.liveness.timeoutSeconds | int | `5` |  |
-| query.probes.readiness.enabled | bool | `true` |  |
-| query.probes.readiness.failureThreshold | int | `6` |  |
-| query.probes.readiness.initialDelaySeconds | int | `5` |  |
-| query.probes.readiness.path | string | `"/-/ready"` |  |
-| query.probes.readiness.periodSeconds | int | `10` |  |
-| query.probes.readiness.port | int | `9090` |  |
-| query.probes.readiness.successThreshold | int | `1` |  |
-| query.probes.readiness.timeoutSeconds | int | `5` |  |
-| query.probes.startup.enabled | bool | `true` |  |
-| query.probes.startup.failureThreshold | int | `60` |  |
-| query.probes.startup.initialDelaySeconds | int | `0` |  |
-| query.probes.startup.path | string | `"/-/ready"` |  |
-| query.probes.startup.periodSeconds | int | `5` |  |
-| query.probes.startup.port | int | `9090` |  |
-| query.probes.startup.successThreshold | int | `1` |  |
-| query.probes.startup.timeoutSeconds | int | `5` |  |
-| query.replicaCount | int | `2` |  |
-| query.replicaLabels[0] | string | `"prometheus_replica"` |  |
-| query.resources | object | `{}` |  |
-| query.service.grpcPort | int | `10901` |  |
-| query.service.httpPort | int | `9090` |  |
-| query.service.type | string | `"ClusterIP"` |  |
-| query.stores | list | `[]` |  |
-| queryFrontend.cacheConfig | string | `""` |  |
-| queryFrontend.containerSecurityContext | object | `{}` |  |
-| queryFrontend.downstreamUrl | string | `""` |  |
-| queryFrontend.enabled | bool | `false` |  |
-| queryFrontend.extraArgs | list | `[]` |  |
-| queryFrontend.podSecurityContext | object | `{}` |  |
-| queryFrontend.probes.extraVolumeMounts | list | `[]` |  |
-| queryFrontend.probes.extraVolumes | list | `[]` |  |
-| queryFrontend.probes.liveness.enabled | bool | `true` |  |
-| queryFrontend.probes.liveness.failureThreshold | int | `6` |  |
-| queryFrontend.probes.liveness.initialDelaySeconds | int | `30` |  |
-| queryFrontend.probes.liveness.path | string | `"/-/healthy"` |  |
-| queryFrontend.probes.liveness.periodSeconds | int | `10` |  |
-| queryFrontend.probes.liveness.port | int | `9090` |  |
-| queryFrontend.probes.liveness.successThreshold | int | `1` |  |
-| queryFrontend.probes.liveness.timeoutSeconds | int | `5` |  |
-| queryFrontend.probes.readiness.enabled | bool | `true` |  |
-| queryFrontend.probes.readiness.failureThreshold | int | `6` |  |
-| queryFrontend.probes.readiness.initialDelaySeconds | int | `5` |  |
-| queryFrontend.probes.readiness.path | string | `"/-/ready"` |  |
-| queryFrontend.probes.readiness.periodSeconds | int | `10` |  |
-| queryFrontend.probes.readiness.port | int | `9090` |  |
-| queryFrontend.probes.readiness.successThreshold | int | `1` |  |
-| queryFrontend.probes.readiness.timeoutSeconds | int | `5` |  |
-| queryFrontend.probes.startup.enabled | bool | `true` |  |
-| queryFrontend.probes.startup.failureThreshold | int | `60` |  |
-| queryFrontend.probes.startup.initialDelaySeconds | int | `0` |  |
-| queryFrontend.probes.startup.path | string | `"/-/ready"` |  |
-| queryFrontend.probes.startup.periodSeconds | int | `5` |  |
-| queryFrontend.probes.startup.port | int | `9090` |  |
-| queryFrontend.probes.startup.successThreshold | int | `1` |  |
-| queryFrontend.probes.startup.timeoutSeconds | int | `5` |  |
-| queryFrontend.replicaCount | int | `2` |  |
-| queryFrontend.resources | object | `{}` |  |
-| queryFrontend.service.port | int | `9090` |  |
-| queryFrontend.service.type | string | `"ClusterIP"` |  |
-| receive.containerSecurityContext | object | `{}` |  |
-| receive.enabled | bool | `true` |  |
-| receive.extraArgs | list | `[]` |  |
-| receive.extraVolumeMounts | list | `[]` |  |
-| receive.extraVolumes | list | `[]` |  |
-| receive.persistence.enabled | bool | `true` |  |
-| receive.persistence.size | string | `"10Gi"` |  |
-| receive.persistence.storageClass | string | `""` |  |
-| receive.podSecurityContext.fsGroup | int | `1000` |  |
-| receive.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
-| receive.probes.liveness.enabled | bool | `true` |  |
-| receive.probes.liveness.failureThreshold | int | `6` |  |
-| receive.probes.liveness.initialDelaySeconds | int | `30` |  |
-| receive.probes.liveness.path | string | `"/-/healthy"` |  |
-| receive.probes.liveness.periodSeconds | int | `10` |  |
-| receive.probes.liveness.port | int | `10902` |  |
-| receive.probes.liveness.successThreshold | int | `1` |  |
-| receive.probes.liveness.timeoutSeconds | int | `5` |  |
-| receive.probes.readiness.enabled | bool | `true` |  |
-| receive.probes.readiness.failureThreshold | int | `6` |  |
-| receive.probes.readiness.initialDelaySeconds | int | `5` |  |
-| receive.probes.readiness.path | string | `"/-/ready"` |  |
-| receive.probes.readiness.periodSeconds | int | `10` |  |
-| receive.probes.readiness.port | int | `10902` |  |
-| receive.probes.readiness.successThreshold | int | `1` |  |
-| receive.probes.readiness.timeoutSeconds | int | `5` |  |
-| receive.probes.startup.enabled | bool | `true` |  |
-| receive.probes.startup.failureThreshold | int | `60` |  |
-| receive.probes.startup.initialDelaySeconds | int | `0` |  |
-| receive.probes.startup.path | string | `"/-/ready"` |  |
-| receive.probes.startup.periodSeconds | int | `5` |  |
-| receive.probes.startup.port | int | `10902` |  |
-| receive.probes.startup.successThreshold | int | `1` |  |
-| receive.probes.startup.timeoutSeconds | int | `5` |  |
-| receive.replicaCount | int | `3` |  |
-| receive.resources | object | `{}` |  |
-| receive.service.grpcPort | int | `10901` |  |
-| receive.service.httpPort | int | `10902` |  |
-| receive.service.type | string | `"ClusterIP"` |  |
-| receive.tenancyHeader | string | `""` |  |
-| receive.tsdb.retention | string | `"24h"` |  |
-| receive.tsdb.walCompression | bool | `true` |  |
-| ruler.alertQueryUrl | string | `""` |  |
-| ruler.alertmanagers.config | string | `"static_configs:\n  - targets: [\"alertmanager.monitoring.svc.cluster.local:9093\"]\n"` |  |
-| ruler.containerSecurityContext | object | `{}` |  |
-| ruler.enabled | bool | `false` |  |
-| ruler.extraArgs | list | `[]` |  |
-| ruler.persistence.enabled | bool | `true` |  |
-| ruler.persistence.size | string | `"10Gi"` |  |
-| ruler.persistence.storageClass | string | `""` |  |
-| ruler.podSecurityContext.fsGroup | int | `1000` |  |
-| ruler.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
-| ruler.probes.extraVolumeMounts | list | `[]` |  |
-| ruler.probes.extraVolumes | list | `[]` |  |
-| ruler.probes.liveness.enabled | bool | `true` |  |
-| ruler.probes.liveness.failureThreshold | int | `6` |  |
-| ruler.probes.liveness.initialDelaySeconds | int | `30` |  |
-| ruler.probes.liveness.path | string | `"/-/healthy"` |  |
-| ruler.probes.liveness.periodSeconds | int | `10` |  |
-| ruler.probes.liveness.port | int | `10902` |  |
-| ruler.probes.liveness.successThreshold | int | `1` |  |
-| ruler.probes.liveness.timeoutSeconds | int | `5` |  |
-| ruler.probes.readiness.enabled | bool | `true` |  |
-| ruler.probes.readiness.failureThreshold | int | `6` |  |
-| ruler.probes.readiness.initialDelaySeconds | int | `5` |  |
-| ruler.probes.readiness.path | string | `"/-/ready"` |  |
-| ruler.probes.readiness.periodSeconds | int | `10` |  |
-| ruler.probes.readiness.port | int | `10902` |  |
-| ruler.probes.readiness.successThreshold | int | `1` |  |
-| ruler.probes.readiness.timeoutSeconds | int | `5` |  |
-| ruler.probes.startup.enabled | bool | `true` |  |
-| ruler.probes.startup.failureThreshold | int | `60` |  |
-| ruler.probes.startup.initialDelaySeconds | int | `0` |  |
-| ruler.probes.startup.path | string | `"/-/ready"` |  |
-| ruler.probes.startup.periodSeconds | int | `5` |  |
-| ruler.probes.startup.port | int | `10902` |  |
-| ruler.probes.startup.successThreshold | int | `1` |  |
-| ruler.probes.startup.timeoutSeconds | int | `5` |  |
-| ruler.query.urls | list | `[]` |  |
-| ruler.replicaCount | int | `2` |  |
-| ruler.resources | object | `{}` |  |
-| ruler.rules."example-alerts.yaml" | string | `"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"` |  |
-| ruler.service.httpPort | int | `10902` |  |
-| ruler.service.type | string | `"ClusterIP"` |  |
-| storegateway.cachingBucketConfig | string | `""` |  |
-| storegateway.containerSecurityContext | object | `{}` |  |
-| storegateway.enabled | bool | `true` |  |
-| storegateway.extraArgs | list | `[]` |  |
-| storegateway.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
-| storegateway.persistence.enabled | bool | `true` |  |
-| storegateway.persistence.size | string | `"10Gi"` |  |
-| storegateway.persistence.storageClass | string | `""` |  |
-| storegateway.podSecurityContext.fsGroup | int | `1000` |  |
-| storegateway.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
-| storegateway.probes.extraVolumeMounts | list | `[]` |  |
-| storegateway.probes.extraVolumes | list | `[]` |  |
-| storegateway.probes.liveness.enabled | bool | `true` |  |
-| storegateway.probes.liveness.failureThreshold | int | `6` |  |
-| storegateway.probes.liveness.initialDelaySeconds | int | `30` |  |
-| storegateway.probes.liveness.path | string | `"/-/healthy"` |  |
-| storegateway.probes.liveness.periodSeconds | int | `10` |  |
-| storegateway.probes.liveness.port | int | `10902` |  |
-| storegateway.probes.liveness.successThreshold | int | `1` |  |
-| storegateway.probes.liveness.timeoutSeconds | int | `5` |  |
-| storegateway.probes.readiness.enabled | bool | `true` |  |
-| storegateway.probes.readiness.failureThreshold | int | `6` |  |
-| storegateway.probes.readiness.initialDelaySeconds | int | `5` |  |
-| storegateway.probes.readiness.path | string | `"/-/ready"` |  |
-| storegateway.probes.readiness.periodSeconds | int | `10` |  |
-| storegateway.probes.readiness.port | int | `10902` |  |
-| storegateway.probes.readiness.successThreshold | int | `1` |  |
-| storegateway.probes.readiness.timeoutSeconds | int | `5` |  |
-| storegateway.probes.startup.enabled | bool | `true` |  |
-| storegateway.probes.startup.failureThreshold | int | `60` |  |
-| storegateway.probes.startup.initialDelaySeconds | int | `0` |  |
-| storegateway.probes.startup.path | string | `"/-/ready"` |  |
-| storegateway.probes.startup.periodSeconds | int | `5` |  |
-| storegateway.probes.startup.port | int | `10902` |  |
-| storegateway.probes.startup.successThreshold | int | `1` |  |
-| storegateway.probes.startup.timeoutSeconds | int | `5` |  |
-| storegateway.replicaCount | int | `2` |  |
-| storegateway.resources | object | `{}` |  |
-| storegateway.service.grpcPort | int | `10901` |  |
-| storegateway.service.httpPort | int | `10902` |  |
-| storegateway.service.type | string | `"ClusterIP"` |  |
+| bucket | object | `{"bucketweb":{"affinity":{},"annotations":{},"autoscaling":{"enabled":false,"maxReplicas":3,"minReplicas":1,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":null},"containerSecurityContext":{},"enabled":false,"extraArgs":[],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"bucketweb.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"persistence":{},"podSecurityContext":{},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":1,"resources":{},"service":{"annotations":{},"labels":{},"port":10902,"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tolerations":[],"topologySpreadConstraints":[]},"enabled":true}` | Bucketweb component Web UI for bucket inspection. Often disabled in production. ====================================================================== |
+| bucket.bucketweb.annotations | object | `{}` | Extra annotations only for bucketweb |
+| bucket.bucketweb.autoscaling | object | `{"enabled":false,"maxReplicas":3,"minReplicas":1,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":null}` | HorizontalPodAutoscaler for bucketweb only |
+| bucket.bucketweb.enabled | bool | `false` | Enable the bucketweb deployment |
+| bucket.bucketweb.extraArgs | list | `[]` | Add any additional CLI flags |
+| bucket.bucketweb.extraEnv | list | `[]` | Optional environment variables |
+| bucket.bucketweb.extraInitContainers | list | `[]` | Optional sidecars and init containers |
+| bucket.bucketweb.extraVolumes | list | `[]` | Extra volumes and mounts only for bucketweb |
+| bucket.bucketweb.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"bucketweb.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]}` | Ingress configuration for bucketweb only |
+| bucket.bucketweb.ingress.hosts | list | `[{"host":"bucketweb.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | List of host rules |
+| bucket.bucketweb.labels | object | `{}` | Extra labels only for bucketweb |
+| bucket.bucketweb.nodeSelector | object | `{}` | Scheduling and topology per component |
+| bucket.bucketweb.pdb | object | `{"enabled":false,"maxUnavailable":"","minAvailable":""}` | PodDisruptionBudget for bucketweb |
+| bucket.bucketweb.persistence | object | `{}` | Storage not required for bucketweb, leave empty |
+| bucket.bucketweb.podSecurityContext | object | `{}` | Pod and container security contexts |
+| bucket.bucketweb.probes | object | `{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}}` | Probes for health and readiness |
+| bucket.bucketweb.replicaCount | int | `1` | Number of replicas. HPA can override effective replica count when enabled. |
+| bucket.bucketweb.resources | object | `{}` | Resource requests and limits for the bucketweb container |
+| bucket.bucketweb.service.annotations | object | `{}` | Extra Service annotations if needed |
+| bucket.bucketweb.service.labels | object | `{}` | Extra labels for the Service |
+| bucket.bucketweb.service.port | int | `10902` | HTTP port for bucketweb |
+| bucket.bucketweb.service.type | string | `"ClusterIP"` | Service type: ClusterIP NodePort LoadBalancer |
+| bucket.bucketweb.serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}}` | ServiceMonitor for bucketweb |
+| bucket.enabled | bool | `true` | Toggle the umbrella bucket group |
+| compactor | object | `{"affinity":{},"annotations":{},"containerSecurityContext":{},"enabled":true,"extraArgs":["--log.level=info","--log.format=logfmt","--retention.resolution-raw=30d","--retention.resolution-5m=90d","--retention.resolution-1h=365d","--consistency-delay=30m","--wait"],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"className":"","enabled":false,"hosts":[{"host":"compactor.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"persistence":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"10Gi","storageClass":""},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":1,"resources":{},"service":{"annotations":{},"labels":{},"port":10902,"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tolerations":[],"topologySpreadConstraints":[],"vpa":{"enabled":true,"maxAllowed":{"cpu":4,"memory":"8Gi"},"minAllowed":{"cpu":"500m","memory":"512Mi"},"targetKind":"StatefulSet","updateMode":"Auto"}}` | Compactor component Compacts, downscales and deduplicates blocks in the object store ====================================================================== |
+| compactor.extraArgs | list | `["--log.level=info","--log.format=logfmt","--retention.resolution-raw=30d","--retention.resolution-5m=90d","--retention.resolution-1h=365d","--consistency-delay=30m","--wait"]` | CLI flags for compactor |
+| compactor.persistence.accessModes | list | `["ReadWriteOnce"]` | Access modes when PVC is created |
+| compactor.persistence.enabled | bool | `true` | Enable a PVC for compactor work dir |
+| compactor.persistence.size | string | `"10Gi"` | Requested storage size |
+| compactor.persistence.storageClass | string | `""` | Storage class name, empty uses cluster default |
+| global | object | `{"affinity":{},"clusterDomain":"cluster.local","commonLabels":{},"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true},"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"image":{"pullPolicy":"IfNotPresent","repository":"quay.io/thanos/thanos","tag":"v0.39.2"},"imagePullSecrets":[],"nodeSelector":{},"objstore":{"config":"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n  \n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n","createSecret":false,"secretKey":"objstore.yml","secretName":"thanos-objstore"},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"podAnnotations":{},"podSecurityContext":{},"priorityClassName":"","rbac":{"create":true},"resources":{},"serviceAccount":{"annotations":{},"create":true,"name":""},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"namespace":"","relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"thanosRules":{"enabled":true,"forDefaults":{"componentDown":"5m","default":"2m","short":"1m"},"labels":{},"severity":{"componentDown":"critical","critical":"critical","warning":"warning"},"thresholds":{"blockSyncFailures":0,"bucketOperationFailures":0,"query5xxRate":0,"receive5xxRate":0,"ruleEvalFailures":0}},"tolerations":[],"topologySpreadConstraints":[]}` | -------------------------------------------------------------------- |
+| global.clusterDomain | string | `"cluster.local"` | Cluster domain, usually cluster.local, used in DNS names |
+| global.commonLabels | object | `{}` | Extra labels applied to all Kubernetes resources |
+| global.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsNonRoot":true}` | Container security context applied to all components unless overridden |
+| global.extraEnv | list | `[]` | Environment variables applied to main containers globally |
+| global.extraInitContainers | list | `[]` | Optional init containers and sidecars applied globally |
+| global.extraVolumeMounts | list | `[]` | Extra volume mounts applied to main containers by default |
+| global.extraVolumes | list | `[]` | Extra volumes available to all pods by default |
+| global.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy: Always IfNotPresent Never |
+| global.image.repository | string | `"quay.io/thanos/thanos"` | Docker repository for all Thanos containers by default |
+| global.image.tag | string | `"v0.39.2"` | Container image tag |
+| global.imagePullSecrets | list | `[]` | Optional list of image pull secrets to use across all components |
+| global.nodeSelector | object | `{}` | Node scheduling defaults for all components |
+| global.objstore | object | `{"config":"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n  \n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n","createSecret":false,"secretKey":"objstore.yml","secretName":"thanos-objstore"}` | ------------------------------------------------------------------ |
+| global.objstore.config | string | `"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n  \n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n"` | Refer to Thanos docs for exact schema |
+| global.objstore.createSecret | bool | `false` | Create a Secret named secretName with key secretKey containing config below |
+| global.objstore.secretKey | string | `"objstore.yml"` | Key inside the Secret that stores the object store yaml |
+| global.objstore.secretName | string | `"thanos-objstore"` | Name of the Kubernetes Secret that carries the object store config |
+| global.pdb | object | `{"enabled":false,"maxUnavailable":"","minAvailable":""}` | ------------------------------------------------------------------ |
+| global.podAnnotations | object | `{}` | Extra annotations applied to all pods |
+| global.podSecurityContext | object | `{}` | Pod security context applied to all components unless overridden |
+| global.rbac | object | `{"create":true}` | ------------------------------------------------------------------ |
+| global.rbac.create | bool | `true` | Create RBAC resources globally where needed |
+| global.resources | object | `{}` | Default resource requests and limits for all components |
+| global.serviceAccount.annotations | object | `{}` | Extra annotations applied to ServiceAccounts |
+| global.serviceAccount.create | bool | `true` | Create a ServiceAccount per component by default |
+| global.serviceAccount.name | string | `""` | Optional name override for ServiceAccounts, empty means autogenerate |
+| global.serviceMonitor | object | `{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"namespace":"","relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}}` | ------------------------------------------------------------------ |
+| query | object | `{"affinity":{},"annotations":{},"autoscaling":{"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":null},"containerSecurityContext":{},"enabled":true,"extraArgs":["--log.level=info"],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"thanos-query.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"podSecurityContext":{},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":9090,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":9090,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":9090,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":2,"replicaLabels":["prometheus_replica"],"resources":{},"service":{"annotations":{},"grpcPort":10901,"httpPort":9090,"labels":{},"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"stores":[],"tolerations":[],"topologySpreadConstraints":[]}` | Query component Fan out engine that queries multiple store APIs and deduplicates ====================================================================== |
+| query.replicaLabels | list | `["prometheus_replica"]` | Label names used to mark replica identity for deduplication |
+| query.stores | list | `[]` | List of store gRPC endpoints the query component should connect to Example: stores:   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local |
+| queryFrontend | object | `{"affinity":{},"annotations":{},"autoscaling":{"enabled":false,"maxReplicas":5,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":null},"cacheConfig":"","containerSecurityContext":{},"downstreamUrl":"","enabled":false,"extraArgs":[],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"thanos-query-frontend.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"podSecurityContext":{},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":9090,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":9090,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":9090,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":2,"resources":{},"service":{"annotations":{},"labels":{},"port":9090,"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tolerations":[],"topologySpreadConstraints":[]}` | Query Frontend component Caches and shards queries in front of thanos query ====================================================================== |
+| queryFrontend.cacheConfig | string | `""` | Optional caching config file content as string or reference via volume |
+| receive | object | `{"affinity":{},"annotations":{},"containerSecurityContext":{},"enabled":true,"extraArgs":[],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"hashrings":{"autogen":{"enabled":true,"name":"default"},"static":[]},"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"thanos-receive.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"persistence":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"10Gi","storageClass":""},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":3,"resources":{},"service":{"annotations":{},"grpcPort":10901,"httpPort":10902,"labels":{},"remoteWritePort":10908,"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tenancyHeader":"","tolerations":[],"topologySpreadConstraints":[],"tsdb":{"retention":"24h","walCompression":true},"vpa":{"enabled":true,"maxAllowed":{"cpu":"4","memory":"8Gi"},"minAllowed":{"cpu":"500m","memory":"512Mi"},"targetKind":"StatefulSet","updateMode":"Auto"}}` | Receive component Remote write endpoint that splits and forwards samples, optionally sharded ====================================================================== |
+| receive.hashrings | object | `{"autogen":{"enabled":true,"name":"default"},"static":[]}` | existing fields... |
+| receive.hashrings.autogen | object | `{"enabled":true,"name":"default"}` | if enabled true, autogenerate a single ring named default with endpoints receive-0.receive:10901 ... receive-(replicaCount-1).receive:10901 |
+| receive.hashrings.static | list | `[]` | when non empty, it overrides autogen |
+| receive.tenancyHeader | string | `""` | Optional multi tenancy header name to segregate tenants |
+| receive.tsdb | object | `{"retention":"24h","walCompression":true}` | TSDB settings for local storage of samples before shipping to object store |
+| receive.tsdb.retention | string | `"24h"` | TSDB retention period for local WAL |
+| receive.tsdb.walCompression | bool | `true` | Enable WAL compression to reduce IO and disk |
+| ruler | object | `{"affinity":{},"alertQueryUrl":"","alertmanagers":{"config":"static_configs:\n  - targets: [\"alertmanager.monitoring.svc.cluster.local:9093\"]\n"},"annotations":{},"autoImportPrometheusRules":{"enabled":true,"labelSelector":{},"sidecar":{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/kubectl","tag":"latest"}}},"containerSecurityContext":{},"enabled":false,"extraArgs":[],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"thanos-ruler.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"persistence":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"10Gi","storageClass":""},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}},"query":{"urls":[]},"replicaCount":2,"resources":{},"rules":{"example-alerts.yaml":"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"},"service":{"annotations":{},"httpPort":10902,"labels":{},"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tolerations":[],"topologySpreadConstraints":[]}` | Ruler component Evaluates alerting and recording rules using query and sends to Alertmanager ====================================================================== |
+| ruler.alertQueryUrl | string | `""` | URL used in rule alerts to link back to a UI |
+| ruler.alertmanagers | object | `{"config":"static_configs:\n  - targets: [\"alertmanager.monitoring.svc.cluster.local:9093\"]\n"}` | Alertmanager routing configuration in Thanos format |
+| ruler.autoImportPrometheusRules.labelSelector | object | `{}` | Label selector to find PrometheusRule CRDs to import rules from |
+| ruler.query.urls | list | `[]` | List of base URLs for query component to evaluate rules against |
+| ruler.rules | object | `{"example-alerts.yaml":"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"}` | Inline rule files. Use external ConfigMap volumes for large rule sets. |
+| storegateway | object | `{"affinity":{},"annotations":{},"autoscaling":{"enabled":false,"maxReplicas":6,"minReplicas":2,"targetCPUUtilizationPercentage":80,"targetMemoryUtilizationPercentage":null},"cachingBucketConfig":"","containerSecurityContext":{},"enabled":true,"extraArgs":[],"extraContainers":[],"extraEnv":[],"extraEnvFrom":[],"extraInitContainers":[],"extraVolumeMounts":[],"extraVolumes":[],"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"host":"thanos-store.local","paths":[{"path":"/","pathType":"Prefix"}]}],"tls":[]},"labels":{},"nodeSelector":{},"pdb":{"enabled":false,"maxUnavailable":"","minAvailable":""},"persistence":{"accessModes":["ReadWriteOnce"],"enabled":true,"size":"10Gi","storageClass":""},"podSecurityContext":{"fsGroup":1000,"fsGroupChangePolicy":"OnRootMismatch"},"priorityClassName":"","probes":{"liveness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":30,"path":"/-/healthy","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"readiness":{"enabled":true,"failureThreshold":6,"initialDelaySeconds":5,"path":"/-/ready","periodSeconds":10,"port":10902,"successThreshold":1,"timeoutSeconds":5},"startup":{"enabled":true,"failureThreshold":60,"initialDelaySeconds":0,"path":"/-/ready","periodSeconds":5,"port":10902,"successThreshold":1,"timeoutSeconds":5}},"replicaCount":2,"resources":{},"service":{"annotations":{},"grpcPort":10901,"httpPort":10902,"labels":{},"type":"ClusterIP"},"serviceMonitor":{"annotations":{},"enabled":false,"interval":"","labels":{},"metricRelabelings":[],"relabelings":[],"scheme":"","scrapeTimeout":"","tlsConfig":{}},"tolerations":[],"topologySpreadConstraints":[]}` | Store Gateway component Exposes historical blocks from object store via Store API ====================================================================== |
+| storegateway.cachingBucketConfig | string | `""` | Optional caching bucket config passed as a file or inline string |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

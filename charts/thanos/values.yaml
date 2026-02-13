@@ -4,28 +4,28 @@
 # ======================================================================
 
 # ----------------------------------------------------------------------
-# Global settings applied as sensible defaults to all components
+# -- Global settings applied as sensible defaults to all components
 # Each component can override with its own section if needed
 # ----------------------------------------------------------------------
 global:
   image:
-    # Docker repository for all Thanos containers by default
+    # -- Docker repository for all Thanos containers by default
     repository: quay.io/thanos/thanos
-    # Container image tag
+    # -- Container image tag
     tag: v0.39.2
-    # Image pull policy: Always IfNotPresent Never
+    # -- Image pull policy: Always IfNotPresent Never
     pullPolicy: IfNotPresent
-  # Optional list of image pull secrets to use across all components
+  # -- Optional list of image pull secrets to use across all components
   imagePullSecrets: []
-  # Extra labels applied to all Kubernetes resources
+  # -- Extra labels applied to all Kubernetes resources
   commonLabels: {}
-  # Cluster domain, usually cluster.local, used in DNS names
+  # -- Cluster domain, usually cluster.local, used in DNS names
   clusterDomain: "cluster.local"
-  # Extra annotations applied to all pods
+  # -- Extra annotations applied to all pods
   podAnnotations: {}
-  # Pod security context applied to all components unless overridden
+  # -- Pod security context applied to all components unless overridden
   podSecurityContext: {}
-  # Container security context applied to all components unless overridden
+  # -- Container security context applied to all components unless overridden
   containerSecurityContext:
     allowPrivilegeEscalation: false
     readOnlyRootFilesystem: true
@@ -33,38 +33,38 @@ global:
       drop:
         - ALL
     runAsNonRoot: true
-  # Extra volumes available to all pods by default
+  # -- Extra volumes available to all pods by default
   extraVolumes: []
-  # Extra volume mounts applied to main containers by default
+  # -- Extra volume mounts applied to main containers by default
   extraVolumeMounts: []
-  # Default resource requests and limits for all components
+  # -- Default resource requests and limits for all components
   resources: {}
-  # Node scheduling defaults for all components
+  # -- Node scheduling defaults for all components
   nodeSelector: {}
   tolerations: []
   affinity: {}
   topologySpreadConstraints: []
   priorityClassName: ""
-  # Environment variables applied to main containers globally
+  # -- Environment variables applied to main containers globally
   extraEnv: []
   extraEnvFrom: []
-  # Optional init containers and sidecars applied globally
+  # -- Optional init containers and sidecars applied globally
   extraInitContainers: []
   extraContainers: []
 
   # --------------------------------------------------------------------
-  # Object store configuration shared by components that need it
+  # -- Object store configuration shared by components that need it
   # Either create a Secret or provide inline config here
   # --------------------------------------------------------------------
   objstore:
-    # Create a Secret named secretName with key secretKey containing config below
+    # -- Create a Secret named secretName with key secretKey containing config below
     createSecret: false
-    # Name of the Kubernetes Secret that carries the object store config
+    # -- Name of the Kubernetes Secret that carries the object store config
     secretName: thanos-objstore
-    # Key inside the Secret that stores the object store yaml
+    # -- Key inside the Secret that stores the object store yaml
     secretKey: objstore.yml
-    # Inline object store configuration used when createSecret is false
-    # Refer to Thanos docs for exact schema
+    # -- Inline object store configuration used when createSecret is false
+    # -- Refer to Thanos docs for exact schema
     config: |
       type: GCS
       config:
@@ -82,18 +82,18 @@ global:
       #   access_key: myaccess
       #   secret_key: mysecret
   # --------------------------------------------------------------------
-  # RBAC and ServiceAccount defaults
+  # -- RBAC and ServiceAccount defaults
   # Components will use their own service accounts if enabled
   # --------------------------------------------------------------------
   rbac:
-    # Create RBAC resources globally where needed
+    # -- Create RBAC resources globally where needed
     create: true
   serviceAccount:
-    # Create a ServiceAccount per component by default
+    # -- Create a ServiceAccount per component by default
     create: true
-    # Extra annotations applied to ServiceAccounts
+    # -- Extra annotations applied to ServiceAccounts
     annotations: {}
-    # Optional name override for ServiceAccounts, empty means autogenerate
+    # -- Optional name override for ServiceAccounts, empty means autogenerate
     name: ""
 
   thanosRules:  
@@ -115,7 +115,7 @@ global:
       componentDown: critical
 
   # --------------------------------------------------------------------
-  # ServiceMonitor defaults for Prometheus Operator scraping
+  # -- ServiceMonitor defaults for Prometheus Operator scraping
   # Components can override under their own .serviceMonitor blocks
   # --------------------------------------------------------------------
   serviceMonitor:
@@ -131,7 +131,7 @@ global:
     metricRelabelings: []
 
   # --------------------------------------------------------------------
-  # PodDisruptionBudget defaults
+  # -- PodDisruptionBudget defaults
   # Components can override under their own .pdb blocks
   # --------------------------------------------------------------------
   pdb:
@@ -140,35 +140,35 @@ global:
     maxUnavailable: ""
 
 # ======================================================================
-# Bucketweb component
+# -- Bucketweb component
 # Web UI for bucket inspection. Often disabled in production.
 # ======================================================================
 bucket:
-  # Toggle the umbrella bucket group
+  # -- Toggle the umbrella bucket group
   enabled: true
   bucketweb:
-    # Enable the bucketweb deployment
+    # -- Enable the bucketweb deployment
     enabled: false
 
-    # Number of replicas. HPA can override effective replica count when enabled.
+    # -- Number of replicas. HPA can override effective replica count when enabled.
     replicaCount: 1
 
     service:
-      # Service type: ClusterIP NodePort LoadBalancer
+      # -- Service type: ClusterIP NodePort LoadBalancer
       type: ClusterIP
-      # HTTP port for bucketweb
+      # -- HTTP port for bucketweb
       port: 10902
-      # Extra Service annotations if needed
+      # -- Extra Service annotations if needed
       annotations: {}
-      # Extra labels for the Service
+      # -- Extra labels for the Service
       labels: {}
 
-    # Ingress configuration for bucketweb only
+    # -- Ingress configuration for bucketweb only
     ingress:
       enabled: false
       className: ""
       annotations: {}
-      # List of host rules
+      # -- List of host rules
       hosts:
         - host: bucketweb.local
           paths:
@@ -181,7 +181,7 @@ bucket:
       #     hosts:
       #       - bucketweb.local
 
-    # HorizontalPodAutoscaler for bucketweb only
+    # -- HorizontalPodAutoscaler for bucketweb only
     autoscaling:
       enabled: false
       minReplicas: 1
@@ -189,21 +189,21 @@ bucket:
       targetCPUUtilizationPercentage: 80
       targetMemoryUtilizationPercentage: null
 
-    # Add any additional CLI flags
+    # -- Add any additional CLI flags
     extraArgs: []
-    # Resource requests and limits for the bucketweb container
+    # -- Resource requests and limits for the bucketweb container
     resources: {}
-    # Pod and container security contexts
+    # -- Pod and container security contexts
     podSecurityContext: {}
     containerSecurityContext: {}
-    # Optional environment variables
+    # -- Optional environment variables
     extraEnv: []
     extraEnvFrom: []
-    # Optional sidecars and init containers
+    # -- Optional sidecars and init containers
     extraInitContainers: []
     extraContainers: []
 
-    # Probes for health and readiness
+    # -- Probes for health and readiness
     probes:
       readiness:
         enabled: true
@@ -233,26 +233,26 @@ bucket:
         failureThreshold: 60
         successThreshold: 1
 
-    # Storage not required for bucketweb, leave empty
+    # -- Storage not required for bucketweb, leave empty
     persistence: {}
 
-    # Scheduling and topology per component
+    # -- Scheduling and topology per component
     nodeSelector: {}
     tolerations: []
     affinity: {}
     topologySpreadConstraints: []
     priorityClassName: ""
 
-    # Extra annotations only for bucketweb
+    # -- Extra annotations only for bucketweb
     annotations: {}
-    # Extra labels only for bucketweb
+    # -- Extra labels only for bucketweb
     labels: {}
 
-    # Extra volumes and mounts only for bucketweb
+    # -- Extra volumes and mounts only for bucketweb
     extraVolumes: []
     extraVolumeMounts: []
 
-    # ServiceMonitor for bucketweb
+    # -- ServiceMonitor for bucketweb
     serviceMonitor:
       enabled: false
       labels: {}
@@ -264,14 +264,14 @@ bucket:
       relabelings: []
       metricRelabelings: []
 
-    # PodDisruptionBudget for bucketweb
+    # -- PodDisruptionBudget for bucketweb
     pdb:
       enabled: false
       minAvailable: ""
       maxUnavailable: ""
 
 # ======================================================================
-# Compactor component
+# -- Compactor component
 # Compacts, downscales and deduplicates blocks in the object store
 # ======================================================================
 compactor:
@@ -279,13 +279,13 @@ compactor:
   replicaCount: 1
 
   persistence:
-    # Enable a PVC for compactor work dir
+    # -- Enable a PVC for compactor work dir
     enabled: true
-    # Requested storage size
+    # -- Requested storage size
     size: 10Gi
-    # Storage class name, empty uses cluster default
+    # -- Storage class name, empty uses cluster default
     storageClass: ""
-    # Access modes when PVC is created
+    # -- Access modes when PVC is created
     accessModes:
       - ReadWriteOnce
 
@@ -316,7 +316,7 @@ compactor:
       cpu: 4
       memory: 8Gi
 
-  # CLI flags for compactor
+  # -- CLI flags for compactor
   extraArgs:
     - --log.level=info
     - --log.format=logfmt
@@ -395,7 +395,7 @@ compactor:
     maxUnavailable: ""
 
 # ======================================================================
-# Query component
+# -- Query component
 # Fan out engine that queries multiple store APIs and deduplicates
 # ======================================================================
 query:
@@ -427,13 +427,13 @@ query:
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: null
 
-  # List of store gRPC endpoints the query component should connect to
+  # -- List of store gRPC endpoints the query component should connect to
   # Example:
   # stores:
   #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
   stores: []
 
-  # Label names used to mark replica identity for deduplication
+  # -- Label names used to mark replica identity for deduplication
   replicaLabels:
     - prometheus_replica
 
@@ -506,7 +506,7 @@ query:
     maxUnavailable: ""
 
 # ======================================================================
-# Query Frontend component
+# -- Query Frontend component
 # Caches and shards queries in front of thanos query
 # ======================================================================
 queryFrontend:
@@ -514,7 +514,7 @@ queryFrontend:
   replicaCount: 2
 
   downstreamUrl: ""
-  # Optional caching config file content as string or reference via volume
+  # -- Optional caching config file content as string or reference via volume
   cacheConfig: ""
 
   service:
@@ -608,7 +608,7 @@ queryFrontend:
     maxUnavailable: ""
 
 # ======================================================================
-# Store Gateway component
+# -- Store Gateway component
 # Exposes historical blocks from object store via Store API
 # ======================================================================
 storegateway:
@@ -647,7 +647,7 @@ storegateway:
     accessModes:
       - ReadWriteOnce
 
-  # Optional caching bucket config passed as a file or inline string
+  # -- Optional caching bucket config passed as a file or inline string
   cachingBucketConfig: ""
 
   resources: {}
@@ -719,33 +719,33 @@ storegateway:
     maxUnavailable: ""
 
 # ======================================================================
-# Receive component
+# -- Receive component
 # Remote write endpoint that splits and forwards samples, optionally sharded
 # ======================================================================
 receive:
   enabled: true
   replicaCount: 3
 
-  # Optional multi tenancy header name to segregate tenants
+  # -- Optional multi tenancy header name to segregate tenants
   tenancyHeader: ""
   
-  # TSDB settings for local storage of samples before shipping to object store
+  # -- TSDB settings for local storage of samples before shipping to object store
   tsdb:
-    # TSDB retention period for local WAL
+    # -- TSDB retention period for local WAL
     retention: 24h
-    # Enable WAL compression to reduce IO and disk
+    # -- Enable WAL compression to reduce IO and disk
     walCompression: true
 
 
-  # existing fields...
+  # -- existing fields...
   hashrings:
-    # if enabled true, autogenerate a single ring named default with endpoints
+    # -- if enabled true, autogenerate a single ring named default with endpoints
     # receive-0.receive:10901 ... receive-(replicaCount-1).receive:10901
     autogen:
       enabled: true
       name: default
-    # optional static configuration to fully control rings
-    # when non empty, it overrides autogen
+    # -- optional static configuration to fully control rings
+    # -- when non empty, it overrides autogen
     static: []
     # example:
     # static:
@@ -860,7 +860,7 @@ receive:
     maxUnavailable: ""
 
 # ======================================================================
-# Ruler component
+# -- Ruler component
 # Evaluates alerting and recording rules using query and sends to Alertmanager
 # ======================================================================
 ruler:
@@ -868,18 +868,18 @@ ruler:
   replicaCount: 2
 
   query:
-    # List of base URLs for query component to evaluate rules against
+    # -- List of base URLs for query component to evaluate rules against
     urls: []
-  # Alertmanager routing configuration in Thanos format
+  # -- Alertmanager routing configuration in Thanos format
   alertmanagers:
     config: |
       static_configs:
         - targets: ["alertmanager.monitoring.svc.cluster.local:9093"]
 
-  # URL used in rule alerts to link back to a UI
+  # -- URL used in rule alerts to link back to a UI
   alertQueryUrl: ""
 
-  # Inline rule files. Use external ConfigMap volumes for large rule sets.
+  # -- Inline rule files. Use external ConfigMap volumes for large rule sets.
   rules:
     example-alerts.yaml: |
       groups:
@@ -895,7 +895,7 @@ ruler:
 
   autoImportPrometheusRules:
     enabled: true
-    # Label selector to find PrometheusRule CRDs to import rules from
+    # -- Label selector to find PrometheusRule CRDs to import rules from
     labelSelector: {}
     sidecar:
       image:
