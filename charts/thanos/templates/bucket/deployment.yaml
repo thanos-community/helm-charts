@@ -1,0 +1,61 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thanos.compName" (list . "bucketweb") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: bucketweb
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: bucketweb
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- $ctx := dict "Values" (dict "bucketweb" .Values.bucket.bucketweb "global" .Values.global) }}
+      {{ include "thanos.podSC" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
+      containers:
+        - name: bucketweb
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - tools
+            - bucket
+            - web
+            - --http-address=0.0.0.0:{{ .Values.bucket.bucketweb.service.port }}
+            - --objstore.config-file=/etc/thanos/objstore.yml
+          {{- range .Values.bucket.bucketweb.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.bucket.bucketweb.service.port }}
+          volumeMounts:
+            - name: objstore
+              mountPath: /etc/thanos
+              readOnly: true
+          {{ include "thanos.extraMountItems" (dict "root" $ctx "key" "bucketweb") | nindent 10 }}
+          {{ include "thanos.containerSC" (dict "root" $ctx "key" "bucketweb") | nindent 10 }}
+          resources:
+{{ toYaml .Values.bucket.bucketweb.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" $ctx "key" "bucketweb" "port" .Values.bucket.bucketweb.service.port) | nindent 10 }}
+      volumes:
+        - name: objstore
+          secret:
+            secretName: {{ .Values.global.objstore.secretName }}
+            items:
+              - key: {{ .Values.global.objstore.secretKey }}
+                path: objstore.yml
+      {{ include "thanos.extraVolumesBlock" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
+{{- end }}

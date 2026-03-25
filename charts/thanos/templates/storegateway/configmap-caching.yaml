@@ -1,0 +1,13 @@
+{{- if and .Values.storegateway.enabled .Values.storegateway.cachingBucketConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos.compName" (list . "storegateway") }}-caching
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway-caching") | nindent 4 }}
+data:
+  caching-bucket.yaml: |
+{{ toYaml (tpl .Values.storegateway.cachingBucketConfig .) | indent 4 }}
+{{- end }}

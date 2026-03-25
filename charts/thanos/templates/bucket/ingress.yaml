@@ -1,0 +1,32 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.bucket.bucketweb.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "thanos.compName" (list . "bucketweb") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+{{ toYaml .Values.bucket.bucketweb.ingress.annotations | indent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+spec:
+  {{- with .Values.bucket.bucketweb.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- range .Values.bucket.bucketweb.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "thanos.compName" (list $ "bucketweb") }}
+                port:
+                  number: {{ $.Values.bucket.bucketweb.service.port }}
+        {{- end }}
+  {{- end }}
+  tls:
+{{ toYaml .Values.bucket.bucketweb.ingress.tls | indent 4 }}
+{{- end }}

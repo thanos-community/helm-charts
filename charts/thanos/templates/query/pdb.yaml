@@ -1,0 +1,20 @@
+{{- if and .Values.query.enabled .Values.query.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "thanos.compName" (list . "query") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.query.pdb.minAvailable }}
+  minAvailable: {{ .Values.query.pdb.minAvailable | quote }}
+  {{- else if .Values.query.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.query.pdb.maxUnavailable | quote }}
+  {{- end }}
+{{- end }}

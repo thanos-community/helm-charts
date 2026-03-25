@@ -1,0 +1,98 @@
+{{- if .Values.storegateway.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "thanos.compName" (list . "storegateway") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+spec:
+  serviceName: {{ include "thanos.compName" (list . "storegateway") }}
+  replicas: {{ .Values.storegateway.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: storegateway
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: storegateway
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "storegateway") | nindent 6 }}
+      containers:
+        - name: storegateway
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - store
+            - --grpc-address=0.0.0.0:{{ .Values.storegateway.service.grpcPort }}
+            - --http-address=0.0.0.0:{{ .Values.storegateway.service.httpPort }}
+            - --objstore.config-file=/etc/thanos/objstore.yml
+            - --data-dir=/var/thanos/store
+          {{- if .Values.storegateway.cachingBucketConfig }}
+            - --store.caching-bucket.config-file=/etc/thanos/caching-bucket.yaml
+          {{- end }}
+          {{- range .Values.storegateway.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ .Values.storegateway.service.grpcPort }}
+            - name: http
+              containerPort: {{ .Values.storegateway.service.httpPort }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/thanos/store
+            - name: objstore
+              mountPath: /etc/thanos
+              readOnly: true
+          {{- if .Values.storegateway.cachingBucketConfig }}
+            - name: caching-bucket
+              mountPath: /etc/thanos/caching-bucket.yaml
+              subPath: caching-bucket.yaml
+          {{- end }}
+          {{ include "thanos.extraMountItems" (dict "root" . "key" "storegateway") | nindent 10 }}
+          {{ include "thanos.containerSC" (dict "root" . "key" "storegateway") | nindent 10 }}
+          resources:
+{{ toYaml .Values.storegateway.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" . "key" "storegateway" "port" .Values.storegateway.service.httpPort) | nindent 10 }}
+      volumes:
+        - name: objstore
+          secret:
+            secretName: {{ .Values.global.objstore.secretName }}
+            items:
+              - key: {{ .Values.global.objstore.secretKey }}
+                path: objstore.yml
+        {{- if .Values.storegateway.cachingBucketConfig }}
+        - name: caching-bucket
+          configMap:
+            name: {{ include "thanos.compName" (list . "storegateway") }}-caching
+        {{- end }}
+        {{- if not .Values.storegateway.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- end }}
+      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "storegateway") | nindent 6 }}
+  {{- if .Values.storegateway.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+        {{- range .Values.storegateway.persistence.accessModes | default (list "ReadWriteOnce") }}
+          - {{ . | quote }}
+        {{- end }}
+        {{- if .Values.storegateway.persistence.storageClass }}
+        storageClassName: {{ .Values.storegateway.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.storegateway.persistence.size }}
+  {{- end }}
+{{- end }}

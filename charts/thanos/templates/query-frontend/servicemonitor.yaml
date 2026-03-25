@@ -1,0 +1,33 @@
+{{- if and .Values.queryFrontend.enabled (or .Values.queryFrontend.serviceMonitor.enabled .Values.global.serviceMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "thanos.compName" (list . "query-frontend") }}
+  labels:
+    {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
+    {{- if .Values.queryFrontend.serviceMonitor.labels }}{{ toYaml .Values.queryFrontend.serviceMonitor.labels | nindent 4 }}{{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: thanos
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: query-frontend
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ default .Values.global.serviceMonitor.interval .Values.queryFrontend.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ default .Values.global.serviceMonitor.scrapeTimeout .Values.queryFrontend.serviceMonitor.scrapeTimeout | quote }}
+      {{- with (default .Values.global.serviceMonitor.metricRelabelings .Values.queryFrontend.serviceMonitor.metricRelabelings) }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (default .Values.global.serviceMonitor.relabelings .Values.queryFrontend.serviceMonitor.relabelings) }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

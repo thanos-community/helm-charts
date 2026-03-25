@@ -1,0 +1,19 @@
+{{- if .Values.compactor.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.compName" (list . "compactor") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
+spec:
+  type: {{ .Values.compactor.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.compactor.service.port }}
+      targetPort: http
+  selector:
+    app.kubernetes.io/component: compactor
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

@@ -1,0 +1,32 @@
+{{- if and .Values.compactor.enabled .Values.compactor.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "thanos.compName" (list . "compactor") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+{{ toYaml .Values.compactor.ingress.annotations | indent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
+spec:
+  {{- with .Values.compactor.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+  {{- range .Values.compactor.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ include "thanos.compName" (list $ "compactor") }}
+                port:
+                  number: {{ $.Values.compactor.service.port }}
+        {{- end }}
+  {{- end }}
+  tls:
+{{ toYaml .Values.compactor.ingress.tls | indent 4 }}
+{{- end }}

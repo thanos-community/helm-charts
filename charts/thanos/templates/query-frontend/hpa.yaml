@@ -1,0 +1,45 @@
+{{- if and .Values.queryFrontend.enabled .Values.queryFrontend.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "thanos.compName" (list . "query-frontend") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ .Values.queryFrontend.autoscaling.targetKind | default "Deployment" }}
+    name: {{ include "thanos.compName" (list . "query-frontend") }}
+  minReplicas: {{ .Values.queryFrontend.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.queryFrontend.autoscaling.maxReplicas }}
+  metrics:
+  {{- $cpu := .Values.queryFrontend.autoscaling.targetCPUUtilizationPercentage }}
+  {{- $mem := .Values.queryFrontend.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- if or $cpu $mem }}
+    {{- if $cpu }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $cpu }}
+    {{- end }}
+    {{- if $mem }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $mem }}
+    {{- end }}
+  {{- else }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  {{- end }}
+{{- end }}

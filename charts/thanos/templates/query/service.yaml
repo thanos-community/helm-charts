@@ -1,0 +1,22 @@
+{{- if .Values.query.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.compName" (list . "query") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+spec:
+  type: {{ .Values.query.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.query.service.httpPort }}
+      targetPort: http
+    - name: grpc
+      port: {{ .Values.query.service.grpcPort }}
+      targetPort: grpc
+  selector:
+    app.kubernetes.io/component: query
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

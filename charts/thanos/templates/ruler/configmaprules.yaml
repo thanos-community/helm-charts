@@ -1,0 +1,15 @@
+{{- if .Values.ruler.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}-rules
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-rules") | nindent 4 }}
+data:
+{{- range $fname, $content := .Values.ruler.rules }}
+  {{ $fname }}: |
+{{ toYaml (tpl $content $) | indent 4 }}
+{{- end }}
+{{- end }}

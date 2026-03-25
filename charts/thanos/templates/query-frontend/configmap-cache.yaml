@@ -1,0 +1,13 @@
+{{- if and .Values.queryFrontend.enabled .Values.queryFrontend.cacheConfig }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos.compName" (list . "query-frontend") }}-cache
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+data:
+  cache.yaml: |
+{{ toYaml (tpl .Values.queryFrontend.cacheConfig .) | indent 4 }}
+{{- end }}

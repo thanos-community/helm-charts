@@ -1,0 +1,45 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.bucket.bucketweb.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "thanos.compName" (list . "bucketweb") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ .Values.bucket.bucketweb.autoscaling.targetKind | default "Deployment" }}
+    name: {{ include "thanos.compName" (list . "bucketweb") }}
+  minReplicas: {{ .Values.bucket.bucketweb.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.bucket.bucketweb.autoscaling.maxReplicas }}
+  metrics:
+  {{- $cpu := .Values.bucket.bucketweb.autoscaling.targetCPUUtilizationPercentage }}
+  {{- $mem := .Values.bucket.bucketweb.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- if or $cpu $mem }}
+    {{- if $cpu }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $cpu }}
+    {{- end }}
+    {{- if $mem }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $mem }}
+    {{- end }}
+  {{- else }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  {{- end }}
+{{- end }}

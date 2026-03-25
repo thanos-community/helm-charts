@@ -1,0 +1,66 @@
+{{- if .Values.queryFrontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thanos.compName" (list . "query-frontend") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+spec:
+  replicas: {{ .Values.queryFrontend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query-frontend
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+{{ include "thanos.labels" . | indent 8 }}
+        app.kubernetes.io/component: query-frontend
+      annotations:
+{{ toYaml .Values.global.podAnnotations | indent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{ include "thanos.podSC" (dict "root" . "key" "queryFrontend") | nindent 6 }}
+      containers:
+        - name: query-frontend
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - query-frontend
+            - --http-address=0.0.0.0:{{ .Values.queryFrontend.service.port }}
+            - --query-frontend.downstream-url={{ if .Values.queryFrontend.downstreamUrl }}{{ .Values.queryFrontend.downstreamUrl }}{{ else }}http://{{ include "thanos.compName" (list . "query") }}:{{ .Values.query.service.httpPort }}{{ end }}
+          {{- if .Values.queryFrontend.cacheConfig }}
+            - --query-range.response-cache-config=/etc/thanos/cache.yaml
+          {{- end }}
+          {{- range .Values.queryFrontend.extraArgs }}
+            - {{ . | quote }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.queryFrontend.service.port }}
+          {{- if .Values.queryFrontend.cacheConfig }}
+          volumeMounts:
+            - name: cache
+              mountPath: /etc/thanos/cache.yaml
+              subPath: cache.yaml
+          {{ include "thanos.extraMountItems" (dict "root" . "key" "queryFrontend") | nindent 10 }}
+          {{- else }}
+          {{ include "thanos.extraMountsBlock" (dict "root" . "key" "queryFrontend") | nindent 10 }}
+          {{- end }}
+          {{ include "thanos.containerSC" (dict "root" . "key" "queryFrontend") | nindent 10 }}
+          resources:
+{{ toYaml .Values.queryFrontend.resources | indent 12 }}
+          {{ include "thanos.httpProbes" (dict "root" . "key" "queryFrontend" "port" .Values.queryFrontend.service.port) | nindent 10 }}
+      {{- if .Values.queryFrontend.cacheConfig }}
+      volumes:
+        - name: cache
+          configMap:
+            name: {{ include "thanos.compName" (list . "query-frontend") }}-cache
+      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "queryFrontend") | nindent 6 }}
+      {{- else }}
+      {{ include "thanos.extraVolumesBlock" (dict "root" . "key" "queryFrontend") | nindent 6 }}
+      {{- end }}
+{{- end }}
