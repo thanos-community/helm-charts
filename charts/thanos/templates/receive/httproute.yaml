@@ -1,0 +1,3 @@
+{{- if and .Values.receive.enabled .Values.receive.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "receive" .Values.receive.service.httpPort .Values.receive.httpRoute) }}
+{{- end }}

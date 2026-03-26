@@ -181,6 +181,23 @@ bucket:
       #     hosts:
       #       - bucketweb.local
 
+    # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+    httpRoute:
+      enabled: false
+      annotations: {}
+      # -- parentRefs pointing to the Gateway resource(s) to attach to
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-system
+      #     sectionName: https
+      # -- Hostnames to match. Empty matches all hostnames on the Gateway.
+      hostnames: []
+      # Example:
+      # hostnames:
+      #   - bucketweb.example.com
+
     # -- HorizontalPodAutoscaler for bucketweb only
     autoscaling:
       enabled: false
@@ -305,6 +322,13 @@ compactor:
             pathType: Prefix
     tls: []
 
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
+
   vpa:
     enabled: true
     targetKind: StatefulSet
@@ -420,6 +444,27 @@ query:
             pathType: Prefix
     tls: []
 
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    hostnames: []
+    # Example:
+    # hostnames:
+    #   - thanos-query.example.com
+
+  # -- Gateway API GRPCRoute for the gRPC Store API endpoint.
+  grpcRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
+
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -534,6 +579,13 @@ queryFrontend:
             pathType: Prefix
     tls: []
 
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
+
   autoscaling:
     enabled: false
     minReplicas: 2
@@ -632,6 +684,20 @@ storegateway:
           - path: /
             pathType: Prefix
     tls: []
+
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
+
+  # -- Gateway API GRPCRoute for the gRPC Store API endpoint.
+  grpcRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
 
   autoscaling:
     enabled: false
@@ -772,6 +838,20 @@ receive:
           - path: /
             pathType: Prefix
     tls: []
+
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
+
+  # -- Gateway API GRPCRoute for the gRPC Store API endpoint.
+  grpcRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
 
   vpa:
     enabled: true
@@ -926,6 +1006,13 @@ ruler:
           - path: /
             pathType: Prefix
     tls: []
+
+  # -- Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.
+  httpRoute:
+    enabled: false
+    annotations: {}
+    parentRefs: []
+    hostnames: []
 
   resources: {}
   extraArgs: []

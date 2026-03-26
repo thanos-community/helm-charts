@@ -242,3 +242,71 @@ imagePullSecrets:
 {{ toYaml .Values.global.imagePullSecrets | indent 2 }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Render a Gateway API HTTPRoute.
+Usage: {{ include "thanos.httpRoute" (list . "query" .Values.query.service.httpPort .Values.query.httpRoute) }}
+*/}}
+{{- define "thanos.httpRoute" -}}
+{{- $root := index . 0 -}}
+{{- $comp := index . 1 -}}
+{{- $port := index . 2 -}}
+{{- $cfg  := index . 3 -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "thanos.compName" (list $root $comp) }}
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+{{ include "thanos.labels" $root | indent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+  {{- with $cfg.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{ toYaml $cfg.parentRefs | indent 4 }}
+  {{- with $cfg.hostnames }}
+  hostnames:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  rules:
+    - backendRefs:
+        - name: {{ include "thanos.compName" (list $root $comp) }}
+          port: {{ $port }}
+{{- end -}}
+
+{{/*
+Render a Gateway API GRPCRoute.
+Usage: {{ include "thanos.grpcRoute" (list . "query" .Values.query.service.grpcPort .Values.query.grpcRoute) }}
+*/}}
+{{- define "thanos.grpcRoute" -}}
+{{- $root := index . 0 -}}
+{{- $comp := index . 1 -}}
+{{- $port := index . 2 -}}
+{{- $cfg  := index . 3 -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: GRPCRoute
+metadata:
+  name: {{ include "thanos.compName" (list $root $comp) }}-grpc
+  namespace: {{ $root.Release.Namespace }}
+  labels:
+{{ include "thanos.labels" $root | indent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+  {{- with $cfg.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+{{ toYaml $cfg.parentRefs | indent 4 }}
+  {{- with $cfg.hostnames }}
+  hostnames:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+  rules:
+    - backendRefs:
+        - name: {{ include "thanos.compName" (list $root $comp) }}
+          port: {{ $port }}
+{{- end -}}

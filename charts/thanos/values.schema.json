@@ -140,6 +140,50 @@
               "title": "extraVolumes",
               "type": "array"
             },
+            "httpRoute": {
+              "additionalProperties": true,
+              "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "enabled": {
+                  "default": false,
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hostnames": {
+                  "description": "Example:\nparentRefs:\n  - name: my-gateway\n    namespace: gateway-system\n    sectionName: https\nHostnames to match. Empty matches all hostnames on the Gateway.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hostnames",
+                  "type": "array"
+                },
+                "parentRefs": {
+                  "description": "parentRefs pointing to the Gateway resource(s) to attach to",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "parentRefs",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "annotations",
+                "parentRefs",
+                "hostnames"
+              ],
+              "title": "httpRoute",
+              "type": "object"
+            },
             "ingress": {
               "additionalProperties": true,
               "description": "Ingress configuration for bucketweb only",
@@ -667,6 +711,7 @@
             "replicaCount",
             "service",
             "ingress",
+            "httpRoute",
             "autoscaling",
             "extraArgs",
             "resources",
@@ -822,6 +867,48 @@
           "required": [],
           "title": "extraVolumes",
           "type": "array"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
+          "type": "object"
         },
         "ingress": {
           "additionalProperties": true,
@@ -1467,6 +1554,7 @@
         "persistence",
         "service",
         "ingress",
+        "httpRoute",
         "vpa",
         "extraArgs",
         "resources",
@@ -2219,6 +2307,91 @@
           "title": "extraVolumes",
           "type": "array"
         },
+        "grpcRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API GRPCRoute for the gRPC Store API endpoint.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "grpcRoute",
+          "type": "object"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "description": "Example:\nparentRefs:\n  - name: my-gateway\n    namespace: gateway-system",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
+          "type": "object"
+        },
         "ingress": {
           "additionalProperties": true,
           "properties": {
@@ -2756,6 +2929,8 @@
         "replicaCount",
         "service",
         "ingress",
+        "httpRoute",
+        "grpcRoute",
         "autoscaling",
         "stores",
         "replicaLabels",
@@ -2923,6 +3098,48 @@
           "required": [],
           "title": "extraVolumes",
           "type": "array"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
+          "type": "object"
         },
         "ingress": {
           "additionalProperties": true,
@@ -3432,6 +3649,7 @@
         "cacheConfig",
         "service",
         "ingress",
+        "httpRoute",
         "autoscaling",
         "resources",
         "extraArgs",
@@ -3541,6 +3759,48 @@
           "title": "extraVolumes",
           "type": "array"
         },
+        "grpcRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API GRPCRoute for the gRPC Store API endpoint.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "grpcRoute",
+          "type": "object"
+        },
         "hashrings": {
           "additionalProperties": true,
           "description": "existing fields...",
@@ -3584,6 +3844,48 @@
             "static"
           ],
           "title": "hashrings",
+          "type": "object"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
           "type": "object"
         },
         "ingress": {
@@ -4282,6 +4584,8 @@
         "hashrings",
         "service",
         "ingress",
+        "httpRoute",
+        "grpcRoute",
         "vpa",
         "persistence",
         "resources",
@@ -4480,6 +4784,48 @@
           "required": [],
           "title": "extraVolumes",
           "type": "array"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
+          "type": "object"
         },
         "ingress": {
           "additionalProperties": true,
@@ -5091,6 +5437,7 @@
         "persistence",
         "service",
         "ingress",
+        "httpRoute",
         "resources",
         "extraArgs",
         "podSecurityContext",
@@ -5249,6 +5596,90 @@
           "required": [],
           "title": "extraVolumes",
           "type": "array"
+        },
+        "grpcRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API GRPCRoute for the gRPC Store API endpoint.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "grpcRoute",
+          "type": "object"
+        },
+        "httpRoute": {
+          "additionalProperties": true,
+          "description": "Gateway API HTTPRoute. Alternative to ingress for clusters using Gateway API.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hostnames": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "hostnames",
+              "type": "array"
+            },
+            "parentRefs": {
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "parentRefs",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "annotations",
+            "parentRefs",
+            "hostnames"
+          ],
+          "title": "httpRoute",
+          "type": "object"
         },
         "ingress": {
           "additionalProperties": true,
@@ -5825,6 +6256,8 @@
         "replicaCount",
         "service",
         "ingress",
+        "httpRoute",
+        "grpcRoute",
         "autoscaling",
         "persistence",
         "cachingBucketConfig",

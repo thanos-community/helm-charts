@@ -8,28 +8,414 @@
 
 {{ template "chart.description" . }}
 
-**Homepage:** <https://thanos.io/>
-
 ## TL;DR
 
 ```bash
-helm install my-release oci://<registry>/thanos
+helm install thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  --create-namespace
 ```
 
 ## Architecture
 
-![Thanos High Level Arch Diagram](../../docs/imgs/thanos_hld_arch.png)
+![Thanos High Level Architecture](../../docs/imgs/thanos_hld_arch.png)
 
-Find more on Thanos components [](https://thanos.io/tip/thanos/quick-tutorial.md/#components)
+Thanos extends Prometheus with global query view, long-term storage, and high availability. It is composed of several independently deployable components that each serve a specific role.
 
-{{ template "chart.homepageLine" . }}
+Refer to the [Thanos component docs](https://thanos.io/tip/thanos/quick-tutorial.md/#components) for an in-depth explanation.
 
 {{ template "chart.maintainersSection" . }}
 
 {{ template "chart.sourcesSection" . }}
 
+## Prerequisites
+
+- Kubernetes `{{ template "chart.kubeVersion" . }}`
+- Helm >= 3.8 (OCI registry support)
+- An object store bucket — GCS, S3, Azure Blob, or any S3-compatible store
+
 {{ template "chart.requirementsSection" . }}
+
+## Component Overview
+
+The chart deploys each Thanos component as an independent workload. Enable only what you need.
+
+| Component | Enabled by Default | Workload | Purpose |
+|-----------|--------------------|----------|---------|
+| **query** | Yes | Deployment | Fan-out query engine. Queries multiple Store API endpoints and deduplicates results. This is the Prometheus-compatible query entrypoint. |
+| **receive** | Yes | StatefulSet | Remote-write endpoint. Accepts Prometheus `remote_write` traffic, stores samples locally, and ships blocks to the object store. |
+| **storegateway** | Yes | StatefulSet | Serves historical blocks from the object store over the Store API. Required for querying data older than what Prometheus/Receive holds locally. |
+| **compactor** | Yes | StatefulSet | Compacts and downsamples blocks in the object store. Runs as a singleton — do not scale above 1 replica. |
+| **query-frontend** | No | Deployment | Optional caching and query-splitting layer in front of Query. Reduces load for repeated or heavy queries. |
+| **ruler** | No | StatefulSet | Evaluates alerting and recording rules by querying the Query component. Sends alerts to Alertmanager. |
+| **bucket (bucketweb)** | No | Deployment | Read-only web UI for inspecting blocks in the object store. Useful for debugging, not needed in production. |
+
+## Installation
+
+### 1. Add the Helm repository (optional, for non-OCI installs)
+
+```bash
+helm repo add thanos-community https://thanos-community.github.io/helm-charts
+helm repo update
+```
+
+### 2. Configure object store credentials
+
+All stateful Thanos components (Receive, Store Gateway, Compactor, Ruler) need access to an object store.
+
+Create a `values.yaml` file with your object store configuration:
+
+```yaml
+global:
+  objstore:
+    # Set createSecret: true to let the chart create the Secret from the inline config below.
+    # Set createSecret: false (default) if you manage the Secret externally.
+    createSecret: true
+    secretName: thanos-objstore
+    secretKey: objstore.yml
+    config: |
+      type: S3
+      config:
+        bucket: my-thanos-bucket
+        endpoint: s3.eu-west-1.amazonaws.com
+        region: eu-west-1
+        access_key: <ACCESS_KEY>
+        secret_key: <SECRET_KEY>
+```
+
+### 3. Install the chart
+
+```bash
+helm install thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  --create-namespace \
+  -f values.yaml
+```
+
+### 4. Verify the installation
+
+```bash
+kubectl get pods -n monitoring -l app.kubernetes.io/instance=thanos
+```
+
+## Object Store Configuration
+
+The object store config is shared by all components that write to or read from the object store. It follows the [Thanos object store YAML format](https://thanos.io/tip/thanos/storage.md/).
+
+### Providing credentials
+
+**Option A — let the chart create the Secret** (suitable for development):
+
+```yaml
+global:
+  objstore:
+    createSecret: true
+    config: |
+      type: GCS
+      config:
+        bucket: my-bucket
+```
+
+**Option B — bring your own Secret** (recommended for production):
+
+Create the Secret externally (e.g. via Vault, External Secrets Operator, or `kubectl`):
+
+```bash
+kubectl create secret generic thanos-objstore \
+  --from-file=objstore.yml=./objstore.yml \
+  -n monitoring
+```
+
+Then reference it in values:
+
+```yaml
+global:
+  objstore:
+    createSecret: false
+    secretName: thanos-objstore
+    secretKey: objstore.yml
+```
+
+### Provider examples
+
+<details>
+<summary>Google Cloud Storage (GCS)</summary>
+
+```yaml
+type: GCS
+config:
+  bucket: my-thanos-bucket
+  service_account: |-
+    {
+      "type": "service_account",
+      ...
+    }
+```
+
+</details>
+
+<details>
+<summary>Amazon S3 / S3-compatible</summary>
+
+```yaml
+type: S3
+config:
+  bucket: my-thanos-bucket
+  endpoint: s3.eu-west-1.amazonaws.com
+  region: eu-west-1
+  access_key: AKIAIOSFODNN7EXAMPLE
+  secret_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+```
+
+</details>
+
+<details>
+<summary>Azure Blob Storage</summary>
+
+```yaml
+type: AZURE
+config:
+  storage_account: mystorageaccount
+  storage_account_key: <BASE64_ENCODED_KEY>
+  container: thanos
+  endpoint_suffix: core.windows.net
+```
+
+</details>
+
+## Key Configuration Sections
+
+### Global defaults
+
+Settings under `global` apply to **all components** unless overridden at the component level. This avoids repeating common values (image, security context, node selectors, etc.).
+
+```yaml
+global:
+  image:
+    repository: quay.io/thanos/thanos
+    tag: v0.39.2
+    pullPolicy: IfNotPresent
+
+  # Applied to every pod
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: [ALL]
+    runAsNonRoot: true
+
+  # Shared resource defaults (override per component as needed)
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+```
+
+### Query
+
+The Query component is the main entrypoint for PromQL queries. It fans out to all registered Store API endpoints and deduplicates results using replica labels.
+
+```yaml
+query:
+  enabled: true
+  replicaCount: 2
+
+  # Labels that identify replica identity — used for deduplication
+  replicaLabels:
+    - prometheus_replica
+
+  # gRPC endpoints to query. Auto-discovered components are wired automatically.
+  # Add external Prometheus sidecars or remote store gateways here.
+  stores: []
+  # Example:
+  # stores:
+  #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
+
+  ingress:
+    enabled: false
+    className: nginx
+    hosts:
+      - host: thanos-query.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+```
+
+### Receive
+
+The Receive component accepts Prometheus `remote_write` traffic and stores samples locally in a TSDB WAL before shipping blocks to the object store.
+
+```yaml
+receive:
+  enabled: true
+  replicaCount: 3           # Minimum 3 for a replication factor of 2
+
+  tsdb:
+    retention: 24h          # How long to keep data locally before it is uploaded
+    walCompression: true    # Reduces IO and disk usage
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  # Hashring topology — defaults to auto-generating a single ring
+  hashrings:
+    autogen:
+      enabled: true
+      name: default
+    # static: []            # Set to override autogen with a custom hashring config
+```
+
+Configure Prometheus to remote-write to the Receive service:
+
+```yaml
+# In your Prometheus / kube-prometheus-stack values
+prometheus:
+  prometheusSpec:
+    remoteWrite:
+      - url: http://thanos-receive.monitoring.svc.cluster.local:10908/api/v1/receive
+```
+
+### Store Gateway
+
+The Store Gateway exposes historical blocks from the object store over the Store API. Query routes requests for older data to this component.
+
+```yaml
+storegateway:
+  enabled: true
+  replicaCount: 2
+
+  persistence:
+    enabled: true
+    size: 10Gi              # Used for index cache and chunk downloads
+
+  # Optional: add a caching bucket layer (memcached/redis) to reduce object store calls
+  cachingBucketConfig: ""
+```
+
+### Compactor
+
+The Compactor runs as a **singleton** (one instance). It compacts blocks uploaded by Receive into larger blocks and downsamples them for faster long-range queries.
+
+```yaml
+compactor:
+  enabled: true
+  replicaCount: 1           # Do NOT increase — compactor must run as a singleton
+
+  extraArgs:
+    - --retention.resolution-raw=30d    # Keep raw samples for 30 days
+    - --retention.resolution-5m=90d     # Keep 5m-downsampled data for 90 days
+    - --retention.resolution-1h=365d    # Keep 1h-downsampled data for 1 year
+    - --consistency-delay=30m
+    - --wait
+
+  persistence:
+    enabled: true
+    size: 10Gi              # Used as a working directory during compaction
+```
+
+### Query Frontend (optional)
+
+Sits in front of the Query component. Splits large time-range queries, caches results, and reduces load for repeated queries.
+
+```yaml
+queryFrontend:
+  enabled: false            # Enable when query load is significant
+
+  # Downstream URL of the Query component (auto-resolved when both are in the same chart)
+  downstreamUrl: ""
+
+  # Optional: inline caching config (Memcached, Redis, in-memory)
+  cacheConfig: ""
+```
+
+### Ruler (optional)
+
+Evaluates alerting and recording rules on a schedule by querying the Query component, mirroring how Prometheus rules work.
+
+```yaml
+ruler:
+  enabled: false
+
+  query:
+    urls:
+      - http://thanos-query.monitoring.svc.cluster.local:9090
+
+  alertmanagers:
+    config: |
+      static_configs:
+        - targets: ["alertmanager.monitoring.svc.cluster.local:9093"]
+
+  # Inline rule files (key = filename, value = YAML content)
+  rules:
+    my-alerts.yaml: |
+      groups:
+        - name: example
+          rules:
+            - alert: MyAlert
+              expr: up == 0
+              for: 5m
+
+  # Auto-import PrometheusRule CRDs from the cluster (requires kube-prometheus-stack)
+  autoImportPrometheusRules:
+    enabled: true
+    labelSelector: {}
+```
+
+### Monitoring (ServiceMonitor)
+
+Enable Prometheus scraping for each component by enabling its `serviceMonitor`:
+
+```yaml
+global:
+  serviceMonitor:
+    enabled: true           # Enables ServiceMonitor for all components at once
+    namespace: monitoring   # Namespace where ServiceMonitors are created
+```
+
+Or enable per component:
+
+```yaml
+query:
+  serviceMonitor:
+    enabled: true
+
+receive:
+  serviceMonitor:
+    enabled: true
+```
+
+### Built-in alerting rules
+
+The chart ships with a set of PrometheusRules for Thanos components. They are enabled by default:
+
+```yaml
+global:
+  thanosRules:
+    enabled: true
+    severity:
+      critical: critical
+      warning: warning
+    forDefaults:
+      default: 2m
+      short: 1m
+      componentDown: 5m
+```
+
+## Upgrading
+
+Before upgrading, review the [chart changelog](https://github.com/thanos-community/helm-charts/releases) and the [Thanos release notes](https://github.com/thanos-io/thanos/releases).
+
+```bash
+helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  -f values.yaml
+```
+
+## Values Reference
+
+The table below documents all available values. Top-level keys group settings by component. Component-level keys always take precedence over `global` defaults.
 
 {{ template "chart.valuesSection" . }}
 
+---
 {{ template "helm-docs.versionFooter" . }}

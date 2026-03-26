@@ -1,0 +1,3 @@
+{{- if and .Values.storegateway.enabled .Values.storegateway.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "storegateway" .Values.storegateway.service.httpPort .Values.storegateway.httpRoute) }}
+{{- end }}

@@ -1,0 +1,3 @@
+{{- if and .Values.storegateway.enabled .Values.storegateway.grpcRoute.enabled }}
+{{ include "thanos.grpcRoute" (list . "storegateway" .Values.storegateway.service.grpcPort .Values.storegateway.grpcRoute) }}
+{{- end }}
