@@ -1,0 +1,85 @@
+name: release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'charts/**'
+
+permissions:
+  contents: write
+  id-token: write   # required for cosign OIDC keyless signing
+  packages: write   # required for ghcr.io OCI publishing
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.1
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package charts
+        run: |
+          mkdir -p .cr-release-packages
+          for chart in charts/*/; do
+            helm dependency update "$chart"
+            helm package "$chart" --destination .cr-release-packages
+          done
+
+      - name: Sign chart packages with Cosign
+        run: |
+          for pkg in .cr-release-packages/*.tgz; do
+            cosign sign-blob \
+              --yes \
+              --bundle "${pkg}.cosign.bundle" \
+              "${pkg}"
+          done
+
+      - name: Push charts to OCI registry and sign
+        run: |
+          for pkg in .cr-release-packages/*.tgz; do
+            push_output=$(helm push "${pkg}" oci://ghcr.io/${{ github.repository_owner }}/helm-charts 2>&1)
+            echo "${push_output}"
+            digest=$(echo "${push_output}" | grep '^Digest:' | awk '{print $2}')
+            chart_ref=$(echo "${push_output}" | grep '^Pushed:' | awk '{print $2}')
+            if [ -n "${digest}" ] && [ -n "${chart_ref}" ]; then
+              cosign sign --yes "${chart_ref%:*}@${digest}"
+            fi
+          done
+
+      - name: Release charts (GitHub Releases + gh-pages Helm repo)
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          skip_packaging: true
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Cosign bundles to GitHub releases
+        run: |
+          for bundle in .cr-release-packages/*.cosign.bundle; do
+            tag=$(basename "${bundle%.tgz.cosign.bundle}")
+            gh release upload "${tag}" "${bundle}" --clobber
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

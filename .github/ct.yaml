@@ -2,8 +2,7 @@
 helm-extra-args: --timeout 600s
 check-version-increment: true
 debug: true
-chart-dirs: 
+chart-dirs:
   - charts
 chart-repos:
-  - stable=https://kubernetes-charts.storage.googleapis.com/
-
+  - prometheus-community=https://prometheus-community.github.io/helm-charts
