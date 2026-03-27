@@ -1,0 +1,54 @@
+# CI-specific overrides used by `ct install` (chart-testing).
+# Goals:
+#   1. Use a local RustFS instance as an S3-compatible object store
+#   2. Fit within a 2-worker kind cluster (reduce replicas to 1)
+#   3. Keep the compactor pod running so the StatefulSet reports Ready
+
+# ---- RustFS: local S3-compatible store (disabled by default) -----------
+rustfs:
+  enabled: true
+  replicaCount: 1
+  mode:
+    standalone:
+      enabled: true
+    distributed:
+      enabled: false
+  persistence:
+    data:
+      size: 100Mi
+      storageClass: standard
+    logs:
+      size: 100Mi
+      storageClass: standard
+
+# ---- Object store: S3 pointing at the in-cluster RustFS instance -------
+# The config value is processed via `tpl` so Go template syntax is valid;
+# .Release.Name expands to the release name assigned by ct install.
+global:
+  objstore:
+    createSecret: true
+    config: |
+      type: S3
+      config:
+        bucket: thanos
+        endpoint: '{{ printf "%s-rustfs" .Release.Name }}:9000'
+        access_key: rustfsadmin
+        secret_key: rustfsadmin
+        insecure: true
+
+# Reduce replicas to 1 — default values set receive=3, storegateway=2,
+# which exhausts a 2-worker kind cluster and hits the 600 s timeout.
+receive:
+  replicaCount: 1
+
+storegateway:
+  replicaCount: 1
+
+query:
+  replicaCount: 1
+
+compactor:
+  # Without --wait, `thanos compact` runs once and exits with code 0.
+  # Kubernetes restarts the pod immediately, so the StatefulSet is never Ready.
+  extraArgs:
+    - --wait

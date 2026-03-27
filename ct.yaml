@@ -8,5 +8,6 @@ chart-dirs:
 chart-repos:
   - thanos-community=https://thanos-community.github.io/helm-charts
   - prometheus-community=https://prometheus-community.github.io/helm-charts
+  - rustfs=https://charts.rustfs.com/
 chart-yaml-schema: .github/chart_schema.yaml
 lint-conf: .github/lintconf.yaml

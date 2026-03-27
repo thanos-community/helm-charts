@@ -50,23 +50,28 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4
       - name: Install helm-unittest plugin
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --verify=false
       - name: Add Helm repos
         run: |
           helm repo add thanos-community https://thanos-community.github.io/helm-charts
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add rustfs https://charts.rustfs.com/
           helm repo update
       - name: Build chart dependencies
         run: |
           for chart in charts/*/; do
-            helm dependency build "$chart"
+            helm dependency update "$chart"
           done
       - name: Run unit tests
         run: |
           CHART_DIRS="$(git diff --find-renames --name-only "$(git rev-parse --abbrev-ref HEAD)" remotes/origin/master -- charts | grep '[cC]hart.yaml' | sed -e 's#/[Cc]hart.yaml##g')"
           for CHART_DIR in ${CHART_DIRS}; do
-            echo "Running unit tests for ${CHART_DIR}..."
-            helm unittest "${CHART_DIR}"
+            if [ -d "${CHART_DIR}" ]; then
+              echo "Running unit tests for ${CHART_DIR}..."
+              helm unittest "${CHART_DIR}"
+            else
+              echo "Skipping ${CHART_DIR} (directory does not exist on current branch)"
+            fi
           done
 
   install-chart:
@@ -97,5 +102,12 @@ jobs:
           config: .github/kind-config.yaml
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
+      - name: Add Helm repos and update chart dependencies
+        run: |
+          helm repo add thanos-community https://thanos-community.github.io/helm-charts
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add rustfs https://charts.rustfs.com/
+          helm repo update
+          helm dependency update charts/thanos
       - name: Run chart-testing (install)
         run: ct install --config ct.yaml

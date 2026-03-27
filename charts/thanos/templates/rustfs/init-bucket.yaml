@@ -1,0 +1,38 @@
+{{- if .Values.rustfs.enabled }}
+# Creates the object store bucket that Thanos components require.
+# Runs alongside the RustFS subchart: the initContainer polls the RustFS
+# health endpoint and only proceeds once it is ready, then uses mc to
+# create the bucket so that compactor/storegateway/receive can operate.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "thanos.compName" (list . "init-bucket") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-rustfs
+          image: curlimages/curl:8.7.1
+          command:
+            - sh
+            - -c
+            - |
+              until curl -sf http://{{ printf "%s-rustfs" .Release.Name }}:9000/minio/health/live; do
+                echo "Waiting for RustFS..."
+                sleep 3
+              done
+      containers:
+        - name: create-bucket
+          image: minio/mc:RELEASE.2024-04-18T16-45-29Z
+          command:
+            - sh
+            - -c
+            - |
+              mc alias set store http://{{ printf "%s-rustfs" .Release.Name }}:9000 rustfsadmin rustfsadmin --api s3v4
+              mc mb --ignore-existing store/thanos
+              echo "Bucket 'thanos' is ready"
+{{- end }}

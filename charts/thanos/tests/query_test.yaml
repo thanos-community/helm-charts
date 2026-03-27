@@ -60,7 +60,7 @@ tests:
       receive.enabled: false
     asserts:
       - matchRegex:
-          path: spec.template.spec.containers[0].args[2]
+          path: spec.template.spec.containers[0].args[3]
           pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
 
   - it: passes extra CLI args

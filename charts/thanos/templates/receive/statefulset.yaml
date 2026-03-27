@@ -48,6 +48,9 @@ spec:
             {{- if .Values.receive.tenancyHeader }}
             - --receive.tenant-header={{ .Values.receive.tenancyHeader }}
             {{- end }}
+            {{- if .Values.receive.tsdb.retention }}
+            - --tsdb.retention={{ .Values.receive.tsdb.retention }}
+            {{- end }}
             {{- if .Values.receive.tsdb.walCompression }}
             - --tsdb.wal-compression
             {{- end }}

@@ -28,6 +28,10 @@ dependencies:
     version: 80.2.0
     repository: https://prometheus-community.github.io/helm-charts
     condition: kube-prometheus-stack.enabled
+  - name: rustfs
+    version: "0.0.90"
+    repository: https://charts.rustfs.com/
+    condition: rustfs.enabled
 annotations:
   artifacthub.io/license: Apache-2.0
   artifacthub.io/operator: "false"
