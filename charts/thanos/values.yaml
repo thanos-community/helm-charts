@@ -72,7 +72,7 @@ global:
         endpoint: storage.googleapis.com
         region: eu-west-1
         insecure: false
-        
+
       # Example for S3
       # type: S3
       # config:
@@ -96,7 +96,7 @@ global:
     # -- Optional name override for ServiceAccounts, empty means autogenerate
     name: ""
 
-  thanosRules:  
+  thanosRules:
     enabled: true
     labels: {}
     thresholds:
@@ -794,7 +794,7 @@ receive:
 
   # -- Optional multi tenancy header name to segregate tenants
   tenancyHeader: ""
-  
+
   # -- TSDB settings for local storage of samples before shipping to object store
   tsdb:
     # -- TSDB retention period for local WAL
@@ -1065,7 +1065,7 @@ ruler:
 
   annotations: {}
   labels: {}
-  
+
   serviceMonitor:
     enabled: false
     labels: {}

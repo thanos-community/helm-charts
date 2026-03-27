@@ -13,7 +13,7 @@ spec:
     - name: http
       port: {{ .Values.receive.service.httpPort }}
       targetPort: http
-    - name: remote-write 
+    - name: remote-write
       port: {{ .Values.receive.service.remoteWritePort }}
       targetPort: remote-write
   selector:

@@ -59,14 +59,14 @@ spec:
               containerPort: {{ .Values.receive.service.grpcPort }}
             - name: http
               containerPort: {{ default 10902 .Values.receive.service.httpPort }}
-            - name: remote-write 
+            - name: remote-write
               containerPort: {{ .Values.receive.service.remoteWritePort }}
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: NAME 
+            - name: NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
