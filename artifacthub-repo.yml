@@ -1,7 +1,0 @@
-# ArtifactHub repository metadata
-# Register this repository at https://artifacthub.io/ pointing to:
-# https://github.com/thanos-community/helm-charts
-repositoryID: thanos-community #WIP 
-owners:
-  - name: hamdikh
-    email: hamdi.khelil@kapheira.cloud
