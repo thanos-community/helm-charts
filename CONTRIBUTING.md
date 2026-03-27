@@ -49,6 +49,7 @@ git remote add upstream https://github.com/thanos-community/helm-charts.git
 ### 3. Install chart dependencies
 
 ```bash
+helm repo add thanos-community https://thanos-community.github.io/helm-charts
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 helm dependency update charts/thanos
@@ -113,7 +114,7 @@ helm plugin install https://github.com/helm-unittest/helm-unittest
 ### Lint the chart
 
 ```bash
-ct lint --config .github/ct.yaml
+ct lint
 ```
 
 ### Run unit tests
@@ -138,7 +139,7 @@ helm unittest charts/thanos -f tests/gateway_api_test.yaml
 kind create cluster --config .github/kind-config.yaml
 
 # Run chart-testing install
-ct install --config .github/ct.yaml
+ct install
 ```
 
 ### Generate updated README
