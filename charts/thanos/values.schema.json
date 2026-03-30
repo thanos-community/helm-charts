@@ -6035,10 +6035,86 @@
           "required": [],
           "title": "enabled",
           "type": "boolean"
+        },
+        "initBucket": {
+          "additionalProperties": true,
+          "properties": {
+            "accessKey": {
+              "default": "rustfsadmin",
+              "description": "RustFS admin username. Ignored when existingSecret is set.",
+              "required": [],
+              "title": "accessKey",
+              "type": "string"
+            },
+            "bucketName": {
+              "default": "thanos",
+              "description": "S3 bucket name to create.",
+              "required": [],
+              "title": "bucketName",
+              "type": "string"
+            },
+            "existingSecret": {
+              "default": "",
+              "description": "Name of an existing Secret containing the RustFS credentials.\nWhen set, accessKey and secretKey are ignored.\nThe Secret must contain the keys defined in existingSecretKeys.",
+              "required": [],
+              "title": "existingSecret",
+              "type": "string"
+            },
+            "existingSecretKeys": {
+              "additionalProperties": true,
+              "properties": {
+                "accessKey": {
+                  "default": "access-key",
+                  "description": "Key in the existing Secret for the access key.",
+                  "required": [],
+                  "title": "accessKey",
+                  "type": "string"
+                },
+                "secretKey": {
+                  "default": "secret-key",
+                  "description": "Key in the existing Secret for the secret key.",
+                  "required": [],
+                  "title": "secretKey",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "accessKey",
+                "secretKey"
+              ],
+              "title": "existingSecretKeys",
+              "type": "object"
+            },
+            "image": {
+              "default": "rustfs/rc:latest",
+              "description": "Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.",
+              "required": [],
+              "title": "image",
+              "type": "string"
+            },
+            "secretKey": {
+              "default": "rustfsadmin",
+              "description": "RustFS admin password. Ignored when existingSecret is set.",
+              "required": [],
+              "title": "secretKey",
+              "type": "string"
+            }
+          },
+          "required": [
+            "image",
+            "bucketName",
+            "existingSecret",
+            "existingSecretKeys",
+            "accessKey",
+            "secretKey"
+          ],
+          "title": "initBucket",
+          "type": "object"
         }
       },
       "required": [
-        "enabled"
+        "enabled",
+        "initBucket"
       ],
       "title": "rustfs",
       "type": "object"

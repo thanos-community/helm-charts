@@ -13,25 +13,25 @@ rustfs:
       enabled: true
     distributed:
       enabled: false
-  persistence:
-    data:
-      size: 100Mi
-      storageClass: standard
-    logs:
-      size: 100Mi
-      storageClass: standard
+  storageclass:
+    name: standard
+    dataStorageSize: 100Mi
+    logStorageSize: 100Mi
 
 # ---- Object store: S3 pointing at the in-cluster RustFS instance -------
 # The config value is processed via `tpl` so Go template syntax is valid;
 # .Release.Name expands to the release name assigned by ct install.
 global:
+  # Prometheus Operator CRDs are not installed in CI — disable PrometheusRule rendering.
+  thanosRules:
+    enabled: false
   objstore:
     createSecret: true
     config: |
       type: S3
       config:
         bucket: thanos
-        endpoint: '{{ printf "%s-rustfs" .Release.Name }}:9000'
+        endpoint: '{{ printf "%s-rustfs-svc" .Release.Name }}:9000'
         access_key: rustfsadmin
         secret_key: rustfsadmin
         insecure: true
@@ -43,6 +43,17 @@ receive:
 
 storegateway:
   replicaCount: 1
+  extraInitContainers:
+    - name: wait-for-rustfs
+      image: curlimages/curl:8.7.1
+      command:
+        - sh
+        - -c
+        - |
+          until curl -sf http://{{ printf "%s-rustfs-svc" .Release.Name }}:9000/health/ready; do
+            echo "Waiting for RustFS..."
+            sleep 3
+          done
 
 query:
   replicaCount: 1

@@ -2124,6 +2124,24 @@ rustfs:
   # -- Deploy a local RustFS instance as an S3-compatible object store alongside Thanos.
   # Intended for CI and development only. Do not enable in production.
   enabled: false
+  initBucket:
+    # -- Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.
+    image: rustfs/rc:latest
+    # -- S3 bucket name to create.
+    bucketName: thanos
+    # -- Name of an existing Secret containing the RustFS credentials.
+    # When set, accessKey and secretKey are ignored.
+    # The Secret must contain the keys defined in existingSecretKeys.
+    existingSecret: ""
+    existingSecretKeys:
+      # -- Key in the existing Secret for the access key.
+      accessKey: access-key
+      # -- Key in the existing Secret for the secret key.
+      secretKey: secret-key
+    # -- RustFS admin username. Ignored when existingSecret is set.
+    accessKey: rustfsadmin
+    # -- RustFS admin password. Ignored when existingSecret is set.
+    secretKey: rustfsadmin
 
 # ======================================================================
 # kube-prometheus-stack subchart (optional)

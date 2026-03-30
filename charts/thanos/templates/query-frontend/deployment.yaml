@@ -24,6 +24,10 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{ include "thanos.imagePullSecrets" . | nindent 6 }}
       {{ include "thanos.podSC" (dict "root" . "key" "queryFrontend") | nindent 6 }}
+      {{- if .Values.queryFrontend.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.queryFrontend.extraInitContainers) . | nindent 8 }}
+      {{- end }}
       containers:
         - name: query-frontend
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"

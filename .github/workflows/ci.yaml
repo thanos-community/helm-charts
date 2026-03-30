@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
     paths:
-      - 'charts/**'
+      - "charts/**"
   workflow_dispatch:
 
 concurrency:
@@ -22,7 +22,7 @@ jobs:
       - name: Lint Bash scripts
         uses: ludeeus/action-shellcheck@2.0.0
         with:
-          scandir: '.github'
+          scandir: ".github"
 
   lint-chart:
     runs-on: ubuntu-latest
@@ -85,9 +85,9 @@ jobs:
         # keep in sync with active Kubernetes releases; use exact patch versions
         # available as kindest/node images on hub.docker.com/r/kindest/node
         k8s:
-          - v1.33.4
-          - v1.34.2
-          - v1.35.0
+          - v1.33.7
+          - v1.34.3
+          - v1.35.1
     steps:
       - name: Checkout
         uses: actions/checkout@v6

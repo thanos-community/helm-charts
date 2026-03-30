@@ -28,6 +28,15 @@
       "labels": ["renovate", "kube-prometheus-stack"]
     },
     {
+      "description": "Group RustFS helm chart updates into one PR",
+      "matchPackageNames": ["rustfs"],
+      "matchManagers": ["helmv3"],
+      "groupName": "rustfs",
+      "groupSlug": "rustfs",
+      "commitMessageTopic": "rustfs {{newVersion}}",
+      "labels": ["renovate", "rustfs"]
+    },
+    {
       "matchManagers": ["helmv3"],
       "commitMessageTopic": "helm dependency {{depName}}",
       "labels": ["renovate", "helm"]

@@ -2,3 +2,4 @@
 charts/*/charts
 charts/*/requirements.lock
 .vscode/settings.json
+charts/**/*/local/**/*

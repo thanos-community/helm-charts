@@ -2,7 +2,7 @@
 
 ![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.39.2](https://img.shields.io/badge/AppVersion-v0.39.2-informational?style=flat-square)
 
-![Thanos Logo](../../docs/imgs/thanos_logo_full.svg)
+<p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
 A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 
@@ -992,6 +992,13 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.tolerations | list | [] | Tolerations for Ruler pod scheduling. |
 | ruler.topologySpreadConstraints | list | [] | Topology spread constraints for Ruler pods. |
 | rustfs.enabled | bool | `false` | Deploy a local RustFS instance as an S3-compatible object store alongside Thanos. Intended for CI and development only. Do not enable in production. |
+| rustfs.initBucket.accessKey | string | `"rustfsadmin"` | RustFS admin username. Ignored when existingSecret is set. |
+| rustfs.initBucket.bucketName | string | `"thanos"` | S3 bucket name to create. |
+| rustfs.initBucket.existingSecret | string | `""` | Name of an existing Secret containing the RustFS credentials. When set, accessKey and secretKey are ignored. The Secret must contain the keys defined in existingSecretKeys. |
+| rustfs.initBucket.existingSecretKeys.accessKey | string | `"access-key"` | Key in the existing Secret for the access key. |
+| rustfs.initBucket.existingSecretKeys.secretKey | string | `"secret-key"` | Key in the existing Secret for the secret key. |
+| rustfs.initBucket.image | string | `"rustfs/rc:latest"` | Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI. |
+| rustfs.initBucket.secretKey | string | `"rustfsadmin"` | RustFS admin password. Ignored when existingSecret is set. |
 | storegateway.affinity | object | {} | Affinity rules for Store Gateway pod scheduling. |
 | storegateway.annotations | object | {} | Extra annotations applied to Store Gateway resources. |
 | storegateway.autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for the Store Gateway. |
