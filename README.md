@@ -8,7 +8,7 @@
 
 Community-maintained Helm charts for deploying [Thanos](https://thanos.io/) on Kubernetes — a highly available Prometheus setup with long-term storage capabilities.
 
-![Thanos Logo](docs/imgs/thanos_logo_full.svg)
+<p align="center"><img src="docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
 ## Available Charts
 
