@@ -1,7 +1,7 @@
 ---
 name: Bug Report
-about: Something isn't working as expected with the Thanos Helm chart
 labels: kind/bug
+about: Something isn't working as expected with the Thanos Helm chart
 ---
 
 <!--

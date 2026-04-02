@@ -27,17 +27,18 @@ even continue reviewing your changes.
 
 #### What this PR does / why we need it:
 
-
 #### Which issue this PR fixes
-*(optional, in `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close that issue when PR gets merged)*
-  - fixes #
 
+*(optional, in `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close that issue when PR gets merged)*
+
+- fixes #
 
 #### Special notes for your reviewer:
 
-
 #### Checklist
+
 [Place an '[x]' (no spaces) in all applicable fields. Please remove unrelated fields.]
+
 - [ ] [DCO](https://developercertificate.org) signed
 - [ ] Chart Version bumped (if the pr is an update to an existing chart)
 - [ ] Variables are documented in the README.md
