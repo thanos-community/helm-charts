@@ -1,0 +1,60 @@
+suite: receive component
+templates:
+  - receive/statefulset.yaml
+
+tests:
+  - it: renders statefulset when receive is enabled
+    set:
+      receive.enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+
+  - it: does not render when receive is disabled
+    set:
+      receive.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets the correct replica count
+    set:
+      receive.enabled: true
+      receive.replicaCount: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+
+  - it: sets tsdb retention flag
+    set:
+      receive.enabled: true
+      receive.tsdb.retention: 48h
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --tsdb.retention=48h
+
+  - it: enables WAL compression when set
+    set:
+      receive.enabled: true
+      receive.tsdb.walCompression: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=ketama
+
+  - it: mounts persistence volume
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.size: 20Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 20Gi

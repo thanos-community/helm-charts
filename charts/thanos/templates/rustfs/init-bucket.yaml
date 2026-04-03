@@ -1,0 +1,57 @@
+{{- if .Values.rustfs.enabled }}
+# Creates the object store bucket that Thanos components require.
+# Runs alongside the RustFS subchart: the initContainer polls the RustFS
+# health endpoint and only proceeds once it is ready, then uses the rustfs
+# CLI (rc) to create the bucket so that compactor/storegateway/receive can operate.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "thanos.compName" (list . "init-bucket") }}
+  labels:
+{{ include "thanos.labels" . | indent 4 }}
+spec:
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-rustfs
+          image: curlimages/curl:8.7.1
+          command:
+            - sh
+            - -c
+            - |
+              until curl -sf http://{{ printf "%s-rustfs-svc" .Release.Name }}:9000/health/ready; do
+                echo "Waiting for RustFS..."
+                sleep 3
+              done
+      containers:
+        - name: create-bucket
+          image: {{ .Values.rustfs.initBucket.image }}
+          env:
+            - name: RC_ACCESS_KEY
+              {{- if .Values.rustfs.initBucket.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rustfs.initBucket.existingSecret }}
+                  key: {{ .Values.rustfs.initBucket.existingSecretKeys.accessKey }}
+              {{- else }}
+              value: {{ .Values.rustfs.initBucket.accessKey | quote }}
+              {{- end }}
+            - name: RC_SECRET_KEY
+              {{- if .Values.rustfs.initBucket.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rustfs.initBucket.existingSecret }}
+                  key: {{ .Values.rustfs.initBucket.existingSecretKeys.secretKey }}
+              {{- else }}
+              value: {{ .Values.rustfs.initBucket.secretKey | quote }}
+              {{- end }}
+          command:
+            - sh
+            - -c
+            - |
+              rc alias set store http://{{ printf "%s-rustfs-svc" .Release.Name }}:9000 "$RC_ACCESS_KEY" "$RC_SECRET_KEY"
+              rc mb --ignore-existing store/{{ .Values.rustfs.initBucket.bucketName }}
+              echo "Bucket '{{ .Values.rustfs.initBucket.bucketName }}' is ready"
+{{- end }}

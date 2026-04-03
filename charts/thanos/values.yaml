@@ -1,70 +1,127 @@
 # ======================================================================
 # Thanos umbrella chart values
-# Comprehensive and self documented
+# Comprehensive and self-documented.
+# Top-level sections map 1-to-1 to Thanos components.
+# Settings under `global` propagate to every component unless the
+# component provides its own override for that key.
 # ======================================================================
 
-# ----------------------------------------------------------------------
-# -- Global settings applied as sensible defaults to all components
-# Each component can override with its own section if needed
-# ----------------------------------------------------------------------
+# ======================================================================
+# Global settings
+# Applied as sensible defaults to all components.
+# Each component can override with its own section if needed.
+# ======================================================================
+# Global defaults applied to every Thanos component. Individual components can override any of these.
 global:
+  # Container image used for all Thanos components.
   image:
-    # -- Docker repository for all Thanos containers by default
+    # -- Docker repository for all Thanos containers by default.
     repository: quay.io/thanos/thanos
-    # -- Container image tag
+    # -- Container image tag. Changing this upgrades all components at once.
     tag: v0.39.2
-    # -- Image pull policy: Always IfNotPresent Never
+    # -- Image pull policy applied to every container. One of Always, IfNotPresent, Never.
     pullPolicy: IfNotPresent
-  # -- Optional list of image pull secrets to use across all components
+
+  # -- List of imagePullSecrets applied to every pod by default.
+  # @default -- []
   imagePullSecrets: []
-  # -- Extra labels applied to all Kubernetes resources
+
+  # -- Extra labels merged into every Kubernetes resource created by this chart.
+  # @default -- {}
   commonLabels: {}
-  # -- Cluster domain, usually cluster.local, used in DNS names
+
+  # -- Cluster DNS domain, used when constructing in-cluster endpoints.
   clusterDomain: "cluster.local"
-  # -- Extra annotations applied to all pods
+
+  # -- Annotations added to every pod by default. Component-level annotations are merged on top.
+  # @default -- {}
   podAnnotations: {}
-  # -- Pod security context applied to all components unless overridden
+
+  # -- Pod-level security context applied to every pod. Component-level values override this.
+  # @default -- {}
   podSecurityContext: {}
-  # -- Container security context applied to all components unless overridden
+
+  # Container-level security context applied to every main container. Component-level values override this.
   containerSecurityContext:
+    # -- Prevent privilege escalation inside the container.
     allowPrivilegeEscalation: false
+    # -- Mount the root filesystem as read-only.
     readOnlyRootFilesystem: true
+    # Linux capabilities configuration for all containers.
     capabilities:
+      # Drop all Linux capabilities from the container.
       drop:
         - ALL
+    # -- Require the container to run as a non-root user.
     runAsNonRoot: true
-  # -- Extra volumes available to all pods by default
+
+  # -- Additional volumes available to every pod by default.
+  # @default -- []
   extraVolumes: []
-  # -- Extra volume mounts applied to main containers by default
+
+  # -- Additional volume mounts added to every main container by default.
+  # @default -- []
   extraVolumeMounts: []
-  # -- Default resource requests and limits for all components
+
+  # -- Default resource requests and limits. Override per component as needed.
+  # @default -- {}
   resources: {}
-  # -- Node scheduling defaults for all components
+
+  # -- Node selector applied to every pod by default.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Toleration rules applied to every pod by default.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules applied to every pod by default.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints applied to every pod by default.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name applied to every pod by default.
   priorityClassName: ""
-  # -- Environment variables applied to main containers globally
+
+  # -- Extra environment variables injected into every main container by default.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources (ConfigMap, Secret) for every main container.
+  # @default -- []
   extraEnvFrom: []
-  # -- Optional init containers and sidecars applied globally
+
+  # -- Extra init containers added to every pod by default.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers added to every pod by default.
+  # @default -- []
   extraContainers: []
 
-  # --------------------------------------------------------------------
-  # -- Object store configuration shared by components that need it
-  # Either create a Secret or provide inline config here
-  # --------------------------------------------------------------------
+  # Object store configuration shared by all components that read or write
+  # blocks (Receive, Store Gateway, Compactor, Ruler).
+  # Object store configuration block shared by all Thanos components.
   objstore:
-    # -- Create a Secret named secretName with key secretKey containing config below
+    # -- When true, the chart creates a Kubernetes Secret named `secretName`
+    # containing the inline `config` below. Set to false when the Secret is
+    # managed externally (Vault, External Secrets Operator, kubectl, etc.).
     createSecret: false
-    # -- Name of the Kubernetes Secret that carries the object store config
+
+    # -- Name of the Kubernetes Secret that carries the object store config.
+    # All components mount this Secret as a file.
     secretName: thanos-objstore
-    # -- Key inside the Secret that stores the object store yaml
+
+    # -- Key inside the Secret whose value is the object store YAML.
     secretKey: objstore.yml
-    # -- Inline object store configuration used when createSecret is false
-    # -- Refer to Thanos docs for exact schema
+
+    # -- Inline object store configuration rendered into the Secret when
+    # `createSecret` is true. Processed via `tpl`, so Helm template syntax
+    # (e.g. `{{ .Release.Name }}`) is valid inside the string.
+    # Refer to https://thanos.io/tip/thanos/storage.md/ for the full schema.
     config: |
       type: GCS
       config:
@@ -72,7 +129,7 @@ global:
         endpoint: storage.googleapis.com
         region: eu-west-1
         insecure: false
-        
+
       # Example for S3
       # type: S3
       # config:
@@ -81,99 +138,157 @@ global:
       #   region: eu-west-1
       #   access_key: myaccess
       #   secret_key: mysecret
-  # --------------------------------------------------------------------
-  # -- RBAC and ServiceAccount defaults
-  # Components will use their own service accounts if enabled
-  # --------------------------------------------------------------------
+
+  # RBAC and ServiceAccount defaults.
+  # RBAC configuration applied globally across all components.
   rbac:
-    # -- Create RBAC resources globally where needed
+    # -- Create RBAC resources (ClusterRole, ClusterRoleBinding) required by
+    # components that need cluster-level access (e.g. Ruler auto-import).
     create: true
+
+  # ServiceAccount configuration applied to every component by default.
   serviceAccount:
-    # -- Create a ServiceAccount per component by default
+    # -- Create a dedicated ServiceAccount for each component.
     create: true
-    # -- Extra annotations applied to ServiceAccounts
+    # -- Extra annotations merged into every ServiceAccount.
+    # @default -- {}
     annotations: {}
-    # -- Optional name override for ServiceAccounts, empty means autogenerate
+    # -- Name override for all ServiceAccounts. Empty means auto-generate
+    # per-component names based on the release name.
     name: ""
 
-  thanosRules:  
+  # Built-in Thanos alerting rules deployed as PrometheusRule CRDs.
+  # Requires the Prometheus Operator to be installed in the cluster.
+  # Configuration for built-in Thanos PrometheusRule alerting resources.
+  thanosRules:
+    # -- Deploy PrometheusRule resources with built-in Thanos alerting rules.
     enabled: true
+    # -- Extra labels merged into every PrometheusRule resource.
+    # @default -- {}
     labels: {}
+    # Alert firing thresholds. Raise these above 0 to reduce noise in busy clusters.
     thresholds:
+      # -- Alert threshold for bucket operation error rate (errors per second).
       bucketOperationFailures: 0
+      # -- Alert threshold for block synchronisation failure rate.
       blockSyncFailures: 0
+      # -- Alert threshold for Query 5xx response rate.
       query5xxRate: 0
+      # -- Alert threshold for Ruler evaluation failure rate.
       ruleEvalFailures: 0
+      # -- Alert threshold for Receive 5xx response rate.
       receive5xxRate: 0
+    # Default `for` durations used across alert rules.
     forDefaults:
+      # -- `for` duration used when a component is completely down.
       componentDown: 5m
+      # -- Default `for` duration for most alert rules.
       default: 2m
+      # -- Short `for` duration used for fast-burn alerts.
       short: 1m
+    # Severity label values injected into PrometheusRule alert rules.
     severity:
+      # -- Severity label value used for critical alerts.
       critical: critical
+      # -- Severity label value used for warning alerts.
       warning: warning
+      # -- Severity label value used for component-down alerts.
       componentDown: critical
 
-  # --------------------------------------------------------------------
-  # -- ServiceMonitor defaults for Prometheus Operator scraping
-  # Components can override under their own .serviceMonitor blocks
-  # --------------------------------------------------------------------
+  # ServiceMonitor defaults for Prometheus Operator scraping.
+  # Components inherit these defaults and can override per-component.
+  # Default ServiceMonitor configuration inherited by all components.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for every component.
+    # Individual components can override this with their own serviceMonitor.enabled.
     enabled: false
+    # -- Namespace where ServiceMonitor resources are created.
+    # Empty means the same namespace as the release.
     namespace: ""
+    # -- Extra labels merged into every ServiceMonitor resource.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations merged into every ServiceMonitor resource.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval. Empty string uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout. Empty string uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme: http or https.
     scheme: ""
+    # -- TLS configuration for scraping when scheme is https.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied to scraped metrics before ingestion.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after ingestion.
+    # @default -- []
     metricRelabelings: []
 
-  # --------------------------------------------------------------------
-  # -- PodDisruptionBudget defaults
-  # Components can override under their own .pdb blocks
-  # --------------------------------------------------------------------
+  # PodDisruptionBudget defaults. Components inherit these and can override per-component.
+  # Default PodDisruptionBudget configuration inherited by all components.
   pdb:
+    # -- Enable a PodDisruptionBudget for every component. Individual
+    # components can override this with their own pdb.enabled.
     enabled: false
+    # -- Minimum number of available pods during a disruption.
+    # Cannot be set at the same time as maxUnavailable.
     minAvailable: ""
+    # -- Maximum number of unavailable pods during a disruption.
+    # Cannot be set at the same time as minAvailable.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Bucketweb component
-# Web UI for bucket inspection. Often disabled in production.
+# Bucket component
+# Read-only web UI for inspecting object store blocks.
+# Often disabled in production; useful for debugging compaction issues.
 # ======================================================================
+# Bucket component group. Contains the Bucketweb UI sub-chart.
 bucket:
-  # -- Toggle the umbrella bucket group
+  # -- Enable the bucket group. Must be true for the objstore Secret to be
+  # created when global.objstore.createSecret is true.
   enabled: true
+
+  # Bucketweb deployment — read-only browser for object store blocks.
   bucketweb:
-    # -- Enable the bucketweb deployment
+    # -- Enable the Bucketweb deployment (read-only object store browser).
     enabled: false
 
-    # -- Number of replicas. HPA can override effective replica count when enabled.
+    # -- Number of Bucketweb pod replicas.
     replicaCount: 1
 
+    # Kubernetes Service configuration for Bucketweb.
     service:
-      # -- Service type: ClusterIP NodePort LoadBalancer
+      # -- Kubernetes Service type for Bucketweb.
       type: ClusterIP
-      # -- HTTP port for bucketweb
+      # -- HTTP port exposed by the Bucketweb Service.
       port: 10902
-      # -- Extra Service annotations if needed
+      # -- Extra annotations for the Bucketweb Service.
+      # @default -- {}
       annotations: {}
-      # -- Extra labels for the Service
+      # -- Extra labels for the Bucketweb Service.
+      # @default -- {}
       labels: {}
 
-    # -- Ingress configuration for bucketweb only
+    # Kubernetes Ingress configuration for Bucketweb.
     ingress:
+      # -- Enable a Kubernetes Ingress for Bucketweb.
       enabled: false
+      # -- Ingress class name (e.g. nginx, traefik).
       className: ""
+      # -- Extra annotations for the Ingress resource.
+      # @default -- {}
       annotations: {}
-      # -- List of host rules
+      # List of host rules for the Ingress.
       hosts:
         - host: bucketweb.local
           paths:
             - path: /
               pathType: Prefix
+      # -- TLS configuration for the Ingress.
+      # @default -- []
       tls: []
       # Example:
       # tls:
@@ -181,142 +296,296 @@ bucket:
       #     hosts:
       #       - bucketweb.local
 
-    # -- HorizontalPodAutoscaler for bucketweb only
-    autoscaling:
+    # Gateway API HTTPRoute configuration for Bucketweb.
+    httpRoute:
+      # -- Enable a Gateway API HTTPRoute for Bucketweb (alternative to Ingress).
       enabled: false
+      # -- Annotations for the HTTPRoute resource.
+      # @default -- {}
+      annotations: {}
+      # -- Gateway parentRefs the HTTPRoute should attach to.
+      # @default -- []
+      parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-system
+      #     sectionName: https
+      # -- Hostnames to match. Empty matches all hostnames on the parent Gateway.
+      # @default -- []
+      hostnames: []
+      # Example:
+      # hostnames:
+      #   - bucketweb.example.com
+
+    # HorizontalPodAutoscaler configuration for Bucketweb.
+    autoscaling:
+      # -- Enable HorizontalPodAutoscaler for Bucketweb.
+      enabled: false
+      # -- Minimum number of Bucketweb replicas.
       minReplicas: 1
+      # -- Maximum number of Bucketweb replicas.
       maxReplicas: 3
+      # -- Target CPU utilisation percentage for Bucketweb autoscaling.
       targetCPUUtilizationPercentage: 80
+      # -- Target memory utilisation percentage. Null disables memory-based scaling.
       targetMemoryUtilizationPercentage: null
 
-    # -- Add any additional CLI flags
+    # -- Additional CLI arguments appended to the bucketweb command.
+    # @default -- []
     extraArgs: []
-    # -- Resource requests and limits for the bucketweb container
+
+    # -- Resource requests and limits for the Bucketweb container.
+    # @default -- {}
     resources: {}
-    # -- Pod and container security contexts
+
+    # -- Pod security context for Bucketweb. Overrides global.podSecurityContext.
+    # @default -- {}
     podSecurityContext: {}
+
+    # -- Container security context for Bucketweb. Overrides global.containerSecurityContext.
+    # @default -- {}
     containerSecurityContext: {}
-    # -- Optional environment variables
+
+    # -- Extra environment variables injected into the Bucketweb container.
+    # @default -- []
     extraEnv: []
+
+    # -- Extra environment variable sources for the Bucketweb container.
+    # @default -- []
     extraEnvFrom: []
-    # -- Optional sidecars and init containers
+
+    # -- Extra init containers for Bucketweb pods.
+    # @default -- []
     extraInitContainers: []
+
+    # -- Extra sidecar containers for Bucketweb pods.
+    # @default -- []
     extraContainers: []
 
-    # -- Probes for health and readiness
+    # Health and readiness probe configuration for Bucketweb.
     probes:
+      # Readiness probe for Bucketweb.
       readiness:
+        # -- Enable the readiness probe for Bucketweb.
         enabled: true
+        # -- HTTP path checked by the readiness probe.
         path: /-/ready
+        # -- Port checked by the readiness probe.
         port: 10902
+        # -- Seconds to wait before starting the readiness probe.
         initialDelaySeconds: 5
+        # -- How often (seconds) to run the readiness probe.
         periodSeconds: 10
+        # -- Seconds after which the probe times out.
         timeoutSeconds: 5
+        # -- Consecutive failures before the pod is marked not-ready.
         failureThreshold: 6
+        # -- Consecutive successes before the pod is marked ready.
         successThreshold: 1
+      # Liveness probe for Bucketweb.
       liveness:
+        # -- Enable the liveness probe for Bucketweb.
         enabled: true
+        # -- HTTP path checked by the liveness probe.
         path: /-/healthy
+        # -- Port checked by the liveness probe.
         port: 10902
+        # -- Seconds to wait before starting the liveness probe.
         initialDelaySeconds: 30
+        # -- How often (seconds) to run the liveness probe.
         periodSeconds: 10
+        # -- Seconds after which the probe times out.
         timeoutSeconds: 5
+        # -- Consecutive failures before the container is restarted.
         failureThreshold: 6
+        # -- Consecutive successes before the container is considered live.
         successThreshold: 1
+      # Startup probe for Bucketweb.
       startup:
+        # -- Enable the startup probe for Bucketweb.
         enabled: true
+        # -- HTTP path checked by the startup probe.
         path: /-/ready
+        # -- Port checked by the startup probe.
         port: 10902
+        # -- Seconds to wait before starting the startup probe.
         initialDelaySeconds: 0
+        # -- How often (seconds) to run the startup probe.
         periodSeconds: 5
+        # -- Seconds after which the probe times out.
         timeoutSeconds: 5
+        # -- Consecutive failures allowed during startup before the container is killed.
         failureThreshold: 60
+        # -- Consecutive successes required before the startup probe is considered passed.
         successThreshold: 1
 
-    # -- Storage not required for bucketweb, leave empty
+    # -- Storage configuration for Bucketweb. Bucketweb is stateless; leave empty.
+    # @default -- {}
     persistence: {}
 
-    # -- Scheduling and topology per component
+    # -- Node selector for Bucketweb pod scheduling.
+    # @default -- {}
     nodeSelector: {}
+
+    # -- Tolerations for Bucketweb pod scheduling.
+    # @default -- []
     tolerations: []
+
+    # -- Affinity rules for Bucketweb pod scheduling.
+    # @default -- {}
     affinity: {}
+
+    # -- Topology spread constraints for Bucketweb pods.
+    # @default -- []
     topologySpreadConstraints: []
+
+    # -- Priority class name for Bucketweb pods.
     priorityClassName: ""
 
-    # -- Extra annotations only for bucketweb
+    # -- Extra annotations applied to Bucketweb resources.
+    # @default -- {}
     annotations: {}
-    # -- Extra labels only for bucketweb
+
+    # -- Extra labels applied to Bucketweb resources.
+    # @default -- {}
     labels: {}
 
-    # -- Extra volumes and mounts only for bucketweb
+    # -- Extra volumes for Bucketweb pods.
+    # @default -- []
     extraVolumes: []
+
+    # -- Extra volume mounts for the Bucketweb container.
+    # @default -- []
     extraVolumeMounts: []
 
-    # -- ServiceMonitor for bucketweb
+    # Prometheus Operator ServiceMonitor configuration for Bucketweb.
     serviceMonitor:
+      # -- Enable a Prometheus Operator ServiceMonitor for Bucketweb.
       enabled: false
+      # -- Extra labels for the Bucketweb ServiceMonitor.
+      # @default -- {}
       labels: {}
+      # -- Extra annotations for the Bucketweb ServiceMonitor.
+      # @default -- {}
       annotations: {}
+      # -- Scrape interval for Bucketweb. Empty uses the Prometheus operator default.
       interval: ""
+      # -- Scrape timeout for Bucketweb. Empty uses the Prometheus operator default.
       scrapeTimeout: ""
+      # -- Scrape scheme for Bucketweb (http or https).
       scheme: ""
+      # -- TLS configuration for Bucketweb scraping.
+      # @default -- {}
       tlsConfig: {}
+      # -- Relabeling rules applied before Bucketweb metrics are ingested.
+      # @default -- []
       relabelings: []
+      # -- Metric relabeling rules applied after Bucketweb metrics are ingested.
+      # @default -- []
       metricRelabelings: []
 
-    # -- PodDisruptionBudget for bucketweb
+    # PodDisruptionBudget configuration for Bucketweb.
     pdb:
+      # -- Enable a PodDisruptionBudget for Bucketweb.
       enabled: false
+      # -- Minimum available Bucketweb pods during a disruption.
       minAvailable: ""
+      # -- Maximum unavailable Bucketweb pods during a disruption.
       maxUnavailable: ""
 
 # ======================================================================
-# -- Compactor component
-# Compacts, downscales and deduplicates blocks in the object store
+# Compactor component
+# Compacts, downsamples and deduplicates blocks in the object store.
+# Must run as a singleton — do not set replicaCount above 1.
 # ======================================================================
+# Compactor component — compacts and downsamples blocks. Must run as a singleton.
 compactor:
+  # -- Enable the Compactor StatefulSet.
   enabled: true
+
+  # -- Number of Compactor replicas. Must remain 1 — running multiple
+  # compactors against the same bucket causes data corruption.
   replicaCount: 1
 
+  # PersistentVolumeClaim configuration for the Compactor working directory.
   persistence:
-    # -- Enable a PVC for compactor work dir
+    # -- Enable a PersistentVolumeClaim for the Compactor working directory.
     enabled: true
-    # -- Requested storage size
+    # -- Storage capacity for the Compactor PVC (used as a scratch space during compaction).
     size: 10Gi
-    # -- Storage class name, empty uses cluster default
+    # -- StorageClass name for the Compactor PVC. Empty uses the cluster default.
     storageClass: ""
-    # -- Access modes when PVC is created
+    # Access modes for the Compactor PVC.
     accessModes:
       - ReadWriteOnce
 
+  # Kubernetes Service configuration for the Compactor HTTP endpoint.
   service:
+    # -- Kubernetes Service type for the Compactor HTTP endpoint.
     type: ClusterIP
+    # -- HTTP port exposed by the Compactor Service.
     port: 10902
+    # -- Extra annotations for the Compactor Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Compactor Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Compactor.
   ingress:
+    # -- Enable a Kubernetes Ingress for the Compactor HTTP endpoint.
     enabled: false
+    # -- Ingress class name for the Compactor (e.g. nginx, traefik).
     className: ""
+    # Host rules for the Compactor Ingress.
     hosts:
       - host: compactor.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Compactor Ingress.
+    # @default -- []
     tls: []
 
+  # Gateway API HTTPRoute configuration for the Compactor.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for the Compactor HTTP endpoint.
+    enabled: false
+    # -- Annotations for the Compactor HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Compactor HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Compactor HTTPRoute.
+    # @default -- []
+    hostnames: []
+
+  # VerticalPodAutoscaler configuration for the Compactor.
   vpa:
+    # -- Enable a VerticalPodAutoscaler for the Compactor.
     enabled: true
+    # -- Kubernetes workload kind targeted by the Compactor VPA.
     targetKind: StatefulSet
-    updateMode: Auto    # Options: "Auto" | "Off" | "Initial"
+    # -- VPA update mode for the Compactor. One of Auto, Off, or Initial.
+    updateMode: Auto
+    # Minimum resource limits enforced by the Compactor VPA.
     minAllowed:
+      # -- Minimum CPU resource enforced by the Compactor VPA.
       cpu: 500m
+      # -- Minimum memory resource enforced by the Compactor VPA.
       memory: 512Mi
+    # Maximum resource limits enforced by the Compactor VPA.
     maxAllowed:
+      # -- Maximum CPU resource enforced by the Compactor VPA.
       cpu: 4
+      # -- Maximum memory resource enforced by the Compactor VPA.
       memory: 8Gi
 
-  # -- CLI flags for compactor
+  # Additional CLI arguments appended to the `thanos compact` command.
+  # Use this to configure retention, consistency delay, and wait mode.
   extraArgs:
     - --log.level=info
     - --log.format=logfmt
@@ -326,560 +595,1272 @@ compactor:
     - --consistency-delay=30m
     - --wait
 
+  # -- Resource requests and limits for the Compactor container.
+  # @default -- {}
   resources: {}
+
+  # Pod security context for the Compactor. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
     fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context for the Compactor. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
 
+  # -- Extra environment variables injected into the Compactor container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Compactor container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for the Compactor pod.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for the Compactor pod.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Compactor.
   probes:
+    # Readiness probe for the Compactor.
     readiness:
+      # -- Enable the readiness probe for the Compactor.
       enabled: true
+      # -- HTTP path checked by the Compactor readiness probe.
       path: /-/ready
+      # -- Port checked by the Compactor readiness probe.
       port: 10902
+      # -- Seconds to wait before starting the Compactor readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Compactor readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Compactor readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Compactor pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Compactor pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Compactor.
     liveness:
+      # -- Enable the liveness probe for the Compactor.
       enabled: true
+      # -- HTTP path checked by the Compactor liveness probe.
       path: /-/healthy
+      # -- Port checked by the Compactor liveness probe.
       port: 10902
+      # -- Seconds to wait before starting the Compactor liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Compactor liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Compactor liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Compactor container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Compactor container is considered live.
       successThreshold: 1
+    # Startup probe for the Compactor.
     startup:
+      # -- Enable the startup probe for the Compactor.
       enabled: true
+      # -- HTTP path checked by the Compactor startup probe.
       path: /-/ready
+      # -- Port checked by the Compactor startup probe.
       port: 10902
+      # -- Seconds to wait before starting the Compactor startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Compactor startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Compactor startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Compactor startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Compactor startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Compactor pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Compactor pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Compactor pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Compactor pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Compactor pods.
   priorityClassName: ""
 
+  # -- Extra annotations applied to Compactor resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Compactor resources.
+  # @default -- {}
   labels: {}
 
+  # -- Extra volumes for Compactor pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Compactor container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # Prometheus Operator ServiceMonitor configuration for the Compactor.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for the Compactor.
     enabled: false
+    # -- Extra labels for the Compactor ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Compactor ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for the Compactor. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for the Compactor. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for the Compactor (http or https).
     scheme: ""
+    # -- TLS configuration for Compactor scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Compactor metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Compactor metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Compactor.
   pdb:
+    # -- Enable a PodDisruptionBudget for the Compactor.
     enabled: false
+    # -- Minimum available Compactor pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Compactor pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Query component
-# Fan out engine that queries multiple store APIs and deduplicates
+# Query component
+# Fan-out query engine that queries multiple Store API endpoints
+# and deduplicates results. This is the Prometheus-compatible entrypoint.
 # ======================================================================
+# Query component — fan-out PromQL engine that deduplicates results across stores.
 query:
+  # -- Enable the Query Deployment.
   enabled: true
+
+  # -- Number of Query pod replicas. Two or more is recommended for HA.
   replicaCount: 2
 
+  # Kubernetes Service configuration for the Query component.
   service:
+    # -- Kubernetes Service type for the Query component.
     type: ClusterIP
+    # -- HTTP/PromQL port exposed by the Query Service.
     httpPort: 9090
+    # -- gRPC Store API port exposed by the Query Service.
     grpcPort: 10901
+    # -- Extra annotations for the Query Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Query Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Query HTTP endpoint.
   ingress:
+    # -- Enable a Kubernetes Ingress for the Query HTTP endpoint.
     enabled: false
+    # -- Ingress class name for Query (e.g. nginx, traefik).
     className: ""
+    # -- Extra annotations for the Query Ingress.
+    # @default -- {}
     annotations: {}
+    # Host rules for the Query Ingress.
     hosts:
       - host: thanos-query.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Query Ingress.
+    # @default -- []
     tls: []
 
-  autoscaling:
+  # Gateway API HTTPRoute configuration for the Query HTTP endpoint.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for the Query HTTP endpoint.
     enabled: false
+    # -- Annotations for the Query HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Query HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    # -- Hostnames to match on the Query HTTPRoute.
+    # @default -- []
+    hostnames: []
+    # Example:
+    # hostnames:
+    #   - thanos-query.example.com
+
+  # Gateway API GRPCRoute configuration for the Query gRPC Store API.
+  grpcRoute:
+    # -- Enable a Gateway API GRPCRoute for the Query gRPC Store API endpoint.
+    enabled: false
+    # -- Annotations for the Query GRPCRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Query GRPCRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Query GRPCRoute.
+    # @default -- []
+    hostnames: []
+
+  # HorizontalPodAutoscaler configuration for the Query component.
+  autoscaling:
+    # -- Enable HorizontalPodAutoscaler for the Query component.
+    enabled: false
+    # -- Minimum number of Query replicas.
     minReplicas: 2
+    # -- Maximum number of Query replicas.
     maxReplicas: 5
+    # -- Target CPU utilisation percentage for Query autoscaling.
     targetCPUUtilizationPercentage: 80
+    # -- Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.
     targetMemoryUtilizationPercentage: null
 
-  # -- List of store gRPC endpoints the query component should connect to
+  # -- List of gRPC Store API endpoints that Query should connect to.
+  # In-chart components (Receive, Store Gateway, Ruler) are wired automatically.
+  # Add external Prometheus sidecars or remote store gateways here.
+  # @default -- []
+  stores: []
   # Example:
   # stores:
   #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
-  stores: []
 
-  # -- Label names used to mark replica identity for deduplication
+  # Label names that identify replica identity for result deduplication.
   replicaLabels:
     - prometheus_replica
 
+  # Additional CLI arguments appended to the `thanos query` command.
   extraArgs:
     - --log.level=info
 
+  # -- Resource requests and limits for the Query container.
+  # @default -- {}
   resources: {}
+
+  # -- Pod security context for Query pods. Overrides global.podSecurityContext.
+  # @default -- {}
   podSecurityContext: {}
+
+  # -- Container security context for Query. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
+
+  # -- Extra environment variables injected into the Query container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Query container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for Query pods.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for Query pods.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Query component.
   probes:
+    # Readiness probe for the Query component.
     readiness:
+      # -- Enable the readiness probe for Query.
       enabled: true
+      # -- HTTP path checked by the Query readiness probe.
       path: /-/ready
+      # -- Port checked by the Query readiness probe.
       port: 9090
+      # -- Seconds to wait before starting the Query readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Query readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Query readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Query pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Query pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Query component.
     liveness:
+      # -- Enable the liveness probe for Query.
       enabled: true
+      # -- HTTP path checked by the Query liveness probe.
       path: /-/healthy
+      # -- Port checked by the Query liveness probe.
       port: 9090
+      # -- Seconds to wait before starting the Query liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Query liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Query liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Query container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Query container is considered live.
       successThreshold: 1
+    # Startup probe for the Query component.
     startup:
+      # -- Enable the startup probe for Query.
       enabled: true
+      # -- HTTP path checked by the Query startup probe.
       path: /-/ready
+      # -- Port checked by the Query startup probe.
       port: 9090
+      # -- Seconds to wait before starting the Query startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Query startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Query startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Query startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Query startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Query pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Query pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Query pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Query pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Query pods.
   priorityClassName: ""
 
+  # -- Extra volumes for Query pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Query container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # -- Extra annotations applied to Query resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Query resources.
+  # @default -- {}
   labels: {}
 
+  # Prometheus Operator ServiceMonitor configuration for the Query component.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for Query.
     enabled: false
+    # -- Extra labels for the Query ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Query ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for Query. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for Query. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for Query (http or https).
     scheme: ""
+    # -- TLS configuration for Query scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Query metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Query metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Query component.
   pdb:
+    # -- Enable a PodDisruptionBudget for Query.
     enabled: false
+    # -- Minimum available Query pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Query pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Query Frontend component
-# Caches and shards queries in front of thanos query
+# Query Frontend component
+# Optional caching and query-splitting layer in front of Query.
+# Reduces load for repeated or heavy long-range queries.
 # ======================================================================
+# Query Frontend component — optional caching and query-splitting layer in front of Query.
 queryFrontend:
+  # -- Enable the Query Frontend Deployment.
   enabled: false
+
+  # -- Number of Query Frontend pod replicas.
   replicaCount: 2
 
+  # -- Downstream URL of the Query component. Leave empty to use the
+  # in-chart Query service endpoint (auto-resolved).
   downstreamUrl: ""
-  # -- Optional caching config file content as string or reference via volume
+
+  # -- Optional result cache configuration (Memcached, Redis, or in-memory)
+  # passed as an inline YAML string. See https://thanos.io/tip/components/query-frontend.md/
   cacheConfig: ""
 
+  # Kubernetes Service configuration for the Query Frontend.
   service:
+    # -- Kubernetes Service type for Query Frontend.
     type: ClusterIP
+    # -- HTTP port exposed by the Query Frontend Service.
     port: 9090
+    # -- Extra annotations for the Query Frontend Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Query Frontend Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Query Frontend.
   ingress:
+    # -- Enable a Kubernetes Ingress for Query Frontend.
     enabled: false
+    # -- Ingress class name for Query Frontend (e.g. nginx, traefik).
     className: ""
+    # -- Extra annotations for the Query Frontend Ingress.
+    # @default -- {}
     annotations: {}
+    # Host rules for the Query Frontend Ingress.
     hosts:
       - host: thanos-query-frontend.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Query Frontend Ingress.
+    # @default -- []
     tls: []
 
-  autoscaling:
+  # Gateway API HTTPRoute configuration for the Query Frontend.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for Query Frontend.
     enabled: false
+    # -- Annotations for the Query Frontend HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Query Frontend HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Query Frontend HTTPRoute.
+    # @default -- []
+    hostnames: []
+
+  # HorizontalPodAutoscaler configuration for the Query Frontend.
+  autoscaling:
+    # -- Enable HorizontalPodAutoscaler for Query Frontend.
+    enabled: false
+    # -- Minimum number of Query Frontend replicas.
     minReplicas: 2
+    # -- Maximum number of Query Frontend replicas.
     maxReplicas: 5
+    # -- Target CPU utilisation percentage for Query Frontend autoscaling.
     targetCPUUtilizationPercentage: 80
+    # -- Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling.
     targetMemoryUtilizationPercentage: null
 
+  # -- Resource requests and limits for the Query Frontend container.
+  # @default -- {}
   resources: {}
+
+  # -- Additional CLI arguments appended to the `thanos query-frontend` command.
+  # @default -- []
   extraArgs: []
+
+  # -- Pod security context for Query Frontend pods. Overrides global.podSecurityContext.
+  # @default -- {}
   podSecurityContext: {}
+
+  # -- Container security context for Query Frontend. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
+
+  # -- Extra environment variables injected into the Query Frontend container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Query Frontend container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for Query Frontend pods.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for Query Frontend pods.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Query Frontend.
   probes:
+    # Readiness probe for the Query Frontend.
     readiness:
+      # -- Enable the readiness probe for Query Frontend.
       enabled: true
+      # -- HTTP path checked by the Query Frontend readiness probe.
       path: /-/ready
+      # -- Port checked by the Query Frontend readiness probe.
       port: 9090
+      # -- Seconds to wait before starting the Query Frontend readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Query Frontend readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Query Frontend readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Query Frontend pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Query Frontend pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Query Frontend.
     liveness:
+      # -- Enable the liveness probe for Query Frontend.
       enabled: true
+      # -- HTTP path checked by the Query Frontend liveness probe.
       path: /-/healthy
+      # -- Port checked by the Query Frontend liveness probe.
       port: 9090
+      # -- Seconds to wait before starting the Query Frontend liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Query Frontend liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Query Frontend liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Query Frontend container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Query Frontend container is considered live.
       successThreshold: 1
+    # Startup probe for the Query Frontend.
     startup:
+      # -- Enable the startup probe for Query Frontend.
       enabled: true
+      # -- HTTP path checked by the Query Frontend startup probe.
       path: /-/ready
+      # -- Port checked by the Query Frontend startup probe.
       port: 9090
+      # -- Seconds to wait before starting the Query Frontend startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Query Frontend startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Query Frontend startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Query Frontend startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Query Frontend startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Query Frontend pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Query Frontend pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Query Frontend pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Query Frontend pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Query Frontend pods.
   priorityClassName: ""
 
+  # -- Extra volumes for Query Frontend pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Query Frontend container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # -- Extra annotations applied to Query Frontend resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Query Frontend resources.
+  # @default -- {}
   labels: {}
 
+  # Prometheus Operator ServiceMonitor configuration for the Query Frontend.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for Query Frontend.
     enabled: false
+    # -- Extra labels for the Query Frontend ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Query Frontend ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for Query Frontend. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for Query Frontend. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for Query Frontend (http or https).
     scheme: ""
+    # -- TLS configuration for Query Frontend scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Query Frontend metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Query Frontend metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Query Frontend.
   pdb:
+    # -- Enable a PodDisruptionBudget for Query Frontend.
     enabled: false
+    # -- Minimum available Query Frontend pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Query Frontend pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Store Gateway component
-# Exposes historical blocks from object store via Store API
+# Store Gateway component
+# Exposes historical blocks from the object store via the Store API.
+# Query routes requests for data older than the local Receive retention
+# to this component.
 # ======================================================================
+# Store Gateway component — serves historical blocks from the object store over the Store API.
 storegateway:
+  # -- Enable the Store Gateway StatefulSet.
   enabled: true
+
+  # -- Number of Store Gateway pod replicas. Two or more is recommended for HA.
   replicaCount: 2
 
+  # Kubernetes Service configuration for the Store Gateway.
   service:
+    # -- Kubernetes Service type for the Store Gateway.
     type: ClusterIP
+    # -- gRPC Store API port exposed by the Store Gateway Service.
     grpcPort: 10901
+    # -- HTTP port exposed by the Store Gateway Service.
     httpPort: 10902
+    # -- Extra annotations for the Store Gateway Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Store Gateway Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Store Gateway HTTP endpoint.
   ingress:
+    # -- Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint.
     enabled: false
+    # -- Ingress class name for Store Gateway (e.g. nginx, traefik).
     className: ""
+    # -- Extra annotations for the Store Gateway Ingress.
+    # @default -- {}
     annotations: {}
+    # Host rules for the Store Gateway Ingress.
     hosts:
       - host: thanos-store.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Store Gateway Ingress.
+    # @default -- []
     tls: []
 
-  autoscaling:
+  # Gateway API HTTPRoute configuration for the Store Gateway HTTP endpoint.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint.
     enabled: false
+    # -- Annotations for the Store Gateway HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Store Gateway HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Store Gateway HTTPRoute.
+    # @default -- []
+    hostnames: []
+
+  # Gateway API GRPCRoute configuration for the Store Gateway gRPC Store API.
+  grpcRoute:
+    # -- Enable a Gateway API GRPCRoute for the Store Gateway gRPC Store API endpoint.
+    enabled: false
+    # -- Annotations for the Store Gateway GRPCRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Store Gateway GRPCRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Store Gateway GRPCRoute.
+    # @default -- []
+    hostnames: []
+
+  # HorizontalPodAutoscaler configuration for the Store Gateway.
+  autoscaling:
+    # -- Enable HorizontalPodAutoscaler for the Store Gateway.
+    enabled: false
+    # -- Minimum number of Store Gateway replicas.
     minReplicas: 2
+    # -- Maximum number of Store Gateway replicas.
     maxReplicas: 6
+    # -- Target CPU utilisation percentage for Store Gateway autoscaling.
     targetCPUUtilizationPercentage: 80
+    # -- Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling.
     targetMemoryUtilizationPercentage: null
 
+  # PersistentVolumeClaim configuration for the Store Gateway index cache.
   persistence:
+    # -- Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store.
     enabled: true
+    # -- Storage capacity for the Store Gateway PVC.
     size: 10Gi
+    # -- StorageClass name for the Store Gateway PVC. Empty uses the cluster default.
     storageClass: ""
+    # Access modes for the Store Gateway PVC.
     accessModes:
       - ReadWriteOnce
 
-  # -- Optional caching bucket config passed as a file or inline string
+  # -- Optional caching bucket configuration (e.g. Memcached) that wraps the
+  # object store to reduce the number of object store API calls.
+  # Provide as an inline YAML string. See https://thanos.io/tip/components/store.md/#caching-bucket
   cachingBucketConfig: ""
 
+  # -- Resource requests and limits for the Store Gateway container.
+  # @default -- {}
   resources: {}
+
+  # -- Additional CLI arguments appended to the `thanos store` command.
+  # @default -- []
   extraArgs: []
+
+  # Pod security context for Store Gateway pods. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
     fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context for Store Gateway. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
+
+  # -- Extra environment variables injected into the Store Gateway container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Store Gateway container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for Store Gateway pods.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for Store Gateway pods.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Store Gateway.
   probes:
+    # Readiness probe for the Store Gateway.
     readiness:
+      # -- Enable the readiness probe for the Store Gateway.
       enabled: true
+      # -- HTTP path checked by the Store Gateway readiness probe.
       path: /-/ready
+      # -- Port checked by the Store Gateway readiness probe.
       port: 10902
+      # -- Seconds to wait before starting the Store Gateway readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Store Gateway readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Store Gateway readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Store Gateway pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Store Gateway pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Store Gateway.
     liveness:
+      # -- Enable the liveness probe for the Store Gateway.
       enabled: true
+      # -- HTTP path checked by the Store Gateway liveness probe.
       path: /-/healthy
+      # -- Port checked by the Store Gateway liveness probe.
       port: 10902
+      # -- Seconds to wait before starting the Store Gateway liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Store Gateway liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Store Gateway liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Store Gateway container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Store Gateway container is considered live.
       successThreshold: 1
+    # Startup probe for the Store Gateway.
     startup:
+      # -- Enable the startup probe for the Store Gateway.
       enabled: true
+      # -- HTTP path checked by the Store Gateway startup probe.
       path: /-/ready
+      # -- Port checked by the Store Gateway startup probe.
       port: 10902
+      # -- Seconds to wait before starting the Store Gateway startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Store Gateway startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Store Gateway startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Store Gateway startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Store Gateway startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Store Gateway pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Store Gateway pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Store Gateway pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Store Gateway pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Store Gateway pods.
   priorityClassName: ""
 
+  # -- Extra volumes for Store Gateway pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Store Gateway container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # -- Extra annotations applied to Store Gateway resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Store Gateway resources.
+  # @default -- {}
   labels: {}
 
+  # Prometheus Operator ServiceMonitor configuration for the Store Gateway.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for the Store Gateway.
     enabled: false
+    # -- Extra labels for the Store Gateway ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Store Gateway ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for the Store Gateway. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for the Store Gateway. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for the Store Gateway (http or https).
     scheme: ""
+    # -- TLS configuration for Store Gateway scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Store Gateway metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Store Gateway metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Store Gateway.
   pdb:
+    # -- Enable a PodDisruptionBudget for the Store Gateway.
     enabled: false
+    # -- Minimum available Store Gateway pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Store Gateway pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Receive component
-# Remote write endpoint that splits and forwards samples, optionally sharded
+# Receive component
+# Remote-write endpoint that accepts Prometheus remote_write traffic,
+# stores samples in a local TSDB WAL, and ships blocks to the object store.
+# Supports sharded (hashring) topologies for high-throughput ingestion.
 # ======================================================================
+# Receive component — remote-write ingestion endpoint that ships blocks to the object store.
 receive:
+  # -- Enable the Receive StatefulSet.
   enabled: true
+
+  # -- Number of Receive pod replicas. Minimum 3 is recommended for
+  # replication factor 2 (write quorum = floor(replicaCount/2)+1).
   replicaCount: 3
 
-  # -- Optional multi tenancy header name to segregate tenants
+  # -- Optional HTTP header name used to segregate tenants in multi-tenant setups.
+  # When set, Receive routes write requests to the correct tenant shard based on this header.
   tenancyHeader: ""
-  
-  # -- TSDB settings for local storage of samples before shipping to object store
+
+  # TSDB settings for the local WAL before blocks are uploaded to the object store.
   tsdb:
-    # -- TSDB retention period for local WAL
+    # -- How long Receive keeps data in the local WAL before uploading to the object store.
     retention: 24h
-    # -- Enable WAL compression to reduce IO and disk
+    # -- Enable WAL compression to reduce disk I/O and storage usage.
     walCompression: true
 
-
-  # -- existing fields...
+  # Hashring topology configuration for the Receive StatefulSet.
   hashrings:
-    # -- if enabled true, autogenerate a single ring named default with endpoints
-    # receive-0.receive:10901 ... receive-(replicaCount-1).receive:10901
+    # Auto-generated single-ring configuration derived from the StatefulSet pod DNS names.
     autogen:
+      # -- Auto-generate a single default hashring whose endpoints are derived
+      # from the StatefulSet pod DNS names:
+      # `<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`.
       enabled: true
+      # -- Name of the auto-generated hashring.
       name: default
-    # -- optional static configuration to fully control rings
-    # -- when non empty, it overrides autogen
+    # -- Optional static hashring configuration. When non-empty this overrides
+    # `autogen` and gives full control over ring topology.
+    # @default -- []
     static: []
-    # example:
+    # Example:
     # static:
     #   - hashring: default
     #     endpoints:
     #       - thanos-receive-0.thanos-receive:10901
     #       - thanos-receive-1.thanos-receive:10901
 
+  # Kubernetes Service configuration for the Receive component.
   service:
+    # -- Kubernetes Service type for the Receive component.
     type: ClusterIP
+    # -- gRPC Store API port exposed by the Receive Service.
     grpcPort: 10901
+    # -- HTTP port exposed by the Receive Service.
     httpPort: 10902
+    # -- Remote-write ingestion port exposed by the Receive Service.
     remoteWritePort: 10908
+    # -- Extra annotations for the Receive Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Receive Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Receive remote-write endpoint.
   ingress:
+    # -- Enable a Kubernetes Ingress for the Receive remote-write endpoint.
     enabled: false
+    # -- Ingress class name for Receive (e.g. nginx, traefik).
     className: ""
+    # -- Extra annotations for the Receive Ingress.
+    # @default -- {}
     annotations: {}
+    # Host rules for the Receive Ingress.
     hosts:
       - host: thanos-receive.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Receive Ingress.
+    # @default -- []
     tls: []
 
+  # Gateway API HTTPRoute configuration for the Receive HTTP endpoint.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for the Receive HTTP endpoint.
+    enabled: false
+    # -- Annotations for the Receive HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Receive HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Receive HTTPRoute.
+    # @default -- []
+    hostnames: []
+
+  # Gateway API GRPCRoute configuration for the Receive gRPC Store API.
+  grpcRoute:
+    # -- Enable a Gateway API GRPCRoute for the Receive gRPC Store API endpoint.
+    enabled: false
+    # -- Annotations for the Receive GRPCRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Receive GRPCRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Receive GRPCRoute.
+    # @default -- []
+    hostnames: []
+
+  # VerticalPodAutoscaler configuration for the Receive StatefulSet.
   vpa:
+    # -- Enable a VerticalPodAutoscaler for the Receive StatefulSet.
     enabled: true
+    # -- Kubernetes workload kind targeted by the Receive VPA.
     targetKind: StatefulSet
-    updateMode: Auto   # Auto | Off | Initial
+    # -- VPA update mode for Receive. One of Auto, Off, or Initial.
+    updateMode: Auto
+    # Minimum resource limits enforced by the Receive VPA.
     minAllowed:
+      # -- Minimum CPU resource enforced by the Receive VPA.
       cpu: 500m
+      # -- Minimum memory resource enforced by the Receive VPA.
       memory: 512Mi
+    # Maximum resource limits enforced by the Receive VPA.
     maxAllowed:
+      # -- Maximum CPU resource enforced by the Receive VPA.
       cpu: "4"
+      # -- Maximum memory resource enforced by the Receive VPA.
       memory: 8Gi
 
+  # PersistentVolumeClaim configuration for the Receive TSDB WAL.
   persistence:
+    # -- Enable a PersistentVolumeClaim for the Receive TSDB WAL.
     enabled: true
+    # -- Storage capacity for the Receive PVC.
+    # Should be sized to hold at least `tsdb.retention` worth of data.
     size: 10Gi
+    # -- StorageClass name for the Receive PVC. Empty uses the cluster default.
     storageClass: ""
+    # Access modes for the Receive PVC.
     accessModes:
       - ReadWriteOnce
 
+  # -- Resource requests and limits for the Receive container.
+  # @default -- {}
   resources: {}
+
+  # -- Additional CLI arguments appended to the `thanos receive` command.
+  # @default -- []
   extraArgs: []
+
+  # Pod security context for Receive pods. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
     fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context for Receive. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
+
+  # -- Extra environment variables injected into the Receive container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Receive container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for Receive pods.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for Receive pods.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Receive component.
   probes:
+    # Readiness probe for the Receive component.
     readiness:
+      # -- Enable the readiness probe for Receive.
       enabled: true
+      # -- HTTP path checked by the Receive readiness probe.
       path: /-/ready
+      # -- Port checked by the Receive readiness probe.
       port: 10902
+      # -- Seconds to wait before starting the Receive readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Receive readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Receive readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Receive pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Receive pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Receive component.
     liveness:
+      # -- Enable the liveness probe for Receive.
       enabled: true
+      # -- HTTP path checked by the Receive liveness probe.
       path: /-/healthy
+      # -- Port checked by the Receive liveness probe.
       port: 10902
+      # -- Seconds to wait before starting the Receive liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Receive liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Receive liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Receive container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Receive container is considered live.
       successThreshold: 1
+    # Startup probe for the Receive component.
     startup:
+      # -- Enable the startup probe for Receive.
       enabled: true
+      # -- HTTP path checked by the Receive startup probe.
       path: /-/ready
+      # -- Port checked by the Receive startup probe.
       port: 10902
+      # -- Seconds to wait before starting the Receive startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Receive startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Receive startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Receive startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Receive startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Receive pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Receive pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Receive pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Receive pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Receive pods.
   priorityClassName: ""
 
+  # -- Extra volumes for Receive pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Receive container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # -- Extra annotations applied to Receive resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Receive resources.
+  # @default -- {}
   labels: {}
 
+  # Prometheus Operator ServiceMonitor configuration for the Receive component.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for Receive.
     enabled: false
+    # -- Extra labels for the Receive ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Receive ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for Receive. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for Receive. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for Receive (http or https).
     scheme: ""
+    # -- TLS configuration for Receive scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Receive metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Receive metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Receive component.
   pdb:
+    # -- Enable a PodDisruptionBudget for Receive.
     enabled: false
+    # -- Minimum available Receive pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Receive pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
-# -- Ruler component
-# Evaluates alerting and recording rules using query and sends to Alertmanager
+# Ruler component
+# Evaluates alerting and recording rules by querying the Query component
+# and sends alerts to Alertmanager, mirroring Prometheus rule evaluation.
 # ======================================================================
+# Ruler component — evaluates alerting and recording rules against the Query component.
 ruler:
+  # -- Enable the Ruler StatefulSet.
   enabled: false
+
+  # -- Number of Ruler pod replicas. Multiple replicas require consistent
+  # rule distribution to avoid duplicate alerts.
   replicaCount: 2
 
+  # Query endpoint configuration used by the Ruler to evaluate rules.
   query:
-    # -- List of base URLs for query component to evaluate rules against
+    # -- List of Query component base URLs used by the Ruler to evaluate rules.
+    # @default -- []
     urls: []
-  # -- Alertmanager routing configuration in Thanos format
+
+  # Alertmanager routing configuration in Thanos format.
+  # See https://thanos.io/tip/components/rule.md/#flags for the full schema.
   alertmanagers:
     config: |
       static_configs:
         - targets: ["alertmanager.monitoring.svc.cluster.local:9093"]
 
-  # -- URL used in rule alerts to link back to a UI
+  # -- URL used in rule alert annotations to link back to a Thanos query UI.
   alertQueryUrl: ""
 
-  # -- Inline rule files. Use external ConfigMap volumes for large rule sets.
+  # Inline rule files loaded by the Ruler. Keys are filenames; values are
+  # PrometheusRule-compatible YAML content. Use external ConfigMap volumes
+  # for large or frequently updated rule sets.
   rules:
     example-alerts.yaml: |
       groups:
@@ -893,104 +1874,285 @@ ruler:
               annotations:
                 summary: Example alert firing
 
+  # Auto-import PrometheusRule CRDs from the cluster into the Ruler config.
   autoImportPrometheusRules:
+    # -- Enable automatic import of PrometheusRule CRDs from the cluster into
+    # the Ruler. Requires kube-prometheus-stack (or any Prometheus Operator
+    # deployment) to be present in the cluster.
     enabled: true
-    # -- Label selector to find PrometheusRule CRDs to import rules from
+    # -- Label selector used to filter which PrometheusRule CRDs are imported.
+    # Empty selector imports all PrometheusRule resources visible to the sidecar.
+    # @default -- {}
     labelSelector: {}
+    # kubectl sidecar container that reads PrometheusRule CRDs from the cluster.
     sidecar:
+      # Container image for the kubectl sidecar used by autoImportPrometheusRules.
       image:
+        # -- Repository for the kubectl sidecar that reads PrometheusRule CRDs.
         repository: alpine/kubectl
+        # -- Tag for the kubectl sidecar image.
         tag: latest
+        # -- Image pull policy for the kubectl sidecar.
         pullPolicy: IfNotPresent
 
+  # PersistentVolumeClaim configuration for the Ruler data directory.
   persistence:
+    # -- Enable a PersistentVolumeClaim for the Ruler data directory.
     enabled: true
+    # -- Storage capacity for the Ruler PVC.
     size: 10Gi
+    # -- StorageClass name for the Ruler PVC. Empty uses the cluster default.
     storageClass: ""
+    # Access modes for the Ruler PVC.
     accessModes:
       - ReadWriteOnce
 
+  # Kubernetes Service configuration for the Ruler component.
   service:
+    # -- Kubernetes Service type for the Ruler component.
     type: ClusterIP
+    # -- HTTP port exposed by the Ruler Service.
     httpPort: 10902
+    # -- Extra annotations for the Ruler Service.
+    # @default -- {}
     annotations: {}
+    # -- Extra labels for the Ruler Service.
+    # @default -- {}
     labels: {}
 
+  # Kubernetes Ingress configuration for the Ruler HTTP endpoint.
   ingress:
+    # -- Enable a Kubernetes Ingress for the Ruler HTTP endpoint.
     enabled: false
+    # -- Ingress class name for Ruler (e.g. nginx, traefik).
     className: ""
+    # -- Extra annotations for the Ruler Ingress.
+    # @default -- {}
     annotations: {}
+    # Host rules for the Ruler Ingress.
     hosts:
       - host: thanos-ruler.local
         paths:
           - path: /
             pathType: Prefix
+    # -- TLS configuration for the Ruler Ingress.
+    # @default -- []
     tls: []
 
+  # Gateway API HTTPRoute configuration for the Ruler HTTP endpoint.
+  httpRoute:
+    # -- Enable a Gateway API HTTPRoute for the Ruler HTTP endpoint.
+    enabled: false
+    # -- Annotations for the Ruler HTTPRoute resource.
+    # @default -- {}
+    annotations: {}
+    # -- Gateway parentRefs for the Ruler HTTPRoute.
+    # @default -- []
+    parentRefs: []
+    # -- Hostnames to match on the Ruler HTTPRoute.
+    # @default -- []
+    hostnames: []
+
+  # -- Resource requests and limits for the Ruler container.
+  # @default -- {}
   resources: {}
+
+  # -- Additional CLI arguments appended to the `thanos rule` command.
+  # @default -- []
   extraArgs: []
+
+  # Pod security context for Ruler pods. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
     fsGroupChangePolicy: OnRootMismatch
+
+  # -- Container security context for Ruler. Overrides global.containerSecurityContext.
+  # @default -- {}
   containerSecurityContext: {}
+
+  # -- Extra environment variables injected into the Ruler container.
+  # @default -- []
   extraEnv: []
+
+  # -- Extra environment variable sources for the Ruler container.
+  # @default -- []
   extraEnvFrom: []
+
+  # -- Extra init containers for Ruler pods.
+  # @default -- []
   extraInitContainers: []
+
+  # -- Extra sidecar containers for Ruler pods.
+  # @default -- []
   extraContainers: []
 
+  # Health and readiness probe configuration for the Ruler component.
   probes:
+    # Readiness probe for the Ruler component.
     readiness:
+      # -- Enable the readiness probe for the Ruler.
       enabled: true
+      # -- HTTP path checked by the Ruler readiness probe.
       path: /-/ready
+      # -- Port checked by the Ruler readiness probe.
       port: 10902
+      # -- Seconds to wait before starting the Ruler readiness probe.
       initialDelaySeconds: 5
+      # -- How often (seconds) to run the Ruler readiness probe.
       periodSeconds: 10
+      # -- Seconds after which the Ruler readiness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Ruler pod is marked not-ready.
       failureThreshold: 6
+      # -- Consecutive successes before the Ruler pod is marked ready.
       successThreshold: 1
+    # Liveness probe for the Ruler component.
     liveness:
+      # -- Enable the liveness probe for the Ruler.
       enabled: true
+      # -- HTTP path checked by the Ruler liveness probe.
       path: /-/healthy
+      # -- Port checked by the Ruler liveness probe.
       port: 10902
+      # -- Seconds to wait before starting the Ruler liveness probe.
       initialDelaySeconds: 30
+      # -- How often (seconds) to run the Ruler liveness probe.
       periodSeconds: 10
+      # -- Seconds after which the Ruler liveness probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures before the Ruler container is restarted.
       failureThreshold: 6
+      # -- Consecutive successes before the Ruler container is considered live.
       successThreshold: 1
+    # Startup probe for the Ruler component.
     startup:
+      # -- Enable the startup probe for the Ruler.
       enabled: true
+      # -- HTTP path checked by the Ruler startup probe.
       path: /-/ready
+      # -- Port checked by the Ruler startup probe.
       port: 10902
+      # -- Seconds to wait before starting the Ruler startup probe.
       initialDelaySeconds: 0
+      # -- How often (seconds) to run the Ruler startup probe.
       periodSeconds: 5
+      # -- Seconds after which the Ruler startup probe times out.
       timeoutSeconds: 5
+      # -- Consecutive failures during Ruler startup before the container is killed.
       failureThreshold: 60
+      # -- Consecutive successes before the Ruler startup probe is considered passed.
       successThreshold: 1
 
+  # -- Node selector for Ruler pod scheduling.
+  # @default -- {}
   nodeSelector: {}
+
+  # -- Tolerations for Ruler pod scheduling.
+  # @default -- []
   tolerations: []
+
+  # -- Affinity rules for Ruler pod scheduling.
+  # @default -- {}
   affinity: {}
+
+  # -- Topology spread constraints for Ruler pods.
+  # @default -- []
   topologySpreadConstraints: []
+
+  # -- Priority class name for Ruler pods.
   priorityClassName: ""
 
+  # -- Extra volumes for Ruler pods.
+  # @default -- []
   extraVolumes: []
+
+  # -- Extra volume mounts for the Ruler container.
+  # @default -- []
   extraVolumeMounts: []
 
+  # -- Extra annotations applied to Ruler resources.
+  # @default -- {}
   annotations: {}
+
+  # -- Extra labels applied to Ruler resources.
+  # @default -- {}
   labels: {}
-  
+
+  # Prometheus Operator ServiceMonitor configuration for the Ruler component.
   serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for the Ruler.
     enabled: false
+    # -- Extra labels for the Ruler ServiceMonitor.
+    # @default -- {}
     labels: {}
+    # -- Extra annotations for the Ruler ServiceMonitor.
+    # @default -- {}
     annotations: {}
+    # -- Scrape interval for the Ruler. Empty uses the Prometheus operator default.
     interval: ""
+    # -- Scrape timeout for the Ruler. Empty uses the Prometheus operator default.
     scrapeTimeout: ""
+    # -- Scrape scheme for the Ruler (http or https).
     scheme: ""
+    # -- TLS configuration for Ruler scraping.
+    # @default -- {}
     tlsConfig: {}
+    # -- Relabeling rules applied before Ruler metrics are ingested.
+    # @default -- []
     relabelings: []
+    # -- Metric relabeling rules applied after Ruler metrics are ingested.
+    # @default -- []
     metricRelabelings: []
 
+  # PodDisruptionBudget configuration for the Ruler component.
   pdb:
+    # -- Enable a PodDisruptionBudget for the Ruler.
     enabled: false
+    # -- Minimum available Ruler pods during a disruption.
     minAvailable: ""
+    # -- Maximum unavailable Ruler pods during a disruption.
     maxUnavailable: ""
+
+# ======================================================================
+# RustFS subchart (optional local S3-compatible object store)
+# Disabled by default. Enable in CI or development environments where no
+# external object store is available. See charts/thanos/ci/ci-values.yaml
+# for a complete CI configuration example.
+# ======================================================================
+# RustFS subchart — optional local S3-compatible object store for CI/dev environments.
+rustfs:
+  # -- Deploy a local RustFS instance as an S3-compatible object store alongside Thanos.
+  # Intended for CI and development only. Do not enable in production.
+  enabled: false
+  initBucket:
+    # -- Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.
+    image: rustfs/rc:latest
+    # -- S3 bucket name to create.
+    bucketName: thanos
+    # -- Name of an existing Secret containing the RustFS credentials.
+    # When set, accessKey and secretKey are ignored.
+    # The Secret must contain the keys defined in existingSecretKeys.
+    existingSecret: ""
+    existingSecretKeys:
+      # -- Key in the existing Secret for the access key.
+      accessKey: access-key
+      # -- Key in the existing Secret for the secret key.
+      secretKey: secret-key
+    # -- RustFS admin username. Ignored when existingSecret is set.
+    accessKey: rustfsadmin
+    # -- RustFS admin password. Ignored when existingSecret is set.
+    secretKey: rustfsadmin
+
+# ======================================================================
+# kube-prometheus-stack subchart (optional)
+# Deploys the full Prometheus Operator stack (Prometheus, Alertmanager,
+# Grafana, node-exporter, kube-state-metrics) alongside Thanos.
+# All kube-prometheus-stack values are passed through unchanged.
+# Refer to https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+# for the full values reference.
+# ======================================================================
+# kube-prometheus-stack subchart — optional full Prometheus Operator deployment.
+kube-prometheus-stack:
+  # -- Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator
+  # and associated components into the same namespace as Thanos.
+  enabled: false

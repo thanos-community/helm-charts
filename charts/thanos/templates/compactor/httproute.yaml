@@ -1,0 +1,3 @@
+{{- if and .Values.compactor.enabled .Values.compactor.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "compactor" .Values.compactor.service.port .Values.compactor.httpRoute) }}
+{{- end }}

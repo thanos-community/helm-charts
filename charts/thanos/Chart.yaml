@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "v0.39.2"
 keywords:
   - thanos
@@ -28,4 +28,25 @@ dependencies:
     version: 80.2.0
     repository: https://prometheus-community.github.io/helm-charts
     condition: kube-prometheus-stack.enabled
-annotations: {}
+  - name: rustfs
+    version: "0.0.90"
+    repository: https://charts.rustfs.com/
+    condition: rustfs.enabled
+annotations:
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/operator: "false"
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/images: |
+    - name: thanos
+      image: quay.io/thanos/thanos:v0.39.2
+  artifacthub.io/links: |
+    - name: Documentation
+      url: https://thanos.io/tip/thanos/getting-started.md/
+    - name: GitHub
+      url: https://github.com/thanos-io/thanos
+    - name: Slack
+      url: https://cloud-native.slack.com/archives/CL25937SP
+  artifacthub.io/changes: |
+    - kind: added
+      description: Initial release of thanos Helm chart

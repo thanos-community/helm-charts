@@ -30,6 +30,10 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{ include "thanos.imagePullSecrets" . | nindent 6 }}
       {{ include "thanos.podSC" (dict "root" . "key" "receive") | nindent 6 }}
+      {{- if .Values.receive.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.receive.extraInitContainers) . | nindent 8 }}
+      {{- end }}
       containers:
         - name: receive
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -48,6 +52,9 @@ spec:
             {{- if .Values.receive.tenancyHeader }}
             - --receive.tenant-header={{ .Values.receive.tenancyHeader }}
             {{- end }}
+            {{- if .Values.receive.tsdb.retention }}
+            - --tsdb.retention={{ .Values.receive.tsdb.retention }}
+            {{- end }}
             {{- if .Values.receive.tsdb.walCompression }}
             - --tsdb.wal-compression
             {{- end }}
@@ -59,14 +66,14 @@ spec:
               containerPort: {{ .Values.receive.service.grpcPort }}
             - name: http
               containerPort: {{ default 10902 .Values.receive.service.httpPort }}
-            - name: remote-write 
+            - name: remote-write
               containerPort: {{ .Values.receive.service.remoteWritePort }}
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-            - name: NAME 
+            - name: NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name

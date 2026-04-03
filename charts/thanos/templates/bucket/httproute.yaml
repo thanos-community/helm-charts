@@ -1,0 +1,3 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.bucket.bucketweb.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "bucketweb" .Values.bucket.bucketweb.service.port .Values.bucket.bucketweb.httpRoute) }}
+{{- end }}

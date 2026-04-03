@@ -1,0 +1,3 @@
+{{- if and .Values.queryFrontend.enabled .Values.queryFrontend.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "query-frontend" .Values.queryFrontend.service.port .Values.queryFrontend.httpRoute) }}
+{{- end }}

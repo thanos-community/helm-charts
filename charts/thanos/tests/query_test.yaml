@@ -1,0 +1,88 @@
+suite: query component
+templates:
+  - query/deployment.yaml
+
+tests:
+  - it: renders deployment when query is enabled
+    set:
+      query.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query
+
+  - it: does not render when query is disabled
+    set:
+      query.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets the correct replica count
+    set:
+      query.enabled: true
+      query.replicaCount: 5
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 5
+
+  - it: uses the global image repository and tag
+    set:
+      query.enabled: true
+      global.image.repository: quay.io/thanos/thanos
+      global.image.tag: v0.40.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/thanos/thanos:v0.40.0
+
+  - it: passes replica labels as CLI args
+    set:
+      query.enabled: true
+      query.replicaLabels:
+        - prometheus_replica
+        - thanos_replica
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --query.replica-label=prometheus_replica
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --query.replica-label=thanos_replica
+
+  - it: adds store endpoints for storegateway when enabled
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: false
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
+
+  - it: passes extra CLI args
+    set:
+      query.enabled: true
+      query.extraArgs:
+        - --log.level=debug
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--log.level=debug"
+
+  - it: applies global container security context
+    set:
+      query.enabled: true
+      global.containerSecurityContext:
+        runAsNonRoot: true
+        readOnlyRootFilesystem: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true

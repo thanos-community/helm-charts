@@ -1,0 +1,52 @@
+suite: storegateway component
+templates:
+  - storegateway/statefulset.yaml
+
+tests:
+  - it: renders statefulset when storegateway is enabled
+    set:
+      storegateway.enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+
+  - it: does not render when storegateway is disabled
+    set:
+      storegateway.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets the correct replica count
+    set:
+      storegateway.enabled: true
+      storegateway.replicaCount: 4
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 4
+
+  - it: creates persistence volume claim template
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.persistence.size: 50Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+
+  - it: applies pod security context
+    set:
+      storegateway.enabled: true
+      storegateway.podSecurityContext:
+        fsGroup: 2000
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 2000
