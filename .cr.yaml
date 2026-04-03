@@ -1,0 +1,7 @@
+owner: thanos-community
+git-repo: helm-charts
+charts-dir: charts
+packages-path: .cr-release-packages
+pages-branch: gh-pages
+skip-existing: true
+make-release-latest: true

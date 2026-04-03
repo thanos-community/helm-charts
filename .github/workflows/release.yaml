@@ -5,12 +5,12 @@ on:
     branches:
       - master
     paths:
-      - 'charts/**'
+      - "charts/**"
 
 permissions:
   contents: write
-  id-token: write   # required for cosign OIDC keyless signing
-  packages: write   # required for ghcr.io OCI publishing
+  id-token: write # required for cosign OIDC keyless signing
+  packages: write # required for ghcr.io OCI publishing
 
 jobs:
   release:
@@ -69,11 +69,13 @@ jobs:
           done
 
       - name: Release charts (GitHub Releases + gh-pages Helm repo)
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@v1.6.0
         with:
           skip_packaging: true
+          config: .cr.yaml
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          latest_tag: ""
 
       - name: Upload Cosign bundles to GitHub releases
         run: |
