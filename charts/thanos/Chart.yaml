@@ -3,7 +3,7 @@ name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
 version: 0.2.0
-appVersion: "v0.39.2"
+appVersion: "v0.41.0"
 keywords:
   - thanos
   - prometheus
@@ -39,7 +39,7 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/images: |
     - name: thanos
-      image: quay.io/thanos/thanos:v0.39.2
+      image: quay.io/thanos/thanos:v0.41.0
   artifacthub.io/links: |
     - name: Documentation
       url: https://thanos.io/tip/thanos/getting-started.md/
