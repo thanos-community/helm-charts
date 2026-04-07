@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "autodiscover": true,
   "labels": [
     "renovate"
   ],
