@@ -7,51 +7,87 @@
     "renovate"
   ],
   "helm-values": {
-    "fileMatch": ["(^|/)charts/.+/values\\.yaml$"]
+    "fileMatch": [
+      "(^|/)charts/.+/values\\.yaml$"
+    ]
   },
   "packageRules": [
     {
       "description": "Group Thanos image tag (values.yaml) and appVersion (Chart.yaml) into one PR",
-      "matchPackageNames": ["quay.io/thanos/thanos", "thanos-io/thanos"],
+      "matchPackageNames": [
+        "quay.io/thanos/thanos",
+        "thanos-io/thanos"
+      ],
       "groupName": "Thanos",
       "groupSlug": "thanos",
       "commitMessageTopic": "Thanos {{newVersion}}",
-      "labels": ["renovate", "thanos"]
+      "labels": [
+        "renovate",
+        "thanos"
+      ]
     },
     {
       "description": "Group kube-prometheus-stack helm chart updates into one PR",
-      "matchPackageNames": ["kube-prometheus-stack"],
-      "matchManagers": ["helmv3"],
+      "matchPackageNames": [
+        "kube-prometheus-stack"
+      ],
+      "matchManagers": [
+        "helmv3"
+      ],
       "groupName": "kube-prometheus-stack",
       "groupSlug": "kube-prometheus-stack",
       "commitMessageTopic": "kube-prometheus-stack {{newVersion}}",
-      "labels": ["renovate", "kube-prometheus-stack"]
+      "labels": [
+        "renovate",
+        "kube-prometheus-stack"
+      ]
     },
     {
       "description": "Group RustFS helm chart updates into one PR",
-      "matchPackageNames": ["rustfs"],
-      "matchManagers": ["helmv3"],
+      "matchPackageNames": [
+        "rustfs"
+      ],
+      "matchManagers": [
+        "helmv3"
+      ],
       "groupName": "rustfs",
       "groupSlug": "rustfs",
       "commitMessageTopic": "rustfs {{newVersion}}",
-      "labels": ["renovate", "rustfs"]
+      "labels": [
+        "renovate",
+        "rustfs"
+      ]
     },
     {
-      "matchManagers": ["helmv3"],
+      "matchManagers": [
+        "helmv3"
+      ],
       "commitMessageTopic": "helm dependency {{depName}}",
-      "labels": ["renovate", "helm"]
+      "labels": [
+        "renovate",
+        "helm"
+      ]
     },
     {
-      "matchManagers": ["github-actions"],
-      "labels": ["renovate", "github-actions"]
+      "matchManagers": [
+        "github-actions"
+      ],
+      "labels": [
+        "renovate",
+        "github-actions"
+      ]
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
       "description": "Update Thanos appVersion in Chart.yaml from GitHub releases",
-      "fileMatch": ["(^|/)charts/[^/]+/Chart\\.yaml$"],
-      "matchStrings": ["appVersion:\\s+[\"']?(?<currentValue>[^\"'\\s\\n]+)[\"']?"],
+      "fileMatch": [
+        "(^|/)charts/[^/]+/Chart\\.yaml$"
+      ],
+      "matchStrings": [
+        "appVersion:\\s+[\"']?(?<currentValue>[^\"'\\s\\n]+)[\"']?"
+      ],
       "depNameTemplate": "thanos-io/thanos",
       "datasourceTemplate": "github-releases",
       "versioningTemplate": "semver"
@@ -59,8 +95,12 @@
     {
       "customType": "regex",
       "description": "Update Thanos image tag in artifacthub.io/images annotation",
-      "fileMatch": ["(^|/)charts/[^/]+/Chart\\.yaml$"],
-      "matchStrings": ["image:\\s+quay\\.io/thanos/thanos:(?<currentValue>[^\\s]+)"],
+      "fileMatch": [
+        "(^|/)charts/[^/]+/Chart\\.yaml$"
+      ],
+      "matchStrings": [
+        "image:\\s+quay\\.io/thanos/thanos:(?<currentValue>[^\\s]+)"
+      ],
       "depNameTemplate": "quay.io/thanos/thanos",
       "datasourceTemplate": "docker",
       "versioningTemplate": "semver"
