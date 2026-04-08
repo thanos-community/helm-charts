@@ -45,7 +45,7 @@ spec:
             - --remote-write.address=0.0.0.0:{{ .Values.receive.service.remoteWritePort }}
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --tsdb.path=/var/thanos/receive
-            - --label=receive_replica="$(HOSTNAME)"
+            - --label=receive_replica="$(POD_NAME)"
             - --receive.hashrings-file=/etc/thanos/hashrings.json
             - --receive.hashrings-algorithm=ketama
             - --receive.local-endpoint=$(NAME).{{ include "thanos.compName" (list . "receive") }}-headless.$(NAMESPACE).svc.cluster.local:{{ .Values.receive.service.grpcPort }}
