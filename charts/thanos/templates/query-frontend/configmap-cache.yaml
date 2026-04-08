@@ -9,5 +9,5 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
 data:
   cache.yaml: |
-{{ toYaml (tpl .Values.queryFrontend.cacheConfig .) | indent 4 }}
+{{ tpl .Values.queryFrontend.cacheConfig . | indent 4 }}
 {{- end }}

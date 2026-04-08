@@ -37,7 +37,7 @@ spec:
             - --http-address=0.0.0.0:{{ .Values.queryFrontend.service.port }}
             - --query-frontend.downstream-url={{ if .Values.queryFrontend.downstreamUrl }}{{ .Values.queryFrontend.downstreamUrl }}{{ else }}http://{{ include "thanos.compName" (list . "query") }}:{{ .Values.query.service.httpPort }}{{ end }}
           {{- if .Values.queryFrontend.cacheConfig }}
-            - --query-range.response-cache-config=/etc/thanos/cache.yaml
+            - --query-range.response-cache-config-file=/etc/thanos/cache.yaml
           {{- end }}
           {{- range .Values.queryFrontend.extraArgs }}
             - {{ . | quote }}
