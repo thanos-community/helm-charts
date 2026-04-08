@@ -18,7 +18,7 @@ global:
     # -- Docker repository for all Thanos containers by default.
     repository: quay.io/thanos/thanos
     # -- Container image tag. Changing this upgrades all components at once.
-    tag: v0.39.2
+    tag: v0.41.0
     # -- Image pull policy applied to every container. One of Always, IfNotPresent, Never.
     pullPolicy: IfNotPresent
 
