@@ -331,14 +331,28 @@
                   "description": "Maximum unavailable Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "maxUnavailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "minAvailable": {
                   "default": "",
                   "description": "Minimum available Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "minAvailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -414,11 +428,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the liveness probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -488,11 +509,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the readiness probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -562,11 +590,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the startup probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -764,6 +799,13 @@
               "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
+            },
+            "dnsConfig": {
+              "additionalProperties": true,
+              "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+              "required": [],
+              "title": "dnsConfig",
+              "type": "object"
             }
           },
           "required": [
@@ -777,6 +819,7 @@
             "resources",
             "podSecurityContext",
             "containerSecurityContext",
+            "dnsConfig",
             "extraEnv",
             "extraEnvFrom",
             "extraInitContainers",
@@ -1110,14 +1153,28 @@
               "description": "Maximum unavailable Compactor pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Compactor pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -1253,11 +1310,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -1327,11 +1391,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -1401,11 +1472,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -1691,6 +1769,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -1705,6 +1790,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -1809,6 +1895,13 @@
             "runAsNonRoot"
           ],
           "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration applied to every pod. Component-level values override this.",
+          "required": [],
+          "title": "dnsConfig",
           "type": "object"
         },
         "extraContainers": {
@@ -1973,14 +2066,28 @@
               "description": "Maximum number of unavailable pods during a disruption.\nCannot be set at the same time as minAvailable.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum number of available pods during a disruption.\nCannot be set at the same time as maxUnavailable.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -2329,6 +2436,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "networkPolicies": {
+          "default": false,
+          "description": "Create a NetworkPolicy for every enabled component. When true each component gets a NetworkPolicy that allows ingress on its service ports from within the namespace and permits all egress.",
+          "required": [],
+          "title": "networkPolicies",
+          "type": "boolean"
         }
       },
       "required": [
@@ -2339,10 +2453,12 @@
         "podAnnotations",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraVolumes",
         "extraVolumeMounts",
         "resources",
         "nodeSelector",
+        "networkPolicies",
         "tolerations",
         "affinity",
         "topologySpreadConstraints",
@@ -2756,14 +2872,28 @@
               "description": "Maximum unavailable Query pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -2832,11 +2962,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -2906,11 +3043,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -2980,11 +3124,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3214,6 +3365,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -3230,6 +3388,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -3589,14 +3748,28 @@
               "description": "Maximum unavailable Query Frontend pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query Frontend pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -3665,11 +3838,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3739,11 +3919,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3813,11 +4000,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4015,6 +4209,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -4030,6 +4231,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -4201,7 +4403,7 @@
               "properties": {
                 "enabled": {
                   "default": true,
-                  "description": "Auto-generate a single default hashring whose endpoints are derived\nfrom the StatefulSet pod DNS names:\n`\u003cpod-0\u003e.\u003cheadless-svc\u003e:10901 ... \u003cpod-N\u003e.\u003cheadless-svc\u003e:10901`.",
+                  "description": "Auto-generate a single default hashring whose endpoints are derived\nfrom the StatefulSet pod DNS names:\n`<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`.",
                   "required": [],
                   "title": "enabled",
                   "type": "boolean"
@@ -4418,14 +4620,28 @@
               "description": "Maximum unavailable Receive pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Receive pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -4561,11 +4777,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4635,11 +4858,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4709,11 +4939,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5048,6 +5285,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -5066,6 +5310,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -5457,14 +5702,28 @@
               "description": "Maximum unavailable Ruler pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Ruler pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -5600,11 +5859,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5674,11 +5940,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5748,11 +6021,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5987,6 +6267,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -6005,6 +6292,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -6497,14 +6785,28 @@
               "description": "Maximum unavailable Store Gateway pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Store Gateway pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -6640,11 +6942,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6714,11 +7023,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6788,11 +7104,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6998,6 +7321,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -7014,6 +7344,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",

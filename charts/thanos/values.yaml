@@ -55,6 +55,15 @@ global:
     # -- Require the container to run as a non-root user.
     runAsNonRoot: true
 
+  # -- DNS configuration applied to every pod. Component-level values override this.
+  # @default -- {}
+  dnsConfig: {}
+  # Example:
+  # dnsConfig:
+  #   options:
+  #     - name: ndots
+  #       value: "1"
+
   # -- Additional volumes available to every pod by default.
   # @default -- []
   extraVolumes: []
@@ -101,6 +110,11 @@ global:
   # -- Extra sidecar containers added to every pod by default.
   # @default -- []
   extraContainers: []
+
+  # -- Create a NetworkPolicy for every enabled component. When true each
+  # component gets a NetworkPolicy that allows ingress on its service ports
+  # from within the namespace and permits all egress.
+  networkPolicies: false
 
   # Object store configuration shared by all components that read or write
   # blocks (Receive, Store Gateway, Compactor, Ruler).
@@ -233,10 +247,10 @@ global:
     # -- Enable a PodDisruptionBudget for every component. Individual
     # components can override this with their own pdb.enabled.
     enabled: false
-    # -- Minimum number of available pods during a disruption.
+    # -- (int or string) Minimum number of available pods during a disruption.
     # Cannot be set at the same time as maxUnavailable.
     minAvailable: ""
-    # -- Maximum number of unavailable pods during a disruption.
+    # -- (int or string) Maximum number of unavailable pods during a disruption.
     # Cannot be set at the same time as minAvailable.
     maxUnavailable: ""
 
@@ -347,6 +361,10 @@ bucket:
     # @default -- {}
     containerSecurityContext: {}
 
+    # -- DNS configuration for Bucketweb pods. Overrides global.dnsConfig.
+    # @default -- {}
+    dnsConfig: {}
+
     # -- Extra environment variables injected into the Bucketweb container.
     # @default -- []
     extraEnv: []
@@ -371,8 +389,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the readiness probe.
         path: /-/ready
-        # -- Port checked by the readiness probe.
-        port: 10902
+        # -- (int or string) Port checked by the readiness probe.
+        port: http
         # -- Seconds to wait before starting the readiness probe.
         initialDelaySeconds: 5
         # -- How often (seconds) to run the readiness probe.
@@ -389,8 +407,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the liveness probe.
         path: /-/healthy
-        # -- Port checked by the liveness probe.
-        port: 10902
+        # -- (int or string) Port checked by the liveness probe.
+        port: http
         # -- Seconds to wait before starting the liveness probe.
         initialDelaySeconds: 30
         # -- How often (seconds) to run the liveness probe.
@@ -407,8 +425,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the startup probe.
         path: /-/ready
-        # -- Port checked by the startup probe.
-        port: 10902
+        # -- (int or string) Port checked by the startup probe.
+        port: http
         # -- Seconds to wait before starting the startup probe.
         initialDelaySeconds: 0
         # -- How often (seconds) to run the startup probe.
@@ -489,9 +507,9 @@ bucket:
     pdb:
       # -- Enable a PodDisruptionBudget for Bucketweb.
       enabled: false
-      # -- Minimum available Bucketweb pods during a disruption.
+      # -- (int or string) Minimum available Bucketweb pods during a disruption.
       minAvailable: ""
-      # -- Maximum unavailable Bucketweb pods during a disruption.
+      # -- (int or string) Maximum unavailable Bucketweb pods during a disruption.
       maxUnavailable: ""
 
 # ======================================================================
@@ -608,6 +626,10 @@ compactor:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Compactor pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Compactor container.
   # @default -- []
   extraEnv: []
@@ -632,8 +654,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor readiness probe.
       path: /-/ready
-      # -- Port checked by the Compactor readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor readiness probe.
+      port: http
       # -- Seconds to wait before starting the Compactor readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Compactor readiness probe.
@@ -650,8 +672,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor liveness probe.
       path: /-/healthy
-      # -- Port checked by the Compactor liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor liveness probe.
+      port: http
       # -- Seconds to wait before starting the Compactor liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Compactor liveness probe.
@@ -668,8 +690,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor startup probe.
       path: /-/ready
-      # -- Port checked by the Compactor startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor startup probe.
+      port: http
       # -- Seconds to wait before starting the Compactor startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Compactor startup probe.
@@ -746,9 +768,9 @@ compactor:
   pdb:
     # -- Enable a PodDisruptionBudget for the Compactor.
     enabled: false
-    # -- Minimum available Compactor pods during a disruption.
+    # -- (int or string) Minimum available Compactor pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Compactor pods during a disruption.
+    # -- (int or string) Maximum unavailable Compactor pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -854,6 +876,7 @@ query:
   # Example:
   # stores:
   #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
+  #   - thanos-gateway.mydomain.com:443
 
   # Label names that identify replica identity for result deduplication.
   replicaLabels:
@@ -874,6 +897,10 @@ query:
   # -- Container security context for Query. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Query pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Query container.
   # @default -- []
@@ -899,8 +926,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query readiness probe.
       path: /-/ready
-      # -- Port checked by the Query readiness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query readiness probe.
+      port: http
       # -- Seconds to wait before starting the Query readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Query readiness probe.
@@ -917,8 +944,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query liveness probe.
       path: /-/healthy
-      # -- Port checked by the Query liveness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query liveness probe.
+      port: http
       # -- Seconds to wait before starting the Query liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Query liveness probe.
@@ -935,8 +962,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query startup probe.
       path: /-/ready
-      # -- Port checked by the Query startup probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query startup probe.
+      port: http
       # -- Seconds to wait before starting the Query startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Query startup probe.
@@ -1013,9 +1040,9 @@ query:
   pdb:
     # -- Enable a PodDisruptionBudget for Query.
     enabled: false
-    # -- Minimum available Query pods during a disruption.
+    # -- (int or string) Minimum available Query pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query pods during a disruption.
+    # -- (int or string) Maximum unavailable Query pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1114,6 +1141,10 @@ queryFrontend:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Query Frontend pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Query Frontend container.
   # @default -- []
   extraEnv: []
@@ -1138,8 +1169,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend readiness probe.
       path: /-/ready
-      # -- Port checked by the Query Frontend readiness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend readiness probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Query Frontend readiness probe.
@@ -1156,8 +1187,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend liveness probe.
       path: /-/healthy
-      # -- Port checked by the Query Frontend liveness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend liveness probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Query Frontend liveness probe.
@@ -1174,8 +1205,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend startup probe.
       path: /-/ready
-      # -- Port checked by the Query Frontend startup probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend startup probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Query Frontend startup probe.
@@ -1252,9 +1283,9 @@ queryFrontend:
   pdb:
     # -- Enable a PodDisruptionBudget for Query Frontend.
     enabled: false
-    # -- Minimum available Query Frontend pods during a disruption.
+    # -- (int or string) Minimum available Query Frontend pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query Frontend pods during a disruption.
+    # -- (int or string) Maximum unavailable Query Frontend pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1380,6 +1411,10 @@ storegateway:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Store Gateway pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Store Gateway container.
   # @default -- []
   extraEnv: []
@@ -1404,8 +1439,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway readiness probe.
       path: /-/ready
-      # -- Port checked by the Store Gateway readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway readiness probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Store Gateway readiness probe.
@@ -1422,8 +1457,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway liveness probe.
       path: /-/healthy
-      # -- Port checked by the Store Gateway liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway liveness probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Store Gateway liveness probe.
@@ -1440,8 +1475,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway startup probe.
       path: /-/ready
-      # -- Port checked by the Store Gateway startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway startup probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Store Gateway startup probe.
@@ -1518,9 +1553,9 @@ storegateway:
   pdb:
     # -- Enable a PodDisruptionBudget for the Store Gateway.
     enabled: false
-    # -- Minimum available Store Gateway pods during a disruption.
+    # -- (int or string) Minimum available Store Gateway pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Store Gateway pods during a disruption.
+    # -- (int or string) Maximum unavailable Store Gateway pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1685,6 +1720,10 @@ receive:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Receive pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Receive container.
   # @default -- []
   extraEnv: []
@@ -1709,8 +1748,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive readiness probe.
       path: /-/ready
-      # -- Port checked by the Receive readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive readiness probe.
+      port: http
       # -- Seconds to wait before starting the Receive readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Receive readiness probe.
@@ -1727,8 +1766,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive liveness probe.
       path: /-/healthy
-      # -- Port checked by the Receive liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive liveness probe.
+      port: http
       # -- Seconds to wait before starting the Receive liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Receive liveness probe.
@@ -1745,8 +1784,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive startup probe.
       path: /-/ready
-      # -- Port checked by the Receive startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive startup probe.
+      port: http
       # -- Seconds to wait before starting the Receive startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Receive startup probe.
@@ -1823,9 +1862,9 @@ receive:
   pdb:
     # -- Enable a PodDisruptionBudget for Receive.
     enabled: false
-    # -- Minimum available Receive pods during a disruption.
+    # -- (int or string) Minimum available Receive pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Receive pods during a disruption.
+    # -- (int or string) Maximum unavailable Receive pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1970,6 +2009,10 @@ ruler:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Ruler pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Ruler container.
   # @default -- []
   extraEnv: []
@@ -1994,8 +2037,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler readiness probe.
       path: /-/ready
-      # -- Port checked by the Ruler readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler readiness probe.
+      port: http
       # -- Seconds to wait before starting the Ruler readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Ruler readiness probe.
@@ -2012,8 +2055,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler liveness probe.
       path: /-/healthy
-      # -- Port checked by the Ruler liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler liveness probe.
+      port: http
       # -- Seconds to wait before starting the Ruler liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Ruler liveness probe.
@@ -2030,8 +2073,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler startup probe.
       path: /-/ready
-      # -- Port checked by the Ruler startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler startup probe.
+      port: http
       # -- Seconds to wait before starting the Ruler startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Ruler startup probe.
@@ -2108,9 +2151,9 @@ ruler:
   pdb:
     # -- Enable a PodDisruptionBudget for the Ruler.
     enabled: false
-    # -- Minimum available Ruler pods during a disruption.
+    # -- (int or string) Minimum available Ruler pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Ruler pods during a disruption.
+    # -- (int or string) Maximum unavailable Ruler pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================

@@ -4,9 +4,9 @@ kind: Ingress
 metadata:
   name: {{ include "thanos.compName" (list . "storegateway") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-{{ toYaml .Values.storegateway.ingress.annotations | indent 4 }}
+    {{- toYaml .Values.storegateway.ingress.annotations | nindent 4 }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
 spec:
   {{- with .Values.storegateway.ingress.className }}
@@ -24,9 +24,9 @@ spec:
               service:
                 name: {{ include "thanos.compName" (list $ "storegateway") }}
                 port:
-                  number: {{ $.Values.storegateway.service.httpPort }}
+                  name: http
         {{- end }}
   {{- end }}
   tls:
-{{ toYaml .Values.storegateway.ingress.tls | indent 4 }}
+    {{- toYaml .Values.storegateway.ingress.tls | nindent 4 }}
 {{- end }}

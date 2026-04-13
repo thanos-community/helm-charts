@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.39.2](https://img.shields.io/badge/AppVersion-v0.39.2-informational?style=flat-square)
+![Version: 0.3.2](https://img.shields.io/badge/Version-0.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.0.90 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 80.2.0 |
+| https://charts.rustfs.com/ | rustfs | 0.0.91 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 83.0.2 |
 
 ## Component Overview
 
@@ -439,6 +439,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Bucketweb autoscaling. |
 | bucket.bucketweb.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage. Null disables memory-based scaling. |
 | bucket.bucketweb.containerSecurityContext | object | {} | Container security context for Bucketweb. Overrides global.containerSecurityContext. |
+| bucket.bucketweb.dnsConfig | object | {} | DNS configuration for Bucketweb pods. Overrides global.dnsConfig. |
 | bucket.bucketweb.enabled | bool | `false` | Enable the Bucketweb deployment (read-only object store browser). |
 | bucket.bucketweb.extraArgs | list | [] | Additional CLI arguments appended to the bucketweb command. |
 | bucket.bucketweb.extraContainers | list | [] | Extra sidecar containers for Bucketweb pods. |
@@ -461,8 +462,8 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.labels | object | {} | Extra labels applied to Bucketweb resources. |
 | bucket.bucketweb.nodeSelector | object | {} | Node selector for Bucketweb pod scheduling. |
 | bucket.bucketweb.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Bucketweb. |
-| bucket.bucketweb.pdb.maxUnavailable | string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
-| bucket.bucketweb.pdb.minAvailable | string | `""` | Minimum available Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.minAvailable | int or string | `""` | Minimum available Bucketweb pods during a disruption. |
 | bucket.bucketweb.persistence | object | {} | Storage configuration for Bucketweb. Bucketweb is stateless; leave empty. |
 | bucket.bucketweb.podSecurityContext | object | {} | Pod security context for Bucketweb. Overrides global.podSecurityContext. |
 | bucket.bucketweb.priorityClassName | string | `""` | Priority class name for Bucketweb pods. |
@@ -471,7 +472,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the liveness probe. |
 | bucket.bucketweb.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the liveness probe. |
 | bucket.bucketweb.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the liveness probe. |
-| bucket.bucketweb.probes.liveness.port | int | `10902` | Port checked by the liveness probe. |
+| bucket.bucketweb.probes.liveness.port | int or string | `"http"` | Port checked by the liveness probe. |
 | bucket.bucketweb.probes.liveness.successThreshold | int | `1` | Consecutive successes before the container is considered live. |
 | bucket.bucketweb.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Bucketweb. |
@@ -479,7 +480,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the readiness probe. |
 | bucket.bucketweb.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the readiness probe. |
 | bucket.bucketweb.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the readiness probe. |
-| bucket.bucketweb.probes.readiness.port | int | `10902` | Port checked by the readiness probe. |
+| bucket.bucketweb.probes.readiness.port | int or string | `"http"` | Port checked by the readiness probe. |
 | bucket.bucketweb.probes.readiness.successThreshold | int | `1` | Consecutive successes before the pod is marked ready. |
 | bucket.bucketweb.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.probes.startup.enabled | bool | `true` | Enable the startup probe for Bucketweb. |
@@ -487,7 +488,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the startup probe. |
 | bucket.bucketweb.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the startup probe. |
 | bucket.bucketweb.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the startup probe. |
-| bucket.bucketweb.probes.startup.port | int | `10902` | Port checked by the startup probe. |
+| bucket.bucketweb.probes.startup.port | int or string | `"http"` | Port checked by the startup probe. |
 | bucket.bucketweb.probes.startup.successThreshold | int | `1` | Consecutive successes required before the startup probe is considered passed. |
 | bucket.bucketweb.probes.startup.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. |
@@ -511,6 +512,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.affinity | object | {} | Affinity rules for Compactor pod scheduling. |
 | compactor.annotations | object | {} | Extra annotations applied to Compactor resources. |
 | compactor.containerSecurityContext | object | {} | Container security context for the Compactor. Overrides global.containerSecurityContext. |
+| compactor.dnsConfig | object | {} | DNS configuration for Compactor pods. Overrides global.dnsConfig. |
 | compactor.enabled | bool | `true` | Enable the Compactor StatefulSet. |
 | compactor.extraArgs[0] | string | `"--log.level=info"` |  |
 | compactor.extraArgs[1] | string | `"--log.format=logfmt"` |  |
@@ -538,8 +540,8 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.labels | object | {} | Extra labels applied to Compactor resources. |
 | compactor.nodeSelector | object | {} | Node selector for Compactor pod scheduling. |
 | compactor.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Compactor. |
-| compactor.pdb.maxUnavailable | string | `""` | Maximum unavailable Compactor pods during a disruption. |
-| compactor.pdb.minAvailable | string | `""` | Minimum available Compactor pods during a disruption. |
+| compactor.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Compactor pods during a disruption. |
+| compactor.pdb.minAvailable | int or string | `""` | Minimum available Compactor pods during a disruption. |
 | compactor.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | compactor.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Compactor working directory. |
 | compactor.persistence.size | string | `"10Gi"` | Storage capacity for the Compactor PVC (used as a scratch space during compaction). |
@@ -552,7 +554,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Compactor liveness probe. |
 | compactor.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Compactor liveness probe. |
 | compactor.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Compactor liveness probe. |
-| compactor.probes.liveness.port | int | `10902` | Port checked by the Compactor liveness probe. |
+| compactor.probes.liveness.port | int or string | `"http"` | Port checked by the Compactor liveness probe. |
 | compactor.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Compactor container is considered live. |
 | compactor.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Compactor liveness probe times out. |
 | compactor.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Compactor. |
@@ -560,7 +562,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Compactor readiness probe. |
 | compactor.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Compactor readiness probe. |
 | compactor.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Compactor readiness probe. |
-| compactor.probes.readiness.port | int | `10902` | Port checked by the Compactor readiness probe. |
+| compactor.probes.readiness.port | int or string | `"http"` | Port checked by the Compactor readiness probe. |
 | compactor.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Compactor pod is marked ready. |
 | compactor.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Compactor readiness probe times out. |
 | compactor.probes.startup.enabled | bool | `true` | Enable the startup probe for the Compactor. |
@@ -568,7 +570,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Compactor startup probe. |
 | compactor.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Compactor startup probe. |
 | compactor.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Compactor startup probe. |
-| compactor.probes.startup.port | int | `10902` | Port checked by the Compactor startup probe. |
+| compactor.probes.startup.port | int or string | `"http"` | Port checked by the Compactor startup probe. |
 | compactor.probes.startup.successThreshold | int | `1` | Consecutive successes before the Compactor startup probe is considered passed. |
 | compactor.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Compactor startup probe times out. |
 | compactor.replicaCount | int | `1` | Number of Compactor replicas. Must remain 1 — running multiple compactors against the same bucket causes data corruption. |
@@ -602,6 +604,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | global.containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mount the root filesystem as read-only. |
 | global.containerSecurityContext.runAsNonRoot | bool | `true` | Require the container to run as a non-root user. |
+| global.dnsConfig | object | {} | DNS configuration applied to every pod. Component-level values override this. |
 | global.extraContainers | list | [] | Extra sidecar containers added to every pod by default. |
 | global.extraEnv | list | [] | Extra environment variables injected into every main container by default. |
 | global.extraEnvFrom | list | [] | Extra environment variable sources (ConfigMap, Secret) for every main container. |
@@ -610,16 +613,17 @@ The table below documents all available values. Top-level keys group settings by
 | global.extraVolumes | list | [] | Additional volumes available to every pod by default. |
 | global.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy applied to every container. One of Always, IfNotPresent, Never. |
 | global.image.repository | string | `"quay.io/thanos/thanos"` | Docker repository for all Thanos containers by default. |
-| global.image.tag | string | `"v0.39.2"` | Container image tag. Changing this upgrades all components at once. |
+| global.image.tag | string | `"v0.41.0"` | Container image tag. Changing this upgrades all components at once. |
 | global.imagePullSecrets | list | [] | List of imagePullSecrets applied to every pod by default. |
+| global.networkPolicies | bool | `false` | Create a NetworkPolicy for every enabled component. When true each component gets a NetworkPolicy that allows ingress on its service ports from within the namespace and permits all egress. |
 | global.nodeSelector | object | {} | Node selector applied to every pod by default. |
 | global.objstore.config | string | `"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n\n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n"` | Inline object store configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`, so Helm template syntax (e.g. `{{ .Release.Name }}`) is valid inside the string. Refer to https://thanos.io/tip/thanos/storage.md/ for the full schema. |
 | global.objstore.createSecret | bool | `false` | When true, the chart creates a Kubernetes Secret named `secretName` containing the inline `config` below. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.). |
 | global.objstore.secretKey | string | `"objstore.yml"` | Key inside the Secret whose value is the object store YAML. |
 | global.objstore.secretName | string | `"thanos-objstore"` | Name of the Kubernetes Secret that carries the object store config. All components mount this Secret as a file. |
 | global.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for every component. Individual components can override this with their own pdb.enabled. |
-| global.pdb.maxUnavailable | string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
-| global.pdb.minAvailable | string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
+| global.pdb.maxUnavailable | int or string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
+| global.pdb.minAvailable | int or string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
@@ -662,6 +666,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Query autoscaling. |
 | query.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling. |
 | query.containerSecurityContext | object | {} | Container security context for Query. Overrides global.containerSecurityContext. |
+| query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |
@@ -688,8 +693,8 @@ The table below documents all available values. Top-level keys group settings by
 | query.labels | object | {} | Extra labels applied to Query resources. |
 | query.nodeSelector | object | {} | Node selector for Query pod scheduling. |
 | query.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query. |
-| query.pdb.maxUnavailable | string | `""` | Maximum unavailable Query pods during a disruption. |
-| query.pdb.minAvailable | string | `""` | Minimum available Query pods during a disruption. |
+| query.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query pods during a disruption. |
+| query.pdb.minAvailable | int or string | `""` | Minimum available Query pods during a disruption. |
 | query.podSecurityContext | object | {} | Pod security context for Query pods. Overrides global.podSecurityContext. |
 | query.priorityClassName | string | `""` | Priority class name for Query pods. |
 | query.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query. |
@@ -697,7 +702,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Query liveness probe. |
 | query.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Query liveness probe. |
 | query.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Query liveness probe. |
-| query.probes.liveness.port | int | `9090` | Port checked by the Query liveness probe. |
+| query.probes.liveness.port | int or string | `"http"` | Port checked by the Query liveness probe. |
 | query.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Query container is considered live. |
 | query.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Query liveness probe times out. |
 | query.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Query. |
@@ -705,7 +710,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Query readiness probe. |
 | query.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Query readiness probe. |
 | query.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Query readiness probe. |
-| query.probes.readiness.port | int | `9090` | Port checked by the Query readiness probe. |
+| query.probes.readiness.port | int or string | `"http"` | Port checked by the Query readiness probe. |
 | query.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Query pod is marked ready. |
 | query.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Query readiness probe times out. |
 | query.probes.startup.enabled | bool | `true` | Enable the startup probe for Query. |
@@ -713,7 +718,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Query startup probe. |
 | query.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Query startup probe. |
 | query.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query startup probe. |
-| query.probes.startup.port | int | `9090` | Port checked by the Query startup probe. |
+| query.probes.startup.port | int or string | `"http"` | Port checked by the Query startup probe. |
 | query.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query startup probe is considered passed. |
 | query.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query startup probe times out. |
 | query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
@@ -745,6 +750,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling. |
 | queryFrontend.cacheConfig | string | `""` | Optional result cache configuration (Memcached, Redis, or in-memory) passed as an inline YAML string. See https://thanos.io/tip/components/query-frontend.md/ |
 | queryFrontend.containerSecurityContext | object | {} | Container security context for Query Frontend. Overrides global.containerSecurityContext. |
+| queryFrontend.dnsConfig | object | {} | DNS configuration for Query Frontend pods. Overrides global.dnsConfig. |
 | queryFrontend.downstreamUrl | string | `""` | Downstream URL of the Query component. Leave empty to use the in-chart Query service endpoint (auto-resolved). |
 | queryFrontend.enabled | bool | `false` | Enable the Query Frontend Deployment. |
 | queryFrontend.extraArgs | list | [] | Additional CLI arguments appended to the `thanos query-frontend` command. |
@@ -768,8 +774,8 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.labels | object | {} | Extra labels applied to Query Frontend resources. |
 | queryFrontend.nodeSelector | object | {} | Node selector for Query Frontend pod scheduling. |
 | queryFrontend.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query Frontend. |
-| queryFrontend.pdb.maxUnavailable | string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
-| queryFrontend.pdb.minAvailable | string | `""` | Minimum available Query Frontend pods during a disruption. |
+| queryFrontend.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
+| queryFrontend.pdb.minAvailable | int or string | `""` | Minimum available Query Frontend pods during a disruption. |
 | queryFrontend.podSecurityContext | object | {} | Pod security context for Query Frontend pods. Overrides global.podSecurityContext. |
 | queryFrontend.priorityClassName | string | `""` | Priority class name for Query Frontend pods. |
 | queryFrontend.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query Frontend. |
@@ -777,7 +783,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Query Frontend liveness probe. |
-| queryFrontend.probes.liveness.port | int | `9090` | Port checked by the Query Frontend liveness probe. |
+| queryFrontend.probes.liveness.port | int or string | `"http"` | Port checked by the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Query Frontend container is considered live. |
 | queryFrontend.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Query Frontend liveness probe times out. |
 | queryFrontend.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Query Frontend. |
@@ -785,7 +791,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Query Frontend readiness probe. |
-| queryFrontend.probes.readiness.port | int | `9090` | Port checked by the Query Frontend readiness probe. |
+| queryFrontend.probes.readiness.port | int or string | `"http"` | Port checked by the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Query Frontend pod is marked ready. |
 | queryFrontend.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Query Frontend readiness probe times out. |
 | queryFrontend.probes.startup.enabled | bool | `true` | Enable the startup probe for Query Frontend. |
@@ -793,7 +799,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Query Frontend startup probe. |
 | queryFrontend.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Query Frontend startup probe. |
 | queryFrontend.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query Frontend startup probe. |
-| queryFrontend.probes.startup.port | int | `9090` | Port checked by the Query Frontend startup probe. |
+| queryFrontend.probes.startup.port | int or string | `"http"` | Port checked by the Query Frontend startup probe. |
 | queryFrontend.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query Frontend startup probe is considered passed. |
 | queryFrontend.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query Frontend startup probe times out. |
 | queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. |
@@ -816,6 +822,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.affinity | object | {} | Affinity rules for Receive pod scheduling. |
 | receive.annotations | object | {} | Extra annotations applied to Receive resources. |
 | receive.containerSecurityContext | object | {} | Container security context for Receive. Overrides global.containerSecurityContext. |
+| receive.dnsConfig | object | {} | DNS configuration for Receive pods. Overrides global.dnsConfig. |
 | receive.enabled | bool | `true` | Enable the Receive StatefulSet. |
 | receive.extraArgs | list | [] | Additional CLI arguments appended to the `thanos receive` command. |
 | receive.extraContainers | list | [] | Extra sidecar containers for Receive pods. |
@@ -845,8 +852,8 @@ The table below documents all available values. Top-level keys group settings by
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
-| receive.pdb.maxUnavailable | string | `""` | Maximum unavailable Receive pods during a disruption. |
-| receive.pdb.minAvailable | string | `""` | Minimum available Receive pods during a disruption. |
+| receive.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Receive pods during a disruption. |
+| receive.pdb.minAvailable | int or string | `""` | Minimum available Receive pods during a disruption. |
 | receive.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | receive.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Receive TSDB WAL. |
 | receive.persistence.size | string | `"10Gi"` | Storage capacity for the Receive PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
@@ -859,7 +866,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Receive liveness probe. |
 | receive.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Receive liveness probe. |
 | receive.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Receive liveness probe. |
-| receive.probes.liveness.port | int | `10902` | Port checked by the Receive liveness probe. |
+| receive.probes.liveness.port | int or string | `"http"` | Port checked by the Receive liveness probe. |
 | receive.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Receive container is considered live. |
 | receive.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Receive liveness probe times out. |
 | receive.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Receive. |
@@ -867,7 +874,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Receive readiness probe. |
 | receive.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Receive readiness probe. |
 | receive.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Receive readiness probe. |
-| receive.probes.readiness.port | int | `10902` | Port checked by the Receive readiness probe. |
+| receive.probes.readiness.port | int or string | `"http"` | Port checked by the Receive readiness probe. |
 | receive.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Receive pod is marked ready. |
 | receive.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Receive readiness probe times out. |
 | receive.probes.startup.enabled | bool | `true` | Enable the startup probe for Receive. |
@@ -875,7 +882,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Receive startup probe. |
 | receive.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Receive startup probe. |
 | receive.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Receive startup probe. |
-| receive.probes.startup.port | int | `10902` | Port checked by the Receive startup probe. |
+| receive.probes.startup.port | int or string | `"http"` | Port checked by the Receive startup probe. |
 | receive.probes.startup.successThreshold | int | `1` | Consecutive successes before the Receive startup probe is considered passed. |
 | receive.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Receive startup probe times out. |
 | receive.replicaCount | int | `3` | Number of Receive pod replicas. Minimum 3 is recommended for replication factor 2 (write quorum = floor(replicaCount/2)+1). |
@@ -917,6 +924,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
 | ruler.containerSecurityContext | object | {} | Container security context for Ruler. Overrides global.containerSecurityContext. |
+| ruler.dnsConfig | object | {} | DNS configuration for Ruler pods. Overrides global.dnsConfig. |
 | ruler.enabled | bool | `false` | Enable the Ruler StatefulSet. |
 | ruler.extraArgs | list | [] | Additional CLI arguments appended to the `thanos rule` command. |
 | ruler.extraContainers | list | [] | Extra sidecar containers for Ruler pods. |
@@ -939,8 +947,8 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.labels | object | {} | Extra labels applied to Ruler resources. |
 | ruler.nodeSelector | object | {} | Node selector for Ruler pod scheduling. |
 | ruler.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Ruler. |
-| ruler.pdb.maxUnavailable | string | `""` | Maximum unavailable Ruler pods during a disruption. |
-| ruler.pdb.minAvailable | string | `""` | Minimum available Ruler pods during a disruption. |
+| ruler.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Ruler pods during a disruption. |
+| ruler.pdb.minAvailable | int or string | `""` | Minimum available Ruler pods during a disruption. |
 | ruler.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | ruler.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ruler data directory. |
 | ruler.persistence.size | string | `"10Gi"` | Storage capacity for the Ruler PVC. |
@@ -953,7 +961,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Ruler liveness probe. |
 | ruler.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Ruler liveness probe. |
 | ruler.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Ruler liveness probe. |
-| ruler.probes.liveness.port | int | `10902` | Port checked by the Ruler liveness probe. |
+| ruler.probes.liveness.port | int or string | `"http"` | Port checked by the Ruler liveness probe. |
 | ruler.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Ruler container is considered live. |
 | ruler.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Ruler liveness probe times out. |
 | ruler.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Ruler. |
@@ -961,7 +969,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Ruler readiness probe. |
 | ruler.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Ruler readiness probe. |
 | ruler.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Ruler readiness probe. |
-| ruler.probes.readiness.port | int | `10902` | Port checked by the Ruler readiness probe. |
+| ruler.probes.readiness.port | int or string | `"http"` | Port checked by the Ruler readiness probe. |
 | ruler.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Ruler pod is marked ready. |
 | ruler.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Ruler readiness probe times out. |
 | ruler.probes.startup.enabled | bool | `true` | Enable the startup probe for the Ruler. |
@@ -969,7 +977,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Ruler startup probe. |
 | ruler.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Ruler startup probe. |
 | ruler.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Ruler startup probe. |
-| ruler.probes.startup.port | int | `10902` | Port checked by the Ruler startup probe. |
+| ruler.probes.startup.port | int or string | `"http"` | Port checked by the Ruler startup probe. |
 | ruler.probes.startup.successThreshold | int | `1` | Consecutive successes before the Ruler startup probe is considered passed. |
 | ruler.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Ruler startup probe times out. |
 | ruler.query.urls | list | [] | List of Query component base URLs used by the Ruler to evaluate rules. |
@@ -1008,6 +1016,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling. |
 | storegateway.cachingBucketConfig | string | `""` | Optional caching bucket configuration (e.g. Memcached) that wraps the object store to reduce the number of object store API calls. Provide as an inline YAML string. See https://thanos.io/tip/components/store.md/#caching-bucket |
 | storegateway.containerSecurityContext | object | {} | Container security context for Store Gateway. Overrides global.containerSecurityContext. |
+| storegateway.dnsConfig | object | {} | DNS configuration for Store Gateway pods. Overrides global.dnsConfig. |
 | storegateway.enabled | bool | `true` | Enable the Store Gateway StatefulSet. |
 | storegateway.extraArgs | list | [] | Additional CLI arguments appended to the `thanos store` command. |
 | storegateway.extraContainers | list | [] | Extra sidecar containers for Store Gateway pods. |
@@ -1034,8 +1043,8 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.labels | object | {} | Extra labels applied to Store Gateway resources. |
 | storegateway.nodeSelector | object | {} | Node selector for Store Gateway pod scheduling. |
 | storegateway.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Store Gateway. |
-| storegateway.pdb.maxUnavailable | string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
-| storegateway.pdb.minAvailable | string | `""` | Minimum available Store Gateway pods during a disruption. |
+| storegateway.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
+| storegateway.pdb.minAvailable | int or string | `""` | Minimum available Store Gateway pods during a disruption. |
 | storegateway.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | storegateway.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store. |
 | storegateway.persistence.size | string | `"10Gi"` | Storage capacity for the Store Gateway PVC. |
@@ -1048,7 +1057,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Store Gateway liveness probe. |
 | storegateway.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Store Gateway liveness probe. |
 | storegateway.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Store Gateway liveness probe. |
-| storegateway.probes.liveness.port | int | `10902` | Port checked by the Store Gateway liveness probe. |
+| storegateway.probes.liveness.port | int or string | `"http"` | Port checked by the Store Gateway liveness probe. |
 | storegateway.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Store Gateway container is considered live. |
 | storegateway.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Store Gateway liveness probe times out. |
 | storegateway.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Store Gateway. |
@@ -1056,7 +1065,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Store Gateway readiness probe. |
 | storegateway.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Store Gateway readiness probe. |
 | storegateway.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Store Gateway readiness probe. |
-| storegateway.probes.readiness.port | int | `10902` | Port checked by the Store Gateway readiness probe. |
+| storegateway.probes.readiness.port | int or string | `"http"` | Port checked by the Store Gateway readiness probe. |
 | storegateway.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Store Gateway pod is marked ready. |
 | storegateway.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Store Gateway readiness probe times out. |
 | storegateway.probes.startup.enabled | bool | `true` | Enable the startup probe for the Store Gateway. |
@@ -1064,7 +1073,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Store Gateway startup probe. |
 | storegateway.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Store Gateway startup probe. |
 | storegateway.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Store Gateway startup probe. |
-| storegateway.probes.startup.port | int | `10902` | Port checked by the Store Gateway startup probe. |
+| storegateway.probes.startup.port | int or string | `"http"` | Port checked by the Store Gateway startup probe. |
 | storegateway.probes.startup.successThreshold | int | `1` | Consecutive successes before the Store Gateway startup probe is considered passed. |
 | storegateway.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Store Gateway startup probe times out. |
 | storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. |

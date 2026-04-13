@@ -4,9 +4,15 @@ kind: StatefulSet
 metadata:
   name: {{ include "thanos.compName" (list . "ruler") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.ruler.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
+    {{- with .Values.ruler.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ include "thanos.compName" (list . "ruler") }}
   replicas: {{ .Values.ruler.replicaCount }}
@@ -17,18 +23,18 @@ spec:
   template:
     metadata:
       labels:
-{{ include "thanos.labels" . | indent 8 }}
+        {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: ruler
       annotations:
-{{ toYaml .Values.global.podAnnotations | indent 8 }}
+        checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
+        {{- with .Values.global.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
-      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{ include "thanos.podSC" (dict "root" . "key" "ruler") | nindent 6 }}
-      {{- if .Values.ruler.extraInitContainers }}
-      initContainers:
-        {{- tpl (toYaml .Values.ruler.extraInitContainers) . | nindent 8 }}
-      {{- end }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "ruler") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "ruler") | nindent 6 }}
       containers:
         - name: ruler
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -49,6 +55,8 @@ spec:
           {{- range .Values.ruler.extraArgs }}
             - {{ . | quote }}
           {{- end }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
           ports:
             - name: http
               containerPort: {{ .Values.ruler.service.httpPort }}
@@ -67,11 +75,11 @@ spec:
             - name: query
               mountPath: /etc/thanos/query-urls.yaml
               subPath: query-urls.yaml
-          {{ include "thanos.extraMountItems" (dict "root" . "key" "ruler") | nindent 10 }}
-          {{ include "thanos.containerSC" (dict "root" . "key" "ruler") | nindent 10 }}
+            {{- include "thanos.extraMountItems" (dict "root" . "key" "ruler") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "ruler") | nindent 10 }}
           resources:
-{{ toYaml .Values.ruler.resources | indent 12 }}
-          {{ include "thanos.httpProbes" (dict "root" . "key" "ruler" "port" .Values.ruler.service.httpPort) | nindent 10 }}
+            {{- toYaml .Values.ruler.resources | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "ruler" "port" "http") | nindent 10 }}
 
         {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
         - name: prometheus-rule-importer
@@ -86,7 +94,13 @@ spec:
             - name: rule-importer-script
               mountPath: /scripts
         {{- end }}
-
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "ruler" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "ruler") | nindent 6 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "ruler" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "ruler") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "ruler") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "ruler") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "ruler") | nindent 6 }}
       volumes:
         - name: rules
           configMap:
@@ -113,7 +127,7 @@ spec:
           emptyDir: {}
       {{- end }}
 
-      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "ruler") | nindent 6 }}
+      {{- include "thanos.extraVolumeItems" (dict "root" . "key" "ruler") | nindent 6 }}
 
   {{- if .Values.ruler.persistence.enabled }}
   volumeClaimTemplates:

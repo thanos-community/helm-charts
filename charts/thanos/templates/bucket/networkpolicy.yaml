@@ -1,0 +1,22 @@
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.global.networkPolicies }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: bucketweb
+  name: {{ include "thanos.compName" (list . "bucketweb") }}
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: http
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: bucketweb
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+    - Ingress
+{{- end }}

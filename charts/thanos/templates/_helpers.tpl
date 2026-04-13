@@ -44,7 +44,7 @@ app.kubernetes.io/part-of: thanos
 {{- end }}
 
 {{- if $annotations }}
-{{ toYaml $annotations | indent 2 }}
+  {{- toYaml $annotations | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -55,7 +55,7 @@ app.kubernetes.io/part-of: thanos
 {{- $psc := $comp.podSecurityContext | default $root.Values.global.podSecurityContext -}}
 {{- if $psc }}
 securityContext:
-{{ toYaml $psc | nindent 2 }}
+  {{- toYaml $psc | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -66,7 +66,15 @@ securityContext:
 {{- $csc := $comp.containerSecurityContext | default $root.Values.global.containerSecurityContext -}}
 {{- if $csc }}
 securityContext:
-{{ toYaml $csc | nindent 2 }}
+  {{- toYaml $csc | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.dnsConfig" -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- with ($component.dnsConfig | default .Values.global.dnsConfig) -}}
+dnsConfig:
+  {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -141,7 +149,7 @@ startupProbe:
 {{- $volsComp := $comp.extraVolumes | default list -}}
 {{- if or (gt (len $volsGlob) 0) (gt (len $volsComp) 0) }}
 volumes:
-{{ include "thanos.extraVolumeItems" (dict "root" $root "key" $key) | nindent 0 }}
+  {{- include "thanos.extraVolumeItems" (dict "root" $root "key" $key) | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -169,10 +177,132 @@ volumes:
 {{- $mtsComp := $comp.extraVolumeMounts | default list -}}
 {{- if or (gt (len $mtsGlob) 0) (gt (len $mtsComp) 0) }}
 volumeMounts:
-{{ include "thanos.extraMountItems" (dict "root" $root "key" $key) | nindent 0 }}
+  {{- include "thanos.extraMountItems" (dict "root" $root "key" $key) | nindent 2 }}
 {{- end }}
 {{- end }}
 
+
+{{- /* ============================== */ -}}
+{{- /* Scheduling and placement       */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.affinity" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.affinity | default .Values.global.affinity) -}}
+affinity:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.nodeSelector" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.nodeSelector | default .Values.global.nodeSelector) -}}
+nodeSelector:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.priorityClassName" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.priorityClassName | default .Values.global.priorityClassName) -}}
+priorityClassName: {{ . }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.tolerations" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.tolerations | default .Values.global.tolerations) -}}
+tolerations:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.topologySpreadConstraints" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.topologySpreadConstraints | default .Values.global.topologySpreadConstraints) -}}
+topologySpreadConstraints:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- /* ============================== */ -}}
+{{- /* Extra env / envFrom helpers    */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.extraEnvItems" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- $merged := dict -}}
+{{- range (.Values.global.extraEnv | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range ($component.extraEnv | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range (keys $merged | sortAlpha) }}
+- {{ toYaml (index $merged .) | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvBlock" -}}
+{{- if include "thanos.extraEnvItems" $ }}
+env:
+  {{- include "thanos.extraEnvItems" $ | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvFromItems" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- $merged := dict -}}
+{{- range (.Values.global.extraEnvFrom | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range ($component.extraEnvFrom | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range (keys $merged | sortAlpha) }}
+- {{ toYaml (index $merged .) | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvFromBlock" -}}
+{{- if include "thanos.extraEnvFromItems" $ }}
+env:
+  {{- include "thanos.extraEnvFromItems" $ | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- /* ============================== */ -}}
+{{- /* Init / sidecar containers      */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.initContainers" -}}
+{{- $root := .root -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- $icGlob := .Values.global.extraInitContainers | default list -}}
+{{- $icComp := $component.extraInitContainers | default list -}}
+{{- if or (gt (len $icGlob) 0) (gt (len $icComp) 0) }}
+initContainers:
+  {{- range $icGlob }}
+  - {{ tpl (toYaml .) $root | nindent 4 }}
+  {{- end }}
+  {{- range $icComp }}
+  - {{ tpl (toYaml .) $root | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraContainers" -}}
+{{- $root := .root -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- $cGlob := .Values.global.extraContainers | default list -}}
+{{- $cComp := $component.extraContainers | default list -}}
+{{- range $cGlob }}
+- {{ tpl (toYaml .) $root | nindent 2 }}
+{{- end }}
+{{- range $cComp }}
+- {{ tpl (toYaml .) $root | nindent 2 }}
+{{- end }}
+{{- end }}
 
 {{- /* ============================== */ -}}
 {{- /* Receive headless service name  */ -}}
@@ -239,7 +369,7 @@ Render imagePullSecrets from global.image.imagePullSecrets if any
 {{- define "thanos.imagePullSecrets" -}}
 {{- if .Values.global.imagePullSecrets }}
 imagePullSecrets:
-{{ toYaml .Values.global.imagePullSecrets | indent 2 }}
+  {{- toYaml .Values.global.imagePullSecrets | nindent 2 }}
 {{- end }}
 {{- end -}}
 
@@ -258,18 +388,18 @@ metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}
   namespace: {{ $root.Release.Namespace }}
   labels:
-{{ include "thanos.labels" $root | indent 4 }}
+    {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}
   {{- with $cfg.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-{{ toYaml $cfg.parentRefs | indent 4 }}
+    {{- toYaml $cfg.parentRefs | nindent 4 }}
   {{- with $cfg.hostnames }}
   hostnames:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - backendRefs:
@@ -292,18 +422,18 @@ metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}-grpc
   namespace: {{ $root.Release.Namespace }}
   labels:
-{{ include "thanos.labels" $root | indent 4 }}
+    {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}
   {{- with $cfg.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-{{ toYaml $cfg.parentRefs | indent 4 }}
+    {{- toYaml $cfg.parentRefs | nindent 4 }}
   {{- with $cfg.hostnames }}
   hostnames:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - backendRefs:
