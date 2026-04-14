@@ -1,12 +1,19 @@
 {{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled }}
+{{- $ctx := dict "Values" (dict "bucketweb" .Values.bucket.bucketweb "global" .Values.global) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "thanos.compName" (list . "bucketweb") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.bucket.bucketweb.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+    {{- with .Values.bucket.bucketweb.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   replicas: 1
   selector:
@@ -22,8 +29,8 @@ spec:
         {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.affinity" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{- $ctx := dict "Values" (dict "bucketweb" .Values.bucket.bucketweb "global" .Values.global) }}
       {{- include "thanos.podSC" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
       containers:
         - name: bucketweb
@@ -38,6 +45,8 @@ spec:
           {{- range .Values.bucket.bucketweb.extraArgs }}
             - {{ . | quote }}
           {{- end }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 10 }}
           ports:
             - name: http
               containerPort: {{ .Values.bucket.bucketweb.service.port }}
@@ -50,6 +59,12 @@ spec:
           resources:
             {{- toYaml .Values.bucket.bucketweb.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" $ctx "key" "bucketweb" "port" .Values.bucket.bucketweb.service.port) | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" $ctx.Values "component" "bucketweb" "root" .) | nindent 8 }}
+      {{- include "thanos.initContainers" (dict "Values" $ctx.Values "component" "bucketweb" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
       volumes:
         - name: objstore
           secret:
@@ -57,5 +72,5 @@ spec:
             items:
               - key: {{ .Values.global.objstore.secretKey }}
                 path: objstore.yml
-      {{- include "thanos.extraVolumesBlock" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
+        {{- include "thanos.extraVolumeItems" (dict "root" $ctx "key" "bucketweb") | nindent 8 }}
 {{- end }}

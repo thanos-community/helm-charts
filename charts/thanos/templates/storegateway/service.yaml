@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "storegateway") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.storegateway.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+    {{- with .Values.storegateway.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.storegateway.service.type }}
   ports:

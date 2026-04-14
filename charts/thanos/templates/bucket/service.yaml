@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "bucketweb") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.bucket.bucketweb.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+    {{- with .Values.bucket.bucketweb.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.bucket.bucketweb.service.type }}
   ports:

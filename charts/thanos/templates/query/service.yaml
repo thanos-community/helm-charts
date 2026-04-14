@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "query") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.query.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+    {{- with .Values.query.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.query.service.type }}
   ports:
