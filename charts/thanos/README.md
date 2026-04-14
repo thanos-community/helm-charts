@@ -819,6 +819,77 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.serviceMonitor.tlsConfig | object | {} | TLS configuration for Query Frontend scraping. |
 | queryFrontend.tolerations | list | [] | Tolerations for Query Frontend pod scheduling. |
 | queryFrontend.topologySpreadConstraints | list | [] | Topology spread constraints for Query Frontend pods. |
+| queryTls.affinity | object | {} | Affinity rules for Query TLS pod scheduling. |
+| queryTls.annotations | object | {} | Extra annotations applied to Query TLS resources. |
+| queryTls.autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for Query TLS. |
+| queryTls.autoscaling.maxReplicas | int | `5` | Maximum number of Query TLS replicas. |
+| queryTls.autoscaling.minReplicas | int | `2` | Minimum number of Query TLS replicas. |
+| queryTls.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Query TLS autoscaling. |
+| queryTls.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query TLS autoscaling. Null disables memory-based scaling. |
+| queryTls.containerSecurityContext | object | {} | Container security context for Query TLS. Overrides global.containerSecurityContext. |
+| queryTls.dnsConfig | object | {} | DNS configuration for Query TLS pods. Overrides global.dnsConfig. |
+| queryTls.enabled | bool | `false` | Enable the Query TLS Deployment. When enabled, the plain Query automatically adds Query TLS as an endpoint. |
+| queryTls.extraArgs[0] | string | `"--log.level=info"` |  |
+| queryTls.extraContainers | list | [] | Extra sidecar containers for Query TLS pods. |
+| queryTls.extraEnv | list | [] | Extra environment variables injected into the Query TLS container. |
+| queryTls.extraEnvFrom | list | [] | Extra environment variable sources for the Query TLS container. |
+| queryTls.extraInitContainers | list | [] | Extra init containers for Query TLS pods. |
+| queryTls.extraVolumeMounts | list | [] | Extra volume mounts for the Query TLS container. |
+| queryTls.extraVolumes | list | [] | Extra volumes for Query TLS pods. |
+| queryTls.labels | object | {} | Extra labels applied to Query TLS resources. |
+| queryTls.nodeSelector | object | {} | Node selector for Query TLS pod scheduling. |
+| queryTls.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query TLS. |
+| queryTls.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query TLS pods during a disruption. |
+| queryTls.pdb.minAvailable | int or string | `""` | Minimum available Query TLS pods during a disruption. |
+| queryTls.podSecurityContext | object | {} | Pod security context for Query TLS pods. Overrides global.podSecurityContext. |
+| queryTls.priorityClassName | string | `""` | Priority class name for Query TLS pods. |
+| queryTls.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query TLS. |
+| queryTls.probes.liveness.failureThreshold | int | `6` | Consecutive failures before the Query TLS container is restarted. |
+| queryTls.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Query TLS liveness probe. |
+| queryTls.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Query TLS liveness probe. |
+| queryTls.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Query TLS liveness probe. |
+| queryTls.probes.liveness.port | int or string | `"http"` | Port checked by the Query TLS liveness probe. |
+| queryTls.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Query TLS container is considered live. |
+| queryTls.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Query TLS liveness probe times out. |
+| queryTls.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Query TLS. |
+| queryTls.probes.readiness.failureThreshold | int | `6` | Consecutive failures before the Query TLS pod is marked not-ready. |
+| queryTls.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Query TLS readiness probe. |
+| queryTls.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Query TLS readiness probe. |
+| queryTls.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Query TLS readiness probe. |
+| queryTls.probes.readiness.port | int or string | `"http"` | Port checked by the Query TLS readiness probe. |
+| queryTls.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Query TLS pod is marked ready. |
+| queryTls.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Query TLS readiness probe times out. |
+| queryTls.probes.startup.enabled | bool | `true` | Enable the startup probe for Query TLS. |
+| queryTls.probes.startup.failureThreshold | int | `60` | Consecutive failures during Query TLS startup before the container is killed. |
+| queryTls.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Query TLS startup probe. |
+| queryTls.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Query TLS startup probe. |
+| queryTls.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query TLS startup probe. |
+| queryTls.probes.startup.port | int or string | `"http"` | Port checked by the Query TLS startup probe. |
+| queryTls.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query TLS startup probe is considered passed. |
+| queryTls.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query TLS startup probe times out. |
+| queryTls.replicaCount | int | `2` | Number of Query TLS pod replicas. |
+| queryTls.replicaLabels | list | `["prometheus_replica"]` | Label names that identify replica identity for result deduplication. |
+| queryTls.resources | object | {} | Resource requests and limits for the Query TLS container. |
+| queryTls.service.annotations | object | {} | Extra annotations for the Query TLS Service. |
+| queryTls.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Query TLS Service. |
+| queryTls.service.httpPort | int | `9090` | HTTP/PromQL port exposed by the Query TLS Service. |
+| queryTls.service.labels | object | {} | Extra labels for the Query TLS Service. |
+| queryTls.service.type | string | `"ClusterIP"` | Kubernetes Service type for Query TLS. |
+| queryTls.serviceMonitor.annotations | object | {} | Extra annotations for the Query TLS ServiceMonitor. |
+| queryTls.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Query TLS. |
+| queryTls.serviceMonitor.interval | string | `""` | Scrape interval for Query TLS. Empty uses the Prometheus operator default. |
+| queryTls.serviceMonitor.labels | object | {} | Extra labels for the Query TLS ServiceMonitor. |
+| queryTls.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Query TLS metrics are ingested. |
+| queryTls.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Query TLS metrics are ingested. |
+| queryTls.serviceMonitor.scheme | string | `""` | Scrape scheme for Query TLS (http or https). |
+| queryTls.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Query TLS. Empty uses the Prometheus operator default. |
+| queryTls.serviceMonitor.tlsConfig | object | {} | TLS configuration for Query TLS scraping. |
+| queryTls.stores | list | [] | List of remote gRPC Store API endpoints that require TLS. Unlike plain Query, no in-chart components are wired automatically. |
+| queryTls.tls.ca | string | `""` | Path to the CA certificate file used to verify the remote endpoint. Leave empty to use the system trust store. |
+| queryTls.tls.cert | string | `""` | Path to the TLS client certificate file (PEM). Leave empty when the remote endpoint uses a publicly trusted CA. |
+| queryTls.tls.key | string | `""` | Path to the TLS client private key file (PEM). |
+| queryTls.tolerations | list | [] | Tolerations for Query TLS pod scheduling. |
+| queryTls.topologySpreadConstraints | list | [] | Topology spread constraints for Query TLS pods. |
 | receive.affinity | object | {} | Affinity rules for Receive pod scheduling. |
 | receive.annotations | object | {} | Extra annotations applied to Receive resources. |
 | receive.containerSecurityContext | object | {} | Container security context for Receive. Overrides global.containerSecurityContext. |

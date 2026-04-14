@@ -1,0 +1,28 @@
+{{- if .Values.queryTls.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "queryTls") | nindent 4 }}
+    {{- with .Values.queryTls.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.queryTls.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "thanos.compName" (list . "query-tls") }}
+spec:
+  ports:
+    - name: grpc
+      port: {{ .Values.queryTls.service.grpcPort }}
+      targetPort: grpc
+    - name: http
+      port: {{ .Values.queryTls.service.httpPort }}
+      targetPort: http
+  selector:
+    app.kubernetes.io/component: query-tls
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  type: {{ .Values.queryTls.service.type }}
+{{- end }}

@@ -1,0 +1,22 @@
+{{- if and .Values.queryTls.enabled (or .Values.queryTls.pdb.enabled .Values.global.pdb.enabled) }}
+{{- $maxUnavail := .Values.queryTls.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
+{{- $minAvail := .Values.queryTls.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "queryTls") | nindent 4 }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+  name: {{ include "thanos.compName" (list . "query-tls") }}
+spec:
+  {{- if $maxUnavail }}
+  maxUnavailable: {{ $maxUnavail }}
+  {{- else if $minAvail }}
+  minAvailable: {{ $minAvail }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query-tls
+      app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

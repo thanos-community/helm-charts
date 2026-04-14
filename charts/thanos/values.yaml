@@ -1046,6 +1046,237 @@ query:
     maxUnavailable: ""
 
 # ======================================================================
+# Query TLS component
+# A second Query tier that connects to remote Store API endpoints
+# over TLS. The plain Query automatically fans out to this component,
+# so users only need to point Grafana at the plain Query.
+# ======================================================================
+# Query TLS component — TLS-enabled Query for reaching remote gRPC Store API endpoints.
+queryTls:
+  # -- Enable the Query TLS Deployment. When enabled, the plain Query
+  # automatically adds Query TLS as an endpoint.
+  enabled: false
+
+  # -- Number of Query TLS pod replicas.
+  replicaCount: 2
+
+  # Kubernetes Service configuration for Query TLS.
+  service:
+    # -- Extra annotations for the Query TLS Service.
+    # @default -- {}
+    annotations: {}
+    # -- gRPC Store API port exposed by the Query TLS Service.
+    grpcPort: 10901
+    # -- HTTP/PromQL port exposed by the Query TLS Service.
+    httpPort: 9090
+    # -- Extra labels for the Query TLS Service.
+    # @default -- {}
+    labels: {}
+    # -- Kubernetes Service type for Query TLS.
+    type: ClusterIP
+
+  # HorizontalPodAutoscaler configuration for Query TLS.
+  autoscaling:
+    # -- Enable HorizontalPodAutoscaler for Query TLS.
+    enabled: false
+    # -- Maximum number of Query TLS replicas.
+    maxReplicas: 5
+    # -- Minimum number of Query TLS replicas.
+    minReplicas: 2
+    # -- Target CPU utilisation percentage for Query TLS autoscaling.
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilisation percentage for Query TLS autoscaling. Null disables memory-based scaling.
+    targetMemoryUtilizationPercentage: null
+
+  # -- List of remote gRPC Store API endpoints that require TLS.
+  # Unlike plain Query, no in-chart components are wired automatically.
+  # @default -- []
+  stores: []
+  # Example:
+  # stores:
+  #   - thanos-gateway.remote-cluster.example.com:443
+  #   - dnssrv+_grpc._tcp.thanos-storegateway.remote.svc.cluster.local
+
+  # -- Label names that identify replica identity for result deduplication.
+  replicaLabels:
+    - prometheus_replica
+
+  # Additional CLI arguments appended to the `thanos query` command.
+  # Note: --grpc-client-tls-secure is always added automatically.
+  extraArgs:
+    - --log.level=info
+
+  # TLS client configuration for outbound gRPC connections.
+  tls:
+    # -- Path to the CA certificate file used to verify the remote endpoint.
+    # Leave empty to use the system trust store.
+    ca: ""
+    # -- Path to the TLS client certificate file (PEM).
+    # Leave empty when the remote endpoint uses a publicly trusted CA.
+    cert: ""
+    # -- Path to the TLS client private key file (PEM).
+    key: ""
+
+  # -- Resource requests and limits for the Query TLS container.
+  # @default -- {}
+  resources: {}
+
+  # -- Pod security context for Query TLS pods. Overrides global.podSecurityContext.
+  # @default -- {}
+  podSecurityContext: {}
+
+  # -- Container security context for Query TLS. Overrides global.containerSecurityContext.
+  # @default -- {}
+  containerSecurityContext: {}
+
+  # -- DNS configuration for Query TLS pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
+  # -- Extra environment variables injected into the Query TLS container.
+  # @default -- []
+  extraEnv: []
+
+  # -- Extra environment variable sources for the Query TLS container.
+  # @default -- []
+  extraEnvFrom: []
+
+  # -- Extra init containers for Query TLS pods.
+  # @default -- []
+  extraInitContainers: []
+
+  # -- Extra sidecar containers for Query TLS pods.
+  # @default -- []
+  extraContainers: []
+
+  # Health and readiness probe configuration for the Query TLS component.
+  probes:
+    # Readiness probe for the Query TLS component.
+    readiness:
+      # -- Enable the readiness probe for Query TLS.
+      enabled: true
+      # -- HTTP path checked by the Query TLS readiness probe.
+      path: /-/ready
+      # -- (int or string) Port checked by the Query TLS readiness probe.
+      port: http
+      # -- Seconds to wait before starting the Query TLS readiness probe.
+      initialDelaySeconds: 5
+      # -- How often (seconds) to run the Query TLS readiness probe.
+      periodSeconds: 10
+      # -- Seconds after which the Query TLS readiness probe times out.
+      timeoutSeconds: 5
+      # -- Consecutive failures before the Query TLS pod is marked not-ready.
+      failureThreshold: 6
+      # -- Consecutive successes before the Query TLS pod is marked ready.
+      successThreshold: 1
+    # Liveness probe for the Query TLS component.
+    liveness:
+      # -- Enable the liveness probe for Query TLS.
+      enabled: true
+      # -- HTTP path checked by the Query TLS liveness probe.
+      path: /-/healthy
+      # -- (int or string) Port checked by the Query TLS liveness probe.
+      port: http
+      # -- Seconds to wait before starting the Query TLS liveness probe.
+      initialDelaySeconds: 30
+      # -- How often (seconds) to run the Query TLS liveness probe.
+      periodSeconds: 10
+      # -- Seconds after which the Query TLS liveness probe times out.
+      timeoutSeconds: 5
+      # -- Consecutive failures before the Query TLS container is restarted.
+      failureThreshold: 6
+      # -- Consecutive successes before the Query TLS container is considered live.
+      successThreshold: 1
+    # Startup probe for the Query TLS component.
+    startup:
+      # -- Enable the startup probe for Query TLS.
+      enabled: true
+      # -- HTTP path checked by the Query TLS startup probe.
+      path: /-/ready
+      # -- (int or string) Port checked by the Query TLS startup probe.
+      port: http
+      # -- Seconds to wait before starting the Query TLS startup probe.
+      initialDelaySeconds: 0
+      # -- How often (seconds) to run the Query TLS startup probe.
+      periodSeconds: 5
+      # -- Seconds after which the Query TLS startup probe times out.
+      timeoutSeconds: 5
+      # -- Consecutive failures during Query TLS startup before the container is killed.
+      failureThreshold: 60
+      # -- Consecutive successes before the Query TLS startup probe is considered passed.
+      successThreshold: 1
+
+  # -- Node selector for Query TLS pod scheduling.
+  # @default -- {}
+  nodeSelector: {}
+
+  # -- Tolerations for Query TLS pod scheduling.
+  # @default -- []
+  tolerations: []
+
+  # -- Affinity rules for Query TLS pod scheduling.
+  # @default -- {}
+  affinity: {}
+
+  # -- Topology spread constraints for Query TLS pods.
+  # @default -- []
+  topologySpreadConstraints: []
+
+  # -- Priority class name for Query TLS pods.
+  priorityClassName: ""
+
+  # -- Extra volumes for Query TLS pods.
+  # @default -- []
+  extraVolumes: []
+
+  # -- Extra volume mounts for the Query TLS container.
+  # @default -- []
+  extraVolumeMounts: []
+
+  # -- Extra annotations applied to Query TLS resources.
+  # @default -- {}
+  annotations: {}
+
+  # -- Extra labels applied to Query TLS resources.
+  # @default -- {}
+  labels: {}
+
+  # Prometheus Operator ServiceMonitor configuration for Query TLS.
+  serviceMonitor:
+    # -- Enable a Prometheus Operator ServiceMonitor for Query TLS.
+    enabled: false
+    # -- Extra annotations for the Query TLS ServiceMonitor.
+    # @default -- {}
+    annotations: {}
+    # -- Extra labels for the Query TLS ServiceMonitor.
+    # @default -- {}
+    labels: {}
+    # -- Scrape interval for Query TLS. Empty uses the Prometheus operator default.
+    interval: ""
+    # -- Scrape timeout for Query TLS. Empty uses the Prometheus operator default.
+    scrapeTimeout: ""
+    # -- Scrape scheme for Query TLS (http or https).
+    scheme: ""
+    # -- TLS configuration for Query TLS scraping.
+    # @default -- {}
+    tlsConfig: {}
+    # -- Relabeling rules applied before Query TLS metrics are ingested.
+    # @default -- []
+    relabelings: []
+    # -- Metric relabeling rules applied after Query TLS metrics are ingested.
+    # @default -- []
+    metricRelabelings: []
+
+  # PodDisruptionBudget configuration for Query TLS.
+  pdb:
+    # -- Enable a PodDisruptionBudget for Query TLS.
+    enabled: false
+    # -- (int or string) Maximum unavailable Query TLS pods during a disruption.
+    maxUnavailable: ""
+    # -- (int or string) Minimum available Query TLS pods during a disruption.
+    minAvailable: ""
+
+# ======================================================================
 # Query Frontend component
 # Optional caching and query-splitting layer in front of Query.
 # Reduces load for repeated or heavy long-range queries.

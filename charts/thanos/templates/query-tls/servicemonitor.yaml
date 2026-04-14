@@ -1,0 +1,33 @@
+{{- if and .Values.queryTls.enabled (or .Values.queryTls.serviceMonitor.enabled .Values.global.serviceMonitor.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "queryTls") | nindent 4 }}
+  labels:
+    {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
+    {{- if .Values.queryTls.serviceMonitor.labels }}{{ toYaml .Values.queryTls.serviceMonitor.labels | nindent 4 }}{{- end }}
+  name: {{ include "thanos.compName" (list . "query-tls") }}
+spec:
+  endpoints:
+    - interval: {{ default .Values.global.serviceMonitor.interval .Values.queryTls.serviceMonitor.interval | quote }}
+      {{- with (default .Values.global.serviceMonitor.metricRelabelings .Values.queryTls.serviceMonitor.metricRelabelings) }}
+      metricRelabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      path: /metrics
+      port: http
+      {{- with (default .Values.global.serviceMonitor.relabelings .Values.queryTls.serviceMonitor.relabelings) }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      scrapeTimeout: {{ default .Values.global.serviceMonitor.scrapeTimeout .Values.queryTls.serviceMonitor.scrapeTimeout | quote }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query-tls
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: thanos
+{{- end }}

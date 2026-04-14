@@ -39,6 +39,9 @@ spec:
             - query
             - --http-address=0.0.0.0:{{ .Values.query.service.httpPort }}
             - --grpc-address=0.0.0.0:{{ .Values.query.service.grpcPort }}
+          {{- if .Values.queryTls.enabled }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "query-tls") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+          {{- end }}
           {{- if .Values.storegateway.enabled }}
             # - --endpoint={{ include "thanos.compName" (list . "storegateway") }}:{{ .Values.storegateway.service.grpcPort }}
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "storegateway") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}

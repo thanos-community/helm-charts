@@ -1,0 +1,81 @@
+{{- if .Values.queryTls.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "queryTls") | nindent 4 }}
+    {{- with .Values.queryTls.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.queryTls.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "thanos.compName" (list . "query-tls") }}
+spec:
+  replicas: {{ .Values.queryTls.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: query-tls
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+      labels:
+        app.kubernetes.io/component: query-tls
+        {{- include "thanos.labels" . | nindent 8 }}
+    spec:
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      containers:
+        - args:
+            - query
+            {{- range .Values.queryTls.stores }}
+            - --endpoint={{ . }}
+            {{- end }}
+            - --grpc-address=0.0.0.0:{{ .Values.queryTls.service.grpcPort }}
+            {{- if .Values.queryTls.tls.ca }}
+            - --grpc-client-tls-ca={{ .Values.queryTls.tls.ca }}
+            {{- end }}
+            {{- if .Values.queryTls.tls.cert }}
+            - --grpc-client-tls-cert={{ .Values.queryTls.tls.cert }}
+            {{- end }}
+            {{- if .Values.queryTls.tls.key }}
+            - --grpc-client-tls-key={{ .Values.queryTls.tls.key }}
+            {{- end }}
+            - --grpc-client-tls-secure
+            - --http-address=0.0.0.0:{{ .Values.queryTls.service.httpPort }}
+            {{- range .Values.queryTls.replicaLabels }}
+            - --query.replica-label={{ . }}
+            {{- end }}
+            {{- range .Values.queryTls.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "queryTls") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "queryTls") | nindent 10 }}
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          name: query-tls
+          ports:
+            - containerPort: {{ .Values.queryTls.service.grpcPort }}
+              name: grpc
+            - containerPort: {{ .Values.queryTls.service.httpPort }}
+              name: http
+          {{- include "thanos.extraMountsBlock" (dict "root" . "key" "queryTls") | nindent 10 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "queryTls") | nindent 10 }}
+          resources:
+            {{- toYaml .Values.queryTls.resources | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "queryTls" "port" "http") | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "queryTls" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "queryTls" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "queryTls") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "queryTls") | nindent 6 }}
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "queryTls") | nindent 6 }}
+{{- end }}
