@@ -4,7 +4,7 @@ kind: StatefulSet
 metadata:
   name: {{ include "thanos.compName" (list . "storegateway") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
 spec:
@@ -17,14 +17,14 @@ spec:
   template:
     metadata:
       labels:
-{{ include "thanos.labels" . | indent 8 }}
+        {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: storegateway
       annotations:
-{{ toYaml .Values.global.podAnnotations | indent 8 }}
+        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
-      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{ include "thanos.podSC" (dict "root" . "key" "storegateway") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "storegateway") | nindent 6 }}
       {{- if .Values.storegateway.extraInitContainers }}
       initContainers:
         {{- tpl (toYaml .Values.storegateway.extraInitContainers) . | nindent 8 }}
@@ -56,16 +56,16 @@ spec:
             - name: objstore
               mountPath: /etc/thanos
               readOnly: true
-          {{- if .Values.storegateway.cachingBucketConfig }}
+            {{- if .Values.storegateway.cachingBucketConfig }}
             - name: caching-bucket
               mountPath: /etc/thanos/caching-bucket.yaml
               subPath: caching-bucket.yaml
-          {{- end }}
-          {{ include "thanos.extraMountItems" (dict "root" . "key" "storegateway") | nindent 10 }}
-          {{ include "thanos.containerSC" (dict "root" . "key" "storegateway") | nindent 10 }}
+            {{- end }}
+            {{- include "thanos.extraMountItems" (dict "root" . "key" "storegateway") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "storegateway") | nindent 10 }}
           resources:
-{{ toYaml .Values.storegateway.resources | indent 12 }}
-          {{ include "thanos.httpProbes" (dict "root" . "key" "storegateway" "port" .Values.storegateway.service.httpPort) | nindent 10 }}
+            {{- toYaml .Values.storegateway.resources | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "storegateway" "port" .Values.storegateway.service.httpPort) | nindent 10 }}
       volumes:
         - name: objstore
           secret:
@@ -82,7 +82,7 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "storegateway") | nindent 6 }}
+        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "storegateway") | nindent 8 }}
   {{- if .Values.storegateway.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:

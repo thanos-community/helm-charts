@@ -4,9 +4,9 @@ kind: Ingress
 metadata:
   name: {{ include "thanos.compName" (list . "receive") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-{{ toYaml .Values.receive.ingress.annotations | indent 4 }}
+    {{- toYaml .Values.receive.ingress.annotations | nindent 4 }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
 spec:
   {{- with .Values.receive.ingress.className }}
@@ -28,5 +28,5 @@ spec:
         {{- end }}
   {{- end }}
   tls:
-{{ toYaml .Values.receive.ingress.tls | indent 4 }}
+    {{- toYaml .Values.receive.ingress.tls | nindent 4 }}
 {{- end }}

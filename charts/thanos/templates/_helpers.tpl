@@ -44,7 +44,7 @@ app.kubernetes.io/part-of: thanos
 {{- end }}
 
 {{- if $annotations }}
-{{ toYaml $annotations | indent 2 }}
+  {{- toYaml $annotations | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -55,7 +55,7 @@ app.kubernetes.io/part-of: thanos
 {{- $psc := $comp.podSecurityContext | default $root.Values.global.podSecurityContext -}}
 {{- if $psc }}
 securityContext:
-{{ toYaml $psc | nindent 2 }}
+  {{- toYaml $psc | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -66,7 +66,7 @@ securityContext:
 {{- $csc := $comp.containerSecurityContext | default $root.Values.global.containerSecurityContext -}}
 {{- if $csc }}
 securityContext:
-{{ toYaml $csc | nindent 2 }}
+  {{- toYaml $csc | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -141,7 +141,7 @@ startupProbe:
 {{- $volsComp := $comp.extraVolumes | default list -}}
 {{- if or (gt (len $volsGlob) 0) (gt (len $volsComp) 0) }}
 volumes:
-{{ include "thanos.extraVolumeItems" (dict "root" $root "key" $key) | nindent 0 }}
+  {{- include "thanos.extraVolumeItems" (dict "root" $root "key" $key) | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -169,7 +169,7 @@ volumes:
 {{- $mtsComp := $comp.extraVolumeMounts | default list -}}
 {{- if or (gt (len $mtsGlob) 0) (gt (len $mtsComp) 0) }}
 volumeMounts:
-{{ include "thanos.extraMountItems" (dict "root" $root "key" $key) | nindent 0 }}
+  {{- include "thanos.extraMountItems" (dict "root" $root "key" $key) | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -239,7 +239,7 @@ Render imagePullSecrets from global.image.imagePullSecrets if any
 {{- define "thanos.imagePullSecrets" -}}
 {{- if .Values.global.imagePullSecrets }}
 imagePullSecrets:
-{{ toYaml .Values.global.imagePullSecrets | indent 2 }}
+  {{- toYaml .Values.global.imagePullSecrets | nindent 2 }}
 {{- end }}
 {{- end -}}
 
@@ -258,18 +258,18 @@ metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}
   namespace: {{ $root.Release.Namespace }}
   labels:
-{{ include "thanos.labels" $root | indent 4 }}
+    {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}
   {{- with $cfg.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-{{ toYaml $cfg.parentRefs | indent 4 }}
+    {{- toYaml $cfg.parentRefs | nindent 4 }}
   {{- with $cfg.hostnames }}
   hostnames:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - backendRefs:
@@ -292,18 +292,18 @@ metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}-grpc
   namespace: {{ $root.Release.Namespace }}
   labels:
-{{ include "thanos.labels" $root | indent 4 }}
+    {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}
   {{- with $cfg.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   parentRefs:
-{{ toYaml $cfg.parentRefs | indent 4 }}
+    {{- toYaml $cfg.parentRefs | nindent 4 }}
   {{- with $cfg.hostnames }}
   hostnames:
-{{ toYaml . | indent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   rules:
     - backendRefs:

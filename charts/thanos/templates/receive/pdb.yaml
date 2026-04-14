@@ -4,7 +4,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ include "thanos.compName" (list . "receive") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
 spec:

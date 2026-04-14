@@ -4,16 +4,16 @@ kind: ConfigMap
 metadata:
   name: {{ include "thanos.compName" (list . "ruler") }}-query
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-query") | nindent 4 }}
 data:
   query-urls.yaml: |
     query:
       urls:
-{{- if .Values.ruler.query.urls }}
-{{ toYaml .Values.ruler.query.urls | indent 8 }}
-{{- else }}
+        {{- if .Values.ruler.query.urls }}
+        {{- toYaml .Values.ruler.query.urls | nindent 8 }}
+        {{- else }}
         - http://{{ include "thanos.compName" (list . "query") }}:{{ .Values.query.service.httpPort }}
-{{- end }}
+        {{- end }}
 {{- end }}

@@ -8,7 +8,7 @@ kind: Job
 metadata:
   name: {{ include "thanos.compName" (list . "init-bucket") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
 spec:
   backoffLimit: 10
   template:
