@@ -48,7 +48,7 @@ spec:
             - --query.replica-label={{ . }}
           {{- end }}
           {{- range .Values.query.stores }}
-            - --store={{ . }}
+            - --endpoint={{ . }}
           {{- end }}
           {{- range .Values.query.extraArgs }}
             - {{ . | quote }}
