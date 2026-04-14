@@ -4,10 +4,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "thanos.compName" (list . "ruler") }}-am
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-am") | nindent 4 }}
 data:
   alertmanagers.yaml: |
-{{ toYaml (tpl .Values.ruler.alertmanagers.config .) | indent 4 }}
+    {{- toYaml (tpl .Values.ruler.alertmanagers.config .) | nindent 4 }}
 {{- end }}

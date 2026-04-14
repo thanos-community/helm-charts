@@ -4,10 +4,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "thanos.compName" (list . "query-frontend") }}-cache
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
 data:
   cache.yaml: |
-{{ tpl .Values.queryFrontend.cacheConfig . | indent 4 }}
+    {{- tpl .Values.queryFrontend.cacheConfig . | nindent 4 }}
 {{- end }}

@@ -4,7 +4,7 @@ kind: StatefulSet
 metadata:
   name: {{ include "thanos.compName" (list . "compactor") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
 spec:
@@ -17,14 +17,14 @@ spec:
   template:
     metadata:
       labels:
-{{ include "thanos.labels" . | indent 8 }}
+        {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: compactor
       annotations:
-{{ toYaml .Values.global.podAnnotations | indent 8 }}
+        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
-      {{ include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{ include "thanos.podSC" (dict "root" . "key" "compactor") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "compactor") | nindent 6 }}
       {{- if .Values.compactor.extraInitContainers }}
       initContainers:
         {{- tpl (toYaml .Values.compactor.extraInitContainers) . | nindent 8 }}
@@ -50,11 +50,11 @@ spec:
             - name: objstore
               mountPath: /etc/thanos
               readOnly: true
-          {{ include "thanos.extraMountItems" (dict "root" . "key" "compactor") | nindent 10 }}
-          {{ include "thanos.containerSC" (dict "root" . "key" "compactor") | nindent 10 }}
+            {{- include "thanos.extraMountItems" (dict "root" . "key" "compactor") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "compactor") | nindent 10 }}
           resources:
-{{ toYaml .Values.compactor.resources | indent 12 }}
-          {{ include "thanos.httpProbes" (dict "root" . "key" "compactor" "port" .Values.compactor.service.port) | nindent 10 }}
+            {{- toYaml .Values.compactor.resources | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "compactor" "port" .Values.compactor.service.port) | nindent 10 }}
       volumes:
         - name: objstore
           secret:
@@ -66,7 +66,7 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
-      {{ include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") | nindent 6 }}
+        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") | nindent 8 }}
   {{- if .Values.compactor.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:

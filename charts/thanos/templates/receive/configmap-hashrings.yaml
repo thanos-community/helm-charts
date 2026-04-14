@@ -4,10 +4,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "thanos.compName" (list . "receive-hashrings") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive-hashrings") | nindent 4 }}
 data:
   hashrings.json: |
-{{ include "thanos.receive.hashrings" . | nindent 4 }}
+    {{- include "thanos.receive.hashrings" . | nindent 4 }}
 {{- end }}

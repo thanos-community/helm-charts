@@ -4,9 +4,9 @@ kind: Ingress
 metadata:
   name: {{ include "thanos.compName" (list . "compactor") }}
   labels:
-{{ include "thanos.labels" . | indent 4 }}
+    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-{{ toYaml .Values.compactor.ingress.annotations | indent 4 }}
+    {{- toYaml .Values.compactor.ingress.annotations | nindent 4 }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
 spec:
   {{- with .Values.compactor.ingress.className }}
@@ -28,5 +28,5 @@ spec:
         {{- end }}
   {{- end }}
   tls:
-{{ toYaml .Values.compactor.ingress.tls | indent 4 }}
+    {{- toYaml .Values.compactor.ingress.tls | nindent 4 }}
 {{- end }}

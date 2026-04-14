@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.39.2](https://img.shields.io/badge/AppVersion-v0.39.2-informational?style=flat-square)
+![Version: 0.3.2](https://img.shields.io/badge/Version-0.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.0.90 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 80.2.0 |
+| https://charts.rustfs.com/ | rustfs | 0.0.91 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 83.0.2 |
 
 ## Component Overview
 
@@ -610,7 +610,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.extraVolumes | list | [] | Additional volumes available to every pod by default. |
 | global.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy applied to every container. One of Always, IfNotPresent, Never. |
 | global.image.repository | string | `"quay.io/thanos/thanos"` | Docker repository for all Thanos containers by default. |
-| global.image.tag | string | `"v0.39.2"` | Container image tag. Changing this upgrades all components at once. |
+| global.image.tag | string | `"v0.41.0"` | Container image tag. Changing this upgrades all components at once. |
 | global.imagePullSecrets | list | [] | List of imagePullSecrets applied to every pod by default. |
 | global.nodeSelector | object | {} | Node selector applied to every pod by default. |
 | global.objstore.config | string | `"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n\n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n"` | Inline object store configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`, so Helm template syntax (e.g. `{{ .Release.Name }}`) is valid inside the string. Refer to https://thanos.io/tip/thanos/storage.md/ for the full schema. |
