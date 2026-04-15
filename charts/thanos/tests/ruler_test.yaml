@@ -654,7 +654,7 @@ tests:
           value: |
             alertmanagers:
               - static_configs:
-                  - alertmanager-operated.monitoring.svc.cluster.local:9093
+                  - alertmanager.monitoring.svc.cluster.local:9093
                 scheme: http
                 api_version: v2
 
