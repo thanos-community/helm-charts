@@ -1852,8 +1852,11 @@ ruler:
   # See https://thanos.io/tip/components/rule.md/#flags for the full schema.
   alertmanagers:
     config: |
-      static_configs:
-        - targets: ["alertmanager.monitoring.svc.cluster.local:9093"]
+      alertmanagers:
+        - static_configs:
+            - alertmanager.monitoring.svc.cluster.local:9093
+          scheme: http
+          api_version: v2
 
   # -- URL used in rule alert annotations to link back to a Thanos query UI.
   alertQueryUrl: ""

@@ -644,6 +644,60 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: renders alertmanagers configmap data as a valid alert.AlertingConfig with default values
+    template: ruler/configmap-alertmanagers.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - equal:
+          path: data["alertmanagers.yaml"]
+          value: |
+            alertmanagers:
+              - static_configs:
+                  - alertmanager-operated.monitoring.svc.cluster.local:9093
+                scheme: http
+                api_version: v2
+
+  - it: renders alertmanagers configmap with user-provided config
+    template: ruler/configmap-alertmanagers.yaml
+    set:
+      ruler.enabled: true
+      ruler.alertmanagers.config: |
+        alertmanagers:
+          - static_configs:
+              - custom-alertmanager.example.com:9093
+            scheme: https
+            api_version: v2
+    asserts:
+      - equal:
+          path: data["alertmanagers.yaml"]
+          value: |
+            alertmanagers:
+              - static_configs:
+                  - custom-alertmanager.example.com:9093
+                scheme: https
+                api_version: v2
+
+  - it: renders alertmanagers configmap with templated values via tpl
+    template: ruler/configmap-alertmanagers.yaml
+    set:
+      ruler.enabled: true
+      ruler.alertmanagers.config: |
+        alertmanagers:
+          - static_configs:
+              - {{ .Release.Name }}-am:9093
+            scheme: http
+            api_version: v2
+    asserts:
+      - equal:
+          path: data["alertmanagers.yaml"]
+          value: |
+            alertmanagers:
+              - static_configs:
+                  - RELEASE-NAME-am:9093
+                scheme: http
+                api_version: v2
+
   # -- ConfigMap query ---------------------------------------------------
 
   - it: renders query configmap when ruler is enabled
