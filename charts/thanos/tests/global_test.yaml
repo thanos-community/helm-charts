@@ -1,0 +1,115 @@
+suite: global resources
+
+tests:
+  # -- ServiceAccount ----------------------------------------------------
+
+  - it: renders serviceaccount when create and rbac are true
+    template: serviceaccount.yaml
+    set:
+      global.serviceAccount.create: true
+      global.rbac.create: true
+    asserts:
+      - isKind:
+          of: ServiceAccount
+
+  - it: does not render serviceaccount when create is false
+    template: serviceaccount.yaml
+    set:
+      global.serviceAccount.create: false
+      global.rbac.create: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render serviceaccount when rbac is false
+    template: serviceaccount.yaml
+    set:
+      global.serviceAccount.create: true
+      global.rbac.create: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: applies serviceaccount annotations
+    template: serviceaccount.yaml
+    set:
+      global.serviceAccount.create: true
+      global.rbac.create: true
+      global.serviceAccount.annotations:
+        custom-annotation: my-value
+    asserts:
+      - equal:
+          path: metadata.annotations.custom-annotation
+          value: my-value
+
+  # -- PrometheusRule ----------------------------------------------------
+
+  - it: renders prometheusrule when thanosRules are enabled
+    template: prometheusrule.yaml
+    set:
+      global.thanosRules.enabled: true
+    asserts:
+      - isKind:
+          of: PrometheusRule
+
+  - it: does not render prometheusrule when thanosRules are disabled
+    template: prometheusrule.yaml
+    set:
+      global.thanosRules.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: applies extra labels to prometheusrule
+    template: prometheusrule.yaml
+    set:
+      global.thanosRules.enabled: true
+      global.thanosRules.labels:
+        custom-label: my-value
+    asserts:
+      - equal:
+          path: metadata.labels.custom-label
+          value: my-value
+
+  # -- RustFS init-bucket Job --------------------------------------------
+
+  - it: renders rustfs init-bucket job when enabled
+    template: rustfs/init-bucket.yaml
+    set:
+      rustfs.enabled: true
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-init-bucket
+
+  - it: does not render rustfs init-bucket job when disabled
+    template: rustfs/init-bucket.yaml
+    set:
+      rustfs.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: uses existing secret for rustfs credentials when set
+    template: rustfs/init-bucket.yaml
+    set:
+      rustfs.enabled: true
+      rustfs.initBucket.existingSecret: my-rustfs-secret
+      rustfs.initBucket.existingSecretKeys.accessKey: access-key
+      rustfs.initBucket.existingSecretKeys.secretKey: secret-key
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[0].valueFrom.secretKeyRef.name
+          value: my-rustfs-secret
+
+  - it: sets bucket name in rustfs init-bucket job
+    template: rustfs/init-bucket.yaml
+    set:
+      rustfs.enabled: true
+      rustfs.initBucket.bucketName: my-bucket
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].command[2]
+          pattern: "my-bucket"

@@ -1,41 +1,41 @@
-suite: query component
+suite: ruler component
 
 tests:
-  # -- Deployment basics ----------------------------------------------
+  # -- StatefulSet basics ---------------------------------------------
 
-  - it: renders deployment when query is enabled
-    template: query/deployment.yaml
+  - it: renders statefulset when ruler is enabled
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
     asserts:
       - isKind:
-          of: Deployment
+          of: StatefulSet
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-ruler
 
-  - it: does not render when query is disabled
-    template: query/deployment.yaml
+  - it: does not render when ruler is disabled
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: false
+      ruler.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
   - it: sets the correct replica count
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.replicaCount: 3
+      ruler.enabled: true
+      ruler.replicaCount: 3
     asserts:
       - equal:
           path: spec.replicas
           value: 3
 
   - it: uses the global image repository and tag
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.image.repository: quay.io/thanos/thanos
       global.image.tag: v0.40.0
     asserts:
@@ -43,50 +43,59 @@ tests:
           path: spec.template.spec.containers[0].image
           value: quay.io/thanos/thanos:v0.40.0
 
-  - it: passes replica labels as CLI args
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      query.replicaLabels:
-        - prometheus_replica
-        - thanos_replica
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].args
-          content: --query.replica-label=prometheus_replica
-      - contains:
-          path: spec.template.spec.containers[0].args
-          content: --query.replica-label=thanos_replica
-
-  - it: adds store endpoints for storegateway when enabled
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      storegateway.enabled: true
-      receive.enabled: false
-    asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[3]
-          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
-
   - it: passes extra CLI args
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.extraArgs:
+      ruler.enabled: true
+      ruler.extraArgs:
         - --log.level=debug
     asserts:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "--log.level=debug"
 
+  - it: sets alert query URL when configured
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.alertQueryUrl: http://query.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --alert.query-url=http://query.example.com
+
+  - it: creates persistence volume claim template
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: true
+      ruler.persistence.size: 10Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 10Gi
+
+  - it: uses emptyDir when persistence is disabled
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.annotations:
+      ruler.enabled: true
+      ruler.annotations:
         custom-annotation: my-value
     asserts:
       - equal:
@@ -94,23 +103,23 @@ tests:
           value: my-value
 
   - it: applies component labels
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.labels:
-        custom-label: my-value
+      ruler.enabled: true
+      ruler.labels:
+        team: alerting
     asserts:
       - equal:
-          path: metadata.labels.custom-label
-          value: my-value
+          path: metadata.labels.team
+          value: alerting
 
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.extraEnv:
+      ruler.enabled: true
+      ruler.extraEnv:
         - name: LOG_FORMAT
           value: json
     asserts:
@@ -121,15 +130,15 @@ tests:
             value: json
 
   - it: merges global and component extraEnv with component winning
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.extraEnv:
         - name: LOG_FORMAT
           value: json
         - name: SHARED_VAR
           value: global-value
-      query.extraEnv:
+      ruler.extraEnv:
         - name: SHARED_VAR
           value: component-value
     asserts:
@@ -147,15 +156,15 @@ tests:
   # -- Extra envFrom vars -----------------------------------------------
 
   - it: merges global and component extraEnvFrom with component winning
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.extraEnvFrom:
         - name: GLOBAL_FROM
           value: global-value
         - name: SHARED_FROM
           value: global-value
-      query.extraEnvFrom:
+      ruler.extraEnvFrom:
         - name: SHARED_FROM
           value: component-value
     asserts:
@@ -173,9 +182,9 @@ tests:
   # -- Security contexts ----------------------------------------------
 
   - it: applies global container security context
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.containerSecurityContext:
         readOnlyRootFilesystem: true
         runAsNonRoot: true
@@ -188,12 +197,12 @@ tests:
           value: true
 
   - it: applies component container security context overriding global
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.containerSecurityContext:
         runAsNonRoot: true
-      query.containerSecurityContext:
+      ruler.containerSecurityContext:
         runAsNonRoot: false
         runAsUser: 1001
     asserts:
@@ -205,10 +214,10 @@ tests:
           value: 1001
 
   - it: applies pod security context
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.podSecurityContext:
+      ruler.enabled: true
+      ruler.podSecurityContext:
         fsGroup: 1001
     asserts:
       - equal:
@@ -218,9 +227,9 @@ tests:
   # -- Scheduling and placement ---------------------------------------
 
   - it: applies component affinity overriding global
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -230,7 +239,7 @@ tests:
                     operator: In
                     values:
                       - ap-southeast-2a
-      query.affinity:
+      ruler.affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
@@ -246,9 +255,9 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies global affinity as fallback
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -263,12 +272,12 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies component nodeSelector overriding global
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.nodeSelector:
         node-role: node
-      query.nodeSelector:
+      ruler.nodeSelector:
         node-role: thanos
     asserts:
       - equal:
@@ -276,9 +285,9 @@ tests:
           value: thanos
 
   - it: applies global nodeSelector as fallback
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.nodeSelector:
         node-role: thanos
     asserts:
@@ -287,10 +296,10 @@ tests:
           value: thanos
 
   - it: applies component tolerations
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
-      query.tolerations:
+      ruler.enabled: true
+      ruler.tolerations:
         - key: dedicated
           operator: Equal
           value: thanos
@@ -305,9 +314,9 @@ tests:
             effect: NoSchedule
 
   - it: applies global tolerations as fallback
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.tolerations:
         - key: dedicated
           operator: Equal
@@ -323,9 +332,9 @@ tests:
             effect: NoSchedule
 
   - it: applies component topologySpreadConstraints overriding global
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -333,7 +342,7 @@ tests:
           labelSelector:
             matchLabels:
               app: thanos
-      query.topologySpreadConstraints:
+      ruler.topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: ScheduleAnyway
@@ -352,9 +361,9 @@ tests:
                 app: thanos
 
   - it: applies global topologySpreadConstraints as fallback
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -374,20 +383,20 @@ tests:
                 app: thanos
 
   - it: applies component priorityClassName overriding global
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.priorityClassName: high-priority
-      query.priorityClassName: critical
+      ruler.priorityClassName: critical
     asserts:
       - equal:
           path: spec.template.spec.priorityClassName
           value: critical
 
   - it: applies global priorityClassName as fallback
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.priorityClassName: high-priority
     asserts:
       - equal:
@@ -397,14 +406,14 @@ tests:
   # -- Extra init and sidecar containers ------------------------------
 
   - it: merges global and component extraInitContainers
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.extraInitContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraInitContainers:
+      ruler.extraInitContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -423,14 +432,14 @@ tests:
             command: ["echo", "component"]
 
   - it: merges global and component extraContainers
-    template: query/deployment.yaml
+    template: ruler/statefulset.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.extraContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraContainers:
+      ruler.extraContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -448,38 +457,14 @@ tests:
             image: busybox:latest
             command: ["echo", "component"]
 
-  # -- Service --------------------------------------------------------
-
-  - it: applies service annotations
-    template: query/service.yaml
-    set:
-      query.enabled: true
-      query.service.annotations:
-        custom-annotation: my-value
-    asserts:
-      - equal:
-          path: metadata.annotations.custom-annotation
-          value: my-value
-
-  - it: applies service labels
-    template: query/service.yaml
-    set:
-      query.enabled: true
-      query.service.labels:
-        monitoring: "true"
-    asserts:
-      - equal:
-          path: metadata.labels.monitoring
-          value: "true"
-
   # -- PodDisruptionBudget --------------------------------------------
 
   - it: renders PDB when component pdb is enabled
-    template: query/pdb.yaml
+    template: ruler/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: true
-      query.pdb.maxUnavailable: "1"
+      ruler.enabled: true
+      ruler.pdb.enabled: true
+      ruler.pdb.maxUnavailable: "1"
     asserts:
       - isKind:
           of: PodDisruptionBudget
@@ -488,9 +473,9 @@ tests:
           value: 1
 
   - it: renders PDB via global pdb.enabled fallback
-    template: query/pdb.yaml
+    template: ruler/pdb.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
     asserts:
@@ -501,22 +486,22 @@ tests:
           value: 1
 
   - it: component PDB values override global
-    template: query/pdb.yaml
+    template: ruler/pdb.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
-      query.pdb.minAvailable: "3"
+      ruler.pdb.minAvailable: "3"
     asserts:
       - equal:
           path: spec.minAvailable
           value: 3
 
   - it: does not render PDB when both component and global pdb are disabled
-    template: query/pdb.yaml
+    template: ruler/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: false
+      ruler.enabled: true
+      ruler.pdb.enabled: false
       global.pdb.enabled: false
     asserts:
       - hasDocuments:
@@ -525,11 +510,11 @@ tests:
   # -- Ingress -----------------------------------------------------------
 
   - it: renders ingress when enabled
-    template: query/ingress.yaml
+    template: ruler/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.hosts:
+      ruler.enabled: true
+      ruler.ingress.enabled: true
+      ruler.ingress.hosts:
         - host: thanos.example.com
           paths:
             - path: /
@@ -539,24 +524,24 @@ tests:
           of: Ingress
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-ruler
 
   - it: does not render ingress when disabled
-    template: query/ingress.yaml
+    template: ruler/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: false
+      ruler.enabled: true
+      ruler.ingress.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
   - it: sets ingress class name
-    template: query/ingress.yaml
+    template: ruler/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.className: nginx
-      query.ingress.hosts:
+      ruler.enabled: true
+      ruler.ingress.enabled: true
+      ruler.ingress.className: nginx
+      ruler.ingress.hosts:
         - host: thanos.example.com
           paths:
             - path: /
@@ -587,64 +572,118 @@ tests:
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled
-    template: query/servicemonitor.yaml
+    template: ruler/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: true
+      ruler.enabled: true
+      ruler.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-ruler
 
   - it: renders servicemonitor via global fallback
-    template: query/servicemonitor.yaml
+    template: ruler/servicemonitor.yaml
     set:
-      query.enabled: true
+      ruler.enabled: true
       global.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
 
   - it: does not render servicemonitor when disabled
-    template: query/servicemonitor.yaml
+    template: ruler/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: false
+      ruler.enabled: true
+      ruler.serviceMonitor.enabled: false
       global.serviceMonitor.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
-  # -- HorizontalPodAutoscaler ------------------------------------------
+  # -- ConfigMap rules ---------------------------------------------------
 
-  - it: renders HPA when autoscaling is enabled
-    template: query/hpa.yaml
+  - it: renders rules configmap when ruler is enabled
+    template: ruler/configmaprules.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.minReplicas: 1
-      query.autoscaling.maxReplicas: 3
-      query.autoscaling.targetCPUUtilizationPercentage: 80
+      ruler.enabled: true
     asserts:
       - isKind:
-          of: HorizontalPodAutoscaler
+          of: ConfigMap
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
-      - equal:
-          path: spec.minReplicas
-          value: 1
-      - equal:
-          path: spec.maxReplicas
-          value: 3
+          value: RELEASE-NAME-thanos-ruler-rules
 
-  - it: does not render HPA when autoscaling is disabled
-    template: query/hpa.yaml
+  - it: does not render rules configmap when ruler is disabled
+    template: ruler/configmaprules.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: false
+      ruler.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- ConfigMap alertmanagers -------------------------------------------
+
+  - it: renders alertmanagers configmap when ruler is enabled
+    template: ruler/configmap-alertmanagers.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler-am
+
+  - it: does not render alertmanagers configmap when ruler is disabled
+    template: ruler/configmap-alertmanagers.yaml
+    set:
+      ruler.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- ConfigMap query ---------------------------------------------------
+
+  - it: renders query configmap when ruler is enabled
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler-query
+
+  - it: does not render query configmap when ruler is disabled
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- ConfigMap auto-import prometheus rules -----------------------------
+
+  - it: renders rule-importer configmap when autoImport is enabled
+    template: ruler/configmap-auto-import-prometheus-rules.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler-rule-importer
+
+  - it: does not render rule-importer configmap when autoImport is disabled
+    template: ruler/configmap-auto-import-prometheus-rules.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: false
     asserts:
       - hasDocuments:
           count: 0

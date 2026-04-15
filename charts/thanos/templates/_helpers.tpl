@@ -257,7 +257,7 @@ env:
 
 {{- define "thanos.extraEnvFromBlock" -}}
 {{- if include "thanos.extraEnvFromItems" $ }}
-env:
+envFrom:
   {{- include "thanos.extraEnvFromItems" $ | nindent 2 }}
 {{- end }}
 {{- end }}
