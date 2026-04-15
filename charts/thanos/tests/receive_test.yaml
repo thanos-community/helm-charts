@@ -1,9 +1,10 @@
 suite: receive component
-templates:
-  - receive/statefulset.yaml
 
 tests:
+  # -- StatefulSet basics ---------------------------------------------
+
   - it: renders statefulset when receive is enabled
+    template: receive/statefulset.yaml
     set:
       receive.enabled: true
     asserts:
@@ -14,6 +15,7 @@ tests:
           value: RELEASE-NAME-thanos-receive
 
   - it: does not render when receive is disabled
+    template: receive/statefulset.yaml
     set:
       receive.enabled: false
     asserts:
@@ -21,6 +23,7 @@ tests:
           count: 0
 
   - it: sets the correct replica count
+    template: receive/statefulset.yaml
     set:
       receive.enabled: true
       receive.replicaCount: 3
@@ -29,7 +32,19 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: uses the global image repository and tag
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.image.repository: quay.io/thanos/thanos
+      global.image.tag: v0.40.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/thanos/thanos:v0.40.0
+
   - it: sets tsdb retention flag
+    template: receive/statefulset.yaml
     set:
       receive.enabled: true
       receive.tsdb.retention: 48h
@@ -39,6 +54,7 @@ tests:
           content: --tsdb.retention=48h
 
   - it: enables WAL compression when set
+    template: receive/statefulset.yaml
     set:
       receive.enabled: true
       receive.tsdb.walCompression: true
@@ -47,7 +63,19 @@ tests:
           path: spec.template.spec.containers[0].args
           content: --receive.hashrings-algorithm=ketama
 
+  - it: passes extra CLI args
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.extraArgs:
+        - --log.level=debug
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--log.level=debug"
+
   - it: mounts persistence volume
+    template: receive/statefulset.yaml
     set:
       receive.enabled: true
       receive.persistence.enabled: true
@@ -58,3 +86,630 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 20Gi
+
+  # -- Annotations and labels -----------------------------------------
+
+  - it: applies component annotations
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.annotations:
+        custom-annotation: my-value
+    asserts:
+      - equal:
+          path: metadata.annotations.custom-annotation
+          value: my-value
+
+  - it: applies component labels
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.labels:
+        custom-label: my-value
+    asserts:
+      - equal:
+          path: metadata.labels.custom-label
+          value: my-value
+
+  # -- Extra env vars -------------------------------------------------
+
+  - it: injects component extraEnv
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.extraEnv:
+        - name: LOG_FORMAT
+          value: json
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_FORMAT
+            value: json
+
+  - it: merges global and component extraEnv with component winning
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.extraEnv:
+        - name: LOG_FORMAT
+          value: json
+        - name: SHARED_VAR
+          value: global-value
+      receive.extraEnv:
+        - name: SHARED_VAR
+          value: component-value
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_FORMAT
+            value: json
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_VAR
+            value: component-value
+
+  # -- Extra envFrom vars -----------------------------------------------
+
+  - it: merges global and component extraEnvFrom with component winning
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.extraEnvFrom:
+        - name: GLOBAL_FROM
+          value: global-value
+        - name: SHARED_FROM
+          value: global-value
+      receive.extraEnvFrom:
+        - name: SHARED_FROM
+          value: component-value
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            name: GLOBAL_FROM
+            value: global-value
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            name: SHARED_FROM
+            value: component-value
+
+  # -- Security contexts ----------------------------------------------
+
+  - it: applies global container security context
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.containerSecurityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+
+  - it: applies component container security context overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.containerSecurityContext:
+        runAsNonRoot: true
+      receive.containerSecurityContext:
+        runAsNonRoot: false
+        runAsUser: 1001
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1001
+
+  - it: applies pod security context
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.podSecurityContext:
+        fsGroup: 1001
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.fsGroup
+          value: 1001
+
+  # -- Scheduling and placement ---------------------------------------
+
+  - it: applies component affinity overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - ap-southeast-2a
+      receive.affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: thanos
+                topologyKey: kubernetes.io/hostname
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.affinity.podAntiAffinity
+      - isNull:
+          path: spec.template.spec.affinity.nodeAffinity
+
+  - it: applies global affinity as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - ap-southeast-2a
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.affinity.nodeAffinity
+
+  - it: applies component nodeSelector overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.nodeSelector:
+        node-role: node
+      receive.nodeSelector:
+        node-role: thanos
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.node-role
+          value: thanos
+
+  - it: applies global nodeSelector as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.nodeSelector:
+        node-role: thanos
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.node-role
+          value: thanos
+
+  - it: applies component tolerations
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.tolerations:
+        - key: dedicated
+          operator: Equal
+          value: thanos
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: dedicated
+            operator: Equal
+            value: thanos
+            effect: NoSchedule
+
+  - it: applies global tolerations as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.tolerations:
+        - key: dedicated
+          operator: Equal
+          value: thanos
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: dedicated
+            operator: Equal
+            value: thanos
+            effect: NoSchedule
+
+  - it: applies component topologySpreadConstraints overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: thanos
+      receive.topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: thanos
+    asserts:
+      - contains:
+          path: spec.template.spec.topologySpreadConstraints
+          content:
+            maxSkew: 2
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app: thanos
+
+  - it: applies global topologySpreadConstraints as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: thanos
+    asserts:
+      - contains:
+          path: spec.template.spec.topologySpreadConstraints
+          content:
+            maxSkew: 1
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app: thanos
+
+  - it: applies component priorityClassName overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.priorityClassName: high-priority
+      receive.priorityClassName: critical
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: critical
+
+  - it: applies global priorityClassName as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.priorityClassName: high-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: high-priority
+
+  # -- Extra init and sidecar containers ------------------------------
+
+  - it: merges global and component extraInitContainers
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.extraInitContainers:
+        - name: global-init
+          image: busybox:latest
+          command: ["echo", "global"]
+      receive.extraInitContainers:
+        - name: component-init
+          image: busybox:latest
+          command: ["echo", "component"]
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: global-init
+            image: busybox:latest
+            command: ["echo", "global"]
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: component-init
+            image: busybox:latest
+            command: ["echo", "component"]
+
+  - it: merges global and component extraContainers
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.extraContainers:
+        - name: global-init
+          image: busybox:latest
+          command: ["echo", "global"]
+      receive.extraContainers:
+        - name: component-init
+          image: busybox:latest
+          command: ["echo", "component"]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: global-init
+            image: busybox:latest
+            command: ["echo", "global"]
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: component-init
+            image: busybox:latest
+            command: ["echo", "component"]
+
+  # -- Service --------------------------------------------------------
+
+  - it: applies service annotations to receive service
+    template: receive/service.yaml
+    documentIndex: 0
+    set:
+      receive.enabled: true
+      receive.service.annotations:
+        custom-annotation: my-value
+    asserts:
+      - equal:
+          path: metadata.annotations.custom-annotation
+          value: my-value
+
+  - it: applies service annotations to receive headless service
+    template: receive/service.yaml
+    documentIndex: 1
+    set:
+      receive.enabled: true
+      receive.service.annotations:
+        custom-annotation: my-value
+    asserts:
+      - equal:
+          path: metadata.annotations.custom-annotation
+          value: my-value
+
+  - it: applies service labels to receive service
+    template: receive/service.yaml
+    documentIndex: 0
+    set:
+      receive.enabled: true
+      receive.service.labels:
+        monitoring: "true"
+    asserts:
+      - equal:
+          path: metadata.labels.monitoring
+          value: "true"
+
+  - it: applies service labels to receive headless service
+    template: receive/service.yaml
+    documentIndex: 1
+    set:
+      receive.enabled: true
+      receive.service.labels:
+        monitoring: "true"
+    asserts:
+      - equal:
+          path: metadata.labels.monitoring
+          value: "true"
+
+  # -- PodDisruptionBudget --------------------------------------------
+
+  - it: renders PDB when component pdb is enabled
+    template: receive/pdb.yaml
+    set:
+      receive.enabled: true
+      receive.pdb.enabled: true
+      receive.pdb.maxUnavailable: "1"
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+
+  - it: renders PDB via global pdb.enabled fallback
+    template: receive/pdb.yaml
+    set:
+      receive.enabled: true
+      global.pdb.enabled: true
+      global.pdb.minAvailable: "1"
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: component PDB values override global
+    template: receive/pdb.yaml
+    set:
+      receive.enabled: true
+      global.pdb.enabled: true
+      global.pdb.minAvailable: "1"
+      receive.pdb.minAvailable: "3"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 3
+
+  - it: does not render PDB when both component and global pdb are disabled
+    template: receive/pdb.yaml
+    set:
+      receive.enabled: true
+      receive.pdb.enabled: false
+      global.pdb.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Ingress -----------------------------------------------------------
+
+  - it: renders ingress when enabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: true
+      receive.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+
+  - it: does not render ingress when disabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets ingress class name
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: true
+      receive.ingress.className: nginx
+      receive.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets ingress host and path
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.enabled: true
+      query.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+
+  # -- ServiceMonitor ----------------------------------------------------
+
+  - it: renders servicemonitor when component enabled
+    template: receive/servicemonitor.yaml
+    set:
+      receive.enabled: true
+      receive.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+
+  - it: renders servicemonitor via global fallback
+    template: receive/servicemonitor.yaml
+    set:
+      receive.enabled: true
+      global.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+
+  - it: does not render servicemonitor when disabled
+    template: receive/servicemonitor.yaml
+    set:
+      receive.enabled: true
+      receive.serviceMonitor.enabled: false
+      global.serviceMonitor.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- VerticalPodAutoscaler ---------------------------------------------
+
+  - it: renders VPA when enabled and CRD is available
+    template: receive/vpa.yaml
+    capabilities:
+      majorVersion: 1
+      minorVersion: 29
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
+    set:
+      receive.enabled: true
+      receive.vpa.enabled: true
+      receive.vpa.minAllowed.cpu: 500m
+      receive.vpa.minAllowed.memory: 512Mi
+      receive.vpa.maxAllowed.cpu: "4"
+      receive.vpa.maxAllowed.memory: 8Gi
+    asserts:
+      - isKind:
+          of: VerticalPodAutoscaler
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].minAllowed.cpu
+          value: 500m
+      - equal:
+          path: spec.resourcePolicy.containerPolicies[0].maxAllowed.memory
+          value: 8Gi
+
+  - it: does not render VPA when disabled
+    template: receive/vpa.yaml
+    capabilities:
+      majorVersion: 1
+      minorVersion: 29
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
+    set:
+      receive.enabled: true
+      receive.vpa.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- ConfigMap hashrings -----------------------------------------------
+
+  - it: renders hashrings configmap when receive is enabled
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-hashrings
+
+  - it: does not render hashrings configmap when receive is disabled
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

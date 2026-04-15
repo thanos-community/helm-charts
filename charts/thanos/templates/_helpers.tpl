@@ -173,6 +173,127 @@ volumeMounts:
 {{- end }}
 {{- end }}
 
+{{- /* ============================== */ -}}
+{{- /* Scheduling and placement       */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.affinity" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.affinity | default .Values.global.affinity) -}}
+affinity:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.nodeSelector" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.nodeSelector | default .Values.global.nodeSelector) -}}
+nodeSelector:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.priorityClassName" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.priorityClassName | default .Values.global.priorityClassName) -}}
+priorityClassName: {{ . }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.tolerations" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.tolerations | default .Values.global.tolerations) -}}
+tolerations:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.topologySpreadConstraints" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- with ($component.topologySpreadConstraints | default .Values.global.topologySpreadConstraints) -}}
+topologySpreadConstraints:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- /* ============================== */ -}}
+{{- /* Extra env / envFrom helpers    */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.extraEnvItems" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- $merged := dict -}}
+{{- range (.Values.global.extraEnv | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range ($component.extraEnv | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range (keys $merged | sortAlpha) }}
+- {{ toYaml (index $merged .) | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvBlock" -}}
+{{- if include "thanos.extraEnvItems" $ }}
+env:
+  {{- include "thanos.extraEnvItems" $ | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvFromItems" -}}
+{{- $component := index .Values .component | default dict -}}
+{{- $merged := dict -}}
+{{- range (.Values.global.extraEnvFrom | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range ($component.extraEnvFrom | default list) }}
+{{- $_ := set $merged .name . }}
+{{- end }}
+{{- range (keys $merged | sortAlpha) }}
+- {{ toYaml (index $merged .) | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraEnvFromBlock" -}}
+{{- if include "thanos.extraEnvFromItems" $ }}
+envFrom:
+  {{- include "thanos.extraEnvFromItems" $ | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{- /* ============================== */ -}}
+{{- /* Init / sidecar containers      */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.initContainers" -}}
+{{- $root := .root -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- $icGlob := .Values.global.extraInitContainers | default list -}}
+{{- $icComp := $component.extraInitContainers | default list -}}
+{{- if or (gt (len $icGlob) 0) (gt (len $icComp) 0) }}
+initContainers:
+  {{- range $icGlob }}
+  - {{ tpl (toYaml .) $root | nindent 4 }}
+  {{- end }}
+  {{- range $icComp }}
+  - {{ tpl (toYaml .) $root | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "thanos.extraContainers" -}}
+{{- $root := .root -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- $cGlob := .Values.global.extraContainers | default list -}}
+{{- $cComp := $component.extraContainers | default list -}}
+{{- range $cGlob }}
+- {{ tpl (toYaml .) $root | nindent 2 }}
+{{- end }}
+{{- range $cComp }}
+- {{ tpl (toYaml .) $root | nindent 2 }}
+{{- end }}
+{{- end }}
 
 {{- /* ============================== */ -}}
 {{- /* Receive headless service name  */ -}}

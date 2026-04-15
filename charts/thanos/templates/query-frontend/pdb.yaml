@@ -1,4 +1,6 @@
-{{- if and .Values.queryFrontend.enabled .Values.queryFrontend.pdb.enabled }}
+{{- if and .Values.queryFrontend.enabled (or .Values.queryFrontend.pdb.enabled .Values.global.pdb.enabled) }}
+{{- $minAvail := .Values.queryFrontend.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+{{- $maxUnavail := .Values.queryFrontend.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -12,9 +14,9 @@ spec:
     matchLabels:
       app.kubernetes.io/component: query-frontend
       app.kubernetes.io/instance: {{ .Release.Name }}
-  {{- if .Values.queryFrontend.pdb.minAvailable }}
-  minAvailable: {{ .Values.queryFrontend.pdb.minAvailable | quote }}
-  {{- else if .Values.queryFrontend.pdb.maxUnavailable }}
-  maxUnavailable: {{ .Values.queryFrontend.pdb.maxUnavailable | quote }}
+  {{- if $minAvail }}
+  minAvailable: {{ $minAvail }}
+  {{- else if $maxUnavail }}
+  maxUnavailable: {{ $maxUnavail }}
   {{- end }}
 {{- end }}

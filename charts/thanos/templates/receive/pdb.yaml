@@ -1,4 +1,6 @@
-{{- if and .Values.receive.enabled .Values.receive.pdb.enabled }}
+{{- if and .Values.receive.enabled (or .Values.receive.pdb.enabled .Values.global.pdb.enabled) }}
+{{- $minAvail := .Values.receive.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+{{- $maxUnavail := .Values.receive.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -12,9 +14,9 @@ spec:
     matchLabels:
       app.kubernetes.io/component: receive
       app.kubernetes.io/instance: {{ .Release.Name }}
-  {{- if .Values.receive.pdb.minAvailable }}
-  minAvailable: {{ .Values.receive.pdb.minAvailable | quote }}
-  {{- else if .Values.receive.pdb.maxUnavailable }}
-  maxUnavailable: {{ .Values.receive.pdb.maxUnavailable | quote }}
+  {{- if $minAvail }}
+  minAvailable: {{ $minAvail }}
+  {{- else if $maxUnavail }}
+  maxUnavailable: {{ $maxUnavail }}
   {{- end }}
 {{- end }}

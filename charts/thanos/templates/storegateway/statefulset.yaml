@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "storegateway") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.storegateway.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+    {{- with .Values.storegateway.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ include "thanos.compName" (list . "storegateway") }}
   replicas: {{ .Values.storegateway.replicaCount }}
@@ -23,12 +29,9 @@ spec:
         {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "storegateway") | nindent 6 }}
-      {{- if .Values.storegateway.extraInitContainers }}
-      initContainers:
-        {{- tpl (toYaml .Values.storegateway.extraInitContainers) . | nindent 8 }}
-      {{- end }}
       containers:
         - name: storegateway
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -45,6 +48,8 @@ spec:
           {{- range .Values.storegateway.extraArgs }}
             - {{ . | quote }}
           {{- end }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "storegateway") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "storegateway") | nindent 10 }}
           ports:
             - name: grpc
               containerPort: {{ .Values.storegateway.service.grpcPort }}
@@ -66,6 +71,12 @@ spec:
           resources:
             {{- toYaml .Values.storegateway.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "storegateway" "port" .Values.storegateway.service.httpPort) | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 8 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
       volumes:
         - name: objstore
           secret:

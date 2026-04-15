@@ -5,11 +5,17 @@ metadata:
   name: {{ include "thanos.compName" (list . "compactor") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.compactor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
+    {{- with .Values.compactor.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ include "thanos.compName" (list . "compactor") }}
-  replicas: 1
+  replicas: {{ .Values.compactor.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/component: compactor
@@ -23,12 +29,9 @@ spec:
         {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "compactor") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "compactor") | nindent 6 }}
-      {{- if .Values.compactor.extraInitContainers }}
-      initContainers:
-        {{- tpl (toYaml .Values.compactor.extraInitContainers) . | nindent 8 }}
-      {{- end }}
       containers:
         - name: compactor
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -41,6 +44,8 @@ spec:
           {{- range .Values.compactor.extraArgs }}
             - {{ . | quote }}
           {{- end }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "compactor") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "compactor") | nindent 10 }}
           ports:
             - name: http
               containerPort: {{ .Values.compactor.service.port }}
@@ -55,6 +60,12 @@ spec:
           resources:
             {{- toYaml .Values.compactor.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "compactor" "port" .Values.compactor.service.port) | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "compactor" "root" .) | nindent 8 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "compactor" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "compactor") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "compactor") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "compactor") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "compactor") | nindent 6 }}
       volumes:
         - name: objstore
           secret:

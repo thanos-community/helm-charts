@@ -1,9 +1,10 @@
 suite: storegateway component
-templates:
-  - storegateway/statefulset.yaml
 
 tests:
+  # -- StatefulSet basics ---------------------------------------------
+
   - it: renders statefulset when storegateway is enabled
+    template: storegateway/statefulset.yaml
     set:
       storegateway.enabled: true
     asserts:
@@ -14,6 +15,7 @@ tests:
           value: RELEASE-NAME-thanos-storegateway
 
   - it: does not render when storegateway is disabled
+    template: storegateway/statefulset.yaml
     set:
       storegateway.enabled: false
     asserts:
@@ -21,15 +23,39 @@ tests:
           count: 0
 
   - it: sets the correct replica count
+    template: storegateway/statefulset.yaml
     set:
       storegateway.enabled: true
-      storegateway.replicaCount: 4
+      storegateway.replicaCount: 3
     asserts:
       - equal:
           path: spec.replicas
-          value: 4
+          value: 3
+
+  - it: uses the global image repository and tag
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.image.repository: quay.io/thanos/thanos
+      global.image.tag: v0.40.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/thanos/thanos:v0.40.0
+
+  - it: passes extra CLI args
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.extraArgs:
+        - --log.level=debug
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--log.level=debug"
 
   - it: creates persistence volume claim template
+    template: storegateway/statefulset.yaml
     set:
       storegateway.enabled: true
       storegateway.persistence.enabled: true
@@ -41,12 +67,598 @@ tests:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 50Gi
 
+  # -- Annotations and labels -----------------------------------------
+
+  - it: applies component labels
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.labels:
+        team: storage
+    asserts:
+      - equal:
+          path: metadata.labels.team
+          value: storage
+
+  - it: applies component annotations
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.annotations:
+        owner: team-storage
+    asserts:
+      - equal:
+          path: metadata.annotations.owner
+          value: team-storage
+
+  # -- Extra env vars -------------------------------------------------
+
+  - it: injects component extraEnv
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.extraEnv:
+        - name: LOG_FORMAT
+          value: json
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_FORMAT
+            value: json
+
+  - it: merges global and component extraEnv with component winning
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.extraEnv:
+        - name: LOG_FORMAT
+          value: json
+        - name: SHARED_VAR
+          value: global-value
+      storegateway.extraEnv:
+        - name: SHARED_VAR
+          value: component-value
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_FORMAT
+            value: json
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SHARED_VAR
+            value: component-value
+
+  # -- Extra envFrom vars -----------------------------------------------
+
+  - it: merges global and component extraEnvFrom with component winning
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.extraEnvFrom:
+        - name: GLOBAL_FROM
+          value: global-value
+        - name: SHARED_FROM
+          value: global-value
+      storegateway.extraEnvFrom:
+        - name: SHARED_FROM
+          value: component-value
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            name: GLOBAL_FROM
+            value: global-value
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            name: SHARED_FROM
+            value: component-value
+
+  # -- Security contexts ----------------------------------------------
+
+  - it: applies global container security context
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.containerSecurityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: true
+
+  - it: applies component container security context overriding global
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.containerSecurityContext:
+        runAsNonRoot: true
+      storegateway.containerSecurityContext:
+        runAsNonRoot: false
+        runAsUser: 1001
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsNonRoot
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+          value: 1001
+
   - it: applies pod security context
+    template: storegateway/statefulset.yaml
     set:
       storegateway.enabled: true
       storegateway.podSecurityContext:
-        fsGroup: 2000
+        fsGroup: 1001
     asserts:
       - equal:
           path: spec.template.spec.securityContext.fsGroup
-          value: 2000
+          value: 1001
+
+  # -- Scheduling and placement ---------------------------------------
+
+  - it: applies component affinity overriding global
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - ap-southeast-2a
+      storegateway.affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: thanos
+                topologyKey: kubernetes.io/hostname
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.affinity.podAntiAffinity
+      - isNull:
+          path: spec.template.spec.affinity.nodeAffinity
+
+  - it: applies global affinity as fallback
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/zone
+                    operator: In
+                    values:
+                      - ap-southeast-2a
+    asserts:
+      - isNotEmpty:
+          path: spec.template.spec.affinity.nodeAffinity
+
+  - it: applies component nodeSelector overriding global
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.nodeSelector:
+        node-role: node
+      storegateway.nodeSelector:
+        node-role: thanos
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.node-role
+          value: thanos
+
+  - it: applies global nodeSelector as fallback
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.nodeSelector:
+        node-role: thanos
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector.node-role
+          value: thanos
+
+  - it: applies component tolerations
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.tolerations:
+        - key: dedicated
+          operator: Equal
+          value: thanos
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: dedicated
+            operator: Equal
+            value: thanos
+            effect: NoSchedule
+
+  - it: applies global tolerations as fallback
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.tolerations:
+        - key: dedicated
+          operator: Equal
+          value: thanos
+          effect: NoSchedule
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: dedicated
+            operator: Equal
+            value: thanos
+            effect: NoSchedule
+
+  - it: applies component topologySpreadConstraints overriding global
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: thanos
+      storegateway.topologySpreadConstraints:
+        - maxSkew: 2
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: thanos
+    asserts:
+      - contains:
+          path: spec.template.spec.topologySpreadConstraints
+          content:
+            maxSkew: 2
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: ScheduleAnyway
+            labelSelector:
+              matchLabels:
+                app: thanos
+
+  - it: applies global topologySpreadConstraints as fallback
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: thanos
+    asserts:
+      - contains:
+          path: spec.template.spec.topologySpreadConstraints
+          content:
+            maxSkew: 1
+            topologyKey: topology.kubernetes.io/zone
+            whenUnsatisfiable: DoNotSchedule
+            labelSelector:
+              matchLabels:
+                app: thanos
+
+  - it: applies component priorityClassName overriding global
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.priorityClassName: high-priority
+      storegateway.priorityClassName: critical
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: critical
+
+  - it: applies global priorityClassName as fallback
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.priorityClassName: high-priority
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: high-priority
+
+  # -- Extra init and sidecar containers ------------------------------
+
+  - it: merges global and component extraInitContainers
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.extraInitContainers:
+        - name: global-init
+          image: busybox:latest
+          command: ["echo", "global"]
+      storegateway.extraInitContainers:
+        - name: component-init
+          image: busybox:latest
+          command: ["echo", "component"]
+    asserts:
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: global-init
+            image: busybox:latest
+            command: ["echo", "global"]
+      - contains:
+          path: spec.template.spec.initContainers
+          content:
+            name: component-init
+            image: busybox:latest
+            command: ["echo", "component"]
+
+  - it: merges global and component extraContainers
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.extraContainers:
+        - name: global-init
+          image: busybox:latest
+          command: ["echo", "global"]
+      storegateway.extraContainers:
+        - name: component-init
+          image: busybox:latest
+          command: ["echo", "component"]
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: global-init
+            image: busybox:latest
+            command: ["echo", "global"]
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            name: component-init
+            image: busybox:latest
+            command: ["echo", "component"]
+
+  # -- Service --------------------------------------------------------
+
+  - it: applies service annotations
+    template: storegateway/service.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.service.annotations:
+        custom-annotation: my-value
+    asserts:
+      - equal:
+          path: metadata.annotations.custom-annotation
+          value: my-value
+
+  - it: applies service labels
+    template: storegateway/service.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.service.labels:
+        monitoring: "true"
+    asserts:
+      - equal:
+          path: metadata.labels.monitoring
+          value: "true"
+
+  # -- PodDisruptionBudget --------------------------------------------
+
+  - it: renders PDB when component pdb is enabled
+    template: storegateway/pdb.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.pdb.enabled: true
+      storegateway.pdb.minAvailable: "1"
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: renders PDB via global pdb.enabled fallback
+    template: storegateway/pdb.yaml
+    set:
+      storegateway.enabled: true
+      global.pdb.enabled: true
+      global.pdb.minAvailable: "1"
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: component PDB values override global
+    template: storegateway/pdb.yaml
+    set:
+      storegateway.enabled: true
+      global.pdb.enabled: true
+      global.pdb.minAvailable: "1"
+      storegateway.pdb.minAvailable: "3"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 3
+
+  - it: does not render PDB when both component and global pdb are disabled
+    template: storegateway/pdb.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.pdb.enabled: false
+      global.pdb.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Ingress -----------------------------------------------------------
+
+  - it: renders ingress when enabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: true
+      storegateway.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+
+  - it: does not render ingress when disabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets ingress class name
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: true
+      storegateway.ingress.className: nginx
+      storegateway.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets ingress host and path
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.enabled: true
+      query.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+
+  # -- ServiceMonitor ----------------------------------------------------
+
+  - it: renders servicemonitor when component enabled
+    template: storegateway/servicemonitor.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+
+  - it: renders servicemonitor via global fallback
+    template: storegateway/servicemonitor.yaml
+    set:
+      storegateway.enabled: true
+      global.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+
+  - it: does not render servicemonitor when disabled
+    template: storegateway/servicemonitor.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.serviceMonitor.enabled: false
+      global.serviceMonitor.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- HorizontalPodAutoscaler ------------------------------------------
+
+  - it: renders HPA when autoscaling is enabled
+    template: storegateway/hpa.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.autoscaling.enabled: true
+      storegateway.autoscaling.minReplicas: 1
+      storegateway.autoscaling.maxReplicas: 3
+      storegateway.autoscaling.targetCPUUtilizationPercentage: 80
+    asserts:
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+      - equal:
+          path: spec.minReplicas
+          value: 1
+      - equal:
+          path: spec.maxReplicas
+          value: 3
+
+  - it: does not render HPA when autoscaling is disabled
+    template: storegateway/hpa.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.autoscaling.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- ConfigMap caching bucket ------------------------------------------
+
+  - it: renders caching bucket configmap when cachingBucketConfig is set
+    template: storegateway/configmap-caching.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.cachingBucketConfig: |
+        type: MEMCACHED
+        config:
+          addresses:
+            - memcached:11211
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway-caching
+
+  - it: does not render caching bucket configmap when cachingBucketConfig is empty
+    template: storegateway/configmap-caching.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.cachingBucketConfig: ""
+    asserts:
+      - hasDocuments:
+          count: 0

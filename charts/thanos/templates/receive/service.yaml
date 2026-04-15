@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "receive") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.receive.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- with .Values.receive.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   type: {{ .Values.receive.service.type }}
   ports:
@@ -26,8 +32,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "receive") }}-headless
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.receive.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- with .Values.receive.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   clusterIP: None
   type: ClusterIP

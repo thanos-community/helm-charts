@@ -5,8 +5,14 @@ metadata:
   name: {{ include "thanos.compName" (list . "receive") }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.receive.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- with .Values.receive.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceName: {{ include "thanos.receiveHeadless" . }}
   replicas: {{ .Values.receive.replicaCount }}
@@ -28,12 +34,9 @@ spec:
         {{- toYaml $anns | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "receive") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "receive") | nindent 6 }}
-      {{- if .Values.receive.extraInitContainers }}
-      initContainers:
-        {{- tpl (toYaml .Values.receive.extraInitContainers) . | nindent 8 }}
-      {{- end }}
       containers:
         - name: receive
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
@@ -81,6 +84,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "receive") | nindent 12 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "receive") | nindent 10 }}
           volumeMounts:
             - name: data
               mountPath: /var/thanos/receive
@@ -92,6 +97,12 @@ spec:
           resources:
             {{- toYaml (.Values.receive.resources | default dict) | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "receive" "port" (default 10902 .Values.receive.service.httpPort)) | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 8 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "receive") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "receive") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "receive") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "receive") | nindent 6 }}
       volumes:
         - name: thanos-config
           projected:

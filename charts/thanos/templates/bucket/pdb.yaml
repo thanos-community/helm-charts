@@ -1,4 +1,6 @@
-{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled .Values.bucket.bucketweb.pdb.enabled }}
+{{- if and .Values.bucket.enabled .Values.bucket.bucketweb.enabled (or .Values.bucket.bucketweb.pdb.enabled .Values.global.pdb.enabled) }}
+{{- $minAvail := .Values.bucket.bucketweb.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+{{- $maxUnavail := .Values.bucket.bucketweb.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -12,9 +14,9 @@ spec:
     matchLabels:
       app.kubernetes.io/component: bucketweb
       app.kubernetes.io/instance: {{ .Release.Name }}
-  {{- if .Values.bucket.bucketweb.pdb.minAvailable }}
-  minAvailable: {{ .Values.bucket.bucketweb.pdb.minAvailable | quote }}
-  {{- else if .Values.bucket.bucketweb.pdb.maxUnavailable }}
-  maxUnavailable: {{ .Values.bucket.bucketweb.pdb.maxUnavailable | quote }}
+  {{- if $minAvail }}
+  minAvailable: {{ $minAvail }}
+  {{- else if $maxUnavail }}
+  maxUnavailable: {{ $maxUnavail }}
   {{- end }}
 {{- end }}

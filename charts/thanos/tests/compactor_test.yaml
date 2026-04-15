@@ -1,41 +1,41 @@
-suite: query component
+suite: compactor component
 
 tests:
-  # -- Deployment basics ----------------------------------------------
+  # -- StatefulSet basics ---------------------------------------------
 
-  - it: renders deployment when query is enabled
-    template: query/deployment.yaml
+  - it: renders statefulset when compactor is enabled
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
     asserts:
       - isKind:
-          of: Deployment
+          of: StatefulSet
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-compactor
 
-  - it: does not render when query is disabled
-    template: query/deployment.yaml
+  - it: does not render when compactor is disabled
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: false
+      compactor.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
   - it: sets the correct replica count
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.replicaCount: 3
+      compactor.enabled: true
+      compactor.replicaCount: 3
     asserts:
       - equal:
           path: spec.replicas
           value: 3
 
   - it: uses the global image repository and tag
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.image.repository: quay.io/thanos/thanos
       global.image.tag: v0.40.0
     asserts:
@@ -43,50 +43,53 @@ tests:
           path: spec.template.spec.containers[0].image
           value: quay.io/thanos/thanos:v0.40.0
 
-  - it: passes replica labels as CLI args
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      query.replicaLabels:
-        - prometheus_replica
-        - thanos_replica
-    asserts:
-      - contains:
-          path: spec.template.spec.containers[0].args
-          content: --query.replica-label=prometheus_replica
-      - contains:
-          path: spec.template.spec.containers[0].args
-          content: --query.replica-label=thanos_replica
-
-  - it: adds store endpoints for storegateway when enabled
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      storegateway.enabled: true
-      receive.enabled: false
-    asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[3]
-          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
-
   - it: passes extra CLI args
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.extraArgs:
+      compactor.enabled: true
+      compactor.extraArgs:
         - --log.level=debug
+        - --wait
     asserts:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "--log.level=debug"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--wait"
+
+  - it: creates persistence volume claim template
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.size: 50Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+
+  - it: uses emptyDir when persistence is disabled
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
 
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.annotations:
+      compactor.enabled: true
+      compactor.annotations:
         custom-annotation: my-value
     asserts:
       - equal:
@@ -94,10 +97,10 @@ tests:
           value: my-value
 
   - it: applies component labels
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.labels:
+      compactor.enabled: true
+      compactor.labels:
         custom-label: my-value
     asserts:
       - equal:
@@ -107,10 +110,10 @@ tests:
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.extraEnv:
+      compactor.enabled: true
+      compactor.extraEnv:
         - name: LOG_FORMAT
           value: json
     asserts:
@@ -121,15 +124,15 @@ tests:
             value: json
 
   - it: merges global and component extraEnv with component winning
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.extraEnv:
         - name: LOG_FORMAT
           value: json
         - name: SHARED_VAR
           value: global-value
-      query.extraEnv:
+      compactor.extraEnv:
         - name: SHARED_VAR
           value: component-value
     asserts:
@@ -147,15 +150,15 @@ tests:
   # -- Extra envFrom vars -----------------------------------------------
 
   - it: merges global and component extraEnvFrom with component winning
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.extraEnvFrom:
         - name: GLOBAL_FROM
           value: global-value
         - name: SHARED_FROM
           value: global-value
-      query.extraEnvFrom:
+      compactor.extraEnvFrom:
         - name: SHARED_FROM
           value: component-value
     asserts:
@@ -173,9 +176,9 @@ tests:
   # -- Security contexts ----------------------------------------------
 
   - it: applies global container security context
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.containerSecurityContext:
         readOnlyRootFilesystem: true
         runAsNonRoot: true
@@ -188,12 +191,12 @@ tests:
           value: true
 
   - it: applies component container security context overriding global
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.containerSecurityContext:
         runAsNonRoot: true
-      query.containerSecurityContext:
+      compactor.containerSecurityContext:
         runAsNonRoot: false
         runAsUser: 1001
     asserts:
@@ -205,10 +208,10 @@ tests:
           value: 1001
 
   - it: applies pod security context
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.podSecurityContext:
+      compactor.enabled: true
+      compactor.podSecurityContext:
         fsGroup: 1001
     asserts:
       - equal:
@@ -218,9 +221,9 @@ tests:
   # -- Scheduling and placement ---------------------------------------
 
   - it: applies component affinity overriding global
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -230,7 +233,7 @@ tests:
                     operator: In
                     values:
                       - ap-southeast-2a
-      query.affinity:
+      compactor.affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
@@ -246,9 +249,9 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies global affinity as fallback
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -263,12 +266,12 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies component nodeSelector overriding global
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.nodeSelector:
         node-role: node
-      query.nodeSelector:
+      compactor.nodeSelector:
         node-role: thanos
     asserts:
       - equal:
@@ -276,9 +279,9 @@ tests:
           value: thanos
 
   - it: applies global nodeSelector as fallback
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.nodeSelector:
         node-role: thanos
     asserts:
@@ -287,10 +290,10 @@ tests:
           value: thanos
 
   - it: applies component tolerations
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
-      query.tolerations:
+      compactor.enabled: true
+      compactor.tolerations:
         - key: dedicated
           operator: Equal
           value: thanos
@@ -305,9 +308,9 @@ tests:
             effect: NoSchedule
 
   - it: applies global tolerations as fallback
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.tolerations:
         - key: dedicated
           operator: Equal
@@ -323,9 +326,9 @@ tests:
             effect: NoSchedule
 
   - it: applies component topologySpreadConstraints overriding global
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -333,7 +336,7 @@ tests:
           labelSelector:
             matchLabels:
               app: thanos
-      query.topologySpreadConstraints:
+      compactor.topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: ScheduleAnyway
@@ -352,9 +355,9 @@ tests:
                 app: thanos
 
   - it: applies global topologySpreadConstraints as fallback
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -374,20 +377,20 @@ tests:
                 app: thanos
 
   - it: applies component priorityClassName overriding global
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.priorityClassName: high-priority
-      query.priorityClassName: critical
+      compactor.priorityClassName: critical
     asserts:
       - equal:
           path: spec.template.spec.priorityClassName
           value: critical
 
   - it: applies global priorityClassName as fallback
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.priorityClassName: high-priority
     asserts:
       - equal:
@@ -397,14 +400,14 @@ tests:
   # -- Extra init and sidecar containers ------------------------------
 
   - it: merges global and component extraInitContainers
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.extraInitContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraInitContainers:
+      compactor.extraInitContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -423,14 +426,14 @@ tests:
             command: ["echo", "component"]
 
   - it: merges global and component extraContainers
-    template: query/deployment.yaml
+    template: compactor/statefulset.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.extraContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraContainers:
+      compactor.extraContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -451,10 +454,10 @@ tests:
   # -- Service --------------------------------------------------------
 
   - it: applies service annotations
-    template: query/service.yaml
+    template: compactor/service.yaml
     set:
-      query.enabled: true
-      query.service.annotations:
+      compactor.enabled: true
+      compactor.service.annotations:
         custom-annotation: my-value
     asserts:
       - equal:
@@ -462,10 +465,10 @@ tests:
           value: my-value
 
   - it: applies service labels
-    template: query/service.yaml
+    template: compactor/service.yaml
     set:
-      query.enabled: true
-      query.service.labels:
+      compactor.enabled: true
+      compactor.service.labels:
         monitoring: "true"
     asserts:
       - equal:
@@ -475,11 +478,11 @@ tests:
   # -- PodDisruptionBudget --------------------------------------------
 
   - it: renders PDB when component pdb is enabled
-    template: query/pdb.yaml
+    template: compactor/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: true
-      query.pdb.maxUnavailable: "1"
+      compactor.enabled: true
+      compactor.pdb.enabled: true
+      compactor.pdb.maxUnavailable: "1"
     asserts:
       - isKind:
           of: PodDisruptionBudget
@@ -488,9 +491,9 @@ tests:
           value: 1
 
   - it: renders PDB via global pdb.enabled fallback
-    template: query/pdb.yaml
+    template: compactor/pdb.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
     asserts:
@@ -501,22 +504,22 @@ tests:
           value: 1
 
   - it: component PDB values override global
-    template: query/pdb.yaml
+    template: compactor/pdb.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
-      query.pdb.minAvailable: "3"
+      compactor.pdb.minAvailable: "3"
     asserts:
       - equal:
           path: spec.minAvailable
           value: 3
 
   - it: does not render PDB when both component and global pdb are disabled
-    template: query/pdb.yaml
+    template: compactor/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: false
+      compactor.enabled: true
+      compactor.pdb.enabled: false
       global.pdb.enabled: false
     asserts:
       - hasDocuments:
@@ -525,11 +528,11 @@ tests:
   # -- Ingress -----------------------------------------------------------
 
   - it: renders ingress when enabled
-    template: query/ingress.yaml
+    template: compactor/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.hosts:
+      compactor.enabled: true
+      compactor.ingress.enabled: true
+      compactor.ingress.hosts:
         - host: thanos.example.com
           paths:
             - path: /
@@ -539,24 +542,24 @@ tests:
           of: Ingress
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-compactor
 
   - it: does not render ingress when disabled
-    template: query/ingress.yaml
+    template: compactor/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: false
+      compactor.enabled: true
+      compactor.ingress.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
   - it: sets ingress class name
-    template: query/ingress.yaml
+    template: compactor/ingress.yaml
     set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.className: nginx
-      query.ingress.hosts:
+      compactor.enabled: true
+      compactor.ingress.enabled: true
+      compactor.ingress.className: nginx
+      compactor.ingress.hosts:
         - host: thanos.example.com
           paths:
             - path: /
@@ -587,64 +590,75 @@ tests:
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled
-    template: query/servicemonitor.yaml
+    template: compactor/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: true
+      compactor.enabled: true
+      compactor.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-compactor
 
   - it: renders servicemonitor via global fallback
-    template: query/servicemonitor.yaml
+    template: compactor/servicemonitor.yaml
     set:
-      query.enabled: true
+      compactor.enabled: true
       global.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
 
   - it: does not render servicemonitor when disabled
-    template: query/servicemonitor.yaml
+    template: compactor/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: false
+      compactor.enabled: true
+      compactor.serviceMonitor.enabled: false
       global.serviceMonitor.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
-  # -- HorizontalPodAutoscaler ------------------------------------------
+  # -- VerticalPodAutoscaler ---------------------------------------------
 
-  - it: renders HPA when autoscaling is enabled
-    template: query/hpa.yaml
+  - it: renders VPA when enabled and CRD is available
+    template: compactor/vpa.yaml
+    capabilities:
+      majorVersion: 1
+      minorVersion: 29
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.minReplicas: 1
-      query.autoscaling.maxReplicas: 3
-      query.autoscaling.targetCPUUtilizationPercentage: 80
+      compactor.enabled: true
+      compactor.vpa.enabled: true
+      compactor.vpa.minAllowed.cpu: 500m
+      compactor.vpa.minAllowed.memory: 512Mi
+      compactor.vpa.maxAllowed.cpu: 4
+      compactor.vpa.maxAllowed.memory: 8Gi
     asserts:
       - isKind:
-          of: HorizontalPodAutoscaler
+          of: VerticalPodAutoscaler
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-compactor
       - equal:
-          path: spec.minReplicas
-          value: 1
+          path: spec.resourcePolicy.containerPolicies[0].minAllowed.cpu
+          value: 500m
       - equal:
-          path: spec.maxReplicas
-          value: 3
+          path: spec.resourcePolicy.containerPolicies[0].maxAllowed.memory
+          value: 8Gi
 
-  - it: does not render HPA when autoscaling is disabled
-    template: query/hpa.yaml
+  - it: does not render VPA when disabled
+    template: compactor/vpa.yaml
+    capabilities:
+      majorVersion: 1
+      minorVersion: 29
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
     set:
-      query.enabled: true
-      query.autoscaling.enabled: false
+      compactor.enabled: true
+      compactor.vpa.enabled: false
     asserts:
       - hasDocuments:
           count: 0
