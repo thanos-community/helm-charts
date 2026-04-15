@@ -95,6 +95,7 @@ spec:
               mountPath: /scripts
         {{- end }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "ruler" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "ruler") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "ruler" "root" .) | nindent 6 }}
       {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "ruler") | nindent 6 }}
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "ruler") | nindent 6 }}
