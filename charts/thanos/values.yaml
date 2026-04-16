@@ -233,10 +233,10 @@ global:
     # -- Enable a PodDisruptionBudget for every component. Individual
     # components can override this with their own pdb.enabled.
     enabled: false
-    # -- Minimum number of available pods during a disruption.
+    # -- (int or string) Minimum number of available pods during a disruption.
     # Cannot be set at the same time as maxUnavailable.
     minAvailable: ""
-    # -- Maximum number of unavailable pods during a disruption.
+    # -- (int or string) Maximum number of unavailable pods during a disruption.
     # Cannot be set at the same time as minAvailable.
     maxUnavailable: ""
 
@@ -489,9 +489,9 @@ bucket:
     pdb:
       # -- Enable a PodDisruptionBudget for Bucketweb.
       enabled: false
-      # -- Minimum available Bucketweb pods during a disruption.
+      # -- (int or string) Minimum available Bucketweb pods during a disruption.
       minAvailable: ""
-      # -- Maximum unavailable Bucketweb pods during a disruption.
+      # -- (int or string) Maximum unavailable Bucketweb pods during a disruption.
       maxUnavailable: ""
 
 # ======================================================================
@@ -746,9 +746,9 @@ compactor:
   pdb:
     # -- Enable a PodDisruptionBudget for the Compactor.
     enabled: false
-    # -- Minimum available Compactor pods during a disruption.
+    # -- (int or string) Minimum available Compactor pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Compactor pods during a disruption.
+    # -- (int or string) Maximum unavailable Compactor pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1013,9 +1013,9 @@ query:
   pdb:
     # -- Enable a PodDisruptionBudget for Query.
     enabled: false
-    # -- Minimum available Query pods during a disruption.
+    # -- (int or string) Minimum available Query pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query pods during a disruption.
+    # -- (int or string) Maximum unavailable Query pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1252,9 +1252,9 @@ queryFrontend:
   pdb:
     # -- Enable a PodDisruptionBudget for Query Frontend.
     enabled: false
-    # -- Minimum available Query Frontend pods during a disruption.
+    # -- (int or string) Minimum available Query Frontend pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query Frontend pods during a disruption.
+    # -- (int or string) Maximum unavailable Query Frontend pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1518,9 +1518,9 @@ storegateway:
   pdb:
     # -- Enable a PodDisruptionBudget for the Store Gateway.
     enabled: false
-    # -- Minimum available Store Gateway pods during a disruption.
+    # -- (int or string) Minimum available Store Gateway pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Store Gateway pods during a disruption.
+    # -- (int or string) Maximum unavailable Store Gateway pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1823,9 +1823,9 @@ receive:
   pdb:
     # -- Enable a PodDisruptionBudget for Receive.
     enabled: false
-    # -- Minimum available Receive pods during a disruption.
+    # -- (int or string) Minimum available Receive pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Receive pods during a disruption.
+    # -- (int or string) Maximum unavailable Receive pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -2108,9 +2108,9 @@ ruler:
   pdb:
     # -- Enable a PodDisruptionBudget for the Ruler.
     enabled: false
-    # -- Minimum available Ruler pods during a disruption.
+    # -- (int or string) Minimum available Ruler pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Ruler pods during a disruption.
+    # -- (int or string) Maximum unavailable Ruler pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
