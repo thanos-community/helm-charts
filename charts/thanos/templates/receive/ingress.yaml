@@ -24,7 +24,7 @@ spec:
               service:
                 name: {{ include "thanos.compName" (list $ "receive") }}
                 port:
-                  number: {{ $.Values.receive.service.httpPort }}
+                  name: http
         {{- end }}
   {{- end }}
   tls:

@@ -1,0 +1,22 @@
+{{- if and .Values.ruler.enabled .Values.global.networkPolicies }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
+  name: {{ include "thanos.compName" (list . "ruler") }}
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: http
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: ruler
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+    - Ingress
+{{- end }}

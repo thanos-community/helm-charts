@@ -1,0 +1,24 @@
+{{- if and .Values.receive.enabled .Values.global.networkPolicies }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: receive
+  name: {{ include "thanos.compName" (list . "receive") }}
+spec:
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: grpc
+        - port: http
+        - port: remote-write
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: receive
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+    - Egress
+    - Ingress
+{{- end }}

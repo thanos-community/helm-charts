@@ -889,3 +889,51 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  # -- NetworkPolicy -------------------------------------------------------
+
+  - it: does not render networkpolicy when networkPolicies is disabled
+    template: bucket/networkpolicy.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.networkPolicies: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render networkpolicy when bucket is disabled
+    template: bucket/networkpolicy.yaml
+    set:
+      bucket.enabled: false
+      bucket.bucketweb.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render networkpolicy when bucketweb is disabled
+    template: bucket/networkpolicy.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: false
+      global.networkPolicies: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders networkpolicy when bucket, bucketweb, and networkPolicies are enabled
+    template: bucket/networkpolicy.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: apiVersion
+          value: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-bucketweb

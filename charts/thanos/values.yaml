@@ -111,6 +111,11 @@ global:
   # @default -- []
   extraContainers: []
 
+  # -- Create a NetworkPolicy for every enabled component. When true each
+  # component gets a NetworkPolicy that allows ingress on its service ports
+  # from within the namespace and permits all egress.
+  networkPolicies: false
+
   # Object store configuration shared by all components that read or write
   # blocks (Receive, Store Gateway, Compactor, Ruler).
   # Object store configuration block shared by all Thanos components.
@@ -384,8 +389,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the readiness probe.
         path: /-/ready
-        # -- Port checked by the readiness probe.
-        port: 10902
+        # -- (int or string) Port checked by the readiness probe.
+        port: http
         # -- Seconds to wait before starting the readiness probe.
         initialDelaySeconds: 5
         # -- How often (seconds) to run the readiness probe.
@@ -402,8 +407,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the liveness probe.
         path: /-/healthy
-        # -- Port checked by the liveness probe.
-        port: 10902
+        # -- (int or string) Port checked by the liveness probe.
+        port: http
         # -- Seconds to wait before starting the liveness probe.
         initialDelaySeconds: 30
         # -- How often (seconds) to run the liveness probe.
@@ -420,8 +425,8 @@ bucket:
         enabled: true
         # -- HTTP path checked by the startup probe.
         path: /-/ready
-        # -- Port checked by the startup probe.
-        port: 10902
+        # -- (int or string) Port checked by the startup probe.
+        port: http
         # -- Seconds to wait before starting the startup probe.
         initialDelaySeconds: 0
         # -- How often (seconds) to run the startup probe.
@@ -649,8 +654,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor readiness probe.
       path: /-/ready
-      # -- Port checked by the Compactor readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor readiness probe.
+      port: http
       # -- Seconds to wait before starting the Compactor readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Compactor readiness probe.
@@ -667,8 +672,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor liveness probe.
       path: /-/healthy
-      # -- Port checked by the Compactor liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor liveness probe.
+      port: http
       # -- Seconds to wait before starting the Compactor liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Compactor liveness probe.
@@ -685,8 +690,8 @@ compactor:
       enabled: true
       # -- HTTP path checked by the Compactor startup probe.
       path: /-/ready
-      # -- Port checked by the Compactor startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Compactor startup probe.
+      port: http
       # -- Seconds to wait before starting the Compactor startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Compactor startup probe.
@@ -920,8 +925,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query readiness probe.
       path: /-/ready
-      # -- Port checked by the Query readiness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query readiness probe.
+      port: http
       # -- Seconds to wait before starting the Query readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Query readiness probe.
@@ -938,8 +943,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query liveness probe.
       path: /-/healthy
-      # -- Port checked by the Query liveness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query liveness probe.
+      port: http
       # -- Seconds to wait before starting the Query liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Query liveness probe.
@@ -956,8 +961,8 @@ query:
       enabled: true
       # -- HTTP path checked by the Query startup probe.
       path: /-/ready
-      # -- Port checked by the Query startup probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query startup probe.
+      port: http
       # -- Seconds to wait before starting the Query startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Query startup probe.
@@ -1163,8 +1168,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend readiness probe.
       path: /-/ready
-      # -- Port checked by the Query Frontend readiness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend readiness probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Query Frontend readiness probe.
@@ -1181,8 +1186,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend liveness probe.
       path: /-/healthy
-      # -- Port checked by the Query Frontend liveness probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend liveness probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Query Frontend liveness probe.
@@ -1199,8 +1204,8 @@ queryFrontend:
       enabled: true
       # -- HTTP path checked by the Query Frontend startup probe.
       path: /-/ready
-      # -- Port checked by the Query Frontend startup probe.
-      port: 9090
+      # -- (int or string) Port checked by the Query Frontend startup probe.
+      port: http
       # -- Seconds to wait before starting the Query Frontend startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Query Frontend startup probe.
@@ -1433,8 +1438,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway readiness probe.
       path: /-/ready
-      # -- Port checked by the Store Gateway readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway readiness probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Store Gateway readiness probe.
@@ -1451,8 +1456,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway liveness probe.
       path: /-/healthy
-      # -- Port checked by the Store Gateway liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway liveness probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Store Gateway liveness probe.
@@ -1469,8 +1474,8 @@ storegateway:
       enabled: true
       # -- HTTP path checked by the Store Gateway startup probe.
       path: /-/ready
-      # -- Port checked by the Store Gateway startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Store Gateway startup probe.
+      port: http
       # -- Seconds to wait before starting the Store Gateway startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Store Gateway startup probe.
@@ -1742,8 +1747,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive readiness probe.
       path: /-/ready
-      # -- Port checked by the Receive readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive readiness probe.
+      port: http
       # -- Seconds to wait before starting the Receive readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Receive readiness probe.
@@ -1760,8 +1765,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive liveness probe.
       path: /-/healthy
-      # -- Port checked by the Receive liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive liveness probe.
+      port: http
       # -- Seconds to wait before starting the Receive liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Receive liveness probe.
@@ -1778,8 +1783,8 @@ receive:
       enabled: true
       # -- HTTP path checked by the Receive startup probe.
       path: /-/ready
-      # -- Port checked by the Receive startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Receive startup probe.
+      port: http
       # -- Seconds to wait before starting the Receive startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Receive startup probe.
@@ -2034,8 +2039,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler readiness probe.
       path: /-/ready
-      # -- Port checked by the Ruler readiness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler readiness probe.
+      port: http
       # -- Seconds to wait before starting the Ruler readiness probe.
       initialDelaySeconds: 5
       # -- How often (seconds) to run the Ruler readiness probe.
@@ -2052,8 +2057,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler liveness probe.
       path: /-/healthy
-      # -- Port checked by the Ruler liveness probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler liveness probe.
+      port: http
       # -- Seconds to wait before starting the Ruler liveness probe.
       initialDelaySeconds: 30
       # -- How often (seconds) to run the Ruler liveness probe.
@@ -2070,8 +2075,8 @@ ruler:
       enabled: true
       # -- HTTP path checked by the Ruler startup probe.
       path: /-/ready
-      # -- Port checked by the Ruler startup probe.
-      port: 10902
+      # -- (int or string) Port checked by the Ruler startup probe.
+      port: http
       # -- Seconds to wait before starting the Ruler startup probe.
       initialDelaySeconds: 0
       # -- How often (seconds) to run the Ruler startup probe.

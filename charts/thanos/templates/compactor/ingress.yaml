@@ -24,7 +24,7 @@ spec:
               service:
                 name: {{ include "thanos.compName" (list $ "compactor") }}
                 port:
-                  number: {{ $.Values.compactor.service.port }}
+                  name: http
         {{- end }}
   {{- end }}
   tls:
