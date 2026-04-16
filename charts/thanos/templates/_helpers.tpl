@@ -70,6 +70,14 @@ securityContext:
 {{- end }}
 {{- end }}
 
+{{- define "thanos.dnsConfig" -}}
+{{- $component := (index .Values .component) | default dict -}}
+{{- with ($component.dnsConfig | default .Values.global.dnsConfig) -}}
+dnsConfig:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- end }}
+
 {{- define "thanos.httpProbes" -}}
 {{- $root := .root -}}
 {{- $key := .key -}}

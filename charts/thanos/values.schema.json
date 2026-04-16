@@ -778,6 +778,13 @@
               "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
+            },
+            "dnsConfig": {
+              "additionalProperties": true,
+              "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+              "required": [],
+              "title": "dnsConfig",
+              "type": "object"
             }
           },
           "required": [
@@ -791,6 +798,7 @@
             "resources",
             "podSecurityContext",
             "containerSecurityContext",
+            "dnsConfig",
             "extraEnv",
             "extraEnvFrom",
             "extraInitContainers",
@@ -1719,6 +1727,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -1733,6 +1748,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -1837,6 +1853,13 @@
             "runAsNonRoot"
           ],
           "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration applied to every pod. Component-level values override this.",
+          "required": [],
+          "title": "dnsConfig",
           "type": "object"
         },
         "extraContainers": {
@@ -2381,6 +2404,7 @@
         "podAnnotations",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraVolumes",
         "extraVolumeMounts",
         "resources",
@@ -3270,6 +3294,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -3286,6 +3317,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -4085,6 +4117,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -4100,6 +4139,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -5132,6 +5172,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -5150,6 +5197,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -6085,6 +6133,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -6103,6 +6158,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -7110,6 +7166,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -7126,6 +7189,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",

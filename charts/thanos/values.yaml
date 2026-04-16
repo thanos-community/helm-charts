@@ -55,6 +55,15 @@ global:
     # -- Require the container to run as a non-root user.
     runAsNonRoot: true
 
+  # -- DNS configuration applied to every pod. Component-level values override this.
+  # @default -- {}
+  dnsConfig: {}
+  # Example:
+  # dnsConfig:
+  #   options:
+  #     - name: ndots
+  #       value: "1"
+
   # -- Additional volumes available to every pod by default.
   # @default -- []
   extraVolumes: []
@@ -347,6 +356,10 @@ bucket:
     # @default -- {}
     containerSecurityContext: {}
 
+    # -- DNS configuration for Bucketweb pods. Overrides global.dnsConfig.
+    # @default -- {}
+    dnsConfig: {}
+
     # -- Extra environment variables injected into the Bucketweb container.
     # @default -- []
     extraEnv: []
@@ -607,6 +620,10 @@ compactor:
   # -- Container security context for the Compactor. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Compactor pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Compactor container.
   # @default -- []
@@ -875,6 +892,10 @@ query:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Query pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Query container.
   # @default -- []
   extraEnv: []
@@ -1113,6 +1134,10 @@ queryFrontend:
   # -- Container security context for Query Frontend. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Query Frontend pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Query Frontend container.
   # @default -- []
@@ -1379,6 +1404,10 @@ storegateway:
   # -- Container security context for Store Gateway. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Store Gateway pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Store Gateway container.
   # @default -- []
@@ -1685,6 +1714,10 @@ receive:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Receive pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Receive container.
   # @default -- []
   extraEnv: []
@@ -1969,6 +2002,10 @@ ruler:
   # -- Container security context for Ruler. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Ruler pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Ruler container.
   # @default -- []

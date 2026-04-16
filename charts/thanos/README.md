@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.3.5](https://img.shields.io/badge/Version-0.3.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -439,6 +439,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Bucketweb autoscaling. |
 | bucket.bucketweb.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage. Null disables memory-based scaling. |
 | bucket.bucketweb.containerSecurityContext | object | {} | Container security context for Bucketweb. Overrides global.containerSecurityContext. |
+| bucket.bucketweb.dnsConfig | object | {} | DNS configuration for Bucketweb pods. Overrides global.dnsConfig. |
 | bucket.bucketweb.enabled | bool | `false` | Enable the Bucketweb deployment (read-only object store browser). |
 | bucket.bucketweb.extraArgs | list | [] | Additional CLI arguments appended to the bucketweb command. |
 | bucket.bucketweb.extraContainers | list | [] | Extra sidecar containers for Bucketweb pods. |
@@ -511,6 +512,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.affinity | object | {} | Affinity rules for Compactor pod scheduling. |
 | compactor.annotations | object | {} | Extra annotations applied to Compactor resources. |
 | compactor.containerSecurityContext | object | {} | Container security context for the Compactor. Overrides global.containerSecurityContext. |
+| compactor.dnsConfig | object | {} | DNS configuration for Compactor pods. Overrides global.dnsConfig. |
 | compactor.enabled | bool | `true` | Enable the Compactor StatefulSet. |
 | compactor.extraArgs[0] | string | `"--log.level=info"` |  |
 | compactor.extraArgs[1] | string | `"--log.format=logfmt"` |  |
@@ -602,6 +604,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | global.containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mount the root filesystem as read-only. |
 | global.containerSecurityContext.runAsNonRoot | bool | `true` | Require the container to run as a non-root user. |
+| global.dnsConfig | object | {} | DNS configuration applied to every pod. Component-level values override this. |
 | global.extraContainers | list | [] | Extra sidecar containers added to every pod by default. |
 | global.extraEnv | list | [] | Extra environment variables injected into every main container by default. |
 | global.extraEnvFrom | list | [] | Extra environment variable sources (ConfigMap, Secret) for every main container. |
@@ -662,6 +665,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Query autoscaling. |
 | query.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling. |
 | query.containerSecurityContext | object | {} | Container security context for Query. Overrides global.containerSecurityContext. |
+| query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |
@@ -745,6 +749,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling. |
 | queryFrontend.cacheConfig | string | `""` | Optional result cache configuration (Memcached, Redis, or in-memory) passed as an inline YAML string. See https://thanos.io/tip/components/query-frontend.md/ |
 | queryFrontend.containerSecurityContext | object | {} | Container security context for Query Frontend. Overrides global.containerSecurityContext. |
+| queryFrontend.dnsConfig | object | {} | DNS configuration for Query Frontend pods. Overrides global.dnsConfig. |
 | queryFrontend.downstreamUrl | string | `""` | Downstream URL of the Query component. Leave empty to use the in-chart Query service endpoint (auto-resolved). |
 | queryFrontend.enabled | bool | `false` | Enable the Query Frontend Deployment. |
 | queryFrontend.extraArgs | list | [] | Additional CLI arguments appended to the `thanos query-frontend` command. |
@@ -816,6 +821,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.affinity | object | {} | Affinity rules for Receive pod scheduling. |
 | receive.annotations | object | {} | Extra annotations applied to Receive resources. |
 | receive.containerSecurityContext | object | {} | Container security context for Receive. Overrides global.containerSecurityContext. |
+| receive.dnsConfig | object | {} | DNS configuration for Receive pods. Overrides global.dnsConfig. |
 | receive.enabled | bool | `true` | Enable the Receive StatefulSet. |
 | receive.extraArgs | list | [] | Additional CLI arguments appended to the `thanos receive` command. |
 | receive.extraContainers | list | [] | Extra sidecar containers for Receive pods. |
@@ -917,6 +923,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
 | ruler.containerSecurityContext | object | {} | Container security context for Ruler. Overrides global.containerSecurityContext. |
+| ruler.dnsConfig | object | {} | DNS configuration for Ruler pods. Overrides global.dnsConfig. |
 | ruler.enabled | bool | `false` | Enable the Ruler StatefulSet. |
 | ruler.extraArgs | list | [] | Additional CLI arguments appended to the `thanos rule` command. |
 | ruler.extraContainers | list | [] | Extra sidecar containers for Ruler pods. |
@@ -1008,6 +1015,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling. |
 | storegateway.cachingBucketConfig | string | `""` | Optional caching bucket configuration (e.g. Memcached) that wraps the object store to reduce the number of object store API calls. Provide as an inline YAML string. See https://thanos.io/tip/components/store.md/#caching-bucket |
 | storegateway.containerSecurityContext | object | {} | Container security context for Store Gateway. Overrides global.containerSecurityContext. |
+| storegateway.dnsConfig | object | {} | DNS configuration for Store Gateway pods. Overrides global.dnsConfig. |
 | storegateway.enabled | bool | `true` | Enable the Store Gateway StatefulSet. |
 | storegateway.extraArgs | list | [] | Additional CLI arguments appended to the `thanos store` command. |
 | storegateway.extraContainers | list | [] | Extra sidecar containers for Store Gateway pods. |
