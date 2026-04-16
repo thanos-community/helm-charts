@@ -26,7 +26,10 @@ spec:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: ruler
       annotations:
-        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
+        {{- with .Values.global.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "ruler") | nindent 6 }}

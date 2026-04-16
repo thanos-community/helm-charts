@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.3.4](https://img.shields.io/badge/Version-0.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.3.5](https://img.shields.io/badge/Version-0.3.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -461,8 +461,8 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.labels | object | {} | Extra labels applied to Bucketweb resources. |
 | bucket.bucketweb.nodeSelector | object | {} | Node selector for Bucketweb pod scheduling. |
 | bucket.bucketweb.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Bucketweb. |
-| bucket.bucketweb.pdb.maxUnavailable | string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
-| bucket.bucketweb.pdb.minAvailable | string | `""` | Minimum available Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.minAvailable | int or string | `""` | Minimum available Bucketweb pods during a disruption. |
 | bucket.bucketweb.persistence | object | {} | Storage configuration for Bucketweb. Bucketweb is stateless; leave empty. |
 | bucket.bucketweb.podSecurityContext | object | {} | Pod security context for Bucketweb. Overrides global.podSecurityContext. |
 | bucket.bucketweb.priorityClassName | string | `""` | Priority class name for Bucketweb pods. |
@@ -538,8 +538,8 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.labels | object | {} | Extra labels applied to Compactor resources. |
 | compactor.nodeSelector | object | {} | Node selector for Compactor pod scheduling. |
 | compactor.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Compactor. |
-| compactor.pdb.maxUnavailable | string | `""` | Maximum unavailable Compactor pods during a disruption. |
-| compactor.pdb.minAvailable | string | `""` | Minimum available Compactor pods during a disruption. |
+| compactor.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Compactor pods during a disruption. |
+| compactor.pdb.minAvailable | int or string | `""` | Minimum available Compactor pods during a disruption. |
 | compactor.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | compactor.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Compactor working directory. |
 | compactor.persistence.size | string | `"10Gi"` | Storage capacity for the Compactor PVC (used as a scratch space during compaction). |
@@ -618,8 +618,8 @@ The table below documents all available values. Top-level keys group settings by
 | global.objstore.secretKey | string | `"objstore.yml"` | Key inside the Secret whose value is the object store YAML. |
 | global.objstore.secretName | string | `"thanos-objstore"` | Name of the Kubernetes Secret that carries the object store config. All components mount this Secret as a file. |
 | global.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for every component. Individual components can override this with their own pdb.enabled. |
-| global.pdb.maxUnavailable | string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
-| global.pdb.minAvailable | string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
+| global.pdb.maxUnavailable | int or string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
+| global.pdb.minAvailable | int or string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
@@ -688,8 +688,8 @@ The table below documents all available values. Top-level keys group settings by
 | query.labels | object | {} | Extra labels applied to Query resources. |
 | query.nodeSelector | object | {} | Node selector for Query pod scheduling. |
 | query.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query. |
-| query.pdb.maxUnavailable | string | `""` | Maximum unavailable Query pods during a disruption. |
-| query.pdb.minAvailable | string | `""` | Minimum available Query pods during a disruption. |
+| query.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query pods during a disruption. |
+| query.pdb.minAvailable | int or string | `""` | Minimum available Query pods during a disruption. |
 | query.podSecurityContext | object | {} | Pod security context for Query pods. Overrides global.podSecurityContext. |
 | query.priorityClassName | string | `""` | Priority class name for Query pods. |
 | query.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query. |
@@ -768,8 +768,8 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.labels | object | {} | Extra labels applied to Query Frontend resources. |
 | queryFrontend.nodeSelector | object | {} | Node selector for Query Frontend pod scheduling. |
 | queryFrontend.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query Frontend. |
-| queryFrontend.pdb.maxUnavailable | string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
-| queryFrontend.pdb.minAvailable | string | `""` | Minimum available Query Frontend pods during a disruption. |
+| queryFrontend.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
+| queryFrontend.pdb.minAvailable | int or string | `""` | Minimum available Query Frontend pods during a disruption. |
 | queryFrontend.podSecurityContext | object | {} | Pod security context for Query Frontend pods. Overrides global.podSecurityContext. |
 | queryFrontend.priorityClassName | string | `""` | Priority class name for Query Frontend pods. |
 | queryFrontend.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query Frontend. |
@@ -845,8 +845,8 @@ The table below documents all available values. Top-level keys group settings by
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
-| receive.pdb.maxUnavailable | string | `""` | Maximum unavailable Receive pods during a disruption. |
-| receive.pdb.minAvailable | string | `""` | Minimum available Receive pods during a disruption. |
+| receive.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Receive pods during a disruption. |
+| receive.pdb.minAvailable | int or string | `""` | Minimum available Receive pods during a disruption. |
 | receive.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | receive.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Receive TSDB WAL. |
 | receive.persistence.size | string | `"10Gi"` | Storage capacity for the Receive PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
@@ -939,8 +939,8 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.labels | object | {} | Extra labels applied to Ruler resources. |
 | ruler.nodeSelector | object | {} | Node selector for Ruler pod scheduling. |
 | ruler.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Ruler. |
-| ruler.pdb.maxUnavailable | string | `""` | Maximum unavailable Ruler pods during a disruption. |
-| ruler.pdb.minAvailable | string | `""` | Minimum available Ruler pods during a disruption. |
+| ruler.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Ruler pods during a disruption. |
+| ruler.pdb.minAvailable | int or string | `""` | Minimum available Ruler pods during a disruption. |
 | ruler.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | ruler.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ruler data directory. |
 | ruler.persistence.size | string | `"10Gi"` | Storage capacity for the Ruler PVC. |
@@ -1034,8 +1034,8 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.labels | object | {} | Extra labels applied to Store Gateway resources. |
 | storegateway.nodeSelector | object | {} | Node selector for Store Gateway pod scheduling. |
 | storegateway.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Store Gateway. |
-| storegateway.pdb.maxUnavailable | string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
-| storegateway.pdb.minAvailable | string | `""` | Minimum available Store Gateway pods during a disruption. |
+| storegateway.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
+| storegateway.pdb.minAvailable | int or string | `""` | Minimum available Store Gateway pods during a disruption. |
 | storegateway.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | storegateway.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store. |
 | storegateway.persistence.size | string | `"10Gi"` | Storage capacity for the Store Gateway PVC. |

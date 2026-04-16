@@ -331,14 +331,28 @@
                   "description": "Maximum unavailable Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "maxUnavailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "minAvailable": {
                   "default": "",
                   "description": "Minimum available Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "minAvailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -1110,14 +1124,28 @@
               "description": "Maximum unavailable Compactor pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Compactor pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -1973,14 +2001,28 @@
               "description": "Maximum number of unavailable pods during a disruption.\nCannot be set at the same time as minAvailable.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum number of available pods during a disruption.\nCannot be set at the same time as maxUnavailable.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -2756,14 +2798,28 @@
               "description": "Maximum unavailable Query pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -3589,14 +3645,28 @@
               "description": "Maximum unavailable Query Frontend pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query Frontend pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -4418,14 +4488,28 @@
               "description": "Maximum unavailable Receive pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Receive pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -5457,14 +5541,28 @@
               "description": "Maximum unavailable Ruler pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Ruler pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -6497,14 +6595,28 @@
               "description": "Maximum unavailable Store Gateway pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Store Gateway pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [

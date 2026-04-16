@@ -25,7 +25,7 @@ spec:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: query
       annotations:
-      {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "query") | nindent 6 }}
@@ -68,12 +68,11 @@ spec:
           resources:
             {{- toYaml .Values.query.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "query" "port" .Values.query.service.httpPort) | nindent 10 }}
-      {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "query" "root" .) | nindent 8 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "query" "root" .) | nindent 6 }}
       {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.tolerations" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "query") | nindent 6 }}
-      {{ include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
+      {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
 {{- end }}

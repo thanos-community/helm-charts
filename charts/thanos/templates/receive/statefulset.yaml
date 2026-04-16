@@ -31,6 +31,7 @@ spec:
         {{- $anns = merge $anns .Values.global.podAnnotations -}}
         {{- end }}
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+        {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
         {{- toYaml $anns | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
