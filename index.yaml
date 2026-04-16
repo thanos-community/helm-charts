@@ -21,6 +21,62 @@ entries:
       artifacthub.io/prerelease: "false"
     apiVersion: v2
     appVersion: v0.41.0
+    created: "2026-04-16T10:01:41.310268026Z"
+    dependencies:
+    - alias: kube-prometheus-stack
+      condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 83.0.2
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com/
+      version: 0.0.91
+    description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus
+      setup with long term storage capabilities.
+    digest: 7a11013883dd80785032e032af203c364dba5a0c027847d5d8d4eb3bbdb5af22
+    home: https://thanos.io/
+    icon: https://raw.githubusercontent.com/thanos-io/thanos/master/docs/img/Thanos-logo_fullmedium.png
+    keywords:
+    - thanos
+    - prometheus
+    - monitoring
+    - metrics
+    - alerting
+    - observability
+    - kube-prometheus-stack
+    kubeVersion: '>= 1.30.0-0'
+    maintainers:
+    - email: hamdi.khelil@kapheira.cloud
+      name: hamdikh
+    name: thanos
+    sources:
+    - https://github.com/thanos-io/thanos
+    - https://github.com/thanos-community/helm-charts
+    type: application
+    urls:
+    - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.3.5/thanos-0.3.5.tgz
+    version: 0.3.5
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: Initial release of thanos Helm chart
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/images: |
+        - name: thanos
+          image: quay.io/thanos/thanos:v0.41.0
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Documentation
+          url: https://thanos.io/tip/thanos/getting-started.md/
+        - name: GitHub
+          url: https://github.com/thanos-io/thanos
+        - name: Slack
+          url: https://cloud-native.slack.com/archives/CL25937SP
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+    apiVersion: v2
+    appVersion: v0.41.0
     created: "2026-04-15T09:03:11.318673103Z"
     dependencies:
     - alias: kube-prometheus-stack
@@ -337,4 +393,4 @@ entries:
     urls:
     - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.2.0/thanos-0.2.0.tgz
     version: 0.2.0
-generated: "2026-04-15T09:03:11.318692299Z"
+generated: "2026-04-16T10:01:41.310289797Z"
