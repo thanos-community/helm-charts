@@ -55,6 +55,15 @@ global:
     # -- Require the container to run as a non-root user.
     runAsNonRoot: true
 
+  # -- DNS configuration applied to every pod. Component-level values override this.
+  # @default -- {}
+  dnsConfig: {}
+  # Example:
+  # dnsConfig:
+  #   options:
+  #     - name: ndots
+  #       value: "1"
+
   # -- Additional volumes available to every pod by default.
   # @default -- []
   extraVolumes: []
@@ -233,10 +242,10 @@ global:
     # -- Enable a PodDisruptionBudget for every component. Individual
     # components can override this with their own pdb.enabled.
     enabled: false
-    # -- Minimum number of available pods during a disruption.
+    # -- (int or string) Minimum number of available pods during a disruption.
     # Cannot be set at the same time as maxUnavailable.
     minAvailable: ""
-    # -- Maximum number of unavailable pods during a disruption.
+    # -- (int or string) Maximum number of unavailable pods during a disruption.
     # Cannot be set at the same time as minAvailable.
     maxUnavailable: ""
 
@@ -346,6 +355,10 @@ bucket:
     # -- Container security context for Bucketweb. Overrides global.containerSecurityContext.
     # @default -- {}
     containerSecurityContext: {}
+
+    # -- DNS configuration for Bucketweb pods. Overrides global.dnsConfig.
+    # @default -- {}
+    dnsConfig: {}
 
     # -- Extra environment variables injected into the Bucketweb container.
     # @default -- []
@@ -489,9 +502,9 @@ bucket:
     pdb:
       # -- Enable a PodDisruptionBudget for Bucketweb.
       enabled: false
-      # -- Minimum available Bucketweb pods during a disruption.
+      # -- (int or string) Minimum available Bucketweb pods during a disruption.
       minAvailable: ""
-      # -- Maximum unavailable Bucketweb pods during a disruption.
+      # -- (int or string) Maximum unavailable Bucketweb pods during a disruption.
       maxUnavailable: ""
 
 # ======================================================================
@@ -607,6 +620,10 @@ compactor:
   # -- Container security context for the Compactor. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Compactor pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Compactor container.
   # @default -- []
@@ -746,9 +763,9 @@ compactor:
   pdb:
     # -- Enable a PodDisruptionBudget for the Compactor.
     enabled: false
-    # -- Minimum available Compactor pods during a disruption.
+    # -- (int or string) Minimum available Compactor pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Compactor pods during a disruption.
+    # -- (int or string) Maximum unavailable Compactor pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -874,6 +891,10 @@ query:
   # -- Container security context for Query. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Query pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Query container.
   # @default -- []
@@ -1013,9 +1034,9 @@ query:
   pdb:
     # -- Enable a PodDisruptionBudget for Query.
     enabled: false
-    # -- Minimum available Query pods during a disruption.
+    # -- (int or string) Minimum available Query pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query pods during a disruption.
+    # -- (int or string) Maximum unavailable Query pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1113,6 +1134,10 @@ queryFrontend:
   # -- Container security context for Query Frontend. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Query Frontend pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Query Frontend container.
   # @default -- []
@@ -1252,9 +1277,9 @@ queryFrontend:
   pdb:
     # -- Enable a PodDisruptionBudget for Query Frontend.
     enabled: false
-    # -- Minimum available Query Frontend pods during a disruption.
+    # -- (int or string) Minimum available Query Frontend pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Query Frontend pods during a disruption.
+    # -- (int or string) Maximum unavailable Query Frontend pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1379,6 +1404,10 @@ storegateway:
   # -- Container security context for Store Gateway. Overrides global.containerSecurityContext.
   # @default -- {}
   containerSecurityContext: {}
+
+  # -- DNS configuration for Store Gateway pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
 
   # -- Extra environment variables injected into the Store Gateway container.
   # @default -- []
@@ -1518,9 +1547,9 @@ storegateway:
   pdb:
     # -- Enable a PodDisruptionBudget for the Store Gateway.
     enabled: false
-    # -- Minimum available Store Gateway pods during a disruption.
+    # -- (int or string) Minimum available Store Gateway pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Store Gateway pods during a disruption.
+    # -- (int or string) Maximum unavailable Store Gateway pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1685,6 +1714,10 @@ receive:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Receive pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Receive container.
   # @default -- []
   extraEnv: []
@@ -1823,9 +1856,9 @@ receive:
   pdb:
     # -- Enable a PodDisruptionBudget for Receive.
     enabled: false
-    # -- Minimum available Receive pods during a disruption.
+    # -- (int or string) Minimum available Receive pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Receive pods during a disruption.
+    # -- (int or string) Maximum unavailable Receive pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
@@ -1973,6 +2006,10 @@ ruler:
   # @default -- {}
   containerSecurityContext: {}
 
+  # -- DNS configuration for Ruler pods. Overrides global.dnsConfig.
+  # @default -- {}
+  dnsConfig: {}
+
   # -- Extra environment variables injected into the Ruler container.
   # @default -- []
   extraEnv: []
@@ -2111,9 +2148,9 @@ ruler:
   pdb:
     # -- Enable a PodDisruptionBudget for the Ruler.
     enabled: false
-    # -- Minimum available Ruler pods during a disruption.
+    # -- (int or string) Minimum available Ruler pods during a disruption.
     minAvailable: ""
-    # -- Maximum unavailable Ruler pods during a disruption.
+    # -- (int or string) Maximum unavailable Ruler pods during a disruption.
     maxUnavailable: ""
 
 # ======================================================================
