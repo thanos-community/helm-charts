@@ -10,6 +10,6 @@ metadata:
 data:
 {{- range $fname, $content := .Values.ruler.rules }}
   {{ $fname }}: |
-    {{- toYaml (tpl $content $) | nindent 4 }}
+    {{- tpl $content $ | nindent 4 }}
 {{- end }}
 {{- end }}

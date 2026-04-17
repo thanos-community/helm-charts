@@ -669,6 +669,81 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: renders rules configmap data as valid Thanos rules.configGroups with default values
+    template: ruler/configmaprules.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - equal:
+          path: data["example-alerts.yaml"]
+          value: |
+            groups:
+              - name: thanos-example
+                rules:
+                  - alert: ExampleAlwaysFiring
+                    expr: vector(1)
+                    for: 1m
+                    labels:
+                      severity: warning
+                    annotations:
+                      summary: Example alert firing
+
+  - it: renders multiple rule files with user-provided content
+    template: ruler/configmaprules.yaml
+    set:
+      ruler.enabled: true
+      ruler.rules:
+        alerts.yaml: |
+          groups:
+            - name: custom
+              rules:
+                - alert: MyAlert
+                  expr: up == 0
+        recording.yaml: |
+          groups:
+            - name: recording
+              rules:
+                - record: job:up
+                  expr: up
+    asserts:
+      - equal:
+          path: data["alerts.yaml"]
+          value: |
+            groups:
+              - name: custom
+                rules:
+                  - alert: MyAlert
+                    expr: up == 0
+      - equal:
+          path: data["recording.yaml"]
+          value: |
+            groups:
+              - name: recording
+                rules:
+                  - record: job:up
+                    expr: up
+
+  - it: renders rules with templated values via tpl
+    template: ruler/configmaprules.yaml
+    set:
+      ruler.enabled: true
+      ruler.rules:
+        alerts.yaml: |
+          groups:
+            - name: {{ .Release.Name }}-alerts
+              rules:
+                - alert: Dummy
+                  expr: vector(1)
+    asserts:
+      - equal:
+          path: data["alerts.yaml"]
+          value: |
+            groups:
+              - name: RELEASE-NAME-alerts
+                rules:
+                  - alert: Dummy
+                    expr: vector(1)
+
   # -- ConfigMap alertmanagers -------------------------------------------
 
   - it: renders alertmanagers configmap when ruler is enabled
