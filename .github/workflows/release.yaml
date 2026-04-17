@@ -40,7 +40,7 @@ jobs:
         uses: sigstore/cosign-installer@v4.1.1
 
       - name: Install helm-sigstore plugin
-        run: helm plugin install https://github.com/sigstore/helm-sigstore
+        run: helm plugin install --verify=false https://github.com/sigstore/helm-sigstore
 
       - name: Configure GPG
         run: |-
