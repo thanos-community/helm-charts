@@ -26,7 +26,10 @@ spec:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: compactor
       annotations:
-        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
+        {{- with .Values.global.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "compactor") | nindent 6 }}
@@ -61,6 +64,7 @@ spec:
             {{- toYaml .Values.compactor.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "compactor" "port" .Values.compactor.service.port) | nindent 10 }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "compactor" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "compactor") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "compactor" "root" .) | nindent 6 }}
       {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "compactor") | nindent 6 }}
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "compactor") | nindent 6 }}

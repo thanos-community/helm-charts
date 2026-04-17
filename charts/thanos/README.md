@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.3.4](https://img.shields.io/badge/Version-0.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -439,6 +439,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Bucketweb autoscaling. |
 | bucket.bucketweb.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage. Null disables memory-based scaling. |
 | bucket.bucketweb.containerSecurityContext | object | {} | Container security context for Bucketweb. Overrides global.containerSecurityContext. |
+| bucket.bucketweb.dnsConfig | object | {} | DNS configuration for Bucketweb pods. Overrides global.dnsConfig. |
 | bucket.bucketweb.enabled | bool | `false` | Enable the Bucketweb deployment (read-only object store browser). |
 | bucket.bucketweb.extraArgs | list | [] | Additional CLI arguments appended to the bucketweb command. |
 | bucket.bucketweb.extraContainers | list | [] | Extra sidecar containers for Bucketweb pods. |
@@ -461,8 +462,8 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.labels | object | {} | Extra labels applied to Bucketweb resources. |
 | bucket.bucketweb.nodeSelector | object | {} | Node selector for Bucketweb pod scheduling. |
 | bucket.bucketweb.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Bucketweb. |
-| bucket.bucketweb.pdb.maxUnavailable | string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
-| bucket.bucketweb.pdb.minAvailable | string | `""` | Minimum available Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Bucketweb pods during a disruption. |
+| bucket.bucketweb.pdb.minAvailable | int or string | `""` | Minimum available Bucketweb pods during a disruption. |
 | bucket.bucketweb.persistence | object | {} | Storage configuration for Bucketweb. Bucketweb is stateless; leave empty. |
 | bucket.bucketweb.podSecurityContext | object | {} | Pod security context for Bucketweb. Overrides global.podSecurityContext. |
 | bucket.bucketweb.priorityClassName | string | `""` | Priority class name for Bucketweb pods. |
@@ -511,6 +512,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.affinity | object | {} | Affinity rules for Compactor pod scheduling. |
 | compactor.annotations | object | {} | Extra annotations applied to Compactor resources. |
 | compactor.containerSecurityContext | object | {} | Container security context for the Compactor. Overrides global.containerSecurityContext. |
+| compactor.dnsConfig | object | {} | DNS configuration for Compactor pods. Overrides global.dnsConfig. |
 | compactor.enabled | bool | `true` | Enable the Compactor StatefulSet. |
 | compactor.extraArgs[0] | string | `"--log.level=info"` |  |
 | compactor.extraArgs[1] | string | `"--log.format=logfmt"` |  |
@@ -538,8 +540,8 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.labels | object | {} | Extra labels applied to Compactor resources. |
 | compactor.nodeSelector | object | {} | Node selector for Compactor pod scheduling. |
 | compactor.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Compactor. |
-| compactor.pdb.maxUnavailable | string | `""` | Maximum unavailable Compactor pods during a disruption. |
-| compactor.pdb.minAvailable | string | `""` | Minimum available Compactor pods during a disruption. |
+| compactor.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Compactor pods during a disruption. |
+| compactor.pdb.minAvailable | int or string | `""` | Minimum available Compactor pods during a disruption. |
 | compactor.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | compactor.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Compactor working directory. |
 | compactor.persistence.size | string | `"10Gi"` | Storage capacity for the Compactor PVC (used as a scratch space during compaction). |
@@ -602,6 +604,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.containerSecurityContext.capabilities.drop[0] | string | `"ALL"` |  |
 | global.containerSecurityContext.readOnlyRootFilesystem | bool | `true` | Mount the root filesystem as read-only. |
 | global.containerSecurityContext.runAsNonRoot | bool | `true` | Require the container to run as a non-root user. |
+| global.dnsConfig | object | {} | DNS configuration applied to every pod. Component-level values override this. |
 | global.extraContainers | list | [] | Extra sidecar containers added to every pod by default. |
 | global.extraEnv | list | [] | Extra environment variables injected into every main container by default. |
 | global.extraEnvFrom | list | [] | Extra environment variable sources (ConfigMap, Secret) for every main container. |
@@ -618,8 +621,8 @@ The table below documents all available values. Top-level keys group settings by
 | global.objstore.secretKey | string | `"objstore.yml"` | Key inside the Secret whose value is the object store YAML. |
 | global.objstore.secretName | string | `"thanos-objstore"` | Name of the Kubernetes Secret that carries the object store config. All components mount this Secret as a file. |
 | global.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for every component. Individual components can override this with their own pdb.enabled. |
-| global.pdb.maxUnavailable | string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
-| global.pdb.minAvailable | string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
+| global.pdb.maxUnavailable | int or string | `""` | Maximum number of unavailable pods during a disruption. Cannot be set at the same time as minAvailable. |
+| global.pdb.minAvailable | int or string | `""` | Minimum number of available pods during a disruption. Cannot be set at the same time as maxUnavailable. |
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
@@ -662,6 +665,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilisation percentage for Query autoscaling. |
 | query.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling. |
 | query.containerSecurityContext | object | {} | Container security context for Query. Overrides global.containerSecurityContext. |
+| query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |
@@ -688,8 +692,8 @@ The table below documents all available values. Top-level keys group settings by
 | query.labels | object | {} | Extra labels applied to Query resources. |
 | query.nodeSelector | object | {} | Node selector for Query pod scheduling. |
 | query.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query. |
-| query.pdb.maxUnavailable | string | `""` | Maximum unavailable Query pods during a disruption. |
-| query.pdb.minAvailable | string | `""` | Minimum available Query pods during a disruption. |
+| query.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query pods during a disruption. |
+| query.pdb.minAvailable | int or string | `""` | Minimum available Query pods during a disruption. |
 | query.podSecurityContext | object | {} | Pod security context for Query pods. Overrides global.podSecurityContext. |
 | query.priorityClassName | string | `""` | Priority class name for Query pods. |
 | query.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query. |
@@ -745,6 +749,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling. |
 | queryFrontend.cacheConfig | string | `""` | Optional result cache configuration (Memcached, Redis, or in-memory) passed as an inline YAML string. See https://thanos.io/tip/components/query-frontend.md/ |
 | queryFrontend.containerSecurityContext | object | {} | Container security context for Query Frontend. Overrides global.containerSecurityContext. |
+| queryFrontend.dnsConfig | object | {} | DNS configuration for Query Frontend pods. Overrides global.dnsConfig. |
 | queryFrontend.downstreamUrl | string | `""` | Downstream URL of the Query component. Leave empty to use the in-chart Query service endpoint (auto-resolved). |
 | queryFrontend.enabled | bool | `false` | Enable the Query Frontend Deployment. |
 | queryFrontend.extraArgs | list | [] | Additional CLI arguments appended to the `thanos query-frontend` command. |
@@ -768,8 +773,8 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.labels | object | {} | Extra labels applied to Query Frontend resources. |
 | queryFrontend.nodeSelector | object | {} | Node selector for Query Frontend pod scheduling. |
 | queryFrontend.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query Frontend. |
-| queryFrontend.pdb.maxUnavailable | string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
-| queryFrontend.pdb.minAvailable | string | `""` | Minimum available Query Frontend pods during a disruption. |
+| queryFrontend.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Query Frontend pods during a disruption. |
+| queryFrontend.pdb.minAvailable | int or string | `""` | Minimum available Query Frontend pods during a disruption. |
 | queryFrontend.podSecurityContext | object | {} | Pod security context for Query Frontend pods. Overrides global.podSecurityContext. |
 | queryFrontend.priorityClassName | string | `""` | Priority class name for Query Frontend pods. |
 | queryFrontend.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Query Frontend. |
@@ -816,6 +821,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.affinity | object | {} | Affinity rules for Receive pod scheduling. |
 | receive.annotations | object | {} | Extra annotations applied to Receive resources. |
 | receive.containerSecurityContext | object | {} | Container security context for Receive. Overrides global.containerSecurityContext. |
+| receive.dnsConfig | object | {} | DNS configuration for Receive pods. Overrides global.dnsConfig. |
 | receive.enabled | bool | `true` | Enable the Receive StatefulSet. |
 | receive.extraArgs | list | [] | Additional CLI arguments appended to the `thanos receive` command. |
 | receive.extraContainers | list | [] | Extra sidecar containers for Receive pods. |
@@ -845,8 +851,8 @@ The table below documents all available values. Top-level keys group settings by
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
-| receive.pdb.maxUnavailable | string | `""` | Maximum unavailable Receive pods during a disruption. |
-| receive.pdb.minAvailable | string | `""` | Minimum available Receive pods during a disruption. |
+| receive.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Receive pods during a disruption. |
+| receive.pdb.minAvailable | int or string | `""` | Minimum available Receive pods during a disruption. |
 | receive.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | receive.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Receive TSDB WAL. |
 | receive.persistence.size | string | `"10Gi"` | Storage capacity for the Receive PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
@@ -917,6 +923,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
 | ruler.containerSecurityContext | object | {} | Container security context for Ruler. Overrides global.containerSecurityContext. |
+| ruler.dnsConfig | object | {} | DNS configuration for Ruler pods. Overrides global.dnsConfig. |
 | ruler.enabled | bool | `false` | Enable the Ruler StatefulSet. |
 | ruler.extraArgs | list | [] | Additional CLI arguments appended to the `thanos rule` command. |
 | ruler.extraContainers | list | [] | Extra sidecar containers for Ruler pods. |
@@ -939,8 +946,8 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.labels | object | {} | Extra labels applied to Ruler resources. |
 | ruler.nodeSelector | object | {} | Node selector for Ruler pod scheduling. |
 | ruler.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Ruler. |
-| ruler.pdb.maxUnavailable | string | `""` | Maximum unavailable Ruler pods during a disruption. |
-| ruler.pdb.minAvailable | string | `""` | Minimum available Ruler pods during a disruption. |
+| ruler.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Ruler pods during a disruption. |
+| ruler.pdb.minAvailable | int or string | `""` | Minimum available Ruler pods during a disruption. |
 | ruler.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | ruler.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ruler data directory. |
 | ruler.persistence.size | string | `"10Gi"` | Storage capacity for the Ruler PVC. |
@@ -1008,6 +1015,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.autoscaling.targetMemoryUtilizationPercentage | string | `nil` | Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling. |
 | storegateway.cachingBucketConfig | string | `""` | Optional caching bucket configuration (e.g. Memcached) that wraps the object store to reduce the number of object store API calls. Provide as an inline YAML string. See https://thanos.io/tip/components/store.md/#caching-bucket |
 | storegateway.containerSecurityContext | object | {} | Container security context for Store Gateway. Overrides global.containerSecurityContext. |
+| storegateway.dnsConfig | object | {} | DNS configuration for Store Gateway pods. Overrides global.dnsConfig. |
 | storegateway.enabled | bool | `true` | Enable the Store Gateway StatefulSet. |
 | storegateway.extraArgs | list | [] | Additional CLI arguments appended to the `thanos store` command. |
 | storegateway.extraContainers | list | [] | Extra sidecar containers for Store Gateway pods. |
@@ -1034,8 +1042,8 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.labels | object | {} | Extra labels applied to Store Gateway resources. |
 | storegateway.nodeSelector | object | {} | Node selector for Store Gateway pod scheduling. |
 | storegateway.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Store Gateway. |
-| storegateway.pdb.maxUnavailable | string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
-| storegateway.pdb.minAvailable | string | `""` | Minimum available Store Gateway pods during a disruption. |
+| storegateway.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Store Gateway pods during a disruption. |
+| storegateway.pdb.minAvailable | int or string | `""` | Minimum available Store Gateway pods during a disruption. |
 | storegateway.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | storegateway.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store. |
 | storegateway.persistence.size | string | `"10Gi"` | Storage capacity for the Store Gateway PVC. |

@@ -64,6 +64,7 @@ spec:
             {{- toYaml .Values.queryFrontend.resources | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "queryFrontend" "port" .Values.queryFrontend.service.port) | nindent 10 }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "queryFrontend" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "queryFrontend") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "queryFrontend" "root" .) | nindent 6 }}
       {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "queryFrontend") | nindent 6 }}
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "queryFrontend") | nindent 6 }}
