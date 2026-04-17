@@ -222,6 +222,52 @@ tests:
           path: spec.template.spec.securityContext.fsGroup
           value: 1001
 
+  # -- DNS configuration -----------------------------------------------
+
+  - it: applies global dnsConfig as fallback
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+    asserts:
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].name
+          value: ndots
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].value
+          value: "1"
+
+  - it: applies component dnsConfig overriding global
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.dnsConfig:
+        options:
+          - name: ndots
+            value: "5"
+      receive.dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+    asserts:
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].name
+          value: ndots
+      - equal:
+          path: spec.template.spec.dnsConfig.options[0].value
+          value: "1"
+
+  - it: does not render dnsConfig when not set
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - isNull:
+          path: spec.template.spec.dnsConfig
+
   # -- Scheduling and placement ---------------------------------------
 
   - it: applies component affinity overriding global

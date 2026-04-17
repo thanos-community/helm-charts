@@ -331,14 +331,28 @@
                   "description": "Maximum unavailable Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "maxUnavailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "minAvailable": {
                   "default": "",
                   "description": "Minimum available Bucketweb pods during a disruption.",
                   "required": [],
                   "title": "minAvailable",
-                  "type": "string"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -764,6 +778,13 @@
               "required": [],
               "title": "topologySpreadConstraints",
               "type": "array"
+            },
+            "dnsConfig": {
+              "additionalProperties": true,
+              "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+              "required": [],
+              "title": "dnsConfig",
+              "type": "object"
             }
           },
           "required": [
@@ -777,6 +798,7 @@
             "resources",
             "podSecurityContext",
             "containerSecurityContext",
+            "dnsConfig",
             "extraEnv",
             "extraEnvFrom",
             "extraInitContainers",
@@ -1110,14 +1132,28 @@
               "description": "Maximum unavailable Compactor pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Compactor pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -1691,6 +1727,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -1705,6 +1748,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -1809,6 +1853,13 @@
             "runAsNonRoot"
           ],
           "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration applied to every pod. Component-level values override this.",
+          "required": [],
+          "title": "dnsConfig",
           "type": "object"
         },
         "extraContainers": {
@@ -1973,14 +2024,28 @@
               "description": "Maximum number of unavailable pods during a disruption.\nCannot be set at the same time as minAvailable.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum number of available pods during a disruption.\nCannot be set at the same time as maxUnavailable.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -2339,6 +2404,7 @@
         "podAnnotations",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraVolumes",
         "extraVolumeMounts",
         "resources",
@@ -2756,14 +2822,28 @@
               "description": "Maximum unavailable Query pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -3214,6 +3294,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -3230,6 +3317,7 @@
         "resources",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -3589,14 +3677,28 @@
               "description": "Maximum unavailable Query Frontend pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Query Frontend pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -4015,6 +4117,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -4030,6 +4139,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -4418,14 +4528,28 @@
               "description": "Maximum unavailable Receive pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Receive pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -5048,6 +5172,13 @@
           ],
           "title": "vpa",
           "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -5066,6 +5197,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -5457,14 +5589,28 @@
               "description": "Maximum unavailable Ruler pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Ruler pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -5987,6 +6133,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -6005,6 +6158,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",
@@ -6497,14 +6651,28 @@
               "description": "Maximum unavailable Store Gateway pods during a disruption.",
               "required": [],
               "title": "maxUnavailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             },
             "minAvailable": {
               "default": "",
               "description": "Minimum available Store Gateway pods during a disruption.",
               "required": [],
               "title": "minAvailable",
-              "type": "string"
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           "required": [
@@ -6998,6 +7166,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
         }
       },
       "required": [
@@ -7014,6 +7189,7 @@
         "extraArgs",
         "podSecurityContext",
         "containerSecurityContext",
+        "dnsConfig",
         "extraEnv",
         "extraEnvFrom",
         "extraInitContainers",

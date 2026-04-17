@@ -31,6 +31,7 @@ spec:
         {{- $anns = merge $anns .Values.global.podAnnotations -}}
         {{- end }}
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+        {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
         {{- toYaml $anns | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
@@ -98,6 +99,7 @@ spec:
             {{- toYaml (.Values.receive.resources | default dict) | nindent 12 }}
           {{- include "thanos.httpProbes" (dict "root" . "key" "receive" "port" (default 10902 .Values.receive.service.httpPort)) | nindent 10 }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "receive") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 6 }}
       {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "receive") | nindent 6 }}
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "receive") | nindent 6 }}
