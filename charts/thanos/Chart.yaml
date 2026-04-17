@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.4.0
+version: 0.4.1
 appVersion: "v0.41.0"
 keywords:
   - thanos
@@ -37,6 +37,9 @@ annotations:
   artifacthub.io/operator: "false"
   artifacthub.io/prerelease: "false"
   artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/signKey: |
+    fingerprint: BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
+    url: https://keys.openpgp.org/vks/v1/by-fingerprint/BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
   artifacthub.io/images: |
     - name: thanos
       image: quay.io/thanos/thanos:v0.41.0
@@ -49,4 +52,4 @@ annotations:
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
     - kind: added
-      description: Initial release of thanos Helm chart
+      description: GPG chart signing with ArtifactHub signKey annotation and Rekor transparency via helm-sigstore
