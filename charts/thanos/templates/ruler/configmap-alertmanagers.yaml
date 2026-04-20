@@ -9,5 +9,5 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-am") | nindent 4 }}
 data:
   alertmanagers.yaml: |
-    {{- toYaml (tpl .Values.ruler.alertmanagers.config .) | nindent 4 }}
+    {{- tpl .Values.ruler.alertmanagers.config . | nindent 4 }}
 {{- end }}
