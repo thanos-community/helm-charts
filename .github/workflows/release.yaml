@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   push:
@@ -6,18 +6,25 @@ on:
       - master
     paths:
       - "charts/**"
+  workflow_dispatch:
+    inputs:
+      rc_suffix:
+        description: 'RC suffix (e.g. "rc.0", "rc.1"). Leave empty for a regular release.'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: write
-  id-token: write # required for cosign OIDC keyless signing
-  packages: write # required for ghcr.io OCI publishing
+  id-token: write  # required for cosign OIDC keyless signing
+  packages: write  # required for ghcr.io OCI publishing
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 0
 
@@ -27,28 +34,84 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Install Helm
-        uses: azure/setup-helm@v5
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2  # v5.0.0
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.1.1
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003  # v4.1.1
+
+      - name: Install helm-sigstore plugin
+        run: helm plugin install --verify=false https://github.com/sigstore/helm-sigstore
+
+      - name: Configure GPG
+        run: |-
+          mkdir -p "$HOME/.gnupg"
+          chmod 0700 "$HOME/.gnupg"
+          echo "use-agent" > "$HOME/.gnupg/gpg.conf"
+          echo "pinentry-mode loopback" >> "$HOME/.gnupg/gpg.conf"
+          echo "allow-loopback-pinentry" > "$HOME/.gnupg/gpg-agent.conf"
+          echo "max-cache-ttl 86400" >> "$HOME/.gnupg/gpg-agent.conf"
+          echo "default-cache-ttl 86400" >> "$HOME/.gnupg/gpg-agent.conf"
+          gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
+
+          echo "$GPG_PRIVATE_KEY" > "$GPG_KEY_PATH"
+          gpg --batch --yes --passphrase-fd 0 --import "$GPG_KEY_PATH" <<< "$GPG_PASSPHRASE"
+
+          gpg --batch --yes --export "$GPG_KEY_ID" > "$HOME/.gnupg/pubring.gpg"
+          gpg --batch --yes --passphrase-fd 0 --export-secret-keys "$GPG_KEY_ID" > "$HOME/.gnupg/secring.gpg" <<< "$GPG_PASSPHRASE"
+          cat > "$GPG_PASSPHRASE_FILE" <<< "$GPG_PASSPHRASE"
+
+          shred -u "$GPG_KEY_PATH"
+        env:
+          GPG_KEY_ID: "${{ secrets.GPG_KEY_ID }}"
+          GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}"
+          GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+          GPG_PASSPHRASE_FILE: "${{ runner.temp }}/gpg-passphrase"
+          GPG_KEY_PATH: "${{ runner.temp }}/private.key"
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Package charts
+      - name: Apply RC suffix to chart versions
+        if: inputs.rc_suffix != ''
+        env:
+          RC_SUFFIX: ${{ inputs.rc_suffix }}
+        run: |
+          for chart in charts/*/; do
+            current=$(yq '.version' "$chart/Chart.yaml")
+            yq -i ".version = \"${current}-${RC_SUFFIX}\"" "$chart/Chart.yaml"
+            yq -i '.annotations["artifacthub.io/prerelease"] = "true"' "$chart/Chart.yaml"
+            echo "Patched $chart/Chart.yaml → version ${current}-${RC_SUFFIX} (prerelease=true)"
+          done
+
+      - name: Add dependency chart repos
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add rustfs https://charts.rustfs.com/
+
+      - name: Package and GPG-sign charts
         run: |
           mkdir -p .cr-release-packages
           for chart in charts/*/; do
             helm dependency update "$chart"
-            helm package "$chart" --destination .cr-release-packages
+            helm package --sign \
+              --key "$GPG_KEY_NAME" \
+              --keyring "$HOME/.gnupg/secring.gpg" \
+              --passphrase-file "$GPG_PASSPHRASE_FILE" \
+              --destination .cr-release-packages \
+              "$chart"
           done
+        env:
+          GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
+          GPG_PASSPHRASE_FILE: ${{ runner.temp }}/gpg-passphrase
 
       - name: Sign chart packages with Cosign
         run: |
+          shopt -s nullglob
           for pkg in .cr-release-packages/*.tgz; do
             cosign sign-blob \
               --yes \
@@ -58,6 +121,7 @@ jobs:
 
       - name: Push charts to OCI registry and sign
         run: |
+          shopt -s nullglob
           for pkg in .cr-release-packages/*.tgz; do
             push_output=$(helm push "${pkg}" oci://ghcr.io/${{ github.repository_owner }}/helm-charts 2>&1)
             echo "${push_output}"
@@ -69,7 +133,7 @@ jobs:
           done
 
       - name: Release charts (GitHub Releases + gh-pages Helm repo)
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f  # v1.7.0
         with:
           skip_packaging: true
           config: .cr.yaml
@@ -77,8 +141,16 @@ jobs:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           latest_tag: ""
 
+      - name: Upload GPG provenance to Rekor transparency log
+        run: |
+          shopt -s nullglob
+          for pkg in .cr-release-packages/*.tgz; do
+            helm sigstore upload "${pkg}"
+          done
+
       - name: Upload Cosign bundles to GitHub releases
         run: |
+          shopt -s nullglob
           for bundle in .cr-release-packages/*.cosign.bundle; do
             tag=$(basename "${bundle%.tgz.cosign.bundle}")
             gh release upload "${tag}" "${bundle}" --clobber

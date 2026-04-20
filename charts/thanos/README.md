@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.4.4](https://img.shields.io/badge/Version-0.4.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -915,7 +915,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.vpa.updateMode | string | `"Auto"` | VPA update mode for Receive. One of Auto, Off, or Initial. |
 | ruler.affinity | object | {} | Affinity rules for Ruler pod scheduling. |
 | ruler.alertQueryUrl | string | `""` | URL used in rule alert annotations to link back to a Thanos query UI. |
-| ruler.alertmanagers.config | string | `"static_configs:\n  - targets: [\"alertmanager.monitoring.svc.cluster.local:9093\"]\n"` |  |
+| ruler.alertmanagers.config | string | `"alertmanagers:\n  - static_configs:\n      - alertmanager.monitoring.svc.cluster.local:9093\n    scheme: http\n    api_version: v2\n"` |  |
 | ruler.annotations | object | {} | Extra annotations applied to Ruler resources. |
 | ruler.autoImportPrometheusRules.enabled | bool | `true` | Enable automatic import of PrometheusRule CRDs from the cluster into the Ruler. Requires kube-prometheus-stack (or any Prometheus Operator deployment) to be present in the cluster. |
 | ruler.autoImportPrometheusRules.labelSelector | object | {} | Label selector used to filter which PrometheusRule CRDs are imported. Empty selector imports all PrometheusRule resources visible to the sidecar. |
