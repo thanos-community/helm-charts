@@ -16,15 +16,15 @@ on:
 
 permissions:
   contents: write
-  id-token: write # required for cosign OIDC keyless signing
-  packages: write # required for ghcr.io OCI publishing
+  id-token: write  # required for cosign OIDC keyless signing
+  packages: write  # required for ghcr.io OCI publishing
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           fetch-depth: 0
 
@@ -34,10 +34,10 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Install Helm
-        uses: azure/setup-helm@v5
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2  # v5.0.0
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.1.1
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003  # v4.1.1
 
       - name: Install helm-sigstore plugin
         run: helm plugin install --verify=false https://github.com/sigstore/helm-sigstore
@@ -70,7 +70,7 @@ jobs:
           GPG_KEY_PATH: "${{ runner.temp }}/private.key"
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121  # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -133,7 +133,7 @@ jobs:
           done
 
       - name: Release charts (GitHub Releases + gh-pages Helm repo)
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f  # v1.7.0
         with:
           skip_packaging: true
           config: .cr.yaml

@@ -61,18 +61,20 @@
                   "description": "Target memory utilisation percentage. Null disables memory-based scaling.",
                   "required": [],
                   "title": "targetMemoryUtilizationPercentage",
-                  "type": "null"
+                  "type": ["integer", "null"]
                 }
               },
               "required": [
                 "enabled",
                 "minReplicas",
-                "maxReplicas",
-                "targetCPUUtilizationPercentage",
-                "targetMemoryUtilizationPercentage"
+                "maxReplicas"
               ],
               "title": "autoscaling",
-              "type": "object"
+              "type": "object",
+              "anyOf": [
+                {"required": ["targetCPUUtilizationPercentage"]},
+                {"required": ["targetMemoryUtilizationPercentage"]}
+              ]
             },
             "containerSecurityContext": {
               "additionalProperties": true,
@@ -2500,18 +2502,20 @@
               "description": "Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": "null"
+              "type": ["integer", "null"]
             }
           },
           "required": [
             "enabled",
             "minReplicas",
-            "maxReplicas",
-            "targetCPUUtilizationPercentage",
-            "targetMemoryUtilizationPercentage"
+            "maxReplicas"
           ],
           "title": "autoscaling",
-          "type": "object"
+          "type": "object",
+          "anyOf": [
+            {"required": ["targetCPUUtilizationPercentage"]},
+            {"required": ["targetMemoryUtilizationPercentage"]}
+          ]
         },
         "containerSecurityContext": {
           "additionalProperties": true,
@@ -3393,18 +3397,20 @@
               "description": "Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": "null"
+              "type": ["integer", "null"]
             }
           },
           "required": [
             "enabled",
             "minReplicas",
-            "maxReplicas",
-            "targetCPUUtilizationPercentage",
-            "targetMemoryUtilizationPercentage"
+            "maxReplicas"
           ],
           "title": "autoscaling",
-          "type": "object"
+          "type": "object",
+          "anyOf": [
+            {"required": ["targetCPUUtilizationPercentage"]},
+            {"required": ["targetMemoryUtilizationPercentage"]}
+          ]
         },
         "cacheConfig": {
           "default": "",
@@ -6328,18 +6334,20 @@
               "description": "Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": "null"
+              "type": ["integer", "null"]
             }
           },
           "required": [
             "enabled",
             "minReplicas",
-            "maxReplicas",
-            "targetCPUUtilizationPercentage",
-            "targetMemoryUtilizationPercentage"
+            "maxReplicas"
           ],
           "title": "autoscaling",
-          "type": "object"
+          "type": "object",
+          "anyOf": [
+            {"required": ["targetCPUUtilizationPercentage"]},
+            {"required": ["targetMemoryUtilizationPercentage"]}
+          ]
         },
         "cachingBucketConfig": {
           "default": "",
