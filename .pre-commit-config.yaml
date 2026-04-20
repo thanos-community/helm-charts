@@ -23,6 +23,16 @@ repos:
           - '.github/lintconf.yaml'
         exclude: ^charts/.*/templates/
 
+  # Pin GitHub Actions to SHA digests
+  - repo: local
+    hooks:
+      - id: pinact
+        name: Pin GitHub Actions to SHA digests
+        entry: pinact run
+        language: system
+        files: ^\.github/workflows/.*\.ya?ml$
+        pass_filenames: true
+
   # Helm chart linting
   - repo: local
     hooks:

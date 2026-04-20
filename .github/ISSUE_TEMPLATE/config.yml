@@ -3,7 +3,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Thanos Community (Slack)
     url: https://cloud-native.slack.com/archives/CL25937SP
-    about: For questions and general discussion, join #thanos in the CNCF Slack workspace.
+    about: "For questions and general discussion, join #thanos in the CNCF Slack workspace."
   - name: Thanos Discussions (GitHub)
     url: https://github.com/thanos-io/thanos/discussions
     about: Use GitHub Discussions for async support questions about Thanos itself.
