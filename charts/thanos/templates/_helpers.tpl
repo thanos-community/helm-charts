@@ -348,6 +348,26 @@ initContainers:
 {{- end -}}
 {{- end -}}
 
+{{- /* ============================== */ -}}
+{{- /* Ruler query URLs helpers       */ -}}
+{{- /* ============================== */ -}}
+
+{{- define "thanos.ruler.queryUrls" -}}
+{{- $urls := .Values.ruler.query.urls -}}
+{{- if not $urls -}}
+{{- $urls = list (printf "http://%s:%v" (include "thanos.compName" (list . "query")) .Values.query.service.httpPort) -}}
+{{- end }}
+{{- range $url := $urls }}
+{{- $u := urlParse $url }}
+- static_configs:
+    - {{ $u.host }}
+  scheme: {{ $u.scheme }}
+{{- if and $u.path (ne $u.path "/") }}
+  path_prefix: {{ $u.path }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
 {{/*
 Resolve the ServiceAccount name.
 If global.serviceAccount.create is true, we default to "<release>-thanos"

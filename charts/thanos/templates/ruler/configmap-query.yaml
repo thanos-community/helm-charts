@@ -9,11 +9,5 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-query") | nindent 4 }}
 data:
   query-urls.yaml: |
-    query:
-      urls:
-        {{- if .Values.ruler.query.urls }}
-        {{- toYaml .Values.ruler.query.urls | nindent 8 }}
-        {{- else }}
-        - http://{{ include "thanos.compName" (list . "query") }}:{{ .Values.query.service.httpPort }}
-        {{- end }}
+    {{- include "thanos.ruler.queryUrls" . | nindent 4 }}
 {{- end }}

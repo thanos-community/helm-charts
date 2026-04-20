@@ -840,6 +840,80 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: renders query configmap data as a clientconfig list with default URL
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - equal:
+          path: data["query-urls.yaml"]
+          value: |
+            - static_configs:
+                - RELEASE-NAME-thanos-query:9090
+              scheme: http
+
+  - it: renders query configmap data as a clientconfig list from a provided URL
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+      ruler.query.urls:
+        - http://thanos-prod-query-frontend:9090
+    asserts:
+      - equal:
+          path: data["query-urls.yaml"]
+          value: |
+            - static_configs:
+                - thanos-prod-query-frontend:9090
+              scheme: http
+
+  - it: emits https scheme and path_prefix when URL has a path
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+      ruler.query.urls:
+        - https://secure-query.example.com:8443/api
+    asserts:
+      - equal:
+          path: data["query-urls.yaml"]
+          value: |
+            - static_configs:
+                - secure-query.example.com:8443
+              scheme: https
+              path_prefix: /api
+
+  - it: renders multiple URLs as separate clientconfig entries
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+      ruler.query.urls:
+        - http://query-a:9090
+        - https://query-b:9090/api
+    asserts:
+      - equal:
+          path: data["query-urls.yaml"]
+          value: |
+            - static_configs:
+                - query-a:9090
+              scheme: http
+            - static_configs:
+                - query-b:9090
+              scheme: https
+              path_prefix: /api
+
+  - it: omits path_prefix when URL path is just /
+    template: ruler/configmap-query.yaml
+    set:
+      ruler.enabled: true
+      ruler.query.urls:
+        - http://query-a:9090/
+    asserts:
+      - equal:
+          path: data["query-urls.yaml"]
+          value: |
+            - static_configs:
+                - query-a:9090
+              scheme: http
+
   # -- ConfigMap auto-import prometheus rules -----------------------------
 
   - it: renders rule-importer configmap when autoImport is enabled
