@@ -1,8 +1,4 @@
 {{- if .Values.ruler.enabled }}
-{{- $urls := .Values.ruler.query.urls }}
-{{- if not $urls }}
-{{- $urls = list (printf "http://%s:%v" (include "thanos.compName" (list . "query")) .Values.query.service.httpPort) }}
-{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,13 +9,5 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler-query") | nindent 4 }}
 data:
   query-urls.yaml: |
-    {{- range $url := $urls }}
-    {{- $u := urlParse $url }}
-    - static_configs:
-        - {{ $u.host }}
-      scheme: {{ $u.scheme }}
-    {{- if and $u.path (ne $u.path "/") }}
-      path_prefix: {{ $u.path }}
-    {{- end }}
-    {{- end }}
+    {{- include "thanos.ruler.queryUrls" . | nindent 4 }}
 {{- end }}
