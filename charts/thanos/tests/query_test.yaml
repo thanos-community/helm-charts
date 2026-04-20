@@ -694,3 +694,122 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: does not render HPA when query component is disabled
+    template: query/hpa.yaml
+    set:
+      query.enabled: false
+      query.autoscaling.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: HPA scaleTargetRef targets query Deployment by default
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+    asserts:
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: Deployment
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: RELEASE-NAME-thanos-query
+
+  - it: HPA scaleTargetRef uses custom targetKind
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+      query.autoscaling.targetKind: StatefulSet
+    asserts:
+      - equal:
+          path: spec.scaleTargetRef.kind
+          value: StatefulSet
+
+  - it: HPA renders CPU metric with correct averageUtilization
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+      query.autoscaling.targetCPUUtilizationPercentage: 60
+    asserts:
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 60
+
+  - it: HPA renders memory metric when targetMemoryUtilizationPercentage is set
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+      query.autoscaling.targetCPUUtilizationPercentage: 80
+      query.autoscaling.targetMemoryUtilizationPercentage: 75
+    asserts:
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: memory
+              target:
+                type: Utilization
+                averageUtilization: 75
+
+  - it: HPA renders both CPU and memory metrics when both are set
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+      query.autoscaling.targetCPUUtilizationPercentage: 80
+      query.autoscaling.targetMemoryUtilizationPercentage: 75
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 2
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 80
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: memory
+              target:
+                type: Utilization
+                averageUtilization: 75
+
+  - it: HPA renders memory-only metric when CPU is not set
+    template: query/hpa.yaml
+    set:
+      query.enabled: true
+      query.autoscaling.enabled: true
+      query.autoscaling.targetCPUUtilizationPercentage: null
+      query.autoscaling.targetMemoryUtilizationPercentage: 75
+    asserts:
+      - lengthEqual:
+          path: spec.metrics
+          count: 1
+      - contains:
+          path: spec.metrics
+          content:
+            type: Resource
+            resource:
+              name: memory
+              target:
+                type: Utilization
+                averageUtilization: 75
