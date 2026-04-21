@@ -813,3 +813,38 @@ tests:
               target:
                 type: Utilization
                 averageUtilization: 75
+
+  # -- NetworkPolicy -------------------------------------------------------
+
+  - it: does not render networkpolicy when networkPolicies is disabled
+    template: query/networkpolicy.yaml
+    set:
+      query.enabled: true
+      global.networkPolicies: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render networkpolicy when query is disabled
+    template: query/networkpolicy.yaml
+    set:
+      query.enabled: false
+      global.networkPolicies: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders networkpolicy when query and networkPolicies are enabled
+    template: query/networkpolicy.yaml
+    set:
+      query.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: apiVersion
+          value: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query

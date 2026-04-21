@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.4.4](https://img.shields.io/badge/Version-0.4.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -472,7 +472,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the liveness probe. |
 | bucket.bucketweb.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the liveness probe. |
 | bucket.bucketweb.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the liveness probe. |
-| bucket.bucketweb.probes.liveness.port | int | `10902` | Port checked by the liveness probe. |
+| bucket.bucketweb.probes.liveness.port | int or string | `"http"` | Port checked by the liveness probe. |
 | bucket.bucketweb.probes.liveness.successThreshold | int | `1` | Consecutive successes before the container is considered live. |
 | bucket.bucketweb.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Bucketweb. |
@@ -480,7 +480,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the readiness probe. |
 | bucket.bucketweb.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the readiness probe. |
 | bucket.bucketweb.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the readiness probe. |
-| bucket.bucketweb.probes.readiness.port | int | `10902` | Port checked by the readiness probe. |
+| bucket.bucketweb.probes.readiness.port | int or string | `"http"` | Port checked by the readiness probe. |
 | bucket.bucketweb.probes.readiness.successThreshold | int | `1` | Consecutive successes before the pod is marked ready. |
 | bucket.bucketweb.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.probes.startup.enabled | bool | `true` | Enable the startup probe for Bucketweb. |
@@ -488,7 +488,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the startup probe. |
 | bucket.bucketweb.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the startup probe. |
 | bucket.bucketweb.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the startup probe. |
-| bucket.bucketweb.probes.startup.port | int | `10902` | Port checked by the startup probe. |
+| bucket.bucketweb.probes.startup.port | int or string | `"http"` | Port checked by the startup probe. |
 | bucket.bucketweb.probes.startup.successThreshold | int | `1` | Consecutive successes required before the startup probe is considered passed. |
 | bucket.bucketweb.probes.startup.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
 | bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. |
@@ -554,7 +554,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Compactor liveness probe. |
 | compactor.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Compactor liveness probe. |
 | compactor.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Compactor liveness probe. |
-| compactor.probes.liveness.port | int | `10902` | Port checked by the Compactor liveness probe. |
+| compactor.probes.liveness.port | int or string | `"http"` | Port checked by the Compactor liveness probe. |
 | compactor.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Compactor container is considered live. |
 | compactor.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Compactor liveness probe times out. |
 | compactor.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Compactor. |
@@ -562,7 +562,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Compactor readiness probe. |
 | compactor.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Compactor readiness probe. |
 | compactor.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Compactor readiness probe. |
-| compactor.probes.readiness.port | int | `10902` | Port checked by the Compactor readiness probe. |
+| compactor.probes.readiness.port | int or string | `"http"` | Port checked by the Compactor readiness probe. |
 | compactor.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Compactor pod is marked ready. |
 | compactor.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Compactor readiness probe times out. |
 | compactor.probes.startup.enabled | bool | `true` | Enable the startup probe for the Compactor. |
@@ -570,7 +570,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Compactor startup probe. |
 | compactor.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Compactor startup probe. |
 | compactor.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Compactor startup probe. |
-| compactor.probes.startup.port | int | `10902` | Port checked by the Compactor startup probe. |
+| compactor.probes.startup.port | int or string | `"http"` | Port checked by the Compactor startup probe. |
 | compactor.probes.startup.successThreshold | int | `1` | Consecutive successes before the Compactor startup probe is considered passed. |
 | compactor.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Compactor startup probe times out. |
 | compactor.replicaCount | int | `1` | Number of Compactor replicas. Must remain 1 — running multiple compactors against the same bucket causes data corruption. |
@@ -615,6 +615,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.image.repository | string | `"quay.io/thanos/thanos"` | Docker repository for all Thanos containers by default. |
 | global.image.tag | string | `"v0.41.0"` | Container image tag. Changing this upgrades all components at once. |
 | global.imagePullSecrets | list | [] | List of imagePullSecrets applied to every pod by default. |
+| global.networkPolicies | bool | `false` | Create a NetworkPolicy for every enabled component. When true each component gets a NetworkPolicy that allows ingress on its service ports from within the namespace and permits all egress. |
 | global.nodeSelector | object | {} | Node selector applied to every pod by default. |
 | global.objstore.config | string | `"type: GCS\nconfig:\n  bucket: change-me\n  endpoint: storage.googleapis.com\n  region: eu-west-1\n  insecure: false\n\n# Example for S3\n# type: S3\n# config:\n#   bucket: my-s3-bucket\n#   endpoint: s3.eu-west-1.amazonaws.com\n#   region: eu-west-1\n#   access_key: myaccess\n#   secret_key: mysecret\n"` | Inline object store configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`, so Helm template syntax (e.g. `{{ .Release.Name }}`) is valid inside the string. Refer to https://thanos.io/tip/thanos/storage.md/ for the full schema. |
 | global.objstore.createSecret | bool | `false` | When true, the chart creates a Kubernetes Secret named `secretName` containing the inline `config` below. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.). |
@@ -701,7 +702,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Query liveness probe. |
 | query.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Query liveness probe. |
 | query.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Query liveness probe. |
-| query.probes.liveness.port | int | `9090` | Port checked by the Query liveness probe. |
+| query.probes.liveness.port | int or string | `"http"` | Port checked by the Query liveness probe. |
 | query.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Query container is considered live. |
 | query.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Query liveness probe times out. |
 | query.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Query. |
@@ -709,7 +710,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Query readiness probe. |
 | query.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Query readiness probe. |
 | query.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Query readiness probe. |
-| query.probes.readiness.port | int | `9090` | Port checked by the Query readiness probe. |
+| query.probes.readiness.port | int or string | `"http"` | Port checked by the Query readiness probe. |
 | query.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Query pod is marked ready. |
 | query.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Query readiness probe times out. |
 | query.probes.startup.enabled | bool | `true` | Enable the startup probe for Query. |
@@ -717,7 +718,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Query startup probe. |
 | query.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Query startup probe. |
 | query.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query startup probe. |
-| query.probes.startup.port | int | `9090` | Port checked by the Query startup probe. |
+| query.probes.startup.port | int or string | `"http"` | Port checked by the Query startup probe. |
 | query.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query startup probe is considered passed. |
 | query.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query startup probe times out. |
 | query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
@@ -782,7 +783,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Query Frontend liveness probe. |
-| queryFrontend.probes.liveness.port | int | `9090` | Port checked by the Query Frontend liveness probe. |
+| queryFrontend.probes.liveness.port | int or string | `"http"` | Port checked by the Query Frontend liveness probe. |
 | queryFrontend.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Query Frontend container is considered live. |
 | queryFrontend.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Query Frontend liveness probe times out. |
 | queryFrontend.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Query Frontend. |
@@ -790,7 +791,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Query Frontend readiness probe. |
-| queryFrontend.probes.readiness.port | int | `9090` | Port checked by the Query Frontend readiness probe. |
+| queryFrontend.probes.readiness.port | int or string | `"http"` | Port checked by the Query Frontend readiness probe. |
 | queryFrontend.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Query Frontend pod is marked ready. |
 | queryFrontend.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Query Frontend readiness probe times out. |
 | queryFrontend.probes.startup.enabled | bool | `true` | Enable the startup probe for Query Frontend. |
@@ -798,7 +799,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Query Frontend startup probe. |
 | queryFrontend.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Query Frontend startup probe. |
 | queryFrontend.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query Frontend startup probe. |
-| queryFrontend.probes.startup.port | int | `9090` | Port checked by the Query Frontend startup probe. |
+| queryFrontend.probes.startup.port | int or string | `"http"` | Port checked by the Query Frontend startup probe. |
 | queryFrontend.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query Frontend startup probe is considered passed. |
 | queryFrontend.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query Frontend startup probe times out. |
 | queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. |
@@ -865,7 +866,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Receive liveness probe. |
 | receive.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Receive liveness probe. |
 | receive.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Receive liveness probe. |
-| receive.probes.liveness.port | int | `10902` | Port checked by the Receive liveness probe. |
+| receive.probes.liveness.port | int or string | `"http"` | Port checked by the Receive liveness probe. |
 | receive.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Receive container is considered live. |
 | receive.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Receive liveness probe times out. |
 | receive.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Receive. |
@@ -873,7 +874,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Receive readiness probe. |
 | receive.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Receive readiness probe. |
 | receive.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Receive readiness probe. |
-| receive.probes.readiness.port | int | `10902` | Port checked by the Receive readiness probe. |
+| receive.probes.readiness.port | int or string | `"http"` | Port checked by the Receive readiness probe. |
 | receive.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Receive pod is marked ready. |
 | receive.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Receive readiness probe times out. |
 | receive.probes.startup.enabled | bool | `true` | Enable the startup probe for Receive. |
@@ -881,7 +882,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Receive startup probe. |
 | receive.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Receive startup probe. |
 | receive.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Receive startup probe. |
-| receive.probes.startup.port | int | `10902` | Port checked by the Receive startup probe. |
+| receive.probes.startup.port | int or string | `"http"` | Port checked by the Receive startup probe. |
 | receive.probes.startup.successThreshold | int | `1` | Consecutive successes before the Receive startup probe is considered passed. |
 | receive.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Receive startup probe times out. |
 | receive.replicaCount | int | `3` | Number of Receive pod replicas. Minimum 3 is recommended for replication factor 2 (write quorum = floor(replicaCount/2)+1). |
@@ -960,7 +961,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Ruler liveness probe. |
 | ruler.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Ruler liveness probe. |
 | ruler.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Ruler liveness probe. |
-| ruler.probes.liveness.port | int | `10902` | Port checked by the Ruler liveness probe. |
+| ruler.probes.liveness.port | int or string | `"http"` | Port checked by the Ruler liveness probe. |
 | ruler.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Ruler container is considered live. |
 | ruler.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Ruler liveness probe times out. |
 | ruler.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Ruler. |
@@ -968,7 +969,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Ruler readiness probe. |
 | ruler.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Ruler readiness probe. |
 | ruler.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Ruler readiness probe. |
-| ruler.probes.readiness.port | int | `10902` | Port checked by the Ruler readiness probe. |
+| ruler.probes.readiness.port | int or string | `"http"` | Port checked by the Ruler readiness probe. |
 | ruler.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Ruler pod is marked ready. |
 | ruler.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Ruler readiness probe times out. |
 | ruler.probes.startup.enabled | bool | `true` | Enable the startup probe for the Ruler. |
@@ -976,7 +977,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Ruler startup probe. |
 | ruler.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Ruler startup probe. |
 | ruler.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Ruler startup probe. |
-| ruler.probes.startup.port | int | `10902` | Port checked by the Ruler startup probe. |
+| ruler.probes.startup.port | int or string | `"http"` | Port checked by the Ruler startup probe. |
 | ruler.probes.startup.successThreshold | int | `1` | Consecutive successes before the Ruler startup probe is considered passed. |
 | ruler.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Ruler startup probe times out. |
 | ruler.query.urls | list | [] | List of Query component base URLs used by the Ruler to evaluate rules. |
@@ -1056,7 +1057,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Store Gateway liveness probe. |
 | storegateway.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Store Gateway liveness probe. |
 | storegateway.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Store Gateway liveness probe. |
-| storegateway.probes.liveness.port | int | `10902` | Port checked by the Store Gateway liveness probe. |
+| storegateway.probes.liveness.port | int or string | `"http"` | Port checked by the Store Gateway liveness probe. |
 | storegateway.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Store Gateway container is considered live. |
 | storegateway.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Store Gateway liveness probe times out. |
 | storegateway.probes.readiness.enabled | bool | `true` | Enable the readiness probe for the Store Gateway. |
@@ -1064,7 +1065,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Store Gateway readiness probe. |
 | storegateway.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Store Gateway readiness probe. |
 | storegateway.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Store Gateway readiness probe. |
-| storegateway.probes.readiness.port | int | `10902` | Port checked by the Store Gateway readiness probe. |
+| storegateway.probes.readiness.port | int or string | `"http"` | Port checked by the Store Gateway readiness probe. |
 | storegateway.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Store Gateway pod is marked ready. |
 | storegateway.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Store Gateway readiness probe times out. |
 | storegateway.probes.startup.enabled | bool | `true` | Enable the startup probe for the Store Gateway. |
@@ -1072,7 +1073,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Store Gateway startup probe. |
 | storegateway.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Store Gateway startup probe. |
 | storegateway.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Store Gateway startup probe. |
-| storegateway.probes.startup.port | int | `10902` | Port checked by the Store Gateway startup probe. |
+| storegateway.probes.startup.port | int or string | `"http"` | Port checked by the Store Gateway startup probe. |
 | storegateway.probes.startup.successThreshold | int | `1` | Consecutive successes before the Store Gateway startup probe is considered passed. |
 | storegateway.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Store Gateway startup probe times out. |
 | storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. |

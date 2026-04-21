@@ -24,7 +24,7 @@ spec:
               service:
                 name: {{ include "thanos.compName" (list $ "query-frontend") }}
                 port:
-                  number: {{ $.Values.queryFrontend.service.port }}
+                  name: http
         {{- end }}
   {{- end }}
   tls:

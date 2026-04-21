@@ -430,11 +430,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the liveness probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -504,11 +511,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the readiness probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -578,11 +592,18 @@
                       "type": "integer"
                     },
                     "port": {
-                      "default": 10902,
+                      "default": "http",
                       "description": "Port checked by the startup probe.",
                       "required": [],
                       "title": "port",
-                      "type": "integer"
+                      "oneOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
                     },
                     "successThreshold": {
                       "default": 1,
@@ -1291,11 +1312,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -1365,11 +1393,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -1439,11 +1474,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Compactor startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -2396,6 +2438,13 @@
           "required": [],
           "title": "topologySpreadConstraints",
           "type": "array"
+        },
+        "networkPolicies": {
+          "default": false,
+          "description": "Create a NetworkPolicy for every enabled component. When true each component gets a NetworkPolicy that allows ingress on its service ports from within the namespace and permits all egress.",
+          "required": [],
+          "title": "networkPolicies",
+          "type": "boolean"
         }
       },
       "required": [
@@ -2411,6 +2460,7 @@
         "extraVolumeMounts",
         "resources",
         "nodeSelector",
+        "networkPolicies",
         "tolerations",
         "affinity",
         "topologySpreadConstraints",
@@ -2916,11 +2966,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -2990,11 +3047,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3064,11 +3128,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3773,11 +3844,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3847,11 +3925,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -3921,11 +4006,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 9090,
+                  "default": "http",
                   "description": "Port checked by the Query Frontend startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4691,11 +4783,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4765,11 +4864,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -4839,11 +4945,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Receive startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5752,11 +5865,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5826,11 +5946,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -5900,11 +6027,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Ruler startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6816,11 +6950,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway liveness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6890,11 +7031,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway readiness probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,
@@ -6964,11 +7112,18 @@
                   "type": "integer"
                 },
                 "port": {
-                  "default": 10902,
+                  "default": "http",
                   "description": "Port checked by the Store Gateway startup probe.",
                   "required": [],
                   "title": "port",
-                  "type": "integer"
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "successThreshold": {
                   "default": 1,

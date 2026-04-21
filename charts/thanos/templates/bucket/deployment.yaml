@@ -58,7 +58,7 @@ spec:
           {{- include "thanos.containerSC" (dict "root" $ctx "key" "bucketweb") | nindent 10 }}
           resources:
             {{- toYaml .Values.bucket.bucketweb.resources | nindent 12 }}
-          {{- include "thanos.httpProbes" (dict "root" $ctx "key" "bucketweb" "port" .Values.bucket.bucketweb.service.port) | nindent 10 }}
+          {{- include "thanos.httpProbes" (dict "root" $ctx "key" "bucketweb" "port" "http") | nindent 10 }}
         {{- include "thanos.extraContainers" (dict "Values" $ctx.Values "component" "bucketweb" "root" .) | nindent 8 }}
       {{- include "thanos.dnsConfig" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" $ctx.Values "component" "bucketweb" "root" .) | nindent 6 }}

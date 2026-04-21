@@ -24,7 +24,7 @@ spec:
               service:
                 name: {{ include "thanos.compName" (list $ "storegateway") }}
                 port:
-                  number: {{ $.Values.storegateway.service.httpPort }}
+                  name: http
         {{- end }}
   {{- end }}
   tls:
