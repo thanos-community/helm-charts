@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -235,12 +235,20 @@ query:
   replicaLabels:
     - prometheus_replica
 
-  # gRPC endpoints to query. Auto-discovered components are wired automatically.
-  # Add external Prometheus sidecars or remote store gateways here.
+  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway) are auto-wired
+  # when autogen.enabled is true. Endpoints defined in static[] are always appended; set
+  # autogen.enabled to false to take full control of what endpoint arguments are passed.
+  endpoints:
+    autogen:
+      enabled: true
+    static: []
+    # Example:
+    # static:
+    #   - thanos-storegateway.cluster1.internal:443
+    #   - thanos-receive.cluster1.internal:443
+
+  # Deprecated. Use query.endpoints.static[] instead.
   stores: []
-  # Example:
-  # stores:
-  #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
 
   ingress:
     http:
@@ -669,6 +677,8 @@ The table below documents all available values. Top-level keys group settings by
 | query.containerSecurityContext | object | {} | Container security context for Query. Overrides global.containerSecurityContext. |
 | query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
+| query.endpoints.autogen.enabled | bool | `true` | Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway). These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format. |
+| query.endpoints.static | list | [] | Optional static endpoint arguments. When non-empty will be added as extra endpoints. When `query.endpoints.autogen.enabled` is `false`, these will give you full control over the endpoints. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |
 | query.extraEnv | list | [] | Extra environment variables injected into the Query container. |
@@ -753,7 +763,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.serviceMonitor.scheme | string | `""` | Scrape scheme for Query (http or https). |
 | query.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Query. Empty uses the Prometheus operator default. |
 | query.serviceMonitor.tlsConfig | object | {} | TLS configuration for Query scraping. |
-| query.stores | list | [] | List of gRPC Store API endpoints that Query should connect to. In-chart components (Receive, Store Gateway, Ruler) are wired automatically. Add external Prometheus sidecars or remote store gateways here. |
+| query.stores | list | [] | Deprecated. Use `query.endpoints.static[]` instead. |
 | query.tolerations | list | [] | Tolerations for Query pod scheduling. |
 | query.topologySpreadConstraints | list | [] | Topology spread constraints for Query pods. |
 | queryFrontend.affinity | object | {} | Affinity rules for Query Frontend pod scheduling. |
