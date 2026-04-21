@@ -7372,6 +7372,758 @@
       ],
       "title": "storegateway",
       "type": "object"
+    },
+    "queryTls": {
+      "additionalProperties": true,
+      "description": "Query TLS component — TLS-enabled Query for reaching remote gRPC Store API endpoints.",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "description": "Affinity rules for Query pod scheduling.",
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Extra annotations applied to Query resources.",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "autoscaling": {
+          "additionalProperties": true,
+          "description": "HorizontalPodAutoscaler configuration for the Query component.",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable HorizontalPodAutoscaler for the Query component.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxReplicas": {
+              "default": 5,
+              "description": "Maximum number of Query replicas.",
+              "required": [],
+              "title": "maxReplicas",
+              "type": "integer"
+            },
+            "minReplicas": {
+              "default": 2,
+              "description": "Minimum number of Query replicas.",
+              "required": [],
+              "title": "minReplicas",
+              "type": "integer"
+            },
+            "targetCPUUtilizationPercentage": {
+              "default": 80,
+              "description": "Target CPU utilisation percentage for Query autoscaling.",
+              "required": [],
+              "title": "targetCPUUtilizationPercentage",
+              "type": "integer"
+            },
+            "targetMemoryUtilizationPercentage": {
+              "default": "null",
+              "description": "Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.",
+              "required": [],
+              "title": "targetMemoryUtilizationPercentage",
+              "type": ["integer", "null"]
+            }
+          },
+          "required": [
+            "enabled",
+            "minReplicas",
+            "maxReplicas"
+          ],
+          "title": "autoscaling",
+          "type": "object",
+          "anyOf": [
+            {"required": ["targetCPUUtilizationPercentage"]},
+            {"required": ["targetMemoryUtilizationPercentage"]}
+          ]
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "description": "Container security context for Query. Overrides global.containerSecurityContext.",
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "enabled": {
+          "default": true,
+          "description": "Enable the Query Deployment.",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "description": "Additional CLI arguments appended to the `thanos query` command.",
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "description": "Extra sidecar containers for Query pods.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "description": "Extra environment variables injected into the Query container.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "description": "Extra environment variable sources for the Query container.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "description": "Extra init containers for Query pods.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "description": "Extra volume mounts for the Query container.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "description": "Extra volumes for Query pods.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Query resources.",
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "description": "Node selector for Query pod scheduling.",
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "description": "PodDisruptionBudget configuration for the Query component.",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable a PodDisruptionBudget for Query.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "description": "Maximum unavailable Query pods during a disruption.",
+              "required": [],
+              "title": "maxUnavailable",
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "minAvailable": {
+              "default": "",
+              "description": "Minimum available Query pods during a disruption.",
+              "required": [],
+              "title": "minAvailable",
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "description": "Pod security context for Query pods. Overrides global.podSecurityContext.",
+          "required": [],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "description": "Priority class name for Query pods.",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "description": "Health and readiness probe configuration for the Query component.",
+          "properties": {
+            "liveness": {
+              "additionalProperties": true,
+              "description": "Liveness probe for the Query component.",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "description": "Enable the liveness probe for Query.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "description": "Consecutive failures before the Query container is restarted.",
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 30,
+                  "description": "Seconds to wait before starting the Query liveness probe.",
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/healthy",
+                  "description": "HTTP path checked by the Query liveness probe.",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "description": "How often (seconds) to run the Query liveness probe.",
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": "http",
+                  "description": "Port checked by the Query liveness probe.",
+                  "required": [],
+                  "title": "port",
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "description": "Consecutive successes before the Query container is considered live.",
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "description": "Seconds after which the Query liveness probe times out.",
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "liveness",
+              "type": "object"
+            },
+            "readiness": {
+              "additionalProperties": true,
+              "description": "Readiness probe for the Query component.",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "description": "Enable the readiness probe for Query.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 6,
+                  "description": "Consecutive failures before the Query pod is marked not-ready.",
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 5,
+                  "description": "Seconds to wait before starting the Query readiness probe.",
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "description": "HTTP path checked by the Query readiness probe.",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 10,
+                  "description": "How often (seconds) to run the Query readiness probe.",
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": "http",
+                  "description": "Port checked by the Query readiness probe.",
+                  "required": [],
+                  "title": "port",
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "description": "Consecutive successes before the Query pod is marked ready.",
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "description": "Seconds after which the Query readiness probe times out.",
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "readiness",
+              "type": "object"
+            },
+            "startup": {
+              "additionalProperties": true,
+              "description": "Startup probe for the Query component.",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "description": "Enable the startup probe for Query.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "failureThreshold": {
+                  "default": 60,
+                  "description": "Consecutive failures during Query startup before the container is killed.",
+                  "required": [],
+                  "title": "failureThreshold",
+                  "type": "integer"
+                },
+                "initialDelaySeconds": {
+                  "default": 0,
+                  "description": "Seconds to wait before starting the Query startup probe.",
+                  "required": [],
+                  "title": "initialDelaySeconds",
+                  "type": "integer"
+                },
+                "path": {
+                  "default": "/-/ready",
+                  "description": "HTTP path checked by the Query startup probe.",
+                  "required": [],
+                  "title": "path",
+                  "type": "string"
+                },
+                "periodSeconds": {
+                  "default": 5,
+                  "description": "How often (seconds) to run the Query startup probe.",
+                  "required": [],
+                  "title": "periodSeconds",
+                  "type": "integer"
+                },
+                "port": {
+                  "default": "http",
+                  "description": "Port checked by the Query startup probe.",
+                  "required": [],
+                  "title": "port",
+                  "oneOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "successThreshold": {
+                  "default": 1,
+                  "description": "Consecutive successes before the Query startup probe is considered passed.",
+                  "required": [],
+                  "title": "successThreshold",
+                  "type": "integer"
+                },
+                "timeoutSeconds": {
+                  "default": 5,
+                  "description": "Seconds after which the Query startup probe times out.",
+                  "required": [],
+                  "title": "timeoutSeconds",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "enabled",
+                "path",
+                "port",
+                "initialDelaySeconds",
+                "periodSeconds",
+                "timeoutSeconds",
+                "failureThreshold",
+                "successThreshold"
+              ],
+              "title": "startup",
+              "type": "object"
+            }
+          },
+          "required": [
+            "readiness",
+            "liveness",
+            "startup"
+          ],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 2,
+          "description": "Number of Query pod replicas. Two or more is recommended for HA.",
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "replicaLabels": {
+          "description": "Label names that identify replica identity for result deduplication.",
+          "items": {
+            "anyOf": [
+              {
+                "required": [],
+                "type": "string"
+              }
+            ],
+            "required": []
+          },
+          "required": [],
+          "title": "replicaLabels",
+          "type": "array"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "description": "Resource requests and limits for the Query container.",
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "description": "Kubernetes Service configuration for the Query component.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Query Service.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "grpcPort": {
+              "default": 10901,
+              "description": "gRPC Store API port exposed by the Query Service.",
+              "required": [],
+              "title": "grpcPort",
+              "type": "integer"
+            },
+            "httpPort": {
+              "default": 9090,
+              "description": "HTTP/PromQL port exposed by the Query Service.",
+              "required": [],
+              "title": "httpPort",
+              "type": "integer"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "description": "Extra labels for the Query Service.",
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "description": "Kubernetes Service type for the Query component.",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "httpPort",
+            "grpcPort",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "description": "Prometheus Operator ServiceMonitor configuration for the Query component.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Query ServiceMonitor.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Enable a Prometheus Operator ServiceMonitor for Query.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "interval": {
+              "default": "",
+              "description": "Scrape interval for Query. Empty uses the Prometheus operator default.",
+              "required": [],
+              "title": "interval",
+              "type": "string"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "description": "Extra labels for the Query ServiceMonitor.",
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "metricRelabelings": {
+              "description": "Metric relabeling rules applied after Query metrics are ingested.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "metricRelabelings",
+              "type": "array"
+            },
+            "relabelings": {
+              "description": "Relabeling rules applied before Query metrics are ingested.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "relabelings",
+              "type": "array"
+            },
+            "scheme": {
+              "default": "",
+              "description": "Scrape scheme for Query (http or https).",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "scrapeTimeout": {
+              "default": "",
+              "description": "Scrape timeout for Query. Empty uses the Prometheus operator default.",
+              "required": [],
+              "title": "scrapeTimeout",
+              "type": "string"
+            },
+            "tlsConfig": {
+              "additionalProperties": true,
+              "description": "TLS configuration for Query scraping.",
+              "required": [],
+              "title": "tlsConfig",
+              "type": "object"
+            }
+          },
+          "required": [
+            "enabled",
+            "labels",
+            "annotations",
+            "interval",
+            "scrapeTimeout",
+            "scheme",
+            "tlsConfig",
+            "relabelings",
+            "metricRelabelings"
+          ],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "stores": {
+          "description": "List of gRPC Store API endpoints that Query should connect to.\nIn-chart components (Receive, Store Gateway, Ruler) are wired automatically.\nAdd external Prometheus sidecars or remote store gateways here.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "stores",
+          "type": "array"
+        },
+        "tolerations": {
+          "description": "Tolerations for Query pod scheduling.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "description": "Topology spread constraints for Query pods.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "DNS configuration for pods. Overrides global.dnsConfig.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
+        },
+        "tls": {
+          "additionalProperties": true,
+          "description": "TLS client configuration for outbound gRPC connections.",
+          "properties": {
+            "cert": {
+              "default": "",
+              "description": "Path to the TLS client certificate file (PEM).",
+              "required": [],
+              "title": "cert",
+              "type": "string"
+            },
+            "key": {
+              "default": "",
+              "description": "Path to the TLS client private key file (PEM).",
+              "required": [],
+              "title": "key",
+              "type": "string"
+            },
+            "ca": {
+              "default": "",
+              "description": "Path to the CA certificate file used to verify the remote endpoint.",
+              "required": [],
+              "title": "ca",
+              "type": "string"
+            }
+          },
+          "required": [
+            "cert",
+            "key",
+            "ca"
+          ],
+          "title": "tls",
+          "type": "object"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "service",
+        "autoscaling",
+        "stores",
+        "replicaLabels",
+        "extraArgs",
+        "resources",
+        "podSecurityContext",
+        "containerSecurityContext",
+        "dnsConfig",
+        "extraEnv",
+        "extraEnvFrom",
+        "extraInitContainers",
+        "extraContainers",
+        "probes",
+        "nodeSelector",
+        "tolerations",
+        "affinity",
+        "topologySpreadConstraints",
+        "priorityClassName",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "annotations",
+        "labels",
+        "serviceMonitor",
+        "pdb",
+        "tls"
+      ],
+      "title": "queryTls",
+      "type": "object"
     }
   },
   "required": [
@@ -7379,6 +8131,7 @@
     "bucket",
     "compactor",
     "query",
+    "queryTls",
     "queryFrontend",
     "storegateway",
     "receive",

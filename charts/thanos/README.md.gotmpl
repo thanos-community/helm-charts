@@ -43,6 +43,7 @@ The chart deploys each Thanos component as an independent workload. Enable only 
 | Component | Enabled by Default | Workload | Purpose |
 |-----------|--------------------|----------|---------|
 | **query** | Yes | Deployment | Fan-out query engine. Queries multiple Store API endpoints and deduplicates results. This is the Prometheus-compatible query entrypoint. |
+| **query-tls** | No | Deployment | Fan-out query engine for TLS endpoints. Queries multiple Store API endpoints that are TLS enabled and deduplicates results. The `query` component adds this to its list of endpoints automatically. |
 | **receive** | Yes | StatefulSet | Remote-write endpoint. Accepts Prometheus `remote_write` traffic, stores samples locally, and ships blocks to the object store. |
 | **storegateway** | Yes | StatefulSet | Serves historical blocks from the object store over the Store API. Required for querying data older than what Prometheus/Receive holds locally. |
 | **compactor** | Yes | StatefulSet | Compacts and downsamples blocks in the object store. Runs as a singleton — do not scale above 1 replica. |
@@ -238,6 +239,31 @@ query:
         paths:
           - path: /
             pathType: Prefix
+```
+
+### Query TLS (optional)
+
+The Query TLS component that fans out to TLS registered Store API endpoints and deduplicates results using replica labels.
+It exists because the `thanos query` command does not support a mix of TLS and non-TLS endpoints, so this provides a way
+to add TLS endpoints as well.
+The Query component above automatically includes Query TLS as one of its endpoints so that the results collected by this
+are available to the Query component.
+
+```yaml
+queryTls:
+  enabled: true
+  replicaCount: 2
+
+  # Labels that identify replica identity — used for deduplication
+  replicaLabels:
+    - prometheus_replica
+
+  # gRPC endpoints to query.
+  # Add external Prometheus sidecars or remote store gateways that are TLS enabled here.
+  stores: []
+  # Example:
+  # stores:
+  #   - thanos-gateway.mydomain.com:443
 ```
 
 ### Receive

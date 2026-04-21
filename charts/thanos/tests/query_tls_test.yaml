@@ -1,41 +1,41 @@
-suite: query component
+suite: query-tls component
 
 tests:
   # -- Deployment basics ----------------------------------------------
 
-  - it: renders deployment when query is enabled
-    template: query/deployment.yaml
+  - it: renders deployment when query-tls is enabled
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
     asserts:
       - isKind:
           of: Deployment
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-query-tls
 
-  - it: does not render when query is disabled
-    template: query/deployment.yaml
+  - it: does not render when query-tls is disabled
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: false
+      queryTls.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
   - it: sets the correct replica count
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.replicaCount: 3
+      queryTls.enabled: true
+      queryTls.replicaCount: 3
     asserts:
       - equal:
           path: spec.replicas
           value: 3
 
   - it: uses the global image repository and tag
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.image.repository: quay.io/thanos/thanos
       global.image.tag: v0.40.0
     asserts:
@@ -44,10 +44,10 @@ tests:
           value: quay.io/thanos/thanos:v0.40.0
 
   - it: passes replica labels as CLI args
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.replicaLabels:
+      queryTls.enabled: true
+      queryTls.replicaLabels:
         - prometheus_replica
         - thanos_replica
     asserts:
@@ -58,33 +58,11 @@ tests:
           path: spec.template.spec.containers[0].args
           content: --query.replica-label=thanos_replica
 
-  - it: adds store endpoints for storegateway when enabled
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      storegateway.enabled: true
-      receive.enabled: false
-    asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[3]
-          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*storegateway\\..*"
-
-  - it: adds store endpoint for query-tls when enabled
-    template: query/deployment.yaml
-    set:
-      query.enabled: true
-      queryTls.enabled: true
-      receive.enabled: false
-    asserts:
-      - matchRegex:
-          path: spec.template.spec.containers[0].args[3]
-          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*query-tls\\..*"
-
   - it: passes extra CLI args
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.extraArgs:
+      queryTls.enabled: true
+      queryTls.extraArgs:
         - --log.level=debug
     asserts:
       - contains:
@@ -94,10 +72,10 @@ tests:
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.annotations:
+      queryTls.enabled: true
+      queryTls.annotations:
         custom-annotation: my-value
     asserts:
       - equal:
@@ -105,10 +83,10 @@ tests:
           value: my-value
 
   - it: applies component labels
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.labels:
+      queryTls.enabled: true
+      queryTls.labels:
         custom-label: my-value
     asserts:
       - equal:
@@ -118,10 +96,10 @@ tests:
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.extraEnv:
+      queryTls.enabled: true
+      queryTls.extraEnv:
         - name: LOG_FORMAT
           value: json
     asserts:
@@ -132,15 +110,15 @@ tests:
             value: json
 
   - it: merges global and component extraEnv with component winning
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.extraEnv:
         - name: LOG_FORMAT
           value: json
         - name: SHARED_VAR
           value: global-value
-      query.extraEnv:
+      queryTls.extraEnv:
         - name: SHARED_VAR
           value: component-value
     asserts:
@@ -158,15 +136,15 @@ tests:
   # -- Extra envFrom vars -----------------------------------------------
 
   - it: merges global and component extraEnvFrom with component winning
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.extraEnvFrom:
         - name: GLOBAL_FROM
           value: global-value
         - name: SHARED_FROM
           value: global-value
-      query.extraEnvFrom:
+      queryTls.extraEnvFrom:
         - name: SHARED_FROM
           value: component-value
     asserts:
@@ -184,9 +162,9 @@ tests:
   # -- Security contexts ----------------------------------------------
 
   - it: applies global container security context
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.containerSecurityContext:
         readOnlyRootFilesystem: true
         runAsNonRoot: true
@@ -199,12 +177,12 @@ tests:
           value: true
 
   - it: applies component container security context overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.containerSecurityContext:
         runAsNonRoot: true
-      query.containerSecurityContext:
+      queryTls.containerSecurityContext:
         runAsNonRoot: false
         runAsUser: 1001
     asserts:
@@ -216,10 +194,10 @@ tests:
           value: 1001
 
   - it: applies pod security context
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.podSecurityContext:
+      queryTls.enabled: true
+      queryTls.podSecurityContext:
         fsGroup: 1001
     asserts:
       - equal:
@@ -229,9 +207,9 @@ tests:
   # -- DNS configuration -----------------------------------------------
 
   - it: applies global dnsConfig as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.dnsConfig:
         options:
           - name: ndots
@@ -245,14 +223,14 @@ tests:
           value: "1"
 
   - it: applies component dnsConfig overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.dnsConfig:
         options:
           - name: ndots
             value: "5"
-      query.dnsConfig:
+      queryTls.dnsConfig:
         options:
           - name: ndots
             value: "1"
@@ -265,9 +243,9 @@ tests:
           value: "1"
 
   - it: does not render dnsConfig when not set
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
     asserts:
       - isNull:
           path: spec.template.spec.dnsConfig
@@ -275,9 +253,9 @@ tests:
   # -- Scheduling and placement ---------------------------------------
 
   - it: applies component affinity overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -287,7 +265,7 @@ tests:
                     operator: In
                     values:
                       - ap-southeast-2a
-      query.affinity:
+      queryTls.affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
@@ -303,9 +281,9 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies global affinity as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -320,12 +298,12 @@ tests:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies component nodeSelector overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.nodeSelector:
         node-role: node
-      query.nodeSelector:
+      queryTls.nodeSelector:
         node-role: thanos
     asserts:
       - equal:
@@ -333,9 +311,9 @@ tests:
           value: thanos
 
   - it: applies global nodeSelector as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.nodeSelector:
         node-role: thanos
     asserts:
@@ -344,10 +322,10 @@ tests:
           value: thanos
 
   - it: applies component tolerations
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
-      query.tolerations:
+      queryTls.enabled: true
+      queryTls.tolerations:
         - key: dedicated
           operator: Equal
           value: thanos
@@ -362,9 +340,9 @@ tests:
             effect: NoSchedule
 
   - it: applies global tolerations as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.tolerations:
         - key: dedicated
           operator: Equal
@@ -380,9 +358,9 @@ tests:
             effect: NoSchedule
 
   - it: applies component topologySpreadConstraints overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -390,7 +368,7 @@ tests:
           labelSelector:
             matchLabels:
               app: thanos
-      query.topologySpreadConstraints:
+      queryTls.topologySpreadConstraints:
         - maxSkew: 2
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: ScheduleAnyway
@@ -409,9 +387,9 @@ tests:
                 app: thanos
 
   - it: applies global topologySpreadConstraints as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
@@ -431,20 +409,20 @@ tests:
                 app: thanos
 
   - it: applies component priorityClassName overriding global
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.priorityClassName: high-priority
-      query.priorityClassName: critical
+      queryTls.priorityClassName: critical
     asserts:
       - equal:
           path: spec.template.spec.priorityClassName
           value: critical
 
   - it: applies global priorityClassName as fallback
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.priorityClassName: high-priority
     asserts:
       - equal:
@@ -454,14 +432,14 @@ tests:
   # -- Extra init and sidecar containers ------------------------------
 
   - it: merges global and component extraInitContainers
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.extraInitContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraInitContainers:
+      queryTls.extraInitContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -480,14 +458,14 @@ tests:
             command: ["echo", "component"]
 
   - it: merges global and component extraContainers
-    template: query/deployment.yaml
+    template: query-tls/deployment.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.extraContainers:
         - name: global-init
           image: busybox:latest
           command: ["echo", "global"]
-      query.extraContainers:
+      queryTls.extraContainers:
         - name: component-init
           image: busybox:latest
           command: ["echo", "component"]
@@ -508,10 +486,10 @@ tests:
   # -- Service --------------------------------------------------------
 
   - it: applies service annotations
-    template: query/service.yaml
+    template: query-tls/service.yaml
     set:
-      query.enabled: true
-      query.service.annotations:
+      queryTls.enabled: true
+      queryTls.service.annotations:
         custom-annotation: my-value
     asserts:
       - equal:
@@ -519,10 +497,10 @@ tests:
           value: my-value
 
   - it: applies service labels
-    template: query/service.yaml
+    template: query-tls/service.yaml
     set:
-      query.enabled: true
-      query.service.labels:
+      queryTls.enabled: true
+      queryTls.service.labels:
         monitoring: "true"
     asserts:
       - equal:
@@ -532,11 +510,11 @@ tests:
   # -- PodDisruptionBudget --------------------------------------------
 
   - it: renders PDB when component pdb is enabled
-    template: query/pdb.yaml
+    template: query-tls/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: true
-      query.pdb.maxUnavailable: "1"
+      queryTls.enabled: true
+      queryTls.pdb.enabled: true
+      queryTls.pdb.maxUnavailable: "1"
     asserts:
       - isKind:
           of: PodDisruptionBudget
@@ -545,9 +523,9 @@ tests:
           value: 1
 
   - it: renders PDB via global pdb.enabled fallback
-    template: query/pdb.yaml
+    template: query-tls/pdb.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
     asserts:
@@ -558,117 +536,55 @@ tests:
           value: 1
 
   - it: component PDB values override global
-    template: query/pdb.yaml
+    template: query-tls/pdb.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.pdb.enabled: true
       global.pdb.minAvailable: "1"
-      query.pdb.minAvailable: "3"
+      queryTls.pdb.minAvailable: "3"
     asserts:
       - equal:
           path: spec.minAvailable
           value: 3
 
   - it: does not render PDB when both component and global pdb are disabled
-    template: query/pdb.yaml
+    template: query-tls/pdb.yaml
     set:
-      query.enabled: true
-      query.pdb.enabled: false
+      queryTls.enabled: true
+      queryTls.pdb.enabled: false
       global.pdb.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
-  # -- Ingress -----------------------------------------------------------
-
-  - it: renders ingress when enabled
-    template: query/ingress.yaml
-    set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.hosts:
-        - host: thanos.example.com
-          paths:
-            - path: /
-              pathType: Prefix
-    asserts:
-      - isKind:
-          of: Ingress
-      - equal:
-          path: metadata.name
-          value: RELEASE-NAME-thanos-query
-
-  - it: does not render ingress when disabled
-    template: query/ingress.yaml
-    set:
-      query.enabled: true
-      query.ingress.enabled: false
-    asserts:
-      - hasDocuments:
-          count: 0
-
-  - it: sets ingress class name
-    template: query/ingress.yaml
-    set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.className: nginx
-      query.ingress.hosts:
-        - host: thanos.example.com
-          paths:
-            - path: /
-              pathType: Prefix
-    asserts:
-      - equal:
-          path: spec.ingressClassName
-          value: nginx
-
-  - it: sets ingress host and path
-    template: query/ingress.yaml
-    set:
-      query.enabled: true
-      query.ingress.enabled: true
-      query.ingress.hosts:
-        - host: thanos.example.com
-          paths:
-            - path: /
-              pathType: Prefix
-    asserts:
-      - equal:
-          path: spec.rules[0].host
-          value: thanos.example.com
-      - equal:
-          path: spec.rules[0].http.paths[0].path
-          value: /
-
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled
-    template: query/servicemonitor.yaml
+    template: query-tls/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: true
+      queryTls.enabled: true
+      queryTls.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-query-tls
 
   - it: renders servicemonitor via global fallback
-    template: query/servicemonitor.yaml
+    template: query-tls/servicemonitor.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.serviceMonitor.enabled: true
     asserts:
       - isKind:
           of: ServiceMonitor
 
   - it: does not render servicemonitor when disabled
-    template: query/servicemonitor.yaml
+    template: query-tls/servicemonitor.yaml
     set:
-      query.enabled: true
-      query.serviceMonitor.enabled: false
+      queryTls.enabled: true
+      queryTls.serviceMonitor.enabled: false
       global.serviceMonitor.enabled: false
     asserts:
       - hasDocuments:
@@ -677,19 +593,19 @@ tests:
   # -- HorizontalPodAutoscaler ------------------------------------------
 
   - it: renders HPA when autoscaling is enabled
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.minReplicas: 1
-      query.autoscaling.maxReplicas: 3
-      query.autoscaling.targetCPUUtilizationPercentage: 80
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.minReplicas: 1
+      queryTls.autoscaling.maxReplicas: 3
+      queryTls.autoscaling.targetCPUUtilizationPercentage: 80
     asserts:
       - isKind:
           of: HorizontalPodAutoscaler
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-query-tls
       - equal:
           path: spec.minReplicas
           value: 1
@@ -698,53 +614,53 @@ tests:
           value: 3
 
   - it: does not render HPA when autoscaling is disabled
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: false
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: does not render HPA when query component is disabled
-    template: query/hpa.yaml
+  - it: does not render HPA when query-tls component is disabled
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: false
-      query.autoscaling.enabled: true
+      queryTls.enabled: false
+      queryTls.autoscaling.enabled: true
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: HPA scaleTargetRef targets query Deployment by default
-    template: query/hpa.yaml
+  - it: HPA scaleTargetRef targets query-tls Deployment by default
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
     asserts:
       - equal:
           path: spec.scaleTargetRef.kind
           value: Deployment
       - equal:
           path: spec.scaleTargetRef.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-query-tls
 
   - it: HPA scaleTargetRef uses custom targetKind
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.targetKind: StatefulSet
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.targetKind: StatefulSet
     asserts:
       - equal:
           path: spec.scaleTargetRef.kind
           value: StatefulSet
 
   - it: HPA renders CPU metric with correct averageUtilization
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.targetCPUUtilizationPercentage: 60
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.targetCPUUtilizationPercentage: 60
     asserts:
       - contains:
           path: spec.metrics
@@ -757,12 +673,12 @@ tests:
                 averageUtilization: 60
 
   - it: HPA renders memory metric when targetMemoryUtilizationPercentage is set
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.targetCPUUtilizationPercentage: 80
-      query.autoscaling.targetMemoryUtilizationPercentage: 75
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.targetCPUUtilizationPercentage: 80
+      queryTls.autoscaling.targetMemoryUtilizationPercentage: 75
     asserts:
       - contains:
           path: spec.metrics
@@ -775,12 +691,12 @@ tests:
                 averageUtilization: 75
 
   - it: HPA renders both CPU and memory metrics when both are set
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.targetCPUUtilizationPercentage: 80
-      query.autoscaling.targetMemoryUtilizationPercentage: 75
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.targetCPUUtilizationPercentage: 80
+      queryTls.autoscaling.targetMemoryUtilizationPercentage: 75
     asserts:
       - lengthEqual:
           path: spec.metrics
@@ -805,12 +721,12 @@ tests:
                 averageUtilization: 75
 
   - it: HPA renders memory-only metric when CPU is not set
-    template: query/hpa.yaml
+    template: query-tls/hpa.yaml
     set:
-      query.enabled: true
-      query.autoscaling.enabled: true
-      query.autoscaling.targetCPUUtilizationPercentage: null
-      query.autoscaling.targetMemoryUtilizationPercentage: 75
+      queryTls.enabled: true
+      queryTls.autoscaling.enabled: true
+      queryTls.autoscaling.targetCPUUtilizationPercentage: null
+      queryTls.autoscaling.targetMemoryUtilizationPercentage: 75
     asserts:
       - lengthEqual:
           path: spec.metrics
@@ -828,27 +744,27 @@ tests:
   # -- NetworkPolicy -------------------------------------------------------
 
   - it: does not render networkpolicy when networkPolicies is disabled
-    template: query/networkpolicy.yaml
+    template: query-tls/networkpolicy.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.networkPolicies: false
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: does not render networkpolicy when query is disabled
-    template: query/networkpolicy.yaml
+  - it: does not render networkpolicy when query-tls is disabled
+    template: query-tls/networkpolicy.yaml
     set:
-      query.enabled: false
+      queryTls.enabled: false
       global.networkPolicies: true
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: renders networkpolicy when query and networkPolicies are enabled
-    template: query/networkpolicy.yaml
+  - it: renders networkpolicy when query-tls and networkPolicies are enabled
+    template: query-tls/networkpolicy.yaml
     set:
-      query.enabled: true
+      queryTls.enabled: true
       global.networkPolicies: true
     asserts:
       - isKind:
@@ -858,4 +774,4 @@ tests:
           value: networking.k8s.io/v1
       - equal:
           path: metadata.name
-          value: RELEASE-NAME-thanos-query
+          value: RELEASE-NAME-thanos-query-tls

@@ -5,6 +5,7 @@ Components enabled:
 - compactor: {{ .Values.compactor.enabled }}
 - query: {{ .Values.query.enabled }}
 - query-frontend: {{ .Values.queryFrontend.enabled }}
+- query-tls: {{ .Values.queryTls.enabled }}
 - receive: {{ .Values.receive.enabled }}
 - ruler: {{ .Values.ruler.enabled }}
 - storegateway: {{ .Values.storegateway.enabled }}

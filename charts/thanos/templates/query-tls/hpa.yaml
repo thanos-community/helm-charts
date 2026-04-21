@@ -1,0 +1,45 @@
+{{- if and .Values.queryTls.enabled .Values.queryTls.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "queryTls") | nindent 4 }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+  name: {{ include "thanos.compName" (list . "query-tls") }}
+spec:
+  maxReplicas: {{ .Values.queryTls.autoscaling.maxReplicas }}
+  metrics:
+    {{- $cpu := .Values.queryTls.autoscaling.targetCPUUtilizationPercentage }}
+    {{- $mem := .Values.queryTls.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- if or $cpu $mem }}
+    {{- if $cpu }}
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: {{ $cpu }}
+          type: Utilization
+      type: Resource
+    {{- end }}
+    {{- if $mem }}
+    - resource:
+        name: memory
+        target:
+          averageUtilization: {{ $mem }}
+          type: Utilization
+      type: Resource
+    {{- end }}
+    {{- else }}
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 80
+          type: Utilization
+      type: Resource
+    {{- end }}
+  minReplicas: {{ .Values.queryTls.autoscaling.minReplicas }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: {{ .Values.queryTls.autoscaling.targetKind | default "Deployment" }}
+    name: {{ include "thanos.compName" (list . "query-tls") }}
+{{- end }}
