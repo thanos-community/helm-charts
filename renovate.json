@@ -8,8 +8,8 @@
     "renovate"
   ],
   "helm-values": {
-    "fileMatch": [
-      "(^|/)charts/.+/values\\.yaml$"
+    "managerFilePatterns": [
+      "/(^|/)charts/.+/values\\.yaml$/"
     ]
   },
   "packageRules": [
@@ -84,8 +84,8 @@
     {
       "customType": "regex",
       "description": "Update Thanos appVersion in Chart.yaml from GitHub releases",
-      "fileMatch": [
-        "(^|/)charts/[^/]+/Chart\\.yaml$"
+      "managerFilePatterns": [
+        "/(^|/)charts/[^/]+/Chart\\.yaml$/"
       ],
       "matchStrings": [
         "appVersion:\\s+[\"']?(?<currentValue>[^\"'\\s\\n]+)[\"']?"
@@ -97,8 +97,8 @@
     {
       "customType": "regex",
       "description": "Update Thanos image tag in artifacthub.io/images annotation",
-      "fileMatch": [
-        "(^|/)charts/[^/]+/Chart\\.yaml$"
+      "managerFilePatterns": [
+        "/(^|/)charts/[^/]+/Chart\\.yaml$/"
       ],
       "matchStrings": [
         "image:\\s+quay\\.io/thanos/thanos:(?<currentValue>[^\\s]+)"
