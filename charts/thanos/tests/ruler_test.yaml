@@ -972,3 +972,38 @@ tests:
       - matchRegex:
           path: data["import.sh"]
           pattern: 'SELECTOR="role=alert-rules,team=observability"'
+
+  # -- NetworkPolicy -------------------------------------------------------
+
+  - it: does not render networkpolicy when networkPolicies is disabled
+    template: ruler/networkpolicy.yaml
+    set:
+      ruler.enabled: true
+      global.networkPolicies: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render networkpolicy when ruler is disabled
+    template: ruler/networkpolicy.yaml
+    set:
+      ruler.enabled: false
+      global.networkPolicies: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders networkpolicy when ruler and networkPolicies are enabled
+    template: ruler/networkpolicy.yaml
+    set:
+      ruler.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: apiVersion
+          value: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler

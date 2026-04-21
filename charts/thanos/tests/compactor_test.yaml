@@ -708,3 +708,38 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  # -- NetworkPolicy -------------------------------------------------------
+
+  - it: does not render networkpolicy when networkPolicies is disabled
+    template: compactor/networkpolicy.yaml
+    set:
+      compactor.enabled: true
+      global.networkPolicies: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render networkpolicy when compactor is disabled
+    template: compactor/networkpolicy.yaml
+    set:
+      compactor.enabled: false
+      global.networkPolicies: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders networkpolicy when compactor and networkPolicies are enabled
+    template: compactor/networkpolicy.yaml
+    set:
+      compactor.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: apiVersion
+          value: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-compactor
