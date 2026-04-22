@@ -1,32 +1,43 @@
-{{- if and .Values.receive.enabled .Values.receive.ingress.enabled }}
+{{- if .Values.receive.enabled }}
+{{- $http := .Values.receive.ingress.http.enabled | ternary .Values.receive.ingress.http .Values.receive.ingress }}
+{{- $ingresses := dict "http" $http "grpc" .Values.receive.ingress.grpc }}
+{{- $sep := "" }}
+{{- range $port, $ingress := $ingresses }}
+{{- if $ingress.enabled }}
+{{ $sep -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}
-  labels:
-    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.receive.ingress.annotations | nindent 4 }}
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- toYaml $ingress.annotations | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" $.Values "component" "receive") | nindent 4 }}
+  labels:
+    {{- include "thanos.labels" $ | nindent 4 }}
+  name: {{ include "thanos.compName" (list $ (printf "receive%s" (eq $port "http" | ternary "" (printf "-%s" $port)))) }}
 spec:
-  {{- with .Values.receive.ingress.className }}
+  {{- with $ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
   rules:
-  {{- range .Values.receive.ingress.hosts }}
+    {{- range $ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
         {{- range .paths }}
-          - path: {{ .path | quote }}
-            pathType: {{ .pathType | default "Prefix" }}
-            backend:
+          - backend:
               service:
                 name: {{ include "thanos.compName" (list $ "receive") }}
                 port:
-                  name: http
+                  name: {{ $port }}
+            path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
         {{- end }}
-  {{- end }}
+    {{- end }}
+  {{- with $ingress.tls }}
   tls:
-    {{- toYaml .Values.receive.ingress.tls | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- $sep = "---\n" }}
+{{- end }}
+{{- end }}
 {{- end }}

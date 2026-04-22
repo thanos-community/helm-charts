@@ -2744,31 +2744,135 @@
         },
         "ingress": {
           "additionalProperties": true,
-          "description": "Kubernetes Ingress configuration for the Query HTTP endpoint.",
+          "description": "Kubernetes Ingress configuration for the Query endpoint.",
           "properties": {
             "annotations": {
               "additionalProperties": true,
-              "description": "Extra annotations for the Query Ingress.",
+              "description": "Deprecated. Use `query.ingress.http.annotations` instead.",
               "required": [],
               "title": "annotations",
               "type": "object"
             },
             "className": {
               "default": "",
-              "description": "Ingress class name for Query (e.g. nginx, traefik).",
+              "description": "Deprecated. Use `query.ingress.http.className` instead.",
               "required": [],
               "title": "className",
               "type": "string"
             },
             "enabled": {
               "default": false,
-              "description": "Enable a Kubernetes Ingress for the Query HTTP endpoint.",
+              "description": "Deprecated. Use `query.ingress.http.enabled` instead.",
               "required": [],
               "title": "enabled",
               "type": "boolean"
             },
+            "grpc": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Query gRPC endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Query gRPC Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Query gRPC endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Query gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Query gRPC Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-query-grpc.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Query gRPC Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "grpc",
+              "type": "object"
+            },
             "hosts": {
-              "description": "Host rules for the Query Ingress.",
+              "description": "Deprecated. Use `query.ingress.http.hosts` instead.",
               "items": {
                 "anyOf": [
                   {
@@ -2826,8 +2930,112 @@
               "title": "hosts",
               "type": "array"
             },
+            "http": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Query HTTP endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Query HTTP Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Query HTTP endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Query HTTP endpoint.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Query HTTP Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-query.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Query HTTP Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "http",
+              "type": "object"
+            },
             "tls": {
-              "description": "TLS configuration for the Query Ingress.",
+              "description": "Deprecated. Use `query.ingress.http.tls` instead.",
               "items": {
                 "required": []
               },
@@ -2841,7 +3049,9 @@
             "className",
             "annotations",
             "hosts",
-            "tls"
+            "tls",
+            "http",
+            "grpc"
           ],
           "title": "ingress",
           "type": "object"
@@ -4494,31 +4704,135 @@
         },
         "ingress": {
           "additionalProperties": true,
-          "description": "Kubernetes Ingress configuration for the Receive remote-write endpoint.",
+          "description": "Kubernetes Ingress configuration for the Receive endpoint.",
           "properties": {
             "annotations": {
               "additionalProperties": true,
-              "description": "Extra annotations for the Receive Ingress.",
+              "description": "Deprecated. Use `receive.ingress.http.annotations` instead.",
               "required": [],
               "title": "annotations",
               "type": "object"
             },
             "className": {
               "default": "",
-              "description": "Ingress class name for Receive (e.g. nginx, traefik).",
+              "description": "Deprecated. Use `receive.ingress.http.className` instead.",
               "required": [],
               "title": "className",
               "type": "string"
             },
             "enabled": {
               "default": false,
-              "description": "Enable a Kubernetes Ingress for the Receive remote-write endpoint.",
+              "description": "Deprecated. Use `receive.ingress.http.enabled` instead.",
               "required": [],
               "title": "enabled",
               "type": "boolean"
             },
+            "grpc": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Receive gRPC endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Receive gRPC Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Receive gRPC endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Receive gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Receive gRPC Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-receive-grpc.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Receive gRPC Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "grpc",
+              "type": "object"
+            },
             "hosts": {
-              "description": "Host rules for the Receive Ingress.",
+              "description": "Deprecated. Use `receive.ingress.http.hosts` instead.",
               "items": {
                 "anyOf": [
                   {
@@ -4576,8 +4890,112 @@
               "title": "hosts",
               "type": "array"
             },
+            "http": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Receive HTTP endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Receive HTTP Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Receive HTTP endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Receive HTTP endpoint.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Receive HTTP Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-receive.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Receive HTTP Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "http",
+              "type": "object"
+            },
             "tls": {
-              "description": "TLS configuration for the Receive Ingress.",
+              "description": "Deprecated. Use `receive.ingress.http.tls` instead.",
               "items": {
                 "required": []
               },
@@ -4591,7 +5009,9 @@
             "className",
             "annotations",
             "hosts",
-            "tls"
+            "tls",
+            "http",
+            "grpc"
           ],
           "title": "ingress",
           "type": "object"
@@ -6669,31 +7089,135 @@
         },
         "ingress": {
           "additionalProperties": true,
-          "description": "Kubernetes Ingress configuration for the Store Gateway HTTP endpoint.",
+          "description": "Kubernetes Ingress configuration for the Store Gateway endpoint.",
           "properties": {
             "annotations": {
               "additionalProperties": true,
-              "description": "Extra annotations for the Store Gateway Ingress.",
+              "description": "Deprecated. Use `storegateway.ingress.http.annotations` instead.",
               "required": [],
               "title": "annotations",
               "type": "object"
             },
             "className": {
               "default": "",
-              "description": "Ingress class name for Store Gateway (e.g. nginx, traefik).",
+              "description": "Deprecated. Use `storegateway.ingress.http.className` instead.",
               "required": [],
               "title": "className",
               "type": "string"
             },
             "enabled": {
               "default": false,
-              "description": "Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint.",
+              "description": "Deprecated. Use `storegateway.ingress.http.enabled` instead.",
               "required": [],
               "title": "enabled",
               "type": "boolean"
             },
+            "grpc": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Store Gateway gRPC endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Store Gateway gRPC Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Store Gateway gRPC endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Store Gateway gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Store Gateway gRPC Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-store-grpc.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Store Gateway gRPC Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "grpc",
+              "type": "object"
+            },
             "hosts": {
-              "description": "Host rules for the Store Gateway Ingress.",
+              "description": "Deprecated. Use `storegateway.ingress.http.hosts` instead.",
               "items": {
                 "anyOf": [
                   {
@@ -6751,8 +7275,112 @@
               "title": "hosts",
               "type": "array"
             },
+            "http": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Store Gateway HTTP endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Store Gateway HTTP Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Store Gateway HTTP endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Store Gateway HTTP Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-store.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Store Gateway HTTP Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "http",
+              "type": "object"
+            },
             "tls": {
-              "description": "TLS configuration for the Store Gateway Ingress.",
+              "description": "Deprecated. Use `storegateway.ingress.http.tls` instead.",
               "items": {
                 "required": []
               },
@@ -6766,7 +7394,9 @@
             "className",
             "annotations",
             "hosts",
-            "tls"
+            "tls",
+            "http",
+            "grpc"
           ],
           "title": "ingress",
           "type": "object"

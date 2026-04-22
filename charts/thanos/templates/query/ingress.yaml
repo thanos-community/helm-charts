@@ -1,32 +1,43 @@
-{{- if and .Values.query.enabled .Values.query.ingress.enabled }}
+{{- if .Values.query.enabled }}
+{{- $http := .Values.query.ingress.http.enabled | ternary .Values.query.ingress.http .Values.query.ingress }}
+{{- $ingresses := dict "http" $http "grpc" .Values.query.ingress.grpc }}
+{{- $sep := "" }}
+{{- range $port, $ingress := $ingresses }}
+{{- if $ingress.enabled }}
+{{ $sep -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "thanos.compName" (list . "query") }}
-  labels:
-    {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.query.ingress.annotations | nindent 4 }}
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+    {{- toYaml $ingress.annotations | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" $.Values "component" "query") | nindent 4 }}
+  labels:
+    {{- include "thanos.labels" $ | nindent 4 }}
+  name: {{ include "thanos.compName" (list $ (printf "query%s" (eq $port "http" | ternary "" (printf "-%s" $port)))) }}
 spec:
-  {{- with .Values.query.ingress.className }}
+  {{- with $ingress.className }}
   ingressClassName: {{ . }}
   {{- end }}
   rules:
-  {{- range .Values.query.ingress.hosts }}
+    {{- range $ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
         {{- range .paths }}
-          - path: {{ .path | quote }}
-            pathType: {{ .pathType | default "Prefix" }}
-            backend:
+          - backend:
               service:
                 name: {{ include "thanos.compName" (list $ "query") }}
                 port:
-                  name: http
+                  name: {{ $port }}
+            path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
         {{- end }}
-  {{- end }}
+    {{- end }}
+  {{- with $ingress.tls }}
   tls:
-    {{- toYaml .Values.query.ingress.tls | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- $sep = "---\n" }}
+{{- end }}
+{{- end }}
 {{- end }}

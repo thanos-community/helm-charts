@@ -630,6 +630,262 @@ tests:
           path: spec.rules[0].http.paths[0].path
           value: /
 
+  - it: ingress targets http port
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.enabled: true
+      query.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+
+  - it: renders ingress when http.enabled is true
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.http.enabled: true
+      query.ingress.http.hosts:
+        - host: thanos-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query
+
+  - it: does not render ingress when neither enabled nor http.enabled is true
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.enabled: false
+      query.ingress.http.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: uses http values for class name host and tls
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.http.enabled: true
+      query.ingress.http.className: nginx-http
+      query.ingress.http.hosts:
+        - host: thanos-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      query.ingress.http.tls:
+        - hosts:
+            - thanos-http.example.com
+          secretName: thanos-http-tls
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-http.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-http-tls
+
+  - it: applies http annotations
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.http.enabled: true
+      query.ingress.http.annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      query.ingress.http.hosts:
+        - host: thanos-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["cert-manager.io/cluster-issuer"]
+          value: letsencrypt
+
+  - it: prefers http values over deprecated when both are set
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.enabled: true
+      query.ingress.className: deprecated-nginx
+      query.ingress.hosts:
+        - host: deprecated.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      query.ingress.http.enabled: true
+      query.ingress.http.className: nginx-http
+      query.ingress.http.hosts:
+        - host: thanos-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-http.example.com
+
+  # -- gRPC Ingress ------------------------------------------------------
+
+  - it: renders grpc ingress when enabled
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: true
+      query.ingress.grpc.hosts:
+        - host: thanos-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query-grpc
+
+  - it: does not render grpc ingress when disabled
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render grpc ingress when query is disabled
+    template: query/ingress.yaml
+    set:
+      query.enabled: false
+      query.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets grpc ingress class name
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: true
+      query.ingress.grpc.className: nginx
+      query.ingress.grpc.hosts:
+        - host: thanos-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets grpc ingress host and path and targets grpc port
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: true
+      query.ingress.grpc.hosts:
+        - host: thanos-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-grpc.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: RELEASE-NAME-thanos-query
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+
+  - it: applies grpc ingress annotations
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: true
+      query.ingress.grpc.annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: GRPC
+      query.ingress.grpc.hosts:
+        - host: thanos-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/backend-protocol"]
+          value: GRPC
+
+  - it: renders grpc ingress tls when provided
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.grpc.enabled: true
+      query.ingress.grpc.hosts:
+        - host: thanos-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      query.ingress.grpc.tls:
+        - hosts:
+            - thanos-grpc.example.com
+          secretName: thanos-grpc-tls
+    asserts:
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: thanos-grpc.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-grpc-tls
+
+  - it: renders both http and grpc ingresses when both are enabled
+    template: query/ingress.yaml
+    set:
+      query.enabled: true
+      query.ingress.http.enabled: true
+      query.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query-grpc
+        documentIndex: 0
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query
+        documentIndex: 1
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+        documentIndex: 1
+
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled

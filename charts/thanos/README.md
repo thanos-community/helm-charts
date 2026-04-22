@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.0.91 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 83.0.2 |
+| https://charts.rustfs.com/ | rustfs | 0.0.98 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 84.0.1 |
 
 ## Component Overview
 
@@ -243,13 +243,14 @@ query:
   #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
 
   ingress:
-    enabled: false
-    className: nginx
-    hosts:
-      - host: thanos-query.example.com
-        paths:
-          - path: /
-            pathType: Prefix
+    http:
+      enabled: false
+      className: nginx
+      hosts:
+        - host: thanos-query.example.com
+          paths:
+            - path: /
+              pathType: Prefix
 ```
 
 ### Receive
@@ -683,13 +684,27 @@ The table below documents all available values. Top-level keys group settings by
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
 | query.httpRoute.hostnames | list | [] | Hostnames to match on the Query HTTPRoute. |
 | query.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Query HTTPRoute. |
-| query.ingress.annotations | object | {} | Extra annotations for the Query Ingress. |
-| query.ingress.className | string | `""` | Ingress class name for Query (e.g. nginx, traefik). |
-| query.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Query HTTP endpoint. |
+| query.ingress.annotations | object | {} | Deprecated. Use `query.ingress.http.annotations` instead. |
+| query.ingress.className | string | `""` | Deprecated. Use `query.ingress.http.className` instead. |
+| query.ingress.enabled | bool | `false` | Deprecated. Use `query.ingress.http.enabled` instead. |
+| query.ingress.grpc.annotations | object | {} | Extra annotations for the Query gRPC Ingress. |
+| query.ingress.grpc.className | string | `""` | Ingress class name for Query gRPC endpoint (e.g. nginx, traefik). |
+| query.ingress.grpc.enabled | bool | `false` | Enable a Kubernetes Ingress for the Query gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress. |
+| query.ingress.grpc.hosts[0].host | string | `"thanos-query-grpc.local"` |  |
+| query.ingress.grpc.hosts[0].paths[0].path | string | `"/"` |  |
+| query.ingress.grpc.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| query.ingress.grpc.tls | list | [] | TLS configuration for the Query gRPC Ingress. |
 | query.ingress.hosts[0].host | string | `"thanos-query.local"` |  |
 | query.ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | query.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
-| query.ingress.tls | list | [] | TLS configuration for the Query Ingress. |
+| query.ingress.http.annotations | object | {} | Extra annotations for the Query HTTP Ingress. |
+| query.ingress.http.className | string | `""` | Ingress class name for Query HTTP endpoint (e.g. nginx, traefik). |
+| query.ingress.http.enabled | bool | `false` | Enable a Kubernetes Ingress for the Query HTTP endpoint. |
+| query.ingress.http.hosts[0].host | string | `"thanos-query.local"` |  |
+| query.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
+| query.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| query.ingress.http.tls | list | [] | TLS configuration for the Query HTTP Ingress. |
+| query.ingress.tls | list | [] | Deprecated. Use `query.ingress.http.tls` instead. |
 | query.labels | object | {} | Extra labels applied to Query resources. |
 | query.nodeSelector | object | {} | Node selector for Query pod scheduling. |
 | query.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Query. |
@@ -842,13 +857,27 @@ The table below documents all available values. Top-level keys group settings by
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |
 | receive.httpRoute.hostnames | list | [] | Hostnames to match on the Receive HTTPRoute. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
-| receive.ingress.annotations | object | {} | Extra annotations for the Receive Ingress. |
-| receive.ingress.className | string | `""` | Ingress class name for Receive (e.g. nginx, traefik). |
-| receive.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Receive remote-write endpoint. |
+| receive.ingress.annotations | object | {} | Deprecated. Use `receive.ingress.http.annotations` instead. |
+| receive.ingress.className | string | `""` | Deprecated. Use `receive.ingress.http.className` instead. |
+| receive.ingress.enabled | bool | `false` | Deprecated. Use `receive.ingress.http.enabled` instead. |
+| receive.ingress.grpc.annotations | object | {} | Extra annotations for the Receive gRPC Ingress. |
+| receive.ingress.grpc.className | string | `""` | Ingress class name for Receive gRPC endpoint (e.g. nginx, traefik). |
+| receive.ingress.grpc.enabled | bool | `false` | Enable a Kubernetes Ingress for the Receive gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress. |
+| receive.ingress.grpc.hosts[0].host | string | `"thanos-receive-grpc.local"` |  |
+| receive.ingress.grpc.hosts[0].paths[0].path | string | `"/"` |  |
+| receive.ingress.grpc.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| receive.ingress.grpc.tls | list | [] | TLS configuration for the Receive gRPC Ingress. |
 | receive.ingress.hosts[0].host | string | `"thanos-receive.local"` |  |
 | receive.ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | receive.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
-| receive.ingress.tls | list | [] | TLS configuration for the Receive Ingress. |
+| receive.ingress.http.annotations | object | {} | Extra annotations for the Receive HTTP Ingress. |
+| receive.ingress.http.className | string | `""` | Ingress class name for Receive HTTP endpoint (e.g. nginx, traefik). |
+| receive.ingress.http.enabled | bool | `false` | Enable a Kubernetes Ingress for the Receive HTTP endpoint. |
+| receive.ingress.http.hosts[0].host | string | `"thanos-receive.local"` |  |
+| receive.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
+| receive.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| receive.ingress.http.tls | list | [] | TLS configuration for the Receive HTTP Ingress. |
+| receive.ingress.tls | list | [] | Deprecated. Use `receive.ingress.http.tls` instead. |
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
@@ -1034,13 +1063,27 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
 | storegateway.httpRoute.hostnames | list | [] | Hostnames to match on the Store Gateway HTTPRoute. |
 | storegateway.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway HTTPRoute. |
-| storegateway.ingress.annotations | object | {} | Extra annotations for the Store Gateway Ingress. |
-| storegateway.ingress.className | string | `""` | Ingress class name for Store Gateway (e.g. nginx, traefik). |
-| storegateway.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint. |
+| storegateway.ingress.annotations | object | {} | Deprecated. Use `storegateway.ingress.http.annotations` instead. |
+| storegateway.ingress.className | string | `""` | Deprecated. Use `storegateway.ingress.http.className` instead. |
+| storegateway.ingress.enabled | bool | `false` | Deprecated. Use `storegateway.ingress.http.enabled` instead. |
+| storegateway.ingress.grpc.annotations | object | {} | Extra annotations for the Store Gateway gRPC Ingress. |
+| storegateway.ingress.grpc.className | string | `""` | Ingress class name for Store Gateway gRPC endpoint (e.g. nginx, traefik). |
+| storegateway.ingress.grpc.enabled | bool | `false` | Enable a Kubernetes Ingress for the Store Gateway gRPC endpoint. Note this is independent of ingress.enabled that is for the HTTP ingress. |
+| storegateway.ingress.grpc.hosts[0].host | string | `"thanos-store-grpc.local"` |  |
+| storegateway.ingress.grpc.hosts[0].paths[0].path | string | `"/"` |  |
+| storegateway.ingress.grpc.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| storegateway.ingress.grpc.tls | list | [] | TLS configuration for the Store Gateway gRPC Ingress. |
 | storegateway.ingress.hosts[0].host | string | `"thanos-store.local"` |  |
 | storegateway.ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | storegateway.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
-| storegateway.ingress.tls | list | [] | TLS configuration for the Store Gateway Ingress. |
+| storegateway.ingress.http.annotations | object | {} | Extra annotations for the Store Gateway HTTP Ingress. |
+| storegateway.ingress.http.className | string | `""` | Ingress class name for Store Gateway HTTP endpoint (e.g. nginx, traefik). |
+| storegateway.ingress.http.enabled | bool | `false` | Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint. |
+| storegateway.ingress.http.hosts[0].host | string | `"thanos-store.local"` |  |
+| storegateway.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
+| storegateway.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| storegateway.ingress.http.tls | list | [] | TLS configuration for the Store Gateway HTTP Ingress. |
+| storegateway.ingress.tls | list | [] | Deprecated. Use `storegateway.ingress.http.tls` instead. |
 | storegateway.labels | object | {} | Extra labels applied to Store Gateway resources. |
 | storegateway.nodeSelector | object | {} | Node selector for Store Gateway pod scheduling. |
 | storegateway.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Store Gateway. |
