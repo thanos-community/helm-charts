@@ -459,3 +459,16 @@ spec:
         - name: {{ include "thanos.compName" (list $root $comp) }}
           port: {{ $port }}
 {{- end -}}
+
+{{/*
+Render .Values.ruler.autoImportPrometheusRules.labelSelector (a map) as a
+comma-separated "key=value" string suitable for `kubectl get -l`.
+An empty map renders as the empty string.
+*/}}
+{{- define "thanos.ruler.autoImportPrometheusRules.labelSelector" -}}
+{{- $parts := list -}}
+{{- range $k, $v := .Values.ruler.autoImportPrometheusRules.labelSelector -}}
+{{- $parts = append $parts (printf "%s=%s" $k $v) -}}
+{{- end -}}
+{{- join "," $parts -}}
+{{- end -}}

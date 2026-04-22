@@ -937,6 +937,42 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: renders empty SELECTOR when labelSelector is empty (imports ALL PrometheusRules)
+    template: ruler/configmap-auto-import-prometheus-rules.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      ruler.autoImportPrometheusRules.labelSelector: {}
+    asserts:
+      - matchRegex:
+          path: data["import.sh"]
+          pattern: 'SELECTOR=""'
+
+  - it: renders SELECTOR as comma-separated key=value list when labelSelector is set
+    template: ruler/configmap-auto-import-prometheus-rules.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      ruler.autoImportPrometheusRules.labelSelector:
+        role: alert-rules
+    asserts:
+      - matchRegex:
+          path: data["import.sh"]
+          pattern: 'SELECTOR="role=alert-rules"'
+
+  - it: joins multiple labelSelector entries with commas
+    template: ruler/configmap-auto-import-prometheus-rules.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      ruler.autoImportPrometheusRules.labelSelector:
+        role: alert-rules
+        team: observability
+    asserts:
+      - matchRegex:
+          path: data["import.sh"]
+          pattern: 'SELECTOR="role=alert-rules,team=observability"'
+
   # -- NetworkPolicy -------------------------------------------------------
 
   - it: does not render networkpolicy when networkPolicies is disabled

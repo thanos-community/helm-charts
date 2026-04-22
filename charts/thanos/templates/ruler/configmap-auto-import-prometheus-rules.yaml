@@ -7,15 +7,17 @@ data:
   import.sh: |
     set -e
 
-    SELECTOR="{{ .Values.ruler.autoImportPrometheusRules.labelSelector }}"
+    SELECTOR="{{ include "thanos.ruler.autoImportPrometheusRules.labelSelector" . }}"
 
-    if [ -z "$SELECTOR" ] || [ "$SELECTOR" = "{}" ]; then
+    if [ -z "$SELECTOR" ]; then
       echo "No label selector provided, importing ALL PrometheusRules"
       SELECTOR_ARG=""
     else
       echo "Using label selector: $SELECTOR"
       SELECTOR_ARG="-l $SELECTOR"
     fi
+
+    PREV_SUM=""
 
     while true; do
       echo "Syncing PrometheusRules"
@@ -30,9 +32,19 @@ data:
 
         echo "Processing $ns/$name"
 
-        kubectl get prometheusrule "$name" -n "$ns" -o yaml | \
-          yq -y '{groups: .spec.groups}' > "/generated/${ns}-${name}.yaml"
+        kubectl get prometheusrule "$name" -n "$ns" -o jsonpath='{.spec}' \
+          > "/generated/${ns}-${name}.yaml"
       done
+
+      CURRENT_SUM=$(find /generated -type f -name '*.yaml' -exec cat {} + 2>/dev/null | md5sum | cut -d' ' -f1)
+      if [ "$CURRENT_SUM" != "$PREV_SUM" ]; then
+        echo "Rule files changed, triggering Thanos Ruler reload"
+        if curl -sf -X POST http://localhost:10902/-/reload; then
+          PREV_SUM="$CURRENT_SUM"
+        else
+          echo "Failed to reload Thanos Ruler, will retry next cycle"
+        fi
+      fi
 
       sleep 60
     done
