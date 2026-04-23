@@ -4,6 +4,7 @@ kind: Service
 metadata:
   name: {{ include "thanos.compName" (list . "storegateway") }}
   labels:
+    app.kubernetes.io/component: storegateway
     {{- include "thanos.labels" . | nindent 4 }}
     {{- with .Values.storegateway.service.labels }}
     {{- toYaml . | nindent 4 }}

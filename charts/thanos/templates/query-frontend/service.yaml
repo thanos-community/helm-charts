@@ -4,6 +4,7 @@ kind: Service
 metadata:
   name: {{ include "thanos.compName" (list . "query-frontend") }}
   labels:
+    app.kubernetes.io/component: query-frontend
     {{- include "thanos.labels" . | nindent 4 }}
     {{- with .Values.queryFrontend.service.labels }}
     {{- toYaml . | nindent 4 }}
