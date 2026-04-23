@@ -4,6 +4,7 @@ kind: Service
 metadata:
   name: {{ include "thanos.compName" (list . "bucketweb") }}
   labels:
+    app.kubernetes.io/component: bucketweb
     {{- include "thanos.labels" . | nindent 4 }}
     {{- with .Values.bucket.bucketweb.service.labels }}
     {{- toYaml . | nindent 4 }}
