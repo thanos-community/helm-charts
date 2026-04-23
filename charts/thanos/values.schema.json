@@ -6139,6 +6139,13 @@
               "title": "annotations",
               "type": "object"
             },
+            "grpcPort": {
+              "default": 10901,
+              "description": "gRPC Store API port exposed by the Ruler headless Service.",
+              "required": [],
+              "title": "grpcPort",
+              "type": "integer"
+            },
             "httpPort": {
               "default": 10902,
               "description": "HTTP port exposed by the Ruler Service.",
@@ -6163,6 +6170,7 @@
           },
           "required": [
             "type",
+            "grpcPort",
             "httpPort",
             "annotations",
             "labels"
