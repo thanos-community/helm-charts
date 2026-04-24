@@ -1952,6 +1952,8 @@ ruler:
   service:
     # -- Kubernetes Service type for the Ruler component.
     type: ClusterIP
+    # -- gRPC Store API port exposed by the Ruler headless Service.
+    grpcPort: 10901
     # -- HTTP port exposed by the Ruler Service.
     httpPort: 10902
     # -- Extra annotations for the Ruler Service.

@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.5.2](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -985,6 +985,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.resources | object | {} | Resource requests and limits for the Ruler container. |
 | ruler.rules."example-alerts.yaml" | string | `"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"` |  |
 | ruler.service.annotations | object | {} | Extra annotations for the Ruler Service. |
+| ruler.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Ruler headless Service. |
 | ruler.service.httpPort | int | `10902` | HTTP port exposed by the Ruler Service. |
 | ruler.service.labels | object | {} | Extra labels for the Ruler Service. |
 | ruler.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Ruler component. |
