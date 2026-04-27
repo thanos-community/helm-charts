@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.0.91 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 83.0.2 |
+| https://charts.rustfs.com/ | rustfs | 0.0.98 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 84.0.1 |
 
 ## Component Overview
 
@@ -502,6 +502,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.serviceMonitor.interval | string | `""` | Scrape interval for Bucketweb. Empty uses the Prometheus operator default. |
 | bucket.bucketweb.serviceMonitor.labels | object | {} | Extra labels for the Bucketweb ServiceMonitor. |
 | bucket.bucketweb.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Bucketweb metrics are ingested. |
+| bucket.bucketweb.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | bucket.bucketweb.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Bucketweb metrics are ingested. |
 | bucket.bucketweb.serviceMonitor.scheme | string | `""` | Scrape scheme for Bucketweb (http or https). |
 | bucket.bucketweb.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Bucketweb. Empty uses the Prometheus operator default. |
@@ -584,6 +585,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.serviceMonitor.interval | string | `""` | Scrape interval for the Compactor. Empty uses the Prometheus operator default. |
 | compactor.serviceMonitor.labels | object | {} | Extra labels for the Compactor ServiceMonitor. |
 | compactor.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Compactor metrics are ingested. |
+| compactor.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | compactor.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Compactor metrics are ingested. |
 | compactor.serviceMonitor.scheme | string | `""` | Scrape scheme for the Compactor (http or https). |
 | compactor.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for the Compactor. Empty uses the Prometheus operator default. |
@@ -637,7 +639,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.serviceMonitor.interval | string | `""` | Scrape interval. Empty string uses the Prometheus operator default. |
 | global.serviceMonitor.labels | object | {} | Extra labels merged into every ServiceMonitor resource. |
 | global.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after ingestion. |
-| global.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor resources are created. Empty means the same namespace as the release. |
+| global.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitors are created. Empty means the same namespace as the release. |
 | global.serviceMonitor.relabelings | list | [] | Relabeling rules applied to scraped metrics before ingestion. |
 | global.serviceMonitor.scheme | string | `""` | Scrape scheme: http or https. |
 | global.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout. Empty string uses the Prometheus operator default. |
@@ -734,6 +736,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.serviceMonitor.interval | string | `""` | Scrape interval for Query. Empty uses the Prometheus operator default. |
 | query.serviceMonitor.labels | object | {} | Extra labels for the Query ServiceMonitor. |
 | query.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Query metrics are ingested. |
+| query.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | query.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Query metrics are ingested. |
 | query.serviceMonitor.scheme | string | `""` | Scrape scheme for Query (http or https). |
 | query.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Query. Empty uses the Prometheus operator default. |
@@ -813,6 +816,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.serviceMonitor.interval | string | `""` | Scrape interval for Query Frontend. Empty uses the Prometheus operator default. |
 | queryFrontend.serviceMonitor.labels | object | {} | Extra labels for the Query Frontend ServiceMonitor. |
 | queryFrontend.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Query Frontend metrics are ingested. |
+| queryFrontend.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | queryFrontend.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Query Frontend metrics are ingested. |
 | queryFrontend.serviceMonitor.scheme | string | `""` | Scrape scheme for Query Frontend (http or https). |
 | queryFrontend.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Query Frontend. Empty uses the Prometheus operator default. |
@@ -898,6 +902,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.serviceMonitor.interval | string | `""` | Scrape interval for Receive. Empty uses the Prometheus operator default. |
 | receive.serviceMonitor.labels | object | {} | Extra labels for the Receive ServiceMonitor. |
 | receive.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Receive metrics are ingested. |
+| receive.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | receive.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Receive metrics are ingested. |
 | receive.serviceMonitor.scheme | string | `""` | Scrape scheme for Receive (http or https). |
 | receive.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Receive. Empty uses the Prometheus operator default. |
@@ -994,6 +999,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.serviceMonitor.interval | string | `""` | Scrape interval for the Ruler. Empty uses the Prometheus operator default. |
 | ruler.serviceMonitor.labels | object | {} | Extra labels for the Ruler ServiceMonitor. |
 | ruler.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Ruler metrics are ingested. |
+| ruler.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | ruler.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Ruler metrics are ingested. |
 | ruler.serviceMonitor.scheme | string | `""` | Scrape scheme for the Ruler (http or https). |
 | ruler.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for the Ruler. Empty uses the Prometheus operator default. |
@@ -1089,6 +1095,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.serviceMonitor.interval | string | `""` | Scrape interval for the Store Gateway. Empty uses the Prometheus operator default. |
 | storegateway.serviceMonitor.labels | object | {} | Extra labels for the Store Gateway ServiceMonitor. |
 | storegateway.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Store Gateway metrics are ingested. |
+| storegateway.serviceMonitor.namespace | string | `""` | Namespace where ServiceMonitor is created. Empty means the same namespace as the release. |
 | storegateway.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Store Gateway metrics are ingested. |
 | storegateway.serviceMonitor.scheme | string | `""` | Scrape scheme for the Store Gateway (http or https). |
 | storegateway.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for the Store Gateway. Empty uses the Prometheus operator default. |

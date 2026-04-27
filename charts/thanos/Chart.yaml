@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.6.0
+version: 0.6.1
 appVersion: "v0.41.0"
 keywords:
   - thanos
