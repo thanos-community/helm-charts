@@ -716,6 +716,13 @@
                   "title": "enabled",
                   "type": "boolean"
                 },
+                "namespace": {
+                  "default": "",
+                  "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+                  "required": [],
+                  "title": "namespace",
+                  "type": "string"
+                },
                 "interval": {
                   "default": "",
                   "description": "Scrape interval for Bucketweb. Empty uses the Prometheus operator default.",
@@ -1598,6 +1605,13 @@
               "title": "enabled",
               "type": "boolean"
             },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
             "interval": {
               "default": "",
               "description": "Scrape interval for the Compactor. Empty uses the Prometheus operator default.",
@@ -2223,7 +2237,7 @@
             },
             "namespace": {
               "default": "",
-              "description": "Namespace where ServiceMonitor resources are created.\nEmpty means the same namespace as the release.",
+              "description": "Namespace where ServiceMonitors are created.\nEmpty means the same namespace as the release.",
               "required": [],
               "title": "namespace",
               "type": "string"
@@ -3275,6 +3289,13 @@
               "title": "enabled",
               "type": "boolean"
             },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
             "interval": {
               "default": "",
               "description": "Scrape interval for Query. Empty uses the Prometheus operator default.",
@@ -4129,6 +4150,13 @@
               "required": [],
               "title": "enabled",
               "type": "boolean"
+            },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
             },
             "interval": {
               "default": "",
@@ -5084,6 +5112,13 @@
               "required": [],
               "title": "enabled",
               "type": "boolean"
+            },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
             },
             "interval": {
               "default": "",
@@ -6196,6 +6231,13 @@
               "title": "enabled",
               "type": "boolean"
             },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
+            },
             "interval": {
               "default": "",
               "description": "Scrape interval for the Ruler. Empty uses the Prometheus operator default.",
@@ -7251,6 +7293,13 @@
               "required": [],
               "title": "enabled",
               "type": "boolean"
+            },
+            "namespace": {
+              "default": "",
+              "description": "Namespace where ServiceMonitor is created.\nEmpty means the same namespace as the release.",
+              "required": [],
+              "title": "namespace",
+              "type": "string"
             },
             "interval": {
               "default": "",

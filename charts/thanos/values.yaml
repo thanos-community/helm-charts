@@ -216,7 +216,7 @@ global:
     # -- Enable a Prometheus Operator ServiceMonitor for every component.
     # Individual components can override this with their own serviceMonitor.enabled.
     enabled: false
-    # -- Namespace where ServiceMonitor resources are created.
+    # -- Namespace where ServiceMonitors are created.
     # Empty means the same namespace as the release.
     namespace: ""
     # -- Extra labels merged into every ServiceMonitor resource.
@@ -481,6 +481,9 @@ bucket:
     serviceMonitor:
       # -- Enable a Prometheus Operator ServiceMonitor for Bucketweb.
       enabled: false
+      # -- Namespace where ServiceMonitor is created.
+      # Empty means the same namespace as the release.
+      namespace: ""
       # -- Extra labels for the Bucketweb ServiceMonitor.
       # @default -- {}
       labels: {}
@@ -742,6 +745,9 @@ compactor:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for the Compactor.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Compactor ServiceMonitor.
     # @default -- {}
     labels: {}
@@ -1013,6 +1019,9 @@ query:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for Query.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Query ServiceMonitor.
     # @default -- {}
     labels: {}
@@ -1256,6 +1265,9 @@ queryFrontend:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for Query Frontend.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Query Frontend ServiceMonitor.
     # @default -- {}
     labels: {}
@@ -1526,6 +1538,9 @@ storegateway:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for the Store Gateway.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Store Gateway ServiceMonitor.
     # @default -- {}
     labels: {}
@@ -1835,6 +1850,9 @@ receive:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for Receive.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Receive ServiceMonitor.
     # @default -- {}
     labels: {}
@@ -2129,6 +2147,9 @@ ruler:
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for the Ruler.
     enabled: false
+    # -- Namespace where ServiceMonitor is created.
+    # Empty means the same namespace as the release.
+    namespace: ""
     # -- Extra labels for the Ruler ServiceMonitor.
     # @default -- {}
     labels: {}

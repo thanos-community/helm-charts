@@ -3,6 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "thanos.compName" (list . "query-frontend") }}
+  namespace: {{ default .Release.Namespace (default .Values.global.serviceMonitor.namespace .Values.queryFrontend.serviceMonitor.namespace) | quote }}
   labels:
     {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
     {{- if .Values.queryFrontend.serviceMonitor.labels }}{{ toYaml .Values.queryFrontend.serviceMonitor.labels | nindent 4 }}{{- end }}
