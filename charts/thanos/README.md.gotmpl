@@ -231,13 +231,14 @@ query:
   #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
 
   ingress:
-    enabled: false
-    className: nginx
-    hosts:
-      - host: thanos-query.example.com
-        paths:
-          - path: /
-            pathType: Prefix
+    http:
+      enabled: false
+      className: nginx
+      hosts:
+        - host: thanos-query.example.com
+          paths:
+            - path: /
+              pathType: Prefix
 ```
 
 ### Receive

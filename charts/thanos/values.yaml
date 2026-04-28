@@ -801,24 +801,62 @@ query:
     # @default -- {}
     labels: {}
 
-  # Kubernetes Ingress configuration for the Query HTTP endpoint.
+  # Kubernetes Ingress configuration for the Query endpoint.
   ingress:
-    # -- Enable a Kubernetes Ingress for the Query HTTP endpoint.
+    # -- Deprecated. Use `query.ingress.http.enabled` instead.
     enabled: false
-    # -- Ingress class name for Query (e.g. nginx, traefik).
+    # -- Deprecated. Use `query.ingress.http.className` instead.
     className: ""
-    # -- Extra annotations for the Query Ingress.
+    # -- Deprecated. Use `query.ingress.http.annotations` instead.
     # @default -- {}
     annotations: {}
-    # Host rules for the Query Ingress.
+    # Deprecated. Use `query.ingress.http.hosts` instead.
     hosts:
       - host: thanos-query.local
         paths:
           - path: /
             pathType: Prefix
-    # -- TLS configuration for the Query Ingress.
+    # -- Deprecated. Use `query.ingress.http.tls` instead.
     # @default -- []
     tls: []
+
+    # If this is enabled, none of the deprecated values above will be used.
+    http:
+      # -- Enable a Kubernetes Ingress for the Query HTTP endpoint.
+      enabled: false
+      # -- Ingress class name for Query HTTP endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Query HTTP Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Query HTTP Ingress.
+      hosts:
+        - host: thanos-query.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Query HTTP Ingress.
+      # @default -- []
+      tls: []
+
+    grpc:
+      # -- Enable a Kubernetes Ingress for the Query gRPC endpoint.
+      # Note this is independent of ingress.enabled that is for the HTTP ingress.
+      enabled: false
+      # -- Ingress class name for Query gRPC endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Query gRPC Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Query gRPC Ingress.
+      hosts:
+        - host: thanos-query-grpc.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Query gRPC Ingress.
+      # @default -- []
+      tls: []
 
   # Gateway API HTTPRoute configuration for the Query HTTP endpoint.
   httpRoute:
@@ -1316,24 +1354,62 @@ storegateway:
     # @default -- {}
     labels: {}
 
-  # Kubernetes Ingress configuration for the Store Gateway HTTP endpoint.
+  # Kubernetes Ingress configuration for the Store Gateway endpoint.
   ingress:
-    # -- Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint.
+    # -- Deprecated. Use `storegateway.ingress.http.enabled` instead.
     enabled: false
-    # -- Ingress class name for Store Gateway (e.g. nginx, traefik).
+    # -- Deprecated. Use `storegateway.ingress.http.className` instead.
     className: ""
-    # -- Extra annotations for the Store Gateway Ingress.
+    # -- Deprecated. Use `storegateway.ingress.http.annotations` instead.
     # @default -- {}
     annotations: {}
-    # Host rules for the Store Gateway Ingress.
+    # Deprecated. Use `storegateway.ingress.http.hosts` instead.
     hosts:
       - host: thanos-store.local
         paths:
           - path: /
             pathType: Prefix
-    # -- TLS configuration for the Store Gateway Ingress.
+    # -- Deprecated. Use `storegateway.ingress.http.tls` instead.
     # @default -- []
     tls: []
+
+    # If this is enabled, none of the deprecated values above will be used.
+    http:
+      # -- Enable a Kubernetes Ingress for the Store Gateway HTTP endpoint.
+      enabled: false
+      # -- Ingress class name for Store Gateway HTTP endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Store Gateway HTTP Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Store Gateway HTTP Ingress.
+      hosts:
+        - host: thanos-store.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Store Gateway HTTP Ingress.
+      # @default -- []
+      tls: []
+
+    grpc:
+      # -- Enable a Kubernetes Ingress for the Store Gateway gRPC endpoint.
+      # Note this is independent of ingress.enabled that is for the HTTP ingress.
+      enabled: false
+      # -- Ingress class name for Store Gateway gRPC endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Store Gateway gRPC Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Store Gateway gRPC Ingress.
+      hosts:
+        - host: thanos-store-grpc.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Store Gateway gRPC Ingress.
+      # @default -- []
+      tls: []
 
   # Gateway API HTTPRoute configuration for the Store Gateway HTTP endpoint.
   httpRoute:
@@ -1621,24 +1697,62 @@ receive:
     # @default -- {}
     labels: {}
 
-  # Kubernetes Ingress configuration for the Receive remote-write endpoint.
+  # Kubernetes Ingress configuration for the Receive endpoint.
   ingress:
-    # -- Enable a Kubernetes Ingress for the Receive remote-write endpoint.
+    # -- Deprecated. Use `receive.ingress.http.enabled` instead.
     enabled: false
-    # -- Ingress class name for Receive (e.g. nginx, traefik).
+    # -- Deprecated. Use `receive.ingress.http.className` instead.
     className: ""
-    # -- Extra annotations for the Receive Ingress.
+    # -- Deprecated. Use `receive.ingress.http.annotations` instead.
     # @default -- {}
     annotations: {}
-    # Host rules for the Receive Ingress.
+    # Deprecated. Use `receive.ingress.http.hosts` instead.
     hosts:
       - host: thanos-receive.local
         paths:
           - path: /
             pathType: Prefix
-    # -- TLS configuration for the Receive Ingress.
+    # -- Deprecated. Use `receive.ingress.http.tls` instead.
     # @default -- []
     tls: []
+
+    # If this is enabled, none of the deprecated values above will be used.
+    http:
+      # -- Enable a Kubernetes Ingress for the Receive HTTP endpoint.
+      enabled: false
+      # -- Ingress class name for Receive HTTP endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Receive HTTP Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Receive HTTP Ingress.
+      hosts:
+        - host: thanos-receive.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Receive HTTP Ingress.
+      # @default -- []
+      tls: []
+
+    grpc:
+      # -- Enable a Kubernetes Ingress for the Receive gRPC endpoint.
+      # Note this is independent of ingress.enabled that is for the HTTP ingress.
+      enabled: false
+      # -- Ingress class name for Receive gRPC endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Receive gRPC Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Receive gRPC Ingress.
+      hosts:
+        - host: thanos-receive-grpc.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Receive gRPC Ingress.
+      # @default -- []
+      tls: []
 
   # Gateway API HTTPRoute configuration for the Receive HTTP endpoint.
   httpRoute:

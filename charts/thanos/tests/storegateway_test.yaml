@@ -617,6 +617,262 @@ tests:
           path: spec.rules[0].http.paths[0].path
           value: /
 
+  - it: ingress targets http port
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: true
+      storegateway.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+
+  - it: renders ingress when http.enabled is true
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.http.enabled: true
+      storegateway.ingress.http.hosts:
+        - host: thanos-store-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+
+  - it: does not render ingress when neither enabled nor http.enabled is true
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: false
+      storegateway.ingress.http.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: uses http values for class name host and tls
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.http.enabled: true
+      storegateway.ingress.http.className: nginx-http
+      storegateway.ingress.http.hosts:
+        - host: thanos-store-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      storegateway.ingress.http.tls:
+        - hosts:
+            - thanos-store-http.example.com
+          secretName: thanos-store-http-tls
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-store-http.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-store-http-tls
+
+  - it: applies http annotations
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.http.enabled: true
+      storegateway.ingress.http.annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      storegateway.ingress.http.hosts:
+        - host: thanos-store-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["cert-manager.io/cluster-issuer"]
+          value: letsencrypt
+
+  - it: prefers http values over deprecated when both are set
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: true
+      storegateway.ingress.className: deprecated-nginx
+      storegateway.ingress.hosts:
+        - host: deprecated.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      storegateway.ingress.http.enabled: true
+      storegateway.ingress.http.className: nginx-http
+      storegateway.ingress.http.hosts:
+        - host: thanos-store-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-store-http.example.com
+
+  # -- gRPC Ingress ------------------------------------------------------
+
+  - it: renders grpc ingress when enabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: true
+      storegateway.ingress.grpc.hosts:
+        - host: thanos-store-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway-grpc
+
+  - it: does not render grpc ingress when disabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render grpc ingress when storegateway is disabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: false
+      storegateway.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets grpc ingress class name
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: true
+      storegateway.ingress.grpc.className: nginx
+      storegateway.ingress.grpc.hosts:
+        - host: thanos-store-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets grpc ingress host and path and targets grpc port
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: true
+      storegateway.ingress.grpc.hosts:
+        - host: thanos-store-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-store-grpc.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: RELEASE-NAME-thanos-storegateway
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+
+  - it: applies grpc ingress annotations
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: true
+      storegateway.ingress.grpc.annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: GRPC
+      storegateway.ingress.grpc.hosts:
+        - host: thanos-store-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/backend-protocol"]
+          value: GRPC
+
+  - it: renders grpc ingress tls when provided
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.grpc.enabled: true
+      storegateway.ingress.grpc.hosts:
+        - host: thanos-store-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      storegateway.ingress.grpc.tls:
+        - hosts:
+            - thanos-store-grpc.example.com
+          secretName: thanos-store-grpc-tls
+    asserts:
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: thanos-store-grpc.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-store-grpc-tls
+
+  - it: renders both http and grpc ingresses when both are enabled
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.http.enabled: true
+      storegateway.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway-grpc
+        documentIndex: 0
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway
+        documentIndex: 1
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+        documentIndex: 1
+
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled

@@ -663,6 +663,262 @@ tests:
           path: spec.rules[0].http.paths[0].path
           value: /
 
+  - it: ingress targets http port
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: true
+      receive.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+
+  - it: renders ingress when http.enabled is true
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.http.enabled: true
+      receive.ingress.http.hosts:
+        - host: thanos-receive-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+
+  - it: does not render ingress when neither enabled nor http.enabled is true
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: false
+      receive.ingress.http.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: uses http values for class name host and tls
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.http.enabled: true
+      receive.ingress.http.className: nginx-http
+      receive.ingress.http.hosts:
+        - host: thanos-receive-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      receive.ingress.http.tls:
+        - hosts:
+            - thanos-receive-http.example.com
+          secretName: thanos-receive-http-tls
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-receive-http.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-receive-http-tls
+
+  - it: applies http annotations
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.http.enabled: true
+      receive.ingress.http.annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+      receive.ingress.http.hosts:
+        - host: thanos-receive-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["cert-manager.io/cluster-issuer"]
+          value: letsencrypt
+
+  - it: prefers http values over deprecated when both are set
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: true
+      receive.ingress.className: deprecated-nginx
+      receive.ingress.hosts:
+        - host: deprecated.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      receive.ingress.http.enabled: true
+      receive.ingress.http.className: nginx-http
+      receive.ingress.http.hosts:
+        - host: thanos-receive-http.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx-http
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-receive-http.example.com
+
+  # -- gRPC Ingress ------------------------------------------------------
+
+  - it: renders grpc ingress when enabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: true
+      receive.ingress.grpc.hosts:
+        - host: thanos-receive-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-grpc
+
+  - it: does not render grpc ingress when disabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render grpc ingress when receive is disabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: false
+      receive.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets grpc ingress class name
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: true
+      receive.ingress.grpc.className: nginx
+      receive.ingress.grpc.hosts:
+        - host: thanos-receive-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets grpc ingress host and path and targets grpc port
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: true
+      receive.ingress.grpc.hosts:
+        - host: thanos-receive-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-receive-grpc.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: RELEASE-NAME-thanos-receive
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+
+  - it: applies grpc ingress annotations
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: true
+      receive.ingress.grpc.annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: GRPC
+      receive.ingress.grpc.hosts:
+        - host: thanos-receive-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/backend-protocol"]
+          value: GRPC
+
+  - it: renders grpc ingress tls when provided
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.grpc.enabled: true
+      receive.ingress.grpc.hosts:
+        - host: thanos-receive-grpc.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      receive.ingress.grpc.tls:
+        - hosts:
+            - thanos-receive-grpc.example.com
+          secretName: thanos-receive-grpc-tls
+    asserts:
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: thanos-receive-grpc.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-receive-grpc-tls
+
+  - it: renders both http and grpc ingresses when both are enabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.http.enabled: true
+      receive.ingress.grpc.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-grpc
+        documentIndex: 0
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: grpc
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+        documentIndex: 1
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+        documentIndex: 1
+
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled
