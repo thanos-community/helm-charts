@@ -45,7 +45,7 @@ spec:
           {{- end }}
           {{- if .Values.receive.enabled }}
             # - --endpoint={{ include "thanos.compName" (list . "receive") }}-headless:{{ .Values.receive.service.grpcPort }}
-            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "receive") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "receive-headless") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
           {{- range .Values.query.replicaLabels }}
             - --query.replica-label={{ . }}
