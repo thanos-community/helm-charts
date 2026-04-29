@@ -67,7 +67,88 @@ tests:
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[3]
-          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*storegateway.*"
+
+  - it: renders --endpoint args from query.endpoints.static when autogen disabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      query.endpoints.autogen.enabled: false
+      query.endpoints.static:
+        - sidecar.example.com:10901
+        - store.example.com:10901
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=sidecar.example.com:10901
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=store.example.com:10901
+
+  - it: static endpoints replace auto-wired storegateway and receive endpoints
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+      query.endpoints.autogen.enabled: false
+      query.endpoints.static:
+        - external.example.com:10901
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=external\\.example\\.com:10901$"
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[4]
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*storegateway.*"
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[4]
+          pattern: "--endpoint=dnssrv\\+_grpc\\._tcp\\..*receive.*"
+
+  - it: renders static endpoints alongside auto-wired endpoints when autogen enabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+      query.endpoints.autogen.enabled: true
+      query.endpoints.static:
+        - external.example.com:10901
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*storegateway.*"
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[4]
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*receive.*"
+      - equal:
+          path: spec.template.spec.containers[0].args[5]
+          value: --endpoint=external.example.com:10901
+
+  - it: renders no --endpoint args when autogen disabled and static empty
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+      query.endpoints.autogen.enabled: false
+      query.endpoints.static: []
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint="
+
+  - it: renders --endpoint args from deprecated query.stores
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      query.endpoints.autogen.enabled: false
+      query.stores:
+        - legacy.example.com:10901
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=legacy.example.com:10901
 
   - it: passes extra CLI args
     template: query/deployment.yaml

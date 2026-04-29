@@ -906,14 +906,27 @@ query:
     # -- Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.
     targetMemoryUtilizationPercentage: null
 
-  # -- List of gRPC Store API endpoints that Query should connect to.
-  # In-chart components (Receive, Store Gateway, Ruler) are wired automatically.
-  # Add external Prometheus sidecars or remote store gateways here.
+  # Configuration for the --endpoint arguments passed to thanos query.
+  endpoints:
+    # Auto-generated endpoints for the in-chart components (Receive, Store Gateway).
+    autogen:
+      # -- Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway).
+      # These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format.
+      enabled: true
+    # -- Optional static endpoint arguments. When non-empty will be added as extra endpoints.
+    # When `query.endpoints.autogen.enabled` is `false`, these will give you full control over the endpoints.
+    # @default -- []
+    static: []
+    # Example
+    # static:
+    #   - thanos-storegateway.cluster1.internal:443
+    #   - thanos-receive.cluster1.internal:443
+    #   - thanos-gateway.cluster2.internal:443
+    #   - thanos-gateway.cluster3.internal:443
+
+  # -- Deprecated. Use `query.endpoints.static[]` instead.
   # @default -- []
   stores: []
-  # Example:
-  # stores:
-  #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
 
   # Label names that identify replica identity for result deduplication.
   replicaLabels:

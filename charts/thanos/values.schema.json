@@ -2581,6 +2581,45 @@
           "title": "enabled",
           "type": "boolean"
         },
+        "endpoints": {
+          "additionalProperties": true,
+          "description": "Configuration for the --endpoint arguments passed to thanos query.",
+          "properties": {
+            "autogen": {
+              "additionalProperties": true,
+              "description": "Auto-generated endpoints for the in-chart components (Receive, Store Gateway).",
+              "properties": {
+                "enabled": {
+                  "default": true,
+                  "description": "Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway).\nThese use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "enabled"
+              ],
+              "title": "autogen",
+              "type": "object"
+            },
+            "static": {
+              "description": "Optional static endpoint arguments. When non-empty will be added as extra endpoints.\nWhen `query.endpoints.autogen.enabled` is `false`, `query.endpoints.static[]` will give you full control over the endpoints.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "static",
+              "type": "array"
+            }
+          },
+          "required": [
+            "autogen",
+            "static"
+          ],
+          "title": "endpoints",
+          "type": "object"
+        },
         "extraArgs": {
           "description": "Additional CLI arguments appended to the `thanos query` command.",
           "items": {
@@ -3554,7 +3593,7 @@
           "type": "object"
         },
         "stores": {
-          "description": "List of gRPC Store API endpoints that Query should connect to.\nIn-chart components (Receive, Store Gateway, Ruler) are wired automatically.\nAdd external Prometheus sidecars or remote store gateways here.",
+          "description": "Deprecated. Use `query.endpoints.static[]` instead.",
           "items": {
             "required": []
           },
@@ -3596,6 +3635,7 @@
         "httpRoute",
         "grpcRoute",
         "autoscaling",
+        "endpoints",
         "stores",
         "replicaLabels",
         "extraArgs",

@@ -223,12 +223,20 @@ query:
   replicaLabels:
     - prometheus_replica
 
-  # gRPC endpoints to query. Auto-discovered components are wired automatically.
-  # Add external Prometheus sidecars or remote store gateways here.
+  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway) are auto-wired
+  # when autogen.enabled is true. Endpoints defined in static[] are always appended; set
+  # autogen.enabled to false to take full control of what endpoint arguments are passed.
+  endpoints:
+    autogen:
+      enabled: true
+    static: []
+    # Example:
+    # static:
+    #   - thanos-storegateway.cluster1.internal:443
+    #   - thanos-receive.cluster1.internal:443
+
+  # Deprecated. Use query.endpoints.static[] instead.
   stores: []
-  # Example:
-  # stores:
-  #   - dnssrv+_grpc._tcp.thanos-storegateway.monitoring.svc.cluster.local
 
   ingress:
     http:
