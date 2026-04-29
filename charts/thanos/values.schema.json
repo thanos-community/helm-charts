@@ -2501,6 +2501,13 @@
       "additionalProperties": true,
       "description": "======================================================================\nQuery component\nFan-out query engine that queries multiple Store API endpoints\nand deduplicates results. This is the Prometheus-compatible entrypoint.\n======================================================================\nQuery component — fan-out PromQL engine that deduplicates results across stores.",
       "properties": {
+        "addComponentEndpoints": {
+          "default": true,
+          "description": "Enable auto-populating endpoints with the in-chart components (Receive, Store Gateway, Ruler).",
+          "required": [],
+          "title": "addComponentEndpoints",
+          "type": "boolean"
+        },
         "affinity": {
           "additionalProperties": true,
           "description": "Affinity rules for Query pod scheduling.",
@@ -3596,6 +3603,7 @@
         "httpRoute",
         "grpcRoute",
         "autoscaling",
+        "addComponentEndpoints",
         "stores",
         "replicaLabels",
         "extraArgs",

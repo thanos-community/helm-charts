@@ -69,6 +69,66 @@ tests:
           path: spec.template.spec.containers[0].args[3]
           pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
 
+  - it: adds store endpoints for receive when enabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: false
+      receive.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*receive.*"
+
+  - it: adds both storegateway and receive endpoints when both are enabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*storegateway.*"
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[4]
+          pattern: "^--endpoint=dnssrv\\+_grpc._tcp\\..*receive.*"
+
+  - it: omits component endpoints when addComponentEndpoints is false
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      query.addComponentEndpoints: false
+      storegateway.enabled: true
+      receive.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-storegateway.NAMESPACE.svc.cluster.local
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-receive.NAMESPACE.svc.cluster.local
+
+  - it: still renders user-supplied stores when addComponentEndpoints is false
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      query.addComponentEndpoints: false
+      storegateway.enabled: true
+      receive.enabled: true
+      query.stores:
+        - dnssrv+_grpc._tcp.external-store.example.com
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.external-store.example.com
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-storegateway.NAMESPACE.svc.cluster.local
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-receive.NAMESPACE.svc.cluster.local
+
   - it: passes extra CLI args
     template: query/deployment.yaml
     set:

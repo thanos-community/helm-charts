@@ -39,13 +39,13 @@ spec:
             - query
             - --http-address=0.0.0.0:{{ .Values.query.service.httpPort }}
             - --grpc-address=0.0.0.0:{{ .Values.query.service.grpcPort }}
-          {{- if .Values.storegateway.enabled }}
-            # - --endpoint={{ include "thanos.compName" (list . "storegateway") }}:{{ .Values.storegateway.service.grpcPort }}
+          {{- if .Values.query.addComponentEndpoints }}
+            {{- if .Values.storegateway.enabled }}
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "storegateway") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
-          {{- end }}
-          {{- if .Values.receive.enabled }}
-            # - --endpoint={{ include "thanos.compName" (list . "receive") }}-headless:{{ .Values.receive.service.grpcPort }}
+            {{- end }}
+            {{- if .Values.receive.enabled }}
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "receive") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            {{- end }}
           {{- end }}
           {{- range .Values.query.replicaLabels }}
             - --query.replica-label={{ . }}

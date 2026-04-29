@@ -223,7 +223,7 @@ query:
   replicaLabels:
     - prometheus_replica
 
-  # gRPC endpoints to query. Auto-discovered components are wired automatically.
+  # gRPC endpoints to query. Auto-discovered components are wired automatically unless query.addComponentEndpoints is false.
   # Add external Prometheus sidecars or remote store gateways here.
   stores: []
   # Example:

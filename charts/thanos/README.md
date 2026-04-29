@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.7.0](https://img.shields.io/badge/Version-0.7.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.8.0](https://img.shields.io/badge/Version-0.8.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -235,7 +235,7 @@ query:
   replicaLabels:
     - prometheus_replica
 
-  # gRPC endpoints to query. Auto-discovered components are wired automatically.
+  # gRPC endpoints to query. Auto-discovered components are wired automatically unless query.addComponentEndpoints is false.
   # Add external Prometheus sidecars or remote store gateways here.
   stores: []
   # Example:
@@ -659,6 +659,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.tolerations | list | [] | Toleration rules applied to every pod by default. |
 | global.topologySpreadConstraints | list | [] | Topology spread constraints applied to every pod by default. |
 | kube-prometheus-stack.enabled | bool | `false` | Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator and associated components into the same namespace as Thanos. |
+| query.addComponentEndpoints | bool | `true` | Enable auto-populating endpoints with the in-chart components (Receive, Store Gateway, Ruler) |
 | query.affinity | object | {} | Affinity rules for Query pod scheduling. |
 | query.annotations | object | {} | Extra annotations applied to Query resources. |
 | query.autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for the Query component. |
@@ -753,7 +754,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.serviceMonitor.scheme | string | `""` | Scrape scheme for Query (http or https). |
 | query.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Query. Empty uses the Prometheus operator default. |
 | query.serviceMonitor.tlsConfig | object | {} | TLS configuration for Query scraping. |
-| query.stores | list | [] | List of gRPC Store API endpoints that Query should connect to. In-chart components (Receive, Store Gateway, Ruler) are wired automatically. Add external Prometheus sidecars or remote store gateways here. |
+| query.stores | list | [] | List of gRPC Store API endpoints that Query should connect to. In-chart components (Receive, Store Gateway, Ruler) are wired automatically unless query.addComponentEndpoints is false. Add external Prometheus sidecars or remote store gateways here. |
 | query.tolerations | list | [] | Tolerations for Query pod scheduling. |
 | query.topologySpreadConstraints | list | [] | Topology spread constraints for Query pods. |
 | queryFrontend.affinity | object | {} | Affinity rules for Query Frontend pod scheduling. |

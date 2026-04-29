@@ -906,8 +906,11 @@ query:
     # -- Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.
     targetMemoryUtilizationPercentage: null
 
+  # -- Enable auto-populating endpoints with the in-chart components (Receive, Store Gateway, Ruler)
+  addComponentEndpoints: true
+
   # -- List of gRPC Store API endpoints that Query should connect to.
-  # In-chart components (Receive, Store Gateway, Ruler) are wired automatically.
+  # In-chart components (Receive, Store Gateway, Ruler) are wired automatically unless query.addComponentEndpoints is false.
   # Add external Prometheus sidecars or remote store gateways here.
   # @default -- []
   stores: []
