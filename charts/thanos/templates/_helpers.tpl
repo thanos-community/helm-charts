@@ -81,7 +81,6 @@ dnsConfig:
 {{- define "thanos.httpProbes" -}}
 {{- $root := .root -}}
 {{- $key := .key -}}
-{{- $port := .port -}}
 {{- $comp := index $root.Values $key | default dict -}}
 {{- $probes := $comp.probes | default dict -}}
 {{- with $probes.readiness }}
@@ -89,7 +88,7 @@ dnsConfig:
 readinessProbe:
   httpGet:
     path: {{ default "/-/ready" .path | quote }}
-    port: {{ default $port .port }}
+    port: http
   initialDelaySeconds: {{ default 5 .initialDelaySeconds }}
   periodSeconds: {{ default 10 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}
@@ -102,7 +101,7 @@ readinessProbe:
 livenessProbe:
   httpGet:
     path: {{ default "/-/healthy" .path | quote }}
-    port: {{ default $port .port }}
+    port: http
   initialDelaySeconds: {{ default 30 .initialDelaySeconds }}
   periodSeconds: {{ default 10 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}
@@ -115,7 +114,7 @@ livenessProbe:
 startupProbe:
   httpGet:
     path: {{ default "/-/ready" .path | quote }}
-    port: {{ default $port .port }}
+    port: http
   initialDelaySeconds: {{ default 0 .initialDelaySeconds }}
   periodSeconds: {{ default 5 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}

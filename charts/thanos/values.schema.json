@@ -429,20 +429,6 @@
                       "title": "periodSeconds",
                       "type": "integer"
                     },
-                    "port": {
-                      "default": "http",
-                      "description": "Port checked by the liveness probe.",
-                      "required": [],
-                      "title": "port",
-                      "oneOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
                     "successThreshold": {
                       "default": 1,
                       "description": "Consecutive successes before the container is considered live.",
@@ -461,7 +447,6 @@
                   "required": [
                     "enabled",
                     "path",
-                    "port",
                     "initialDelaySeconds",
                     "periodSeconds",
                     "timeoutSeconds",
@@ -510,20 +495,6 @@
                       "title": "periodSeconds",
                       "type": "integer"
                     },
-                    "port": {
-                      "default": "http",
-                      "description": "Port checked by the readiness probe.",
-                      "required": [],
-                      "title": "port",
-                      "oneOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
                     "successThreshold": {
                       "default": 1,
                       "description": "Consecutive successes before the pod is marked ready.",
@@ -542,7 +513,6 @@
                   "required": [
                     "enabled",
                     "path",
-                    "port",
                     "initialDelaySeconds",
                     "periodSeconds",
                     "timeoutSeconds",
@@ -591,20 +561,6 @@
                       "title": "periodSeconds",
                       "type": "integer"
                     },
-                    "port": {
-                      "default": "http",
-                      "description": "Port checked by the startup probe.",
-                      "required": [],
-                      "title": "port",
-                      "oneOf": [
-                        {
-                          "type": "integer"
-                        },
-                        {
-                          "type": "string"
-                        }
-                      ]
-                    },
                     "successThreshold": {
                       "default": 1,
                       "description": "Consecutive successes required before the startup probe is considered passed.",
@@ -623,7 +579,6 @@
                   "required": [
                     "enabled",
                     "path",
-                    "port",
                     "initialDelaySeconds",
                     "periodSeconds",
                     "timeoutSeconds",
@@ -1311,20 +1266,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Compactor liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Compactor container is considered live.",
@@ -1343,7 +1284,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -1392,20 +1332,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Compactor readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Compactor pod is marked ready.",
@@ -1424,7 +1350,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -1473,20 +1398,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Compactor startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Compactor startup probe is considered passed.",
@@ -1505,7 +1416,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -3214,20 +3124,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query container is considered live.",
@@ -3246,7 +3142,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -3295,20 +3190,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query pod is marked ready.",
@@ -3327,7 +3208,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -3376,20 +3256,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query startup probe is considered passed.",
@@ -3408,7 +3274,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -4093,20 +3958,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query Frontend liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query Frontend container is considered live.",
@@ -4125,7 +3976,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -4174,20 +4024,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query Frontend readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query Frontend pod is marked ready.",
@@ -4206,7 +4042,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -4255,20 +4090,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Query Frontend startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Query Frontend startup probe is considered passed.",
@@ -4287,7 +4108,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -5242,20 +5062,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Receive liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Receive container is considered live.",
@@ -5274,7 +5080,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -5323,20 +5128,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Receive readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Receive pod is marked ready.",
@@ -5355,7 +5146,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -5404,20 +5194,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Receive startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Receive startup probe is considered passed.",
@@ -5436,7 +5212,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -6324,20 +6099,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Ruler liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Ruler container is considered live.",
@@ -6356,7 +6117,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -6405,20 +6165,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Ruler readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Ruler pod is marked ready.",
@@ -6437,7 +6183,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -6486,20 +6231,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Ruler startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Ruler startup probe is considered passed.",
@@ -6518,7 +6249,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -7627,20 +7357,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Store Gateway liveness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Store Gateway container is considered live.",
@@ -7659,7 +7375,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -7708,20 +7423,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Store Gateway readiness probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Store Gateway pod is marked ready.",
@@ -7740,7 +7441,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
@@ -7789,20 +7489,6 @@
                   "title": "periodSeconds",
                   "type": "integer"
                 },
-                "port": {
-                  "default": "http",
-                  "description": "Port checked by the Store Gateway startup probe.",
-                  "required": [],
-                  "title": "port",
-                  "oneOf": [
-                    {
-                      "type": "integer"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
                 "successThreshold": {
                   "default": 1,
                   "description": "Consecutive successes before the Store Gateway startup probe is considered passed.",
@@ -7821,7 +7507,6 @@
               "required": [
                 "enabled",
                 "path",
-                "port",
                 "initialDelaySeconds",
                 "periodSeconds",
                 "timeoutSeconds",
