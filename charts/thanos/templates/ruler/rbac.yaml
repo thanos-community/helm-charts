@@ -1,0 +1,34 @@
+{{- if and .Values.ruler.enabled .Values.ruler.autoImportPrometheusRules.enabled .Values.global.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
+rules:
+  - apiGroups:
+      - monitoring.coreos.com
+    resources:
+      - prometheusrules
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "thanos.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

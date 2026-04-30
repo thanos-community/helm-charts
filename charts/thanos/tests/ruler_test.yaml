@@ -1115,6 +1115,90 @@ tests:
           path: data["import.sh"]
           pattern: 'SELECTOR="role=alert-rules,team=observability"'
 
+  # -- RBAC for auto-import PrometheusRules --------------------------------
+
+  - it: renders ClusterRole and ClusterRoleBinding when autoImport and rbac are enabled
+    template: ruler/rbac.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: ClusterRole
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler-rule-importer
+        documentIndex: 0
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - monitoring.coreos.com
+            resources:
+              - prometheusrules
+            verbs:
+              - get
+              - list
+              - watch
+        documentIndex: 0
+      - isKind:
+          of: ClusterRoleBinding
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-ruler-rule-importer
+        documentIndex: 1
+      - equal:
+          path: roleRef.kind
+          value: ClusterRole
+        documentIndex: 1
+      - equal:
+          path: roleRef.name
+          value: RELEASE-NAME-thanos-ruler-rule-importer
+        documentIndex: 1
+      - equal:
+          path: subjects[0].kind
+          value: ServiceAccount
+        documentIndex: 1
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-thanos-thanos
+        documentIndex: 1
+
+  - it: does not render rbac when ruler is disabled
+    template: ruler/rbac.yaml
+    set:
+      ruler.enabled: false
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render rbac when autoImport is disabled
+    template: ruler/rbac.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: false
+      global.rbac.create: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render rbac when global.rbac.create is false
+    template: ruler/rbac.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
   # -- NetworkPolicy -------------------------------------------------------
 
   - it: does not render networkpolicy when networkPolicies is disabled
