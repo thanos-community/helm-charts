@@ -73,7 +73,7 @@ spec:
           {{- include "thanos.containerSC" (dict "root" . "key" "storegateway") | nindent 10 }}
           resources:
             {{- toYaml .Values.storegateway.resources | nindent 12 }}
-          {{- include "thanos.httpProbes" (dict "root" . "key" "storegateway" "port" "http") | nindent 10 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "storegateway") | nindent 10 }}
         {{- include "thanos.extraContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 8 }}
       {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
       {{- include "thanos.initContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 6 }}

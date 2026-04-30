@@ -82,7 +82,7 @@ spec:
           {{- include "thanos.containerSC" (dict "root" . "key" "ruler") | nindent 10 }}
           resources:
             {{- toYaml .Values.ruler.resources | nindent 12 }}
-          {{- include "thanos.httpProbes" (dict "root" . "key" "ruler" "port" "http") | nindent 10 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "ruler") | nindent 10 }}
 
         {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
         - name: prometheus-rule-importer
