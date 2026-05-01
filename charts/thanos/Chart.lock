@@ -1,9 +1,9 @@
 dependencies:
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
-  version: 84.0.1
+  version: 84.4.0
 - name: rustfs
   repository: https://charts.rustfs.com/
   version: 0.0.98
-digest: sha256:38048c73a0069ab416246fcb09f1e3e84b511020e47edeee77ccdec9595439d7
-generated: "2026-04-25T11:11:47.518000895+02:00"
+digest: sha256:ad70181ff97f45f0e458c1ea2b3d742718d8f1f70146aa7506e1617eef6ec7f2
+generated: "2026-05-01T13:16:36.313958039Z"
