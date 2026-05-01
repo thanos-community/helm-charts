@@ -45,8 +45,7 @@ spec:
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "storegateway") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
           {{- if .Values.receive.enabled }}
-            # - --endpoint={{ include "thanos.compName" (list . "receive") }}-headless:{{ .Values.receive.service.grpcPort }}
-            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "receive") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.receiveHeadless" . }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
         {{- end }}
           {{- range .Values.query.endpoints.static }}
