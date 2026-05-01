@@ -4,6 +4,6 @@ dependencies:
   version: 84.0.1
 - name: rustfs
   repository: https://charts.rustfs.com/
-  version: 0.0.98
-digest: sha256:38048c73a0069ab416246fcb09f1e3e84b511020e47edeee77ccdec9595439d7
-generated: "2026-04-25T11:11:47.518000895+02:00"
+  version: 0.1.0
+digest: sha256:4cbf2f4a4a9c31f6b5912e45c27ca588bdf6027701be1f0df10bab1ad6072df8
+generated: "2026-05-01T13:16:27.852855274Z"
