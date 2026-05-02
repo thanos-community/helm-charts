@@ -9,5 +9,5 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway-caching") | nindent 4 }}
 data:
   caching-bucket.yaml: |
-    {{- toYaml (tpl .Values.storegateway.cachingBucketConfig .) | nindent 4 }}
+    {{- tpl .Values.storegateway.cachingBucketConfig . | nindent 4 }}
 {{- end }}
