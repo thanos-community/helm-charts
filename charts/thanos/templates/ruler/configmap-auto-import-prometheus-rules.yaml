@@ -41,11 +41,15 @@ data:
         echo "Rule files changed, triggering Thanos Ruler reload"
         if curl -sf -X POST http://localhost:10902/-/reload; then
           PREV_SUM="$CURRENT_SUM"
+          echo "Reload successful"
         else
           echo "Failed to reload Thanos Ruler, will retry next cycle"
         fi
+      else
+        echo "Rules files have not changed, reload not needed"
       fi
 
+      echo "Sleeping"
       sleep 60
     done
 {{- end }}
