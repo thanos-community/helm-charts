@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.9.1](https://img.shields.io/badge/Version-0.9.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -646,19 +646,45 @@ The table below documents all available values. Top-level keys group settings by
 | global.serviceMonitor.scheme | string | `""` | Scrape scheme: http or https. |
 | global.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout. Empty string uses the Prometheus operator default. |
 | global.serviceMonitor.tlsConfig | object | {} | TLS configuration for scraping when scheme is https. |
-| global.thanosRules.enabled | bool | `true` | Deploy PrometheusRule resources with built-in Thanos alerting rules. |
-| global.thanosRules.forDefaults.componentDown | string | `"5m"` | `for` duration used when a component is completely down. |
-| global.thanosRules.forDefaults.default | string | `"2m"` | Default `for` duration for most alert rules. |
-| global.thanosRules.forDefaults.short | string | `"1m"` | Short `for` duration used for fast-burn alerts. |
-| global.thanosRules.labels | object | {} | Extra labels merged into every PrometheusRule resource. |
-| global.thanosRules.severity.componentDown | string | `"critical"` | Severity label value used for component-down alerts. |
+| global.thanosRules.additionalRuleGroupAnnotations | object | {} | Annotations added to every alert rule across all groups. Applied on top of the rule's default annotations (summary, description, runbook_url). |
+| global.thanosRules.additionalRuleGroupLabels | object | {} | Labels added to every alert rule across all groups. Applied on top of the rule's default labels (severity). Useful for routing alerts to specific Alertmanager receivers (e.g. team, tenant). |
+| global.thanosRules.annotations | object | {} | Extra annotations merged into the PrometheusRule resource metadata. |
+| global.thanosRules.enabled | bool | `true` | Deploy a PrometheusRule resource with built-in Thanos alerting rules. |
+| global.thanosRules.groups.thanosBucketReplicate.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosBucketReplicate.enabled | bool | `false` | Render the thanos-bucket-replicate rule group. |
+| global.thanosRules.groups.thanosBucketReplicate.jobPattern | string | `".*thanos.*bucket-replicate.*"` | Regex used to match the Prometheus `job` label of bucket-replicate scrape targets. |
+| global.thanosRules.groups.thanosBucketReplicate.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosCompact.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosCompact.enabled | bool | `true` | Render the thanos-compact rule group. |
+| global.thanosRules.groups.thanosCompact.jobPattern | string | `".*thanos.*compact.*"` | Regex used to match the Prometheus `job` label of compactor scrape targets. |
+| global.thanosRules.groups.thanosCompact.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosComponentAbsent.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosComponentAbsent.enabled | bool | `true` | Render the thanos-component-absent rule group. |
+| global.thanosRules.groups.thanosComponentAbsent.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosQuery.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosQuery.enabled | bool | `true` | Render the thanos-query rule group. |
+| global.thanosRules.groups.thanosQuery.jobPattern | string | `".*thanos.*query.*"` | Regex used to match the Prometheus `job` label of query scrape targets. |
+| global.thanosRules.groups.thanosQuery.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosReceive.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosReceive.enabled | bool | `true` | Render the thanos-receive rule group. |
+| global.thanosRules.groups.thanosReceive.jobPattern | string | `".*thanos.*receive.*"` | Regex used to match the Prometheus `job` label of receive scrape targets. |
+| global.thanosRules.groups.thanosReceive.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosRule.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosRule.enabled | bool | `true` | Render the thanos-rule rule group. |
+| global.thanosRules.groups.thanosRule.jobPattern | string | `".*thanos.*rule.*"` | Regex used to match the Prometheus `job` label of ruler scrape targets. |
+| global.thanosRules.groups.thanosRule.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosSidecar.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosSidecar.enabled | bool | `false` | Render the thanos-sidecar rule group. |
+| global.thanosRules.groups.thanosSidecar.jobPattern | string | `".*thanos.*sidecar.*"` | Regex used to match the Prometheus `job` label of sidecar scrape targets. |
+| global.thanosRules.groups.thanosSidecar.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.groups.thanosStore.annotations | object | {} | Extra annotations merged into every alert in this group. |
+| global.thanosRules.groups.thanosStore.enabled | bool | `true` | Render the thanos-store rule group. |
+| global.thanosRules.groups.thanosStore.jobPattern | string | `".*thanos.*store.*"` | Regex used to match the Prometheus `job` label of store gateway scrape targets. |
+| global.thanosRules.groups.thanosStore.labels | object | {} | Extra labels merged into every alert in this group. |
+| global.thanosRules.labels | object | {} | Extra labels merged into the PrometheusRule resource metadata. |
 | global.thanosRules.severity.critical | string | `"critical"` | Severity label value used for critical alerts. |
+| global.thanosRules.severity.info | string | `"info"` | Severity label value used for informational alerts. |
 | global.thanosRules.severity.warning | string | `"warning"` | Severity label value used for warning alerts. |
-| global.thanosRules.thresholds.blockSyncFailures | int | `0` | Alert threshold for block synchronisation failure rate. |
-| global.thanosRules.thresholds.bucketOperationFailures | int | `0` | Alert threshold for bucket operation error rate (errors per second). |
-| global.thanosRules.thresholds.query5xxRate | int | `0` | Alert threshold for Query 5xx response rate. |
-| global.thanosRules.thresholds.receive5xxRate | int | `0` | Alert threshold for Receive 5xx response rate. |
-| global.thanosRules.thresholds.ruleEvalFailures | int | `0` | Alert threshold for Ruler evaluation failure rate. |
 | global.tolerations | list | [] | Toleration rules applied to every pod by default. |
 | global.topologySpreadConstraints | list | [] | Topology spread constraints applied to every pod by default. |
 | kube-prometheus-stack.enabled | bool | `false` | Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator and associated components into the same namespace as Thanos. |

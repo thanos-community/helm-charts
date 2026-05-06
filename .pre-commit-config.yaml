@@ -42,3 +42,35 @@ repos:
         language: system
         files: ^charts/
         pass_filenames: false
+
+  # Regenerate chart README.md from values.yaml + README.md.gotmpl.
+  # Uses the locally-installed helm-docs binary so the version is
+  # controlled via the dev-tools install rather than pinned twice.
+  - repo: local
+    hooks:
+      - id: helm-docs
+        name: helm-docs
+        entry: helm-docs --chart-search-root=charts
+        language: system
+        files: ^charts/.*/(values\.yaml|README\.md\.gotmpl|Chart\.yaml)$
+        pass_filenames: false
+
+  # Validate values.yaml against values.schema.json. `helm template` runs
+  # the same schema check that `helm install` does, so a schema/values
+  # drift fails the hook before it reaches CI.
+  - repo: local
+    hooks:
+      - id: helm-schema-validate
+        name: helm schema validate (values.yaml ↔ values.schema.json)
+        entry: |
+          bash -c '
+            set -euo pipefail
+            for chart in charts/*/; do
+              [ -f "$chart/values.schema.json" ] || continue
+              echo "Validating $chart against values.schema.json"
+              helm template schema-check "$chart" >/dev/null
+            done
+          '
+        language: system
+        files: ^charts/.*/(values\.yaml|values\.schema\.json|templates/.*)$
+        pass_filenames: false

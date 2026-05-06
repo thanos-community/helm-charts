@@ -45,7 +45,7 @@ tests:
   # -- PrometheusRule ----------------------------------------------------
 
   - it: renders prometheusrule when thanosRules are enabled
-    template: prometheusrule.yaml
+    template: prometheusrule/rule.yaml
     set:
       global.thanosRules.enabled: true
     asserts:
@@ -53,7 +53,7 @@ tests:
           of: PrometheusRule
 
   - it: does not render prometheusrule when thanosRules are disabled
-    template: prometheusrule.yaml
+    template: prometheusrule/rule.yaml
     set:
       global.thanosRules.enabled: false
     asserts:
@@ -61,7 +61,7 @@ tests:
           count: 0
 
   - it: applies extra labels to prometheusrule
-    template: prometheusrule.yaml
+    template: prometheusrule/rule.yaml
     set:
       global.thanosRules.enabled: true
       global.thanosRules.labels:

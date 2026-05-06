@@ -173,41 +173,147 @@ global:
 
   # Built-in Thanos alerting rules deployed as PrometheusRule CRDs.
   # Requires the Prometheus Operator to be installed in the cluster.
-  # Configuration for built-in Thanos PrometheusRule alerting resources.
+  # Alerts are sourced from the upstream Thanos monitoring-mixin
+  # (https://github.com/monitoring-mixins/website/blob/master/assets/thanos/alerts.yaml)
+  # and grouped per Thanos component. Each group can be toggled
+  # independently and decorated with extra labels and annotations.
   thanosRules:
-    # -- Deploy PrometheusRule resources with built-in Thanos alerting rules.
+    # -- Deploy a PrometheusRule resource with built-in Thanos alerting rules.
     enabled: true
-    # -- Extra labels merged into every PrometheusRule resource.
+    # -- Extra labels merged into the PrometheusRule resource metadata.
     # @default -- {}
     labels: {}
-    # Alert firing thresholds. Raise these above 0 to reduce noise in busy clusters.
-    thresholds:
-      # -- Alert threshold for bucket operation error rate (errors per second).
-      bucketOperationFailures: 0
-      # -- Alert threshold for block synchronisation failure rate.
-      blockSyncFailures: 0
-      # -- Alert threshold for Query 5xx response rate.
-      query5xxRate: 0
-      # -- Alert threshold for Ruler evaluation failure rate.
-      ruleEvalFailures: 0
-      # -- Alert threshold for Receive 5xx response rate.
-      receive5xxRate: 0
-    # Default `for` durations used across alert rules.
-    forDefaults:
-      # -- `for` duration used when a component is completely down.
-      componentDown: 5m
-      # -- Default `for` duration for most alert rules.
-      default: 2m
-      # -- Short `for` duration used for fast-burn alerts.
-      short: 1m
-    # Severity label values injected into PrometheusRule alert rules.
+    # -- Extra annotations merged into the PrometheusRule resource metadata.
+    # @default -- {}
+    annotations: {}
+    # -- Labels added to every alert rule across all groups. Applied on top
+    # of the rule's default labels (severity). Useful for routing alerts
+    # to specific Alertmanager receivers (e.g. team, tenant).
+    # @default -- {}
+    additionalRuleGroupLabels: {}
+    # -- Annotations added to every alert rule across all groups. Applied
+    # on top of the rule's default annotations (summary, description,
+    # runbook_url).
+    # @default -- {}
+    additionalRuleGroupAnnotations: {}
+    # Severity label values injected into alert rules. Override these to
+    # match your Alertmanager routing conventions.
     severity:
       # -- Severity label value used for critical alerts.
       critical: critical
       # -- Severity label value used for warning alerts.
       warning: warning
-      # -- Severity label value used for component-down alerts.
-      componentDown: critical
+      # -- Severity label value used for informational alerts.
+      info: info
+    # Per-group configuration. Each entry maps to a rule group from the
+    # Thanos mixin and supports:
+    #   - enabled: render the group when true (defaults shown below).
+    #   - jobPattern: regex matching the Prometheus `job` label of the
+    #     component scrape targets. Defaults assume a job name containing
+    #     `thanos` and the component keyword.
+    #   - labels / annotations: merged into every alert in the group, on
+    #     top of `additionalRuleGroupLabels` / `additionalRuleGroupAnnotations`.
+    groups:
+      # Compactor alerts (thanos-compact rule group).
+      thanosCompact:
+        # -- Render the thanos-compact rule group.
+        enabled: true
+        # -- Regex used to match the Prometheus `job` label of compactor scrape targets.
+        jobPattern: ".*thanos.*compact.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Query alerts (thanos-query rule group).
+      thanosQuery:
+        # -- Render the thanos-query rule group.
+        enabled: true
+        # -- Regex used to match the Prometheus `job` label of query scrape targets.
+        jobPattern: ".*thanos.*query.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Receive alerts (thanos-receive rule group).
+      thanosReceive:
+        # -- Render the thanos-receive rule group.
+        enabled: true
+        # -- Regex used to match the Prometheus `job` label of receive scrape targets.
+        jobPattern: ".*thanos.*receive.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Sidecar alerts (thanos-sidecar rule group). Disabled by default
+      # because this chart does not deploy the Thanos sidecar.
+      thanosSidecar:
+        # -- Render the thanos-sidecar rule group.
+        enabled: false
+        # -- Regex used to match the Prometheus `job` label of sidecar scrape targets.
+        jobPattern: ".*thanos.*sidecar.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Store gateway alerts (thanos-store rule group).
+      thanosStore:
+        # -- Render the thanos-store rule group.
+        enabled: true
+        # -- Regex used to match the Prometheus `job` label of store gateway scrape targets.
+        jobPattern: ".*thanos.*store.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Ruler alerts (thanos-rule rule group).
+      thanosRule:
+        # -- Render the thanos-rule rule group.
+        enabled: true
+        # -- Regex used to match the Prometheus `job` label of ruler scrape targets.
+        jobPattern: ".*thanos.*rule.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Bucket replicate alerts (thanos-bucket-replicate rule group).
+      # Disabled by default because this chart does not deploy the
+      # bucket-replicate component.
+      thanosBucketReplicate:
+        # -- Render the thanos-bucket-replicate rule group.
+        enabled: false
+        # -- Regex used to match the Prometheus `job` label of bucket-replicate scrape targets.
+        jobPattern: ".*thanos.*bucket-replicate.*"
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
+      # Component absence alerts (thanos-component-absent rule group).
+      # Each rule is also gated on the corresponding component group
+      # being enabled, so disabling thanosSidecar removes both the
+      # sidecar alerts and the ThanosSidecarIsDown rule.
+      thanosComponentAbsent:
+        # -- Render the thanos-component-absent rule group.
+        enabled: true
+        # -- Extra labels merged into every alert in this group.
+        # @default -- {}
+        labels: {}
+        # -- Extra annotations merged into every alert in this group.
+        # @default -- {}
+        annotations: {}
 
   # ServiceMonitor defaults for Prometheus Operator scraping.
   # Components inherit these defaults and can override per-component.
