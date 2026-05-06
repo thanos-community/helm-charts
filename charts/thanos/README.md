@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.8.4](https://img.shields.io/badge/Version-0.8.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.9.1](https://img.shields.io/badge/Version-0.9.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.0.98 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 84.0.1 |
+| https://charts.rustfs.com/ | rustfs | 0.1.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 84.5.0 |
 
 ## Component Overview
 
@@ -234,6 +234,7 @@ query:
   # Labels that identify replica identity — used for deduplication
   replicaLabels:
     - prometheus_replica
+    - receive_replica
 
   # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway) are auto-wired
   # when autogen.enabled is true. Endpoints defined in static[] are always appended; set
@@ -739,6 +740,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query startup probe times out. |
 | query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
 | query.replicaLabels[0] | string | `"prometheus_replica"` |  |
+| query.replicaLabels[1] | string | `"receive_replica"` |  |
 | query.resources | object | {} | Resource requests and limits for the Query container. |
 | query.service.annotations | object | {} | Extra annotations for the Query Service. |
 | query.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Query Service. |

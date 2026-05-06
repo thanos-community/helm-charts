@@ -58,6 +58,18 @@ tests:
           path: spec.template.spec.containers[0].args
           content: --query.replica-label=thanos_replica
 
+  - it: sets default replica labels when nothing is specified
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --query.replica-label=prometheus_replica
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --query.replica-label=receive_replica
+
   - it: adds store endpoints for storegateway when enabled
     template: query/deployment.yaml
     set:

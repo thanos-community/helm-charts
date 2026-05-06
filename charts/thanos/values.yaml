@@ -919,6 +919,7 @@ query:
   # Label names that identify replica identity for result deduplication.
   replicaLabels:
     - prometheus_replica
+    - receive_replica
 
   # Additional CLI arguments appended to the `thanos query` command.
   extraArgs:
