@@ -52,7 +52,7 @@ spec:
             - --label=receive_replica="$(POD_NAME)"
             - --receive.hashrings-file=/etc/thanos/hashrings.json
             - --receive.hashrings-algorithm=ketama
-            - --receive.local-endpoint=$(NAME).{{ include "thanos.compName" (list . "receive") }}-headless.$(NAMESPACE).svc.cluster.local:{{ .Values.receive.service.grpcPort }}
+            - --receive.local-endpoint=$(NAME).{{ include "thanos.compName" (list . "receive") }}-headless.$(NAMESPACE).svc.{{ .Values.global.clusterDomain }}:{{ .Values.receive.service.grpcPort }}
             {{- if .Values.receive.tenancyHeader }}
             - --receive.tenant-header={{ .Values.receive.tenancyHeader }}
             {{- end }}
