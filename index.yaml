@@ -24,6 +24,65 @@ entries:
         url: https://keys.openpgp.org/vks/v1/by-fingerprint/BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
     apiVersion: v2
     appVersion: v0.41.0
+    created: "2026-05-06T13:29:21.372971533Z"
+    dependencies:
+    - alias: kube-prometheus-stack
+      condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 84.5.0
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com/
+      version: 0.1.0
+    description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus
+      setup with long term storage capabilities.
+    digest: 21cadf01d868391cd8d736f70c7945ca5fd3b711f4a494273c979af3d7fc9633
+    home: https://thanos.io/
+    icon: https://raw.githubusercontent.com/thanos-io/thanos/master/docs/img/Thanos-logo_fullmedium.png
+    keywords:
+    - thanos
+    - prometheus
+    - monitoring
+    - metrics
+    - alerting
+    - observability
+    - kube-prometheus-stack
+    kubeVersion: '>= 1.30.0-0'
+    maintainers:
+    - email: hamdi.khelil@kapheira.cloud
+      name: hamdikh
+    name: thanos
+    sources:
+    - https://github.com/thanos-io/thanos
+    - https://github.com/thanos-community/helm-charts
+    type: application
+    urls:
+    - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.9.0/thanos-0.9.0.tgz
+    version: 0.9.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
+          description: GPG chart signing with ArtifactHub signKey annotation and Rekor transparency via helm-sigstore
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/images: |
+        - name: thanos
+          image: quay.io/thanos/thanos:v0.41.0
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Documentation
+          url: https://thanos.io/tip/thanos/getting-started.md/
+        - name: GitHub
+          url: https://github.com/thanos-io/thanos
+        - name: Slack
+          url: https://cloud-native.slack.com/archives/CL25937SP
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/signKey: |
+        fingerprint: BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
+        url: https://keys.openpgp.org/vks/v1/by-fingerprint/BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
+    apiVersion: v2
+    appVersion: v0.41.0
     created: "2026-05-06T12:48:22.835804996Z"
     dependencies:
     - alias: kube-prometheus-stack
@@ -1452,4 +1511,4 @@ entries:
     urls:
     - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.2.0/thanos-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-06T12:48:22.835987207Z"
+generated: "2026-05-06T13:29:21.373155248Z"
