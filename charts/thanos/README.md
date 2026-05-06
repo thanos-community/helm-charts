@@ -976,7 +976,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.sidecar.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the kubectl sidecar. |
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
-| ruler.containerSecurityContext | object | {} | Container security context for Ruler. Overrides global.containerSecurityContext. |
+| ruler.containerSecurityContext | object | global defaults plus "runAsUser: 1000" | Container security context for Ruler. Overrides global.containerSecurityContext. Default includes "runAsUser: 1000" in order to force alpine/kubectl sidecar to not run as root |
 | ruler.dnsConfig | object | {} | DNS configuration for Ruler pods. Overrides global.dnsConfig. |
 | ruler.enabled | bool | `false` | Enable the Ruler StatefulSet. |
 | ruler.extraArgs | list | [] | Additional CLI arguments appended to the `thanos rule` command. |
