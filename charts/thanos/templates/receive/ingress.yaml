@@ -1,6 +1,6 @@
 {{- if .Values.receive.enabled }}
 {{- $http := .Values.receive.ingress.http.enabled | ternary .Values.receive.ingress.http .Values.receive.ingress }}
-{{- $ingresses := dict "http" $http "grpc" .Values.receive.ingress.grpc }}
+{{- $ingresses := dict "http" $http "grpc" .Values.receive.ingress.grpc "remote-write" .Values.receive.ingress.remoteWrite }}
 {{- $sep := "" }}
 {{- range $port, $ingress := $ingresses }}
 {{- if $ingress.enabled }}

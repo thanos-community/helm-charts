@@ -4634,6 +4634,110 @@
               "title": "grpc",
               "type": "object"
             },
+            "remoteWrite": {
+              "additionalProperties": true,
+              "description": "Kubernetes Ingress configuration for the Receive remote-write endpoint.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Receive remote-write Ingress.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "className": {
+                  "default": "",
+                  "description": "Ingress class name for Receive remote-write endpoint (e.g. nginx, traefik).",
+                  "required": [],
+                  "title": "className",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Enable a Kubernetes Ingress for the Receive remote-write endpoint.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "hosts": {
+                  "description": "Host rules for the Receive remote-write Ingress.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": true,
+                        "properties": {
+                          "host": {
+                            "default": "thanos-receive-remote-write.local",
+                            "required": [],
+                            "title": "host",
+                            "type": "string"
+                          },
+                          "paths": {
+                            "items": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "path": {
+                                      "default": "/",
+                                      "required": [],
+                                      "title": "path",
+                                      "type": "string"
+                                    },
+                                    "pathType": {
+                                      "default": "Prefix",
+                                      "required": [],
+                                      "title": "pathType",
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "path",
+                                    "pathType"
+                                  ],
+                                  "type": "object"
+                                }
+                              ],
+                              "required": []
+                            },
+                            "required": [],
+                            "title": "paths",
+                            "type": "array"
+                          }
+                        },
+                        "required": [
+                          "host",
+                          "paths"
+                        ],
+                        "type": "object"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "hosts",
+                  "type": "array"
+                },
+                "tls": {
+                  "description": "TLS configuration for the Receive remote-write Ingress.",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "tls",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "hosts",
+                "tls"
+              ],
+              "title": "remoteWrite",
+              "type": "object"
+            },
             "hosts": {
               "description": "Deprecated. Use `receive.ingress.http.hosts` instead.",
               "items": {
@@ -4814,7 +4918,8 @@
             "hosts",
             "tls",
             "http",
-            "grpc"
+            "grpc",
+            "remoteWrite"
           ],
           "title": "ingress",
           "type": "object"

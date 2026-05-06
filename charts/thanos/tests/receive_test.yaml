@@ -919,6 +919,151 @@ tests:
           value: http
         documentIndex: 1
 
+  # -- Remote-write Ingress ------------------------------------------------------
+
+  - it: renders remote-write ingress when enabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+      receive.ingress.remoteWrite.hosts:
+        - host: thanos-receive-remote-write.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-remote-write
+
+  - it: does not render remote-write ingress when disabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render remote-write ingress when receive is disabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: false
+      receive.ingress.remoteWrite.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: sets remote-write ingress class name
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+      receive.ingress.remoteWrite.className: nginx
+      receive.ingress.remoteWrite.hosts:
+        - host: thanos-receive-remote-write.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+
+  - it: sets remote-write ingress host and path and targets remote-write port
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+      receive.ingress.remoteWrite.hosts:
+        - host: thanos-receive-remote-write.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: spec.rules[0].host
+          value: thanos-receive-remote-write.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: Prefix
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: RELEASE-NAME-thanos-receive
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: remote-write
+
+  - it: applies remote-write ingress annotations
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+      receive.ingress.remoteWrite.annotations:
+        nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      receive.ingress.remoteWrite.hosts:
+        - host: thanos-receive-remote-write.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.annotations["nginx.ingress.kubernetes.io/backend-protocol"]
+          value: HTTP
+
+  - it: renders remote-write ingress tls when provided
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+      receive.ingress.remoteWrite.hosts:
+        - host: thanos-receive-remote-write.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      receive.ingress.remoteWrite.tls:
+        - hosts:
+            - thanos-receive-remote-write.example.com
+          secretName: thanos-receive-remote-write-tls
+    asserts:
+      - equal:
+          path: spec.tls[0].hosts[0]
+          value: thanos-receive-remote-write.example.com
+      - equal:
+          path: spec.tls[0].secretName
+          value: thanos-receive-remote-write-tls
+
+  - it: renders both http and remote-write ingresses when both are enabled
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.http.enabled: true
+      receive.ingress.remoteWrite.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+        documentIndex: 0
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: http
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-remote-write
+        documentIndex: 1
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.name
+          value: remote-write
+        documentIndex: 1
+
   # -- ServiceMonitor ----------------------------------------------------
 
   - it: renders servicemonitor when component enabled
