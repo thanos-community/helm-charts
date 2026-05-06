@@ -1,0 +1,41 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      # Renovate (pinDigests) will pin this to a SHA on its next run.
+      - uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 60
+          days-before-issue-close: 14
+          days-before-pr-stale: 30
+          days-before-pr-close: 14
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: pinned,security,bug
+          exempt-pr-labels: pinned,security,work-in-progress
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not
+            had recent activity. It will be closed in 14 days if no further
+            activity occurs. Thank you for your contributions.
+          close-issue-message: |
+            This issue was closed because it has been stale for 14 days with no
+            activity.
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it
+            has not had recent activity. It will be closed in 14 days if no
+            further activity occurs. Thank you for your contributions.
+          close-pr-message: |
+            This pull request was closed because it has been stale for 14 days
+            with no activity.

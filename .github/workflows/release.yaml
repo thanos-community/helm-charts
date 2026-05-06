@@ -139,6 +139,9 @@ jobs:
           config: .cr.yaml
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Auto-generate release notes from PRs/commits via the GitHub API.
+          # Honors .github/release.yml if present (label-based grouping).
+          CR_GENERATE_RELEASE_NOTES: true
           latest_tag: ""
 
       - name: Upload GPG provenance to Rekor transparency log
