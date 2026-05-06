@@ -351,7 +351,7 @@ tests:
     set:
       query.enabled: true
     asserts:
-      - isNull:
+      - notExists:
           path: spec.template.spec.dnsConfig
 
   # -- Scheduling and placement ---------------------------------------
@@ -381,7 +381,7 @@ tests:
     asserts:
       - isNotEmpty:
           path: spec.template.spec.affinity.podAntiAffinity
-      - isNull:
+      - notExists:
           path: spec.template.spec.affinity.nodeAffinity
 
   - it: applies global affinity as fallback
