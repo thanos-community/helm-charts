@@ -61,7 +61,7 @@ tests:
     asserts:
       - contains:
           path: spec.template.spec.containers[0].args
-          content: --receive.hashrings-algorithm=ketama
+          content: --tsdb.wal-compression
 
   - it: passes extra CLI args
     template: receive/statefulset.yaml
