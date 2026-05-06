@@ -1,7 +1,9 @@
 {{- if and .Values.receive.enabled (eq (include "thanos.receive.mode" .) "standalone") }}
 {{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
 {{- $http := $cfg.ingress.http.enabled | ternary $cfg.ingress.http $cfg.ingress }}
-{{- $ingresses := dict "http" $http "grpc" $cfg.ingress.grpc }}
+{{- $grpc := $cfg.ingress.grpc }}
+{{- $remoteWrite := $cfg.ingress.remoteWrite }}
+{{- $ingresses := dict "http" $http "grpc" $grpc "remote-write" $remoteWrite}}
 {{- $sep := "" }}
 {{- range $port, $ingress := $ingresses }}
 {{- if $ingress.enabled }}
