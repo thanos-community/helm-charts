@@ -2133,6 +2133,10 @@ ruler:
         tag: latest
         # -- Image pull policy for the kubectl sidecar.
         pullPolicy: IfNotPresent
+    rbac:
+      # -- Add a ClusterRole and ClusterRoleBinding that allows thanos ruler to read and watch PrometheusRules.
+      # Also requires global.rbac.create to be true.
+      create: true
 
   # PersistentVolumeClaim configuration for the Ruler data directory.
   persistence:
