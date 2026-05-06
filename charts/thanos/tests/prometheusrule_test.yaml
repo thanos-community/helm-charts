@@ -1,0 +1,322 @@
+suite: thanos prometheus rules
+templates:
+  - prometheusrule/rule.yaml
+
+tests:
+  # ----------------------------------------------------------------------
+  # Resource toggling
+  # ----------------------------------------------------------------------
+
+  - it: renders a single PrometheusRule resource by default
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PrometheusRule
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-rules
+
+  - it: renders nothing when thanosRules is disabled
+    set:
+      global.thanosRules.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # ----------------------------------------------------------------------
+  # Resource-level metadata
+  # ----------------------------------------------------------------------
+
+  - it: applies extra labels to the PrometheusRule resource
+    set:
+      global.thanosRules.labels:
+        team: platform
+    asserts:
+      - equal:
+          path: metadata.labels.team
+          value: platform
+      - isSubset:
+          path: metadata.labels
+          content:
+            app.kubernetes.io/name: thanos
+
+  - it: applies extra annotations to the PrometheusRule resource
+    set:
+      global.thanosRules.annotations:
+        owner: sre
+    asserts:
+      - equal:
+          path: metadata.annotations.owner
+          value: sre
+
+  # ----------------------------------------------------------------------
+  # Default rule groups (no overrides)
+  # ----------------------------------------------------------------------
+
+  - it: renders all enabled-by-default groups
+    asserts:
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-compact
+          any: true
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-query
+          any: true
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-receive
+          any: true
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-store
+          any: true
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-rule
+          any: true
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-component-absent
+          any: true
+
+  - it: does not render thanos-sidecar by default
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-sidecar
+          any: true
+
+  - it: does not render thanos-bucket-replicate by default
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-bucket-replicate
+          any: true
+
+  # ----------------------------------------------------------------------
+  # Per-group enable/disable
+  # ----------------------------------------------------------------------
+
+  - it: disables thanos-compact when its group is disabled
+    set:
+      global.thanosRules.groups.thanosCompact.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-compact
+          any: true
+
+  - it: disables ThanosCompactIsDown when thanos-compact is disabled
+    set:
+      global.thanosRules.groups.thanosCompact.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosCompactIsDown
+          any: true
+
+  - it: enables thanos-sidecar when explicitly turned on
+    set:
+      global.thanosRules.groups.thanosSidecar.enabled: true
+    asserts:
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-sidecar
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosSidecarIsDown
+          any: true
+
+  - it: enables thanos-bucket-replicate when explicitly turned on
+    set:
+      global.thanosRules.groups.thanosBucketReplicate.enabled: true
+    asserts:
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-bucket-replicate
+          any: true
+
+  - it: disables the thanos-component-absent group entirely when toggled off
+    set:
+      global.thanosRules.groups.thanosComponentAbsent.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-component-absent
+          any: true
+
+  # ----------------------------------------------------------------------
+  # Severity overrides
+  # ----------------------------------------------------------------------
+
+  - it: substitutes the configured severity values
+    set:
+      global.thanosRules.severity.critical: page
+      global.thanosRules.severity.warning: ticket
+      global.thanosRules.severity.info: log
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.severity
+          value: ticket
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHttpRequestQueryErrorRateHigh")].labels.severity
+          value: page
+      - equal:
+          path: spec.groups[?(@.name == "thanos-receive")].rules[?(@.alert == "ThanosReceiveHighForwardRequestFailures")].labels.severity
+          value: log
+
+  # ----------------------------------------------------------------------
+  # Job-pattern overrides
+  # ----------------------------------------------------------------------
+
+  - it: uses default job-pattern regexes
+    asserts:
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].expr
+          pattern: 'job=~"\.\*thanos\.\*compact\.\*"'
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHttpRequestQueryErrorRateHigh")].expr
+          pattern: 'job=~"\.\*thanos\.\*query\.\*"'
+
+  - it: honors a custom jobPattern per group
+    set:
+      global.thanosRules.groups.thanosCompact.jobPattern: thanos-compactor
+      global.thanosRules.groups.thanosQuery.jobPattern: thanos-querier
+    asserts:
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].expr
+          pattern: 'job=~"thanos-compactor"'
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHttpRequestQueryErrorRateHigh")].expr
+          pattern: 'job=~"thanos-querier"'
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules[?(@.alert == "ThanosCompactIsDown")].expr
+          pattern: 'job=~"thanos-compactor"'
+
+  # ----------------------------------------------------------------------
+  # Global additional labels and annotations on every alert
+  # ----------------------------------------------------------------------
+
+  - it: applies additionalRuleGroupLabels to every alert
+    set:
+      global.thanosRules.additionalRuleGroupLabels:
+        team: platform
+        tenant: foo
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.team
+          value: platform
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHighDNSFailures")].labels.tenant
+          value: foo
+      - equal:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules[?(@.alert == "ThanosStoreIsDown")].labels.team
+          value: platform
+
+  - it: applies additionalRuleGroupAnnotations to every alert
+    set:
+      global.thanosRules.additionalRuleGroupAnnotations:
+        playbook: https://wiki.example.com/thanos
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-rule")].rules[?(@.alert == "ThanosRuleQueueIsDroppingAlerts")].annotations.playbook
+          value: https://wiki.example.com/thanos
+      - equal:
+          path: spec.groups[?(@.name == "thanos-receive")].rules[?(@.alert == "ThanosReceiveNoUpload")].annotations.playbook
+          value: https://wiki.example.com/thanos
+
+  # ----------------------------------------------------------------------
+  # Per-group label/annotation overrides
+  # ----------------------------------------------------------------------
+
+  - it: applies per-group labels and annotations only to that group
+    set:
+      global.thanosRules.groups.thanosQuery.labels:
+        oncall: query-team
+      global.thanosRules.groups.thanosQuery.annotations:
+        dashboard: https://grafana/query
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryGrpcServerErrorRate")].labels.oncall
+          value: query-team
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryGrpcServerErrorRate")].annotations.dashboard
+          value: https://grafana/query
+      - notExists:
+          path: spec.groups[?(@.name == "thanos-receive")].rules[?(@.alert == "ThanosReceiveConfigReloadFailure")].labels.oncall
+
+  - it: per-group labels override additionalRuleGroupLabels
+    set:
+      global.thanosRules.additionalRuleGroupLabels:
+        oncall: default
+      global.thanosRules.groups.thanosCompact.labels:
+        oncall: storage-team
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.oncall
+          value: storage-team
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHighDNSFailures")].labels.oncall
+          value: default
+
+  - it: per-group annotations override additionalRuleGroupAnnotations
+    set:
+      global.thanosRules.additionalRuleGroupAnnotations:
+        playbook: https://wiki/default
+      global.thanosRules.groups.thanosReceive.annotations:
+        playbook: https://wiki/receive
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-receive")].rules[?(@.alert == "ThanosReceiveNoUpload")].annotations.playbook
+          value: https://wiki/receive
+      - equal:
+          path: spec.groups[?(@.name == "thanos-store")].rules[?(@.alert == "ThanosStoreGrpcErrorRate")].annotations.playbook
+          value: https://wiki/default
+
+  # ----------------------------------------------------------------------
+  # Mixin-source content sanity checks
+  # ----------------------------------------------------------------------
+
+  - it: emits the expected number of rules per default group
+    asserts:
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          count: 5
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          count: 8
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-receive")].rules
+          count: 10
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-store")].rules
+          count: 4
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-rule")].rules
+          count: 11
+
+  - it: includes the upstream runbook URL on every alert
+    asserts:
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].annotations.runbook_url
+          pattern: ^https://github\.com/thanos-io/thanos/tree/main/mixin/runbook\.md
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryOverload")].annotations.runbook_url
+          pattern: ^https://github\.com/thanos-io/thanos/tree/main/mixin/runbook\.md

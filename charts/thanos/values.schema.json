@@ -2186,67 +2186,47 @@
         },
         "thanosRules": {
           "additionalProperties": true,
-          "description": "Built-in Thanos alerting rules deployed as PrometheusRule CRDs.\nRequires the Prometheus Operator to be installed in the cluster.\nConfiguration for built-in Thanos PrometheusRule alerting resources.",
+          "description": "Built-in Thanos alerting rules deployed as PrometheusRule CRDs. Sourced from the upstream Thanos monitoring-mixin and grouped per Thanos component. Each group can be toggled and decorated with labels and annotations.",
           "properties": {
             "enabled": {
               "default": true,
-              "description": "Deploy PrometheusRule resources with built-in Thanos alerting rules.",
+              "description": "Deploy a PrometheusRule resource with built-in Thanos alerting rules.",
               "required": [],
               "title": "enabled",
               "type": "boolean"
             },
-            "forDefaults": {
-              "additionalProperties": true,
-              "description": "Default `for` durations used across alert rules.",
-              "properties": {
-                "componentDown": {
-                  "default": "5m",
-                  "description": "`for` duration used when a component is completely down.",
-                  "required": [],
-                  "title": "componentDown",
-                  "type": "string"
-                },
-                "default": {
-                  "default": "2m",
-                  "description": "Default `for` duration for most alert rules.",
-                  "required": [],
-                  "title": "default",
-                  "type": "string"
-                },
-                "short": {
-                  "default": "1m",
-                  "description": "Short `for` duration used for fast-burn alerts.",
-                  "required": [],
-                  "title": "short",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "componentDown",
-                "default",
-                "short"
-              ],
-              "title": "forDefaults",
-              "type": "object"
-            },
             "labels": {
               "additionalProperties": true,
-              "description": "Extra labels merged into every PrometheusRule resource.",
+              "description": "Extra labels merged into the PrometheusRule resource metadata.",
               "required": [],
               "title": "labels",
               "type": "object"
             },
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations merged into the PrometheusRule resource metadata.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "additionalRuleGroupLabels": {
+              "additionalProperties": true,
+              "description": "Labels added to every alert rule across all groups.",
+              "required": [],
+              "title": "additionalRuleGroupLabels",
+              "type": "object"
+            },
+            "additionalRuleGroupAnnotations": {
+              "additionalProperties": true,
+              "description": "Annotations added to every alert rule across all groups.",
+              "required": [],
+              "title": "additionalRuleGroupAnnotations",
+              "type": "object"
+            },
             "severity": {
               "additionalProperties": true,
-              "description": "Severity label values injected into PrometheusRule alert rules.",
+              "description": "Severity label values injected into alert rules.",
               "properties": {
-                "componentDown": {
-                  "default": "critical",
-                  "description": "Severity label value used for component-down alerts.",
-                  "required": [],
-                  "title": "componentDown",
-                  "type": "string"
-                },
                 "critical": {
                   "default": "critical",
                   "description": "Severity label value used for critical alerts.",
@@ -2260,73 +2240,36 @@
                   "required": [],
                   "title": "warning",
                   "type": "string"
+                },
+                "info": {
+                  "default": "info",
+                  "description": "Severity label value used for informational alerts.",
+                  "required": [],
+                  "title": "info",
+                  "type": "string"
                 }
               },
               "required": [
                 "critical",
                 "warning",
-                "componentDown"
+                "info"
               ],
               "title": "severity",
               "type": "object"
             },
-            "thresholds": {
+            "groups": {
               "additionalProperties": true,
-              "description": "Alert firing thresholds. Raise these above 0 to reduce noise in busy clusters.",
-              "properties": {
-                "blockSyncFailures": {
-                  "default": 0,
-                  "description": "Alert threshold for block synchronisation failure rate.",
-                  "required": [],
-                  "title": "blockSyncFailures",
-                  "type": "integer"
-                },
-                "bucketOperationFailures": {
-                  "default": 0,
-                  "description": "Alert threshold for bucket operation error rate (errors per second).",
-                  "required": [],
-                  "title": "bucketOperationFailures",
-                  "type": "integer"
-                },
-                "query5xxRate": {
-                  "default": 0,
-                  "description": "Alert threshold for Query 5xx response rate.",
-                  "required": [],
-                  "title": "query5xxRate",
-                  "type": "integer"
-                },
-                "receive5xxRate": {
-                  "default": 0,
-                  "description": "Alert threshold for Receive 5xx response rate.",
-                  "required": [],
-                  "title": "receive5xxRate",
-                  "type": "integer"
-                },
-                "ruleEvalFailures": {
-                  "default": 0,
-                  "description": "Alert threshold for Ruler evaluation failure rate.",
-                  "required": [],
-                  "title": "ruleEvalFailures",
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "bucketOperationFailures",
-                "blockSyncFailures",
-                "query5xxRate",
-                "ruleEvalFailures",
-                "receive5xxRate"
-              ],
-              "title": "thresholds",
+              "description": "Per-group toggles and customisation. Each entry maps to a rule group from the Thanos mixin and accepts: enabled (bool), jobPattern (regex string, except for thanosComponentAbsent), labels (object), annotations (object).",
+              "required": [],
+              "title": "groups",
               "type": "object"
             }
           },
           "required": [
             "enabled",
             "labels",
-            "thresholds",
-            "forDefaults",
-            "severity"
+            "severity",
+            "groups"
           ],
           "title": "thanosRules",
           "type": "object"

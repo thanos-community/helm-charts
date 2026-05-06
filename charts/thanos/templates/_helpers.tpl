@@ -471,3 +471,8 @@ An empty map renders as the empty string.
 {{- end -}}
 {{- join "," $parts -}}
 {{- end -}}
+
+{{- /*
+PrometheusRule helpers live in templates/prometheusrule/_helpers.tpl
+to keep this global file focused on cross-cutting chart utilities.
+*/ -}}
