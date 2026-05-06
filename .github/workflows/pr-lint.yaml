@@ -1,0 +1,42 @@
+name: PR Lint
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  pull-requests: read
+
+jobs:
+  conventional-commit-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      # Renovate (pinDigests) will pin this to a SHA on its next run.
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed Conventional Commit types — kept in sync with cliff.toml
+          # commit_parsers so anything mergeable can be classified.
+          types: |
+            feat
+            fix
+            perf
+            revert
+            docs
+            refactor
+            chore
+            ci
+            build
+            test
+            style
+          requireScope: false
+          subjectPattern: ^[A-Za-z].+$
+          subjectPatternError: |
+            The PR subject must start with a letter (no leading lowercase prefix
+            beyond the type/scope, no leading whitespace or punctuation).
