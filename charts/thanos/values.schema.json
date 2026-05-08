@@ -64,16 +64,12 @@
                   "type": ["integer", "null"]
                 }
               },
-              "required": [
-                "enabled",
-                "minReplicas",
-                "maxReplicas"
-              ],
+              "required": ["enabled", "minReplicas", "maxReplicas"],
               "title": "autoscaling",
               "type": "object",
               "anyOf": [
-                {"required": ["targetCPUUtilizationPercentage"]},
-                {"required": ["targetMemoryUtilizationPercentage"]}
+                { "required": ["targetCPUUtilizationPercentage"] },
+                { "required": ["targetMemoryUtilizationPercentage"] }
               ]
             },
             "containerSecurityContext": {
@@ -190,12 +186,7 @@
                   "type": "array"
                 }
               },
-              "required": [
-                "enabled",
-                "annotations",
-                "parentRefs",
-                "hostnames"
-              ],
+              "required": ["enabled", "annotations", "parentRefs", "hostnames"],
               "title": "httpRoute",
               "type": "object"
             },
@@ -256,10 +247,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -270,10 +258,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -357,11 +342,7 @@
                   ]
                 }
               },
-              "required": [
-                "enabled",
-                "minAvailable",
-                "maxUnavailable"
-              ],
+              "required": ["enabled", "minAvailable", "maxUnavailable"],
               "title": "pdb",
               "type": "object"
             },
@@ -589,11 +570,7 @@
                   "type": "object"
                 }
               },
-              "required": [
-                "readiness",
-                "liveness",
-                "startup"
-              ],
+              "required": ["readiness", "liveness", "startup"],
               "title": "probes",
               "type": "object"
             },
@@ -644,12 +621,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "type",
-                "port",
-                "annotations",
-                "labels"
-              ],
+              "required": ["type", "port", "annotations", "labels"],
               "title": "service",
               "type": "object"
             },
@@ -806,10 +778,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "enabled",
-        "bucketweb"
-      ],
+      "required": ["enabled", "bucketweb"],
       "title": "bucket",
       "type": "object"
     },
@@ -975,12 +944,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -1034,10 +998,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -1048,10 +1009,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -1071,12 +1029,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "className",
-            "hosts",
-            "tls"
-          ],
+          "required": ["enabled", "className", "hosts", "tls"],
           "title": "ingress",
           "type": "object"
         },
@@ -1134,11 +1087,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -1183,12 +1132,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "enabled",
-            "size",
-            "storageClass",
-            "accessModes"
-          ],
+          "required": ["enabled", "size", "storageClass", "accessModes"],
           "title": "persistence",
           "type": "object"
         },
@@ -1209,10 +1153,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "fsGroup",
-            "fsGroupChangePolicy"
-          ],
+          "required": ["fsGroup", "fsGroupChangePolicy"],
           "title": "podSecurityContext",
           "type": "object"
         },
@@ -1426,11 +1367,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -1481,12 +1418,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "port",
-            "annotations",
-            "labels"
-          ],
+          "required": ["type", "port", "annotations", "labels"],
           "title": "service",
           "type": "object"
         },
@@ -1624,10 +1556,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "cpu",
-                "memory"
-              ],
+              "required": ["cpu", "memory"],
               "title": "maxAllowed",
               "type": "object"
             },
@@ -1650,10 +1579,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "cpu",
-                "memory"
-              ],
+              "required": ["cpu", "memory"],
               "title": "minAllowed",
               "type": "object"
             },
@@ -1715,6 +1641,7 @@
         "priorityClassName",
         "annotations",
         "labels",
+        "podLabels",
         "extraVolumes",
         "extraVolumeMounts",
         "serviceMonitor",
@@ -1779,9 +1706,7 @@
                   "type": "array"
                 }
               },
-              "required": [
-                "drop"
-              ],
+              "required": ["drop"],
               "title": "capabilities",
               "type": "object"
             },
@@ -1896,11 +1821,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "repository",
-            "tag",
-            "pullPolicy"
-          ],
+          "required": ["repository", "tag", "pullPolicy"],
           "title": "image",
           "type": "object"
         },
@@ -1953,12 +1874,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "createSecret",
-            "secretName",
-            "secretKey",
-            "config"
-          ],
+          "required": ["createSecret", "secretName", "secretKey", "config"],
           "title": "objstore",
           "type": "object"
         },
@@ -2002,11 +1918,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -2043,9 +1955,7 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "create"
-          ],
+          "required": ["create"],
           "title": "rbac",
           "type": "object"
         },
@@ -2082,11 +1992,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "create",
-            "annotations",
-            "name"
-          ],
+          "required": ["create", "annotations", "name"],
           "title": "serviceAccount",
           "type": "object"
         },
@@ -2249,11 +2155,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "critical",
-                "warning",
-                "info"
-              ],
+              "required": ["critical", "warning", "info"],
               "title": "severity",
               "type": "object"
             },
@@ -2265,12 +2167,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "enabled",
-            "labels",
-            "severity",
-            "groups"
-          ],
+          "required": ["enabled", "labels", "severity", "groups"],
           "title": "thanosRules",
           "type": "object"
         },
@@ -2344,9 +2241,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "enabled"
-      ],
+      "required": ["enabled"],
       "title": "kube-prometheus-stack",
       "type": "object"
     },
@@ -2408,16 +2303,12 @@
               "type": ["integer", "null"]
             }
           },
-          "required": [
-            "enabled",
-            "minReplicas",
-            "maxReplicas"
-          ],
+          "required": ["enabled", "minReplicas", "maxReplicas"],
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            { "required": ["targetCPUUtilizationPercentage"] },
+            { "required": ["targetMemoryUtilizationPercentage"] }
           ]
         },
         "containerSecurityContext": {
@@ -2450,9 +2341,7 @@
                   "type": "boolean"
                 }
               },
-              "required": [
-                "enabled"
-              ],
+              "required": ["enabled"],
               "title": "autogen",
               "type": "object"
             },
@@ -2466,10 +2355,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "autogen",
-            "static"
-          ],
+          "required": ["autogen", "static"],
           "title": "endpoints",
           "type": "object"
         },
@@ -2579,12 +2465,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "grpcRoute",
           "type": "object"
         },
@@ -2625,12 +2506,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -2716,10 +2592,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -2730,10 +2603,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -2795,10 +2665,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -2809,10 +2676,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -2879,10 +2743,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -2893,10 +2754,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -3002,11 +2860,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -3227,11 +3081,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -3304,13 +3154,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "httpPort",
-            "grpcPort",
-            "annotations",
-            "labels"
-          ],
+          "required": ["type", "httpPort", "grpcPort", "annotations", "labels"],
           "title": "service",
           "type": "object"
         },
@@ -3529,16 +3373,12 @@
               "type": ["integer", "null"]
             }
           },
-          "required": [
-            "enabled",
-            "minReplicas",
-            "maxReplicas"
-          ],
+          "required": ["enabled", "minReplicas", "maxReplicas"],
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            { "required": ["targetCPUUtilizationPercentage"] },
+            { "required": ["targetMemoryUtilizationPercentage"] }
           ]
         },
         "cacheConfig": {
@@ -3669,12 +3509,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -3735,10 +3570,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -3749,10 +3581,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -3772,13 +3601,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "className",
-            "annotations",
-            "hosts",
-            "tls"
-          ],
+          "required": ["enabled", "className", "annotations", "hosts", "tls"],
           "title": "ingress",
           "type": "object"
         },
@@ -3836,11 +3659,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -4061,11 +3880,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -4116,12 +3931,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "port",
-            "annotations",
-            "labels"
-          ],
+          "required": ["type", "port", "annotations", "labels"],
           "title": "service",
           "type": "object"
         },
@@ -4403,12 +4213,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "grpcRoute",
           "type": "object"
         },
@@ -4435,10 +4240,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "enabled",
-                "name"
-              ],
+              "required": ["enabled", "name"],
               "title": "autogen",
               "type": "object"
             },
@@ -4452,10 +4254,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "autogen",
-            "static"
-          ],
+          "required": ["autogen", "static"],
           "title": "hashrings",
           "type": "object"
         },
@@ -4496,12 +4295,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -4587,10 +4381,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -4601,10 +4392,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -4666,10 +4454,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -4680,10 +4465,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -4750,10 +4532,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -4764,10 +4543,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -4873,11 +4649,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -4922,12 +4694,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "enabled",
-            "size",
-            "storageClass",
-            "accessModes"
-          ],
+          "required": ["enabled", "size", "storageClass", "accessModes"],
           "title": "persistence",
           "type": "object"
         },
@@ -4948,10 +4715,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "fsGroup",
-            "fsGroupChangePolicy"
-          ],
+          "required": ["fsGroup", "fsGroupChangePolicy"],
           "title": "podSecurityContext",
           "type": "object"
         },
@@ -5165,11 +4929,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -5375,10 +5135,7 @@
               "type": "boolean"
             }
           },
-          "required": [
-            "retention",
-            "walCompression"
-          ],
+          "required": ["retention", "walCompression"],
           "title": "tsdb",
           "type": "object"
         },
@@ -5412,10 +5169,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "cpu",
-                "memory"
-              ],
+              "required": ["cpu", "memory"],
               "title": "maxAllowed",
               "type": "object"
             },
@@ -5438,10 +5192,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "cpu",
-                "memory"
-              ],
+              "required": ["cpu", "memory"],
               "title": "minAllowed",
               "type": "object"
             },
@@ -5544,9 +5295,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "config"
-          ],
+          "required": ["config"],
           "title": "alertmanagers",
           "type": "object"
         },
@@ -5605,27 +5354,17 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "repository",
-                    "tag",
-                    "pullPolicy"
-                  ],
+                  "required": ["repository", "tag", "pullPolicy"],
                   "title": "image",
                   "type": "object"
                 }
               },
-              "required": [
-                "image"
-              ],
+              "required": ["image"],
               "title": "sidecar",
               "type": "object"
             }
           },
-          "required": [
-            "enabled",
-            "labelSelector",
-            "sidecar"
-          ],
+          "required": ["enabled", "labelSelector", "sidecar"],
           "title": "autoImportPrometheusRules",
           "type": "object"
         },
@@ -5743,12 +5482,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -5809,10 +5543,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -5823,10 +5554,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -5846,13 +5574,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "className",
-            "annotations",
-            "hosts",
-            "tls"
-          ],
+          "required": ["enabled", "className", "annotations", "hosts", "tls"],
           "title": "ingress",
           "type": "object"
         },
@@ -5910,11 +5632,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -5959,12 +5677,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "enabled",
-            "size",
-            "storageClass",
-            "accessModes"
-          ],
+          "required": ["enabled", "size", "storageClass", "accessModes"],
           "title": "persistence",
           "type": "object"
         },
@@ -5985,10 +5698,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "fsGroup",
-            "fsGroupChangePolicy"
-          ],
+          "required": ["fsGroup", "fsGroupChangePolicy"],
           "title": "podSecurityContext",
           "type": "object"
         },
@@ -6202,11 +5912,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -6224,9 +5930,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "urls"
-          ],
+          "required": ["urls"],
           "title": "query",
           "type": "object"
         },
@@ -6255,9 +5959,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "example-alerts.yaml"
-          ],
+          "required": ["example-alerts.yaml"],
           "title": "rules",
           "type": "object"
         },
@@ -6301,13 +6003,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "grpcPort",
-            "httpPort",
-            "annotations",
-            "labels"
-          ],
+          "required": ["type", "grpcPort", "httpPort", "annotations", "labels"],
           "title": "service",
           "type": "object"
         },
@@ -6513,10 +6209,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "accessKey",
-                "secretKey"
-              ],
+              "required": ["accessKey", "secretKey"],
               "title": "existingSecretKeys",
               "type": "object"
             },
@@ -6547,10 +6240,7 @@
           "type": "object"
         }
       },
-      "required": [
-        "enabled",
-        "initBucket"
-      ],
+      "required": ["enabled", "initBucket"],
       "title": "rustfs",
       "type": "object"
     },
@@ -6612,16 +6302,12 @@
               "type": ["integer", "null"]
             }
           },
-          "required": [
-            "enabled",
-            "minReplicas",
-            "maxReplicas"
-          ],
+          "required": ["enabled", "minReplicas", "maxReplicas"],
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            { "required": ["targetCPUUtilizationPercentage"] },
+            { "required": ["targetMemoryUtilizationPercentage"] }
           ]
         },
         "cachingBucketConfig": {
@@ -6745,12 +6431,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "grpcRoute",
           "type": "object"
         },
@@ -6791,12 +6472,7 @@
               "type": "array"
             }
           },
-          "required": [
-            "enabled",
-            "annotations",
-            "parentRefs",
-            "hostnames"
-          ],
+          "required": ["enabled", "annotations", "parentRefs", "hostnames"],
           "title": "httpRoute",
           "type": "object"
         },
@@ -6882,10 +6558,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -6896,10 +6569,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -6961,10 +6631,7 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "path",
-                                "pathType"
-                              ],
+                              "required": ["path", "pathType"],
                               "type": "object"
                             }
                           ],
@@ -6975,10 +6642,7 @@
                         "type": "array"
                       }
                     },
-                    "required": [
-                      "host",
-                      "paths"
-                    ],
+                    "required": ["host", "paths"],
                     "type": "object"
                   }
                 ],
@@ -7045,10 +6709,7 @@
                                       "type": "string"
                                     }
                                   },
-                                  "required": [
-                                    "path",
-                                    "pathType"
-                                  ],
+                                  "required": ["path", "pathType"],
                                   "type": "object"
                                 }
                               ],
@@ -7059,10 +6720,7 @@
                             "type": "array"
                           }
                         },
-                        "required": [
-                          "host",
-                          "paths"
-                        ],
+                        "required": ["host", "paths"],
                         "type": "object"
                       }
                     ],
@@ -7168,11 +6826,7 @@
               ]
             }
           },
-          "required": [
-            "enabled",
-            "minAvailable",
-            "maxUnavailable"
-          ],
+          "required": ["enabled", "minAvailable", "maxUnavailable"],
           "title": "pdb",
           "type": "object"
         },
@@ -7217,12 +6871,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "enabled",
-            "size",
-            "storageClass",
-            "accessModes"
-          ],
+          "required": ["enabled", "size", "storageClass", "accessModes"],
           "title": "persistence",
           "type": "object"
         },
@@ -7243,10 +6892,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "fsGroup",
-            "fsGroupChangePolicy"
-          ],
+          "required": ["fsGroup", "fsGroupChangePolicy"],
           "title": "podSecurityContext",
           "type": "object"
         },
@@ -7460,11 +7106,7 @@
               "type": "object"
             }
           },
-          "required": [
-            "readiness",
-            "liveness",
-            "startup"
-          ],
+          "required": ["readiness", "liveness", "startup"],
           "title": "probes",
           "type": "object"
         },
@@ -7522,13 +7164,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "grpcPort",
-            "httpPort",
-            "annotations",
-            "labels"
-          ],
+          "required": ["type", "grpcPort", "httpPort", "annotations", "labels"],
           "title": "service",
           "type": "object"
         },
@@ -7673,6 +7309,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb"
       ],

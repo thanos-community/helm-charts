@@ -107,6 +107,17 @@ tests:
           path: metadata.labels.custom-label
           value: my-value
 
+  - it: applies pod labels
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.podLabels:
+        azure.workload.identity/use: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["azure.workload.identity/use"]
+          value: "true"
+
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv

@@ -824,6 +824,10 @@ compactor:
   # @default -- {}
   labels: {}
 
+  # -- Extra labels applied to Compactor pods.
+  # @default -- {}
+  podLabels: {}
+
   # -- Extra volumes for Compactor pods.
   # @default -- []
   extraVolumes: []
@@ -1687,6 +1691,10 @@ storegateway:
   # -- Extra labels applied to Store Gateway resources.
   # @default -- {}
   labels: {}
+
+  # -- Extra labels applied to Store Gateway pods.
+  # @default -- {}
+  podLabels: {}
 
   # Prometheus Operator ServiceMonitor configuration for the Store Gateway.
   serviceMonitor:
