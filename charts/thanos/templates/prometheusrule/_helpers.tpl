@@ -58,18 +58,27 @@ Usage:
 {{- $rule := $groups.thanosRule | default dict -}}
 {{- $bucketRepl := $groups.thanosBucketReplicate | default dict -}}
 {{- $absent := $groups.thanosComponentAbsent | default dict -}}
-{{- /* Resolve `enabled` per group. Defaults match values.yaml: sidecar
-       and bucketReplicate are off because the chart does not deploy
-       those components. Resolving here keeps each rule helper to a
-       single `if .compactEnabled` check and side-steps the Helm quirk
-       where `default true false` returns true. */ -}}
+{{- /* Resolve `enabled` per group. Each group's own toggle defaults to
+       true (false for sidecar/bucketReplicate which have no component
+       in this chart). For groups that map to a chart component, the
+       group is also AND-ed with that component's top-level `enabled`
+       flag, so disabling a component (e.g. ruler.enabled=false) also
+       silences its rule group and its ThanosXIsDown absent alert. */ -}}
 {{- $defaults := dict "compact" true "query" true "receive" true "sidecar" false "store" true "rule" true "bucketRepl" false "absent" true -}}
+{{- $compEn  := and (hasKey .Values "compactor")    (default false (index .Values "compactor"    "enabled")) -}}
+{{- $qEn     := and (hasKey .Values "query")        (default false (index .Values "query"        "enabled")) -}}
+{{- $rcEn    := and (hasKey .Values "receive")      (default false (index .Values "receive"      "enabled")) -}}
+{{- $stEn    := and (hasKey .Values "storegateway") (default false (index .Values "storegateway" "enabled")) -}}
+{{- $rEn     := and (hasKey .Values "ruler")        (default false (index .Values "ruler"        "enabled")) -}}
+{{- $componentGate := dict "compact" $compEn "query" $qEn "receive" $rcEn "store" $stEn "rule" $rEn -}}
 {{- $enabled := dict -}}
 {{- range $k, $g := dict "compact" $compact "query" $query "receive" $receive "sidecar" $sidecar "store" $store "rule" $rule "bucketRepl" $bucketRepl "absent" $absent -}}
-{{- if hasKey $g "enabled" -}}
-{{- $_ := set $enabled $k $g.enabled -}}
+{{- $own := index $defaults $k -}}
+{{- if hasKey $g "enabled" -}}{{- $own = $g.enabled -}}{{- end -}}
+{{- if hasKey $componentGate $k -}}
+{{- $_ := set $enabled $k (and $own (index $componentGate $k)) -}}
 {{- else -}}
-{{- $_ := set $enabled $k (index $defaults $k) -}}
+{{- $_ := set $enabled $k $own -}}
 {{- end -}}
 {{- end -}}
 {{- $ctx := dict
