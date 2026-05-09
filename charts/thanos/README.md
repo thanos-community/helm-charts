@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.10.0](https://img.shields.io/badge/Version-0.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.10.1](https://img.shields.io/badge/Version-0.10.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -655,22 +655,22 @@ The table below documents all available values. Top-level keys group settings by
 | global.thanosRules.groups.thanosBucketReplicate.jobPattern | string | `".*thanos.*bucket-replicate.*"` | Regex used to match the Prometheus `job` label of bucket-replicate scrape targets. |
 | global.thanosRules.groups.thanosBucketReplicate.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosCompact.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosCompact.enabled | bool | `true` | Render the thanos-compact rule group. |
+| global.thanosRules.groups.thanosCompact.enabled | bool | `true` | Render the thanos-compact rule group. Also requires `compactor.enabled`. |
 | global.thanosRules.groups.thanosCompact.jobPattern | string | `".*thanos.*compact.*"` | Regex used to match the Prometheus `job` label of compactor scrape targets. |
 | global.thanosRules.groups.thanosCompact.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosComponentAbsent.annotations | object | {} | Extra annotations merged into every alert in this group. |
 | global.thanosRules.groups.thanosComponentAbsent.enabled | bool | `true` | Render the thanos-component-absent rule group. |
 | global.thanosRules.groups.thanosComponentAbsent.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosQuery.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosQuery.enabled | bool | `true` | Render the thanos-query rule group. |
+| global.thanosRules.groups.thanosQuery.enabled | bool | `true` | Render the thanos-query rule group. Also requires `query.enabled`. |
 | global.thanosRules.groups.thanosQuery.jobPattern | string | `".*thanos.*query.*"` | Regex used to match the Prometheus `job` label of query scrape targets. |
 | global.thanosRules.groups.thanosQuery.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosReceive.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosReceive.enabled | bool | `true` | Render the thanos-receive rule group. |
+| global.thanosRules.groups.thanosReceive.enabled | bool | `true` | Render the thanos-receive rule group. Also requires `receive.enabled`. |
 | global.thanosRules.groups.thanosReceive.jobPattern | string | `".*thanos.*receive.*"` | Regex used to match the Prometheus `job` label of receive scrape targets. |
 | global.thanosRules.groups.thanosReceive.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosRule.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosRule.enabled | bool | `true` | Render the thanos-rule rule group. |
+| global.thanosRules.groups.thanosRule.enabled | bool | `true` | Render the thanos-rule rule group. Also requires `ruler.enabled`. |
 | global.thanosRules.groups.thanosRule.jobPattern | string | `".*thanos.*rule.*"` | Regex used to match the Prometheus `job` label of ruler scrape targets. |
 | global.thanosRules.groups.thanosRule.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosSidecar.annotations | object | {} | Extra annotations merged into every alert in this group. |
@@ -678,7 +678,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.thanosRules.groups.thanosSidecar.jobPattern | string | `".*thanos.*sidecar.*"` | Regex used to match the Prometheus `job` label of sidecar scrape targets. |
 | global.thanosRules.groups.thanosSidecar.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosStore.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosStore.enabled | bool | `true` | Render the thanos-store rule group. |
+| global.thanosRules.groups.thanosStore.enabled | bool | `true` | Render the thanos-store rule group. Also requires `storegateway.enabled`. |
 | global.thanosRules.groups.thanosStore.jobPattern | string | `".*thanos.*store.*"` | Regex used to match the Prometheus `job` label of store gateway scrape targets. |
 | global.thanosRules.groups.thanosStore.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.labels | object | {} | Extra labels merged into the PrometheusRule resource metadata. |

@@ -207,7 +207,11 @@ global:
       info: info
     # Per-group configuration. Each entry maps to a rule group from the
     # Thanos mixin and supports:
-    #   - enabled: render the group when true (defaults shown below).
+    #   - enabled: render the group when true. For groups that map to a
+    #     chart component (compact, query, receive, store, rule), the
+    #     group is also gated on the component's top-level `enabled`
+    #     flag — disabling the component (e.g. ruler.enabled=false)
+    #     silences its rule group and its ThanosXIsDown absent alert.
     #   - jobPattern: regex matching the Prometheus `job` label of the
     #     component scrape targets. Defaults assume a job name containing
     #     `thanos` and the component keyword.
@@ -215,8 +219,9 @@ global:
     #     top of `additionalRuleGroupLabels` / `additionalRuleGroupAnnotations`.
     groups:
       # Compactor alerts (thanos-compact rule group).
+      # Also gated on `compactor.enabled`.
       thanosCompact:
-        # -- Render the thanos-compact rule group.
+        # -- Render the thanos-compact rule group. Also requires `compactor.enabled`.
         enabled: true
         # -- Regex used to match the Prometheus `job` label of compactor scrape targets.
         jobPattern: ".*thanos.*compact.*"
@@ -227,8 +232,9 @@ global:
         # @default -- {}
         annotations: {}
       # Query alerts (thanos-query rule group).
+      # Also gated on `query.enabled`.
       thanosQuery:
-        # -- Render the thanos-query rule group.
+        # -- Render the thanos-query rule group. Also requires `query.enabled`.
         enabled: true
         # -- Regex used to match the Prometheus `job` label of query scrape targets.
         jobPattern: ".*thanos.*query.*"
@@ -239,8 +245,9 @@ global:
         # @default -- {}
         annotations: {}
       # Receive alerts (thanos-receive rule group).
+      # Also gated on `receive.enabled`.
       thanosReceive:
-        # -- Render the thanos-receive rule group.
+        # -- Render the thanos-receive rule group. Also requires `receive.enabled`.
         enabled: true
         # -- Regex used to match the Prometheus `job` label of receive scrape targets.
         jobPattern: ".*thanos.*receive.*"
@@ -264,8 +271,9 @@ global:
         # @default -- {}
         annotations: {}
       # Store gateway alerts (thanos-store rule group).
+      # Also gated on `storegateway.enabled`.
       thanosStore:
-        # -- Render the thanos-store rule group.
+        # -- Render the thanos-store rule group. Also requires `storegateway.enabled`.
         enabled: true
         # -- Regex used to match the Prometheus `job` label of store gateway scrape targets.
         jobPattern: ".*thanos.*store.*"
@@ -276,8 +284,9 @@ global:
         # @default -- {}
         annotations: {}
       # Ruler alerts (thanos-rule rule group).
+      # Also gated on `ruler.enabled`.
       thanosRule:
-        # -- Render the thanos-rule rule group.
+        # -- Render the thanos-rule rule group. Also requires `ruler.enabled`.
         enabled: true
         # -- Regex used to match the Prometheus `job` label of ruler scrape targets.
         jobPattern: ".*thanos.*rule.*"

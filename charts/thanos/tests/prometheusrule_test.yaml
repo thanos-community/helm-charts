@@ -54,7 +54,7 @@ tests:
   # Default rule groups (no overrides)
   # ----------------------------------------------------------------------
 
-  - it: renders all enabled-by-default groups
+  - it: renders rule groups for components enabled by default
     asserts:
       - contains:
           path: spec.groups
@@ -79,12 +79,35 @@ tests:
       - contains:
           path: spec.groups
           content:
+            name: thanos-component-absent
+          any: true
+
+  - it: does not render thanos-rule when ruler is disabled by default
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
             name: thanos-rule
           any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosRuleIsDown
+          any: true
+
+  - it: renders thanos-rule when ruler is enabled
+    set:
+      ruler.enabled: true
+    asserts:
       - contains:
           path: spec.groups
           content:
-            name: thanos-component-absent
+            name: thanos-rule
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosRuleIsDown
           any: true
 
   - it: does not render thanos-sidecar by default
@@ -101,6 +124,101 @@ tests:
           path: spec.groups
           content:
             name: thanos-bucket-replicate
+          any: true
+
+  # ----------------------------------------------------------------------
+  # Auto-disable based on the matching component's `enabled` flag
+  # ----------------------------------------------------------------------
+
+  - it: disables thanos-compact and ThanosCompactIsDown when compactor is disabled
+    set:
+      compactor.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-compact
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosCompactIsDown
+          any: true
+
+  - it: disables thanos-query and ThanosQueryIsDown when query is disabled
+    set:
+      query.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-query
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosQueryIsDown
+          any: true
+
+  - it: disables thanos-receive and ThanosReceiveIsDown when receive is disabled
+    set:
+      receive.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-receive
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosReceiveIsDown
+          any: true
+
+  - it: disables thanos-store and ThanosStoreIsDown when storegateway is disabled
+    set:
+      storegateway.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-store
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosStoreIsDown
+          any: true
+
+  - it: a disabled component silences its rule group even when the group toggle is on
+    set:
+      compactor.enabled: false
+      global.thanosRules.groups.thanosCompact.enabled: true
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-compact
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosCompactIsDown
+          any: true
+
+  - it: explicit group disable silences a group whose component is enabled
+    set:
+      global.thanosRules.groups.thanosQuery.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-query
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosQueryIsDown
           any: true
 
   # ----------------------------------------------------------------------
@@ -232,6 +350,7 @@ tests:
 
   - it: applies additionalRuleGroupAnnotations to every alert
     set:
+      ruler.enabled: true
       global.thanosRules.additionalRuleGroupAnnotations:
         playbook: https://wiki.example.com/thanos
     asserts:
@@ -295,6 +414,8 @@ tests:
   # ----------------------------------------------------------------------
 
   - it: emits the expected number of rules per default group
+    set:
+      ruler.enabled: true
     asserts:
       - lengthEqual:
           path: spec.groups[?(@.name == "thanos-compact")].rules
