@@ -1853,6 +1853,24 @@ receive:
       # @default -- []
       tls: []
 
+    remoteWrite:
+      # -- Enable a Kubernetes Ingress for the Receive remote-write endpoint.
+      enabled: false
+      # -- Ingress class name for Receive remote-write endpoint (e.g. nginx, traefik).
+      className: ""
+      # -- Extra annotations for the Receive remote-write Ingress.
+      # @default -- {}
+      annotations: {}
+      # Host rules for the Receive remote-write Ingress.
+      hosts:
+        - host: thanos-receive-remote-write.local
+          paths:
+            - path: /
+              pathType: Prefix
+      # -- TLS configuration for the Receive remote-write Ingress.
+      # @default -- []
+      tls: []
+
   # Gateway API HTTPRoute configuration for the Receive HTTP endpoint.
   httpRoute:
     # -- Enable a Gateway API HTTPRoute for the Receive HTTP endpoint.
