@@ -1,3 +1,6 @@
-{{- if and .Values.receive.enabled .Values.receive.httpRoute.enabled }}
-{{ include "thanos.httpRoute" (list . "receive" .Values.receive.service.httpPort .Values.receive.httpRoute) }}
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.mode" .) "standalone") }}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- if $cfg.httpRoute.enabled }}
+{{ include "thanos.httpRoute" (list . "receive" $cfg.service.httpPort $cfg.httpRoute) }}
+{{- end }}
 {{- end }}

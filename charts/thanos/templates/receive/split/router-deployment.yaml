@@ -1,0 +1,104 @@
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") }}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- $rt := .Values.receive.router -}}
+{{- $httpPort := default 10902 $rt.service.httpPort -}}
+{{- $rwPort := default 10908 $rt.service.remoteWritePort -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "thanos.receive.routerName" . }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: receive-router
+    {{- with $rt.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
+    {{- with $rt.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ $rt.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: receive-router
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        {{- include "thanos.labels" . | nindent 8 }}
+        app.kubernetes.io/component: receive-router
+        {{- with $rt.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- $anns := dict -}}
+        {{- if .Values.global.podAnnotations }}
+        {{- $anns = merge $anns .Values.global.podAnnotations -}}
+        {{- end }}
+        {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+        {{- toYaml $anns | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "router" "parent" "receive") | nindent 6 }}
+      containers:
+        - name: receive-router
+          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
+          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          args:
+            - receive
+            - --http-address=0.0.0.0:{{ $httpPort }}
+            - --remote-write.address=0.0.0.0:{{ $rwPort }}
+            - --receive.hashrings-file=/etc/thanos/hashrings.json
+            - --receive.hashrings-algorithm=ketama
+            - --receive.replication-factor={{ $rt.replicationFactor | default 1 }}
+            {{- if $cfg.tenancyHeader }}
+            - --receive.tenant-header={{ $cfg.tenancyHeader }}
+            {{- end }}
+            {{- range $rt.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ $httpPort }}
+            - name: remote-write
+              containerPort: {{ $rwPort }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 12 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 10 }}
+          volumeMounts:
+            - name: thanos-config
+              mountPath: /etc/thanos
+              readOnly: true
+            {{- include "thanos.extraMountItems" (dict "root" . "key" "router" "parent" "receive") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "router" "parent" "receive") | nindent 10 }}
+          resources:
+            {{- toYaml ($rt.resources | default dict) | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "router" "parent" "receive") | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "router" "parent" "receive" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "router" "parent" "receive" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
+      volumes:
+        - name: thanos-config
+          configMap:
+            name: {{ include "thanos.receive.hashringsConfigMapName" . }}
+            items:
+              - key: hashrings.json
+                path: hashrings.json
+        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "router" "parent" "receive") | nindent 8 }}
+{{- end }}

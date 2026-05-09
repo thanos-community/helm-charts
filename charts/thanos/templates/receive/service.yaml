@@ -1,27 +1,28 @@
 {{- if .Values.receive.enabled }}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}
+  name: {{ include "thanos.receive.workloadName" . }}
   labels:
     app.kubernetes.io/component: receive
     {{- include "thanos.labels" . | nindent 4 }}
-    {{- with .Values.receive.service.labels }}
+    {{- with $cfg.service.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
-    {{- with .Values.receive.service.annotations }}
+    {{- with $cfg.service.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  type: {{ .Values.receive.service.type }}
+  type: {{ $cfg.service.type }}
   ports:
     - name: http
-      port: {{ .Values.receive.service.httpPort }}
+      port: {{ $cfg.service.httpPort }}
       targetPort: http
     - name: remote-write
-      port: {{ .Values.receive.service.remoteWritePort }}
+      port: {{ $cfg.service.remoteWritePort }}
       targetPort: remote-write
   selector:
     app.kubernetes.io/component: receive
@@ -30,16 +31,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}-headless
+  name: {{ include "thanos.receiveHeadless" . }}
   labels:
     app.kubernetes.io/component: receive
     {{- include "thanos.labels" . | nindent 4 }}
-    {{- with .Values.receive.service.labels }}
+    {{- with $cfg.service.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
-    {{- with .Values.receive.service.annotations }}
+    {{- with $cfg.service.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
@@ -47,7 +48,7 @@ spec:
   type: ClusterIP
   ports:
     - name: grpc
-      port: {{ .Values.receive.service.grpcPort }}
+      port: {{ $cfg.service.grpcPort }}
       targetPort: grpc
   selector:
     app.kubernetes.io/component: receive

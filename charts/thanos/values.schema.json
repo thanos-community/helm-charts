@@ -4505,6 +4505,14 @@
           "title": "httpRoute",
           "type": "object"
         },
+        "ingester": {
+          "additionalProperties": true,
+          "default": {},
+          "description": "Ingester StatefulSet config. Required (and must mirror the top-level `receive.*` shape) when `receive.mode` is `split`; ignored in `standalone` mode.",
+          "required": [],
+          "title": "ingester",
+          "type": "object"
+        },
         "ingress": {
           "additionalProperties": true,
           "description": "Kubernetes Ingress configuration for the Receive endpoint.",
@@ -4817,6 +4825,24 @@
             "grpc"
           ],
           "title": "ingress",
+          "type": "object"
+        },
+        "mode": {
+          "default": "standalone",
+          "description": "Receive deployment topology. One of `standalone` (single workload that both routes and ingests) or `split` (separate Router Deployment and Ingester StatefulSet).",
+          "enum": [
+            "standalone",
+            "split"
+          ],
+          "required": [],
+          "title": "mode",
+          "type": "string"
+        },
+        "router": {
+          "additionalProperties": true,
+          "description": "Receive Router (used only when receive.mode is `split`). Stateless Deployment that fronts the Ingester StatefulSet.",
+          "required": [],
+          "title": "router",
           "type": "object"
         },
         "labels": {
@@ -5480,6 +5506,7 @@
       },
       "required": [
         "enabled",
+        "mode",
         "replicaCount",
         "tenancyHeader",
         "tsdb",
@@ -5510,7 +5537,43 @@
         "annotations",
         "labels",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "router"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "split"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "ingester": {
+                "required": [
+                  "replicaCount",
+                  "tsdb",
+                  "hashrings",
+                  "service",
+                  "vpa",
+                  "persistence",
+                  "podSecurityContext",
+                  "probes",
+                  "serviceMonitor",
+                  "pdb"
+                ]
+              }
+            },
+            "required": [
+              "ingester"
+            ]
+          }
+        }
       ],
       "title": "receive",
       "type": "object"

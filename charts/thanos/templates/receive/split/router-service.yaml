@@ -1,0 +1,30 @@
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") }}
+{{- $rt := .Values.receive.router -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.receive.routerName" . }}
+  labels:
+    app.kubernetes.io/component: receive-router
+    {{- include "thanos.labels" . | nindent 4 }}
+    {{- with $rt.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
+    {{- with $rt.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ $rt.service.type | default "ClusterIP" }}
+  ports:
+    - name: http
+      port: {{ $rt.service.httpPort | default 10902 }}
+      targetPort: http
+    - name: remote-write
+      port: {{ $rt.service.remoteWritePort | default 10908 }}
+      targetPort: remote-write
+  selector:
+    app.kubernetes.io/component: receive-router
+    app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

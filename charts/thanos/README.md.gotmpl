@@ -285,6 +285,59 @@ prometheus:
       - url: http://thanos-receive.monitoring.svc.cluster.local:10908/api/v1/receive
 ```
 
+#### Split mode (separate Router and Ingester)
+
+For high-availability and horizontal scalability, Receive can be deployed as
+two separate workloads following the [receive split proposal](https://thanos.io/tip/proposals-accepted/202012-receive-split.md):
+
+- **Router** — stateless `Deployment` that terminates client `remote_write`
+  traffic and forwards each request to the correct Ingester(s) according to the
+  hashring config (with optional replication).
+- **Ingester** — stateful `StatefulSet` that stores samples in a local TSDB WAL
+  and ships blocks to the object store, just like standalone Receive.
+
+Set `receive.mode: split` to opt in. In `split` mode the top-level `receive.*`
+fields are **ignored**: configure the Ingester StatefulSet (renamed to
+`<release>-thanos-receive-ingester`) via `receive.ingester.*`, and the Router
+Deployment (`<release>-thanos-receive-router`) via `receive.router.*`. The
+schema enforces that both `ingester` and `router` are populated when
+`mode: split`.
+
+```yaml
+receive:
+  enabled: true
+  mode: split             # standalone (default) | split
+
+  ingester:
+    replicaCount: 3       # Minimum 3 for replication factor 2
+    tsdb:
+      retention: 24h
+      walCompression: true
+    service:
+      grpcPort: 10901
+      httpPort: 10902
+      remoteWritePort: 10908
+    persistence:
+      enabled: true
+      size: 10Gi
+    hashrings:
+      autogen:
+        enabled: true
+
+  router:
+    replicaCount: 2
+    replicationFactor: 2  # Each write fans out to N ingesters
+```
+
+In standalone mode (default), leave `receive.ingester` and `receive.router`
+empty — all configuration lives directly under `receive.*`.
+
+In split mode clients should remote-write to the Router service:
+
+```
+http://<release>-thanos-receive-router.<namespace>.svc.cluster.local:10908/api/v1/receive
+```
+
 ### Store Gateway
 
 The Store Gateway exposes historical blocks from the object store over the Store API. Query routes requests for older data to this component.

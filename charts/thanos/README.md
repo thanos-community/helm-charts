@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.10.1](https://img.shields.io/badge/Version-0.10.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -295,6 +295,59 @@ prometheus:
   prometheusSpec:
     remoteWrite:
       - url: http://thanos-receive.monitoring.svc.cluster.local:10908/api/v1/receive
+```
+
+#### Split mode (separate Router and Ingester)
+
+For high-availability and horizontal scalability, Receive can be deployed as
+two separate workloads following the [receive split proposal](https://thanos.io/tip/proposals-accepted/202012-receive-split.md):
+
+- **Router** — stateless `Deployment` that terminates client `remote_write`
+  traffic and forwards each request to the correct Ingester(s) according to the
+  hashring config (with optional replication).
+- **Ingester** — stateful `StatefulSet` that stores samples in a local TSDB WAL
+  and ships blocks to the object store, just like standalone Receive.
+
+Set `receive.mode: split` to opt in. In `split` mode the top-level `receive.*`
+fields are **ignored**: configure the Ingester StatefulSet (renamed to
+`<release>-thanos-receive-ingester`) via `receive.ingester.*`, and the Router
+Deployment (`<release>-thanos-receive-router`) via `receive.router.*`. The
+schema enforces that both `ingester` and `router` are populated when
+`mode: split`.
+
+```yaml
+receive:
+  enabled: true
+  mode: split             # standalone (default) | split
+
+  ingester:
+    replicaCount: 3       # Minimum 3 for replication factor 2
+    tsdb:
+      retention: 24h
+      walCompression: true
+    service:
+      grpcPort: 10901
+      httpPort: 10902
+      remoteWritePort: 10908
+    persistence:
+      enabled: true
+      size: 10Gi
+    hashrings:
+      autogen:
+        enabled: true
+
+  router:
+    replicaCount: 2
+    replicationFactor: 2  # Each write fans out to N ingesters
+```
+
+In standalone mode (default), leave `receive.ingester` and `receive.router`
+empty — all configuration lives directly under `receive.*`.
+
+In split mode clients should remote-write to the Router service:
+
+```
+http://<release>-thanos-receive-router.<namespace>.svc.cluster.local:10908/api/v1/receive
 ```
 
 ### Store Gateway
@@ -883,6 +936,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |
 | receive.httpRoute.hostnames | list | [] | Hostnames to match on the Receive HTTPRoute. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
+| receive.ingester | object | {} | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. |
 | receive.ingress.annotations | object | {} | Deprecated. Use `receive.ingress.http.annotations` instead. |
 | receive.ingress.className | string | `""` | Deprecated. Use `receive.ingress.http.className` instead. |
 | receive.ingress.enabled | bool | `false` | Deprecated. Use `receive.ingress.http.enabled` instead. |
@@ -905,6 +959,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.ingress.http.tls | list | [] | TLS configuration for the Receive HTTP Ingress. |
 | receive.ingress.tls | list | [] | Deprecated. Use `receive.ingress.http.tls` instead. |
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
+| receive.mode | string | `"standalone"` | Receive deployment topology. One of: `standalone` — single workload that both routes and ingests (RouterIngestor mode); `split` — separate Router (Deployment) and Ingester (StatefulSet) workloads, following the receive split proposal (https://thanos.io/tip/proposals-accepted/202012-receive-split.md).  Field shape depends on mode:   - `standalone`: configure the workload directly via top-level `receive.*`     fields (replicaCount, tsdb, service, persistence, etc.). `receive.ingester`     and `receive.router` are ignored.   - `split`: configure each workload via `receive.ingester.*` and     `receive.router.*`. Top-level `receive.*` fields are ignored. The schema     requires both `ingester` and `router` to be populated in this mode. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
 | receive.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Receive pods during a disruption. |
@@ -937,8 +992,84 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Receive startup probe. |
 | receive.probes.startup.successThreshold | int | `1` | Consecutive successes before the Receive startup probe is considered passed. |
 | receive.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Receive startup probe times out. |
-| receive.replicaCount | int | `3` | Number of Receive pod replicas. Minimum 3 is recommended for replication factor 2 (write quorum = floor(replicaCount/2)+1). |
+| receive.replicaCount | int | `3` | Number of Receive pod replicas. Minimum 3 is recommended for replication factor 2 (write quorum = floor(replicaCount/2)+1). In `split` mode this controls the Ingester StatefulSet replica count. |
 | receive.resources | object | {} | Resource requests and limits for the Receive container. |
+| receive.router.affinity | object | {} | Affinity rules for Router pod scheduling. Falls back to receive.affinity. |
+| receive.router.annotations | object | {} | Extra annotations applied to Router resources. |
+| receive.router.containerSecurityContext | object | {} | Container security context for the Router container. Falls back to receive.containerSecurityContext, then global.containerSecurityContext. |
+| receive.router.dnsConfig | object | {} | DNS configuration for Router pods. Falls back to receive.dnsConfig. |
+| receive.router.extraArgs | list | [] | Additional CLI arguments appended to the `thanos receive` command for the Router. |
+| receive.router.extraContainers | list | [] | Extra sidecar containers for Router pods. |
+| receive.router.extraEnv | list | [] | Extra environment variables injected into the Router container. |
+| receive.router.extraEnvFrom | list | [] | Extra environment variable sources for the Router container. |
+| receive.router.extraInitContainers | list | [] | Extra init containers for Router pods. |
+| receive.router.extraVolumeMounts | list | [] | Extra volume mounts for the Router container. |
+| receive.router.extraVolumes | list | [] | Extra volumes for Router pods. |
+| receive.router.httpRoute.annotations | object | {} | Annotations for the Router HTTPRoute resource. |
+| receive.router.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Router HTTP endpoint. |
+| receive.router.httpRoute.hostnames | list | [] | Hostnames to match on the Router HTTPRoute. |
+| receive.router.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Router HTTPRoute. |
+| receive.router.ingress.http.annotations | object | {} | Extra annotations for the Router HTTP Ingress. |
+| receive.router.ingress.http.className | string | `""` | Ingress class name for Router HTTP endpoint. |
+| receive.router.ingress.http.enabled | bool | `false` | Enable a Kubernetes Ingress for the Router HTTP endpoint. |
+| receive.router.ingress.http.hosts[0].host | string | `"thanos-receive-router.local"` |  |
+| receive.router.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
+| receive.router.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| receive.router.ingress.http.tls | list | [] | TLS configuration for the Router HTTP Ingress. |
+| receive.router.labels | object | {} | Extra labels applied to Router resources. |
+| receive.router.nodeSelector | object | {} | Node selector for Router pod scheduling. Falls back to receive.nodeSelector. |
+| receive.router.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Router. |
+| receive.router.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Router pods during a disruption. |
+| receive.router.pdb.minAvailable | int or string | `""` | Minimum available Router pods during a disruption. |
+| receive.router.podSecurityContext | object | {} | Pod security context for Router pods. Falls back to receive.podSecurityContext, then global.podSecurityContext. |
+| receive.router.priorityClassName | string | `""` | Priority class name for Router pods. Falls back to receive.priorityClassName. |
+| receive.router.probes.liveness.enabled | bool | `true` | Enable the liveness probe for Router. |
+| receive.router.probes.liveness.failureThreshold | int | `6` | Consecutive failures before the Router container is restarted. |
+| receive.router.probes.liveness.initialDelaySeconds | int | `30` | Seconds to wait before starting the Router liveness probe. |
+| receive.router.probes.liveness.path | string | `"/-/healthy"` | HTTP path checked by the Router liveness probe. |
+| receive.router.probes.liveness.periodSeconds | int | `10` | How often (seconds) to run the Router liveness probe. |
+| receive.router.probes.liveness.successThreshold | int | `1` | Consecutive successes before the Router container is considered live. |
+| receive.router.probes.liveness.timeoutSeconds | int | `5` | Seconds after which the Router liveness probe times out. |
+| receive.router.probes.readiness.enabled | bool | `true` | Enable the readiness probe for Router. |
+| receive.router.probes.readiness.failureThreshold | int | `6` | Consecutive failures before the Router pod is marked not-ready. |
+| receive.router.probes.readiness.initialDelaySeconds | int | `5` | Seconds to wait before starting the Router readiness probe. |
+| receive.router.probes.readiness.path | string | `"/-/ready"` | HTTP path checked by the Router readiness probe. |
+| receive.router.probes.readiness.periodSeconds | int | `10` | How often (seconds) to run the Router readiness probe. |
+| receive.router.probes.readiness.successThreshold | int | `1` | Consecutive successes before the Router pod is marked ready. |
+| receive.router.probes.readiness.timeoutSeconds | int | `5` | Seconds after which the Router readiness probe times out. |
+| receive.router.probes.startup.enabled | bool | `true` | Enable the startup probe for Router. |
+| receive.router.probes.startup.failureThreshold | int | `60` | Consecutive failures during Router startup before the container is killed. |
+| receive.router.probes.startup.initialDelaySeconds | int | `0` | Seconds to wait before starting the Router startup probe. |
+| receive.router.probes.startup.path | string | `"/-/ready"` | HTTP path checked by the Router startup probe. |
+| receive.router.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Router startup probe. |
+| receive.router.probes.startup.successThreshold | int | `1` | Consecutive successes before the Router startup probe is considered passed. |
+| receive.router.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Router startup probe times out. |
+| receive.router.replicaCount | int | `2` | Number of Router pod replicas. Routers are stateless so scale horizontally based on incoming write throughput. |
+| receive.router.replicationFactor | int | `1` | Replication factor used when forwarding writes to Ingesters. Each write is sent to this many Ingesters. Must be <= ingester replicaCount. |
+| receive.router.resources | object | {} | Resource requests and limits for the Router container. |
+| receive.router.service.annotations | object | {} | Extra annotations for the Router Service. |
+| receive.router.service.httpPort | int | `10902` | HTTP port exposed by the Router Service (metrics, probes). |
+| receive.router.service.labels | object | {} | Extra labels for the Router Service. |
+| receive.router.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Router Service. |
+| receive.router.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Router component. |
+| receive.router.serviceMonitor.annotations | object | {} | Extra annotations for the Router ServiceMonitor. |
+| receive.router.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Router. |
+| receive.router.serviceMonitor.interval | string | `""` | Scrape interval for Router. Empty uses the Prometheus operator default. |
+| receive.router.serviceMonitor.labels | object | {} | Extra labels for the Router ServiceMonitor. |
+| receive.router.serviceMonitor.metricRelabelings | list | [] | Metric relabeling rules applied after Router metrics are ingested. |
+| receive.router.serviceMonitor.relabelings | list | [] | Relabeling rules applied before Router metrics are ingested. |
+| receive.router.serviceMonitor.scheme | string | `""` | Scrape scheme for Router (http or https). |
+| receive.router.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for Router. Empty uses the Prometheus operator default. |
+| receive.router.serviceMonitor.tlsConfig | object | {} | TLS configuration for Router scraping. |
+| receive.router.tolerations | list | [] | Tolerations for Router pod scheduling. Falls back to receive.tolerations. |
+| receive.router.topologySpreadConstraints | list | [] | Topology spread constraints for Router pods. Falls back to receive.topologySpreadConstraints. |
+| receive.router.vpa.enabled | bool | `false` | Enable a VerticalPodAutoscaler for the Router Deployment. |
+| receive.router.vpa.maxAllowed.cpu | string | `"2"` | Maximum CPU resource enforced by the Router VPA. |
+| receive.router.vpa.maxAllowed.memory | string | `"4Gi"` | Maximum memory resource enforced by the Router VPA. |
+| receive.router.vpa.minAllowed.cpu | string | `"100m"` | Minimum CPU resource enforced by the Router VPA. |
+| receive.router.vpa.minAllowed.memory | string | `"256Mi"` | Minimum memory resource enforced by the Router VPA. |
+| receive.router.vpa.targetKind | string | `"Deployment"` | Kubernetes workload kind targeted by the Router VPA. |
+| receive.router.vpa.updateMode | string | `"Auto"` | VPA update mode for Router. One of Auto, Off, or Initial. |
 | receive.service.annotations | object | {} | Extra annotations for the Receive Service. |
 | receive.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Receive Service. |
 | receive.service.httpPort | int | `10902` | HTTP port exposed by the Receive Service. |

@@ -1743,8 +1743,28 @@ receive:
   # -- Enable the Receive StatefulSet.
   enabled: true
 
+  # @schema
+  # enum:
+  #   - standalone
+  #   - split
+  # @schema
+  # -- Receive deployment topology. One of:
+  # `standalone` — single workload that both routes and ingests (RouterIngestor mode);
+  # `split` — separate Router (Deployment) and Ingester (StatefulSet) workloads,
+  # following the receive split proposal (https://thanos.io/tip/proposals-accepted/202012-receive-split.md).
+  #
+  # Field shape depends on mode:
+  #   - `standalone`: configure the workload directly via top-level `receive.*`
+  #     fields (replicaCount, tsdb, service, persistence, etc.). `receive.ingester`
+  #     and `receive.router` are ignored.
+  #   - `split`: configure each workload via `receive.ingester.*` and
+  #     `receive.router.*`. Top-level `receive.*` fields are ignored. The schema
+  #     requires both `ingester` and `router` to be populated in this mode.
+  mode: standalone
+
   # -- Number of Receive pod replicas. Minimum 3 is recommended for
   # replication factor 2 (write quorum = floor(replicaCount/2)+1).
+  # In `split` mode this controls the Ingester StatefulSet replica count.
   replicaCount: 3
 
   # -- Optional HTTP header name used to segregate tenants in multi-tenant setups.
@@ -2072,6 +2092,285 @@ receive:
     minAvailable: ""
     # -- (int or string) Maximum unavailable Receive pods during a disruption.
     maxUnavailable: ""
+
+  # ======================================================================
+  # Receive Ingester (only used when `receive.mode` is `split`).
+  # Stateful workload that stores samples in the local TSDB WAL and ships
+  # blocks to the object store. In `split` mode this block REPLACES the
+  # top-level `receive.*` fields above for the Ingester StatefulSet; the
+  # schema requires it to be populated when mode=split.
+  #
+  # The accepted shape mirrors the top-level `receive.*` fields
+  # (replicaCount, tsdb, hashrings, service, ingress, httpRoute, grpcRoute,
+  # vpa, persistence, resources, extraArgs, podSecurityContext,
+  # containerSecurityContext, dnsConfig, extraEnv, extraEnvFrom,
+  # extraInitContainers, extraContainers, probes, nodeSelector, tolerations,
+  # affinity, topologySpreadConstraints, priorityClassName, extraVolumes,
+  # extraVolumeMounts, annotations, labels, serviceMonitor, pdb,
+  # tenancyHeader). Leave empty (`{}`) in standalone mode.
+  # ======================================================================
+  # -- Ingester StatefulSet config. Required when `receive.mode` is `split`;
+  # ignored in `standalone` mode.
+  # @default -- {}
+  ingester: {}
+  # Example (split mode):
+  # ingester:
+  #   replicaCount: 3
+  #   tsdb:
+  #     retention: 24h
+  #     walCompression: true
+  #   service:
+  #     grpcPort: 10901
+  #     httpPort: 10902
+  #     remoteWritePort: 10908
+  #   persistence:
+  #     enabled: true
+  #     size: 10Gi
+  #   hashrings:
+  #     autogen:
+  #       enabled: true
+
+  # ======================================================================
+  # Receive Router (only used when `receive.mode` is `split`).
+  # Stateless Deployment that fronts the Ingester StatefulSet, exposes the
+  # remote-write endpoint to clients, and forwards requests according to the
+  # hashring configuration (with optional replication).
+  # ======================================================================
+  router:
+    # -- Number of Router pod replicas. Routers are stateless so scale
+    # horizontally based on incoming write throughput.
+    replicaCount: 2
+
+    # -- Replication factor used when forwarding writes to Ingesters.
+    # Each write is sent to this many Ingesters. Must be <= ingester replicaCount.
+    replicationFactor: 1
+
+    # Kubernetes Service configuration for the Router component.
+    service:
+      # -- Kubernetes Service type for the Router component.
+      type: ClusterIP
+      # -- HTTP port exposed by the Router Service (metrics, probes).
+      httpPort: 10902
+      # -- Remote-write ingestion port exposed by the Router Service.
+      remoteWritePort: 10908
+      # -- Extra annotations for the Router Service.
+      # @default -- {}
+      annotations: {}
+      # -- Extra labels for the Router Service.
+      # @default -- {}
+      labels: {}
+
+    # Kubernetes Ingress configuration for the Router HTTP/remote-write endpoint.
+    ingress:
+      http:
+        # -- Enable a Kubernetes Ingress for the Router HTTP endpoint.
+        enabled: false
+        # -- Ingress class name for Router HTTP endpoint.
+        className: ""
+        # -- Extra annotations for the Router HTTP Ingress.
+        # @default -- {}
+        annotations: {}
+        # Host rules for the Router HTTP Ingress.
+        hosts:
+          - host: thanos-receive-router.local
+            paths:
+              - path: /
+                pathType: Prefix
+        # -- TLS configuration for the Router HTTP Ingress.
+        # @default -- []
+        tls: []
+
+    # Gateway API HTTPRoute configuration for the Router HTTP endpoint.
+    httpRoute:
+      # -- Enable a Gateway API HTTPRoute for the Router HTTP endpoint.
+      enabled: false
+      # -- Annotations for the Router HTTPRoute resource.
+      # @default -- {}
+      annotations: {}
+      # -- Gateway parentRefs for the Router HTTPRoute.
+      # @default -- []
+      parentRefs: []
+      # -- Hostnames to match on the Router HTTPRoute.
+      # @default -- []
+      hostnames: []
+
+    # VerticalPodAutoscaler configuration for the Router Deployment.
+    vpa:
+      # -- Enable a VerticalPodAutoscaler for the Router Deployment.
+      enabled: false
+      # -- Kubernetes workload kind targeted by the Router VPA.
+      targetKind: Deployment
+      # -- VPA update mode for Router. One of Auto, Off, or Initial.
+      updateMode: Auto
+      # Minimum resource limits enforced by the Router VPA.
+      minAllowed:
+        # -- Minimum CPU resource enforced by the Router VPA.
+        cpu: 100m
+        # -- Minimum memory resource enforced by the Router VPA.
+        memory: 256Mi
+      # Maximum resource limits enforced by the Router VPA.
+      maxAllowed:
+        # -- Maximum CPU resource enforced by the Router VPA.
+        cpu: "2"
+        # -- Maximum memory resource enforced by the Router VPA.
+        memory: 4Gi
+
+    # -- Resource requests and limits for the Router container.
+    # @default -- {}
+    resources: {}
+
+    # -- Additional CLI arguments appended to the `thanos receive` command for the Router.
+    # @default -- []
+    extraArgs: []
+
+    # -- Pod security context for Router pods. Falls back to receive.podSecurityContext, then global.podSecurityContext.
+    # @default -- {}
+    podSecurityContext: {}
+
+    # -- Container security context for the Router container. Falls back to receive.containerSecurityContext, then global.containerSecurityContext.
+    # @default -- {}
+    containerSecurityContext: {}
+
+    # Health and readiness probe configuration for the Router.
+    probes:
+      # Readiness probe for the Router.
+      readiness:
+        # -- Enable the readiness probe for Router.
+        enabled: true
+        # -- HTTP path checked by the Router readiness probe.
+        path: /-/ready
+        # -- Seconds to wait before starting the Router readiness probe.
+        initialDelaySeconds: 5
+        # -- How often (seconds) to run the Router readiness probe.
+        periodSeconds: 10
+        # -- Seconds after which the Router readiness probe times out.
+        timeoutSeconds: 5
+        # -- Consecutive failures before the Router pod is marked not-ready.
+        failureThreshold: 6
+        # -- Consecutive successes before the Router pod is marked ready.
+        successThreshold: 1
+      # Liveness probe for the Router.
+      liveness:
+        # -- Enable the liveness probe for Router.
+        enabled: true
+        # -- HTTP path checked by the Router liveness probe.
+        path: /-/healthy
+        # -- Seconds to wait before starting the Router liveness probe.
+        initialDelaySeconds: 30
+        # -- How often (seconds) to run the Router liveness probe.
+        periodSeconds: 10
+        # -- Seconds after which the Router liveness probe times out.
+        timeoutSeconds: 5
+        # -- Consecutive failures before the Router container is restarted.
+        failureThreshold: 6
+        # -- Consecutive successes before the Router container is considered live.
+        successThreshold: 1
+      # Startup probe for the Router.
+      startup:
+        # -- Enable the startup probe for Router.
+        enabled: true
+        # -- HTTP path checked by the Router startup probe.
+        path: /-/ready
+        # -- Seconds to wait before starting the Router startup probe.
+        initialDelaySeconds: 0
+        # -- How often (seconds) to run the Router startup probe.
+        periodSeconds: 5
+        # -- Seconds after which the Router startup probe times out.
+        timeoutSeconds: 5
+        # -- Consecutive failures during Router startup before the container is killed.
+        failureThreshold: 60
+        # -- Consecutive successes before the Router startup probe is considered passed.
+        successThreshold: 1
+
+    # -- DNS configuration for Router pods. Falls back to receive.dnsConfig.
+    # @default -- {}
+    dnsConfig: {}
+
+    # -- Extra environment variables injected into the Router container.
+    # @default -- []
+    extraEnv: []
+
+    # -- Extra environment variable sources for the Router container.
+    # @default -- []
+    extraEnvFrom: []
+
+    # -- Extra init containers for Router pods.
+    # @default -- []
+    extraInitContainers: []
+
+    # -- Extra sidecar containers for Router pods.
+    # @default -- []
+    extraContainers: []
+
+    # -- Node selector for Router pod scheduling. Falls back to receive.nodeSelector.
+    # @default -- {}
+    nodeSelector: {}
+
+    # -- Tolerations for Router pod scheduling. Falls back to receive.tolerations.
+    # @default -- []
+    tolerations: []
+
+    # -- Affinity rules for Router pod scheduling. Falls back to receive.affinity.
+    # @default -- {}
+    affinity: {}
+
+    # -- Topology spread constraints for Router pods. Falls back to receive.topologySpreadConstraints.
+    # @default -- []
+    topologySpreadConstraints: []
+
+    # -- Priority class name for Router pods. Falls back to receive.priorityClassName.
+    priorityClassName: ""
+
+    # -- Extra volumes for Router pods.
+    # @default -- []
+    extraVolumes: []
+
+    # -- Extra volume mounts for the Router container.
+    # @default -- []
+    extraVolumeMounts: []
+
+    # -- Extra annotations applied to Router resources.
+    # @default -- {}
+    annotations: {}
+
+    # -- Extra labels applied to Router resources.
+    # @default -- {}
+    labels: {}
+
+    # Prometheus Operator ServiceMonitor configuration for the Router.
+    serviceMonitor:
+      # -- Enable a Prometheus Operator ServiceMonitor for Router.
+      enabled: false
+      # -- Extra labels for the Router ServiceMonitor.
+      # @default -- {}
+      labels: {}
+      # -- Extra annotations for the Router ServiceMonitor.
+      # @default -- {}
+      annotations: {}
+      # -- Scrape interval for Router. Empty uses the Prometheus operator default.
+      interval: ""
+      # -- Scrape timeout for Router. Empty uses the Prometheus operator default.
+      scrapeTimeout: ""
+      # -- Scrape scheme for Router (http or https).
+      scheme: ""
+      # -- TLS configuration for Router scraping.
+      # @default -- {}
+      tlsConfig: {}
+      # -- Relabeling rules applied before Router metrics are ingested.
+      # @default -- []
+      relabelings: []
+      # -- Metric relabeling rules applied after Router metrics are ingested.
+      # @default -- []
+      metricRelabelings: []
+
+    # PodDisruptionBudget configuration for the Router.
+    pdb:
+      # -- Enable a PodDisruptionBudget for Router.
+      enabled: false
+      # -- (int or string) Minimum available Router pods during a disruption.
+      minAvailable: ""
+      # -- (int or string) Maximum unavailable Router pods during a disruption.
+      maxUnavailable: ""
 
 # ======================================================================
 # Ruler component

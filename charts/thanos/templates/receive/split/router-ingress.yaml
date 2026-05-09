@@ -1,0 +1,36 @@
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") .Values.receive.router.ingress.http.enabled }}
+{{- $ingress := .Values.receive.router.ingress.http -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    {{- toYaml $ingress.annotations | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: receive-router
+  name: {{ include "thanos.receive.routerName" . }}
+spec:
+  {{- with $ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    {{- range $ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+        {{- range .paths }}
+          - backend:
+              service:
+                name: {{ include "thanos.receive.routerName" $ }}
+                port:
+                  name: http
+            path: {{ .path | quote }}
+            pathType: {{ .pathType | default "Prefix" }}
+        {{- end }}
+    {{- end }}
+  {{- with $ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,128 @@
+# Shared split-mode defaults for receive tests.
+# In split mode the schema requires `receive.ingester` to be fully populated
+# (top-level `receive.*` fields are ignored). Tests `values:`-merge this file
+# to satisfy the schema with minimal noise.
+receive:
+  enabled: true
+  mode: split
+  ingester:
+    replicaCount: 3
+    tenancyHeader: ""
+    tsdb:
+      retention: 24h
+      walCompression: true
+    hashrings:
+      autogen:
+        enabled: true
+        name: default
+      static: []
+    service:
+      type: ClusterIP
+      grpcPort: 10901
+      httpPort: 10902
+      remoteWritePort: 10908
+      annotations: {}
+      labels: {}
+    ingress:
+      enabled: false
+      className: ""
+      annotations: {}
+      hosts: []
+      tls: []
+      http:
+        enabled: false
+        className: ""
+        annotations: {}
+        hosts: []
+        tls: []
+      grpc:
+        enabled: false
+        className: ""
+        annotations: {}
+        hosts: []
+        tls: []
+    httpRoute:
+      enabled: false
+      annotations: {}
+      parentRefs: []
+      hostnames: []
+    grpcRoute:
+      enabled: false
+      annotations: {}
+      parentRefs: []
+      hostnames: []
+    vpa:
+      enabled: false
+      targetKind: StatefulSet
+      updateMode: Auto
+      minAllowed:
+        cpu: 500m
+        memory: 512Mi
+      maxAllowed:
+        cpu: "4"
+        memory: 8Gi
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+    resources: {}
+    extraArgs: []
+    podSecurityContext:
+      fsGroup: 1000
+      fsGroupChangePolicy: OnRootMismatch
+    containerSecurityContext: {}
+    dnsConfig: {}
+    extraEnv: []
+    extraEnvFrom: []
+    extraInitContainers: []
+    extraContainers: []
+    probes:
+      readiness:
+        enabled: true
+        path: /-/ready
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+        successThreshold: 1
+      liveness:
+        enabled: true
+        path: /-/healthy
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 6
+        successThreshold: 1
+      startup:
+        enabled: true
+        path: /-/ready
+        initialDelaySeconds: 0
+        periodSeconds: 5
+        timeoutSeconds: 5
+        failureThreshold: 60
+        successThreshold: 1
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    topologySpreadConstraints: []
+    priorityClassName: ""
+    extraVolumes: []
+    extraVolumeMounts: []
+    annotations: {}
+    labels: {}
+    serviceMonitor:
+      enabled: false
+      labels: {}
+      annotations: {}
+      interval: ""
+      scrapeTimeout: ""
+      scheme: ""
+      tlsConfig: {}
+      relabelings: []
+      metricRelabelings: []
+    pdb:
+      enabled: false
+      minAvailable: ""
+      maxUnavailable: ""
