@@ -2441,6 +2441,10 @@ ruler:
         tag: latest
         # -- Image pull policy for the kubectl sidecar.
         pullPolicy: IfNotPresent
+    rbac:
+      # -- Add a ClusterRole and ClusterRoleBinding that allows thanos ruler to read and watch PrometheusRules.
+      # Also requires global.rbac.create to be true.
+      create: true
 
   # PersistentVolumeClaim configuration for the Ruler data directory.
   persistence:
@@ -2516,8 +2520,18 @@ ruler:
     fsGroupChangePolicy: OnRootMismatch
 
   # -- Container security context for Ruler. Overrides global.containerSecurityContext.
-  # @default -- {}
-  containerSecurityContext: {}
+  # Default includes "runAsUser: 1000" in order to force alpine/kubectl sidecar to not run as root
+  # @default -- global defaults plus "runAsUser: 1000"
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    runAsUser: 1000
 
   # -- DNS configuration for Ruler pods. Overrides global.dnsConfig.
   # @default -- {}
