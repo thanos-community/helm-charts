@@ -25,6 +25,9 @@ spec:
       labels:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: storegateway
+        {{- with .Values.storegateway.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
         {{- with .Values.global.podAnnotations }}
