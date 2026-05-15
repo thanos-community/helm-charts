@@ -1,15 +1,14 @@
-{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
-{{- if and .Values.receive.enabled (or $cfg.serviceMonitor.enabled .Values.global.serviceMonitor.enabled) }}
-{{- $sm := $cfg.serviceMonitor -}}
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") (or .Values.receive.router.serviceMonitor.enabled .Values.global.serviceMonitor.enabled) }}
+{{- $sm := .Values.receive.router.serviceMonitor -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "thanos.receive.workloadName" . }}
+  name: {{ include "thanos.receive.routerName" . }}
   labels:
     {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
     {{- if $sm.labels }}{{ toYaml $sm.labels | nindent 4 }}{{- end }}
   annotations:
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
 spec:
   namespaceSelector:
     matchNames:
@@ -18,7 +17,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: thanos
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: receive
+      app.kubernetes.io/component: receive-router
   endpoints:
     - port: http
       path: /metrics

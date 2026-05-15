@@ -1,8 +1,10 @@
-{{- if and .Values.receive.enabled .Values.receive.vpa.enabled (semverCompare ">=1.16-0" .Capabilities.KubeVersion.GitVersion) (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1/VerticalPodAutoscaler") }}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- if and .Values.receive.enabled $cfg.vpa.enabled (semverCompare ">=1.16-0" .Capabilities.KubeVersion.GitVersion) (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1/VerticalPodAutoscaler") }}
+{{- $vpa := $cfg.vpa -}}
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}
+  name: {{ include "thanos.receive.workloadName" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
   annotations:
@@ -10,10 +12,10 @@ metadata:
 spec:
   targetRef:
     apiVersion: apps/v1
-    kind: {{ .Values.receive.vpa.targetKind | default "StatefulSet" }}
-    name: {{ include "thanos.compName" (list . "receive") }}
+    kind: {{ $vpa.targetKind | default "StatefulSet" }}
+    name: {{ include "thanos.receive.workloadName" . }}
   updatePolicy:
-    updateMode: {{ .Values.receive.vpa.updateMode | default "Auto" }}
+    updateMode: {{ $vpa.updateMode | default "Auto" }}
   resourcePolicy:
     containerPolicies:
       - containerName: thanos
@@ -22,13 +24,13 @@ spec:
           - cpu
           - memory
         minAllowed:
-          cpu: {{ .Values.receive.vpa.minAllowed.cpu | default "500m" }}
-          memory: {{ .Values.receive.vpa.minAllowed.memory | default "512Mi" }}
+          cpu: {{ $vpa.minAllowed.cpu | default "500m" }}
+          memory: {{ $vpa.minAllowed.memory | default "512Mi" }}
         maxAllowed:
-          cpu: {{ .Values.receive.vpa.maxAllowed.cpu | default "4" }}
-          memory: {{ .Values.receive.vpa.maxAllowed.memory | default "8Gi" }}
+          cpu: {{ $vpa.maxAllowed.cpu | default "4" }}
+          memory: {{ $vpa.maxAllowed.memory | default "8Gi" }}
 {{- else }}
-{{- if and .Values.receive.enabled .Values.receive.vpa.enabled }}
+{{- if and .Values.receive.enabled $cfg.vpa.enabled }}
 {{- printf "# WARNING: VerticalPodAutoscaler CRD not detected on this cluster. Skipping VPA creation for receive." }}
 {{- end }}
 {{- end }}

@@ -1,0 +1,36 @@
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") .Values.receive.router.vpa.enabled (semverCompare ">=1.16-0" .Capabilities.KubeVersion.GitVersion) (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1/VerticalPodAutoscaler") }}
+{{- $vpa := .Values.receive.router.vpa -}}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: {{ include "thanos.receive.routerName" . }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: receive-router
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: {{ $vpa.targetKind | default "Deployment" }}
+    name: {{ include "thanos.receive.routerName" . }}
+  updatePolicy:
+    updateMode: {{ $vpa.updateMode | default "Auto" }}
+  resourcePolicy:
+    containerPolicies:
+      - containerName: thanos
+        mode: Auto
+        controlledResources:
+          - cpu
+          - memory
+        minAllowed:
+          cpu: {{ $vpa.minAllowed.cpu | default "100m" }}
+          memory: {{ $vpa.minAllowed.memory | default "256Mi" }}
+        maxAllowed:
+          cpu: {{ $vpa.maxAllowed.cpu | default "2" }}
+          memory: {{ $vpa.maxAllowed.memory | default "4Gi" }}
+{{- else }}
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") .Values.receive.router.vpa.enabled }}
+{{- printf "# WARNING: VerticalPodAutoscaler CRD not detected on this cluster. Skipping VPA creation for receive-router." }}
+{{- end }}
+{{- end }}

@@ -1,21 +1,23 @@
 {{- if .Values.receive.enabled }}
+{{- $isSplit := eq (include "thanos.receive.isSplit" .) "true" -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}
+  name: {{ include "thanos.receive.workloadName" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
-    {{- with .Values.receive.labels }}
+    {{- with $cfg.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
-    {{- with .Values.receive.annotations }}
+    {{- with $cfg.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   serviceName: {{ include "thanos.receiveHeadless" . }}
-  replicas: {{ .Values.receive.replicaCount }}
+  replicas: {{ $cfg.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/component: receive
@@ -30,48 +32,52 @@ spec:
         {{- if .Values.global.podAnnotations }}
         {{- $anns = merge $anns .Values.global.podAnnotations -}}
         {{- end }}
+        {{- if not $isSplit }}
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+        {{- end }}
         {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
         {{- toYaml $anns | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
-      {{- include "thanos.affinity" (dict "Values" .Values "component" "receive") | nindent 6 }}
+      {{- include "thanos.affinity" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{- include "thanos.podSC" (dict "root" . "key" "receive") | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" . "key" "ingester" "parent" "receive") | nindent 6 }}
       containers:
         - name: receive
           image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
           imagePullPolicy: {{ .Values.global.image.pullPolicy }}
           args:
             - receive
-            - --http-address=0.0.0.0:{{ default 10902 .Values.receive.service.httpPort }}
-            - --grpc-address=0.0.0.0:{{ .Values.receive.service.grpcPort }}
-            - --remote-write.address=0.0.0.0:{{ .Values.receive.service.remoteWritePort }}
+            - --http-address=0.0.0.0:{{ default 10902 $cfg.service.httpPort }}
+            - --grpc-address=0.0.0.0:{{ $cfg.service.grpcPort }}
+            - --remote-write.address=0.0.0.0:{{ $cfg.service.remoteWritePort }}
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --tsdb.path=/var/thanos/receive
             - --label=receive_replica="$(POD_NAME)"
+            {{- if not $isSplit }}
             - --receive.hashrings-file=/etc/thanos/hashrings.json
             - --receive.hashrings-algorithm=ketama
-            - --receive.local-endpoint=$(NAME).{{ include "thanos.compName" (list . "receive") }}-headless.$(NAMESPACE).svc.{{ .Values.global.clusterDomain }}:{{ .Values.receive.service.grpcPort }}
-            {{- if .Values.receive.tenancyHeader }}
-            - --receive.tenant-header={{ .Values.receive.tenancyHeader }}
+            - --receive.local-endpoint=$(NAME).{{ include "thanos.receiveHeadless" . }}.$(NAMESPACE).svc.{{ .Values.global.clusterDomain }}:{{ $cfg.service.grpcPort }}
             {{- end }}
-            {{- if .Values.receive.tsdb.retention }}
-            - --tsdb.retention={{ .Values.receive.tsdb.retention }}
+            {{- if $cfg.tenancyHeader }}
+            - --receive.tenant-header={{ $cfg.tenancyHeader }}
             {{- end }}
-            {{- if .Values.receive.tsdb.walCompression }}
+            {{- if $cfg.tsdb.retention }}
+            - --tsdb.retention={{ $cfg.tsdb.retention }}
+            {{- end }}
+            {{- if $cfg.tsdb.walCompression }}
             - --tsdb.wal-compression
             {{- end }}
-            {{- range .Values.receive.extraArgs }}
+            {{- range $cfg.extraArgs }}
             - {{ . | quote }}
             {{- end }}
           ports:
             - name: grpc
-              containerPort: {{ .Values.receive.service.grpcPort }}
+              containerPort: {{ $cfg.service.grpcPort }}
             - name: http
-              containerPort: {{ default 10902 .Values.receive.service.httpPort }}
+              containerPort: {{ default 10902 $cfg.service.httpPort }}
             - name: remote-write
-              containerPort: {{ .Values.receive.service.remoteWritePort }}
+              containerPort: {{ $cfg.service.remoteWritePort }}
           env:
             - name: POD_NAME
               valueFrom:
@@ -85,26 +91,26 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "receive") | nindent 12 }}
-          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "receive") | nindent 10 }}
+            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 12 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 10 }}
           volumeMounts:
             - name: data
               mountPath: /var/thanos/receive
             - name: thanos-config
               mountPath: /etc/thanos
               readOnly: true
-            {{- include "thanos.extraMountItems" (dict "root" . "key" "receive") | nindent 12 }}
-          {{- include "thanos.containerSC" (dict "root" . "key" "receive") | nindent 10 }}
+            {{- include "thanos.extraMountItems" (dict "root" . "key" "ingester" "parent" "receive") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" . "key" "ingester" "parent" "receive") | nindent 10 }}
           resources:
-            {{- toYaml (.Values.receive.resources | default dict) | nindent 12 }}
-          {{- include "thanos.httpProbes" (dict "root" . "key" "receive") | nindent 10 }}
-        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 8 }}
-      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "receive") | nindent 6 }}
-      {{- include "thanos.initContainers" (dict "Values" .Values "component" "receive" "root" .) | nindent 6 }}
-      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "receive") | nindent 6 }}
-      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "receive") | nindent 6 }}
-      {{- include "thanos.tolerations" (dict "Values" .Values "component" "receive") | nindent 6 }}
-      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "receive") | nindent 6 }}
+            {{- toYaml ($cfg.resources | default dict) | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" . "key" "ingester" "parent" "receive") | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "ingester" "parent" "receive" "root" .) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.initContainers" (dict "Values" .Values "component" "ingester" "parent" "receive" "root" .) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
       volumes:
         - name: thanos-config
           projected:
@@ -114,27 +120,29 @@ spec:
                   items:
                     - key: {{ .Values.global.objstore.secretKey }}
                       path: objstore.yml
+              {{- if not $isSplit }}
               - configMap:
                   name: {{ include "thanos.receive.hashringsConfigMapName" . }}
                   items:
                     - key: hashrings.json
                       path: hashrings.json
-        {{- if not .Values.receive.persistence.enabled }}
+              {{- end }}
+        {{- if not $cfg.persistence.enabled }}
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "receive") | nindent 8 }}
-  {{- if .Values.receive.persistence.enabled }}
+        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "ingester" "parent" "receive") | nindent 8 }}
+  {{- if $cfg.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        {{- if .Values.receive.persistence.storageClass }}
-        storageClassName: {{ .Values.receive.persistence.storageClass }}
+        {{- if $cfg.persistence.storageClass }}
+        storageClassName: {{ $cfg.persistence.storageClass }}
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.receive.persistence.size }}
+            storage: {{ $cfg.persistence.size }}
   {{- end }}
 {{- end }}

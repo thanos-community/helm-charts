@@ -1050,3 +1050,289 @@ tests:
       - equal:
           path: metadata.name
           value: RELEASE-NAME-thanos-receive
+
+  # -- Split mode -----------------------------------------------------------
+
+  - it: rejects an invalid receive.mode value
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.mode: bogus
+    asserts:
+      - failedTemplate:
+          errorPattern: "standalone.*split"
+
+  - it: defaults to standalone mode and uses the receive name
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-thanos-receive-headless
+
+  - it: suffixes the StatefulSet with -ingester in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-ingester
+      - equal:
+          path: spec.serviceName
+          value: RELEASE-NAME-thanos-receive-ingester-headless
+
+  - it: omits router-only flags from the StatefulSet args in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file=/etc/thanos/hashrings.json
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=ketama
+
+  - it: keeps router flags on the StatefulSet args in standalone mode
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file=/etc/thanos/hashrings.json
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=ketama
+
+  - it: omits the hashrings configmap volume mount from ingester in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - notContains:
+          path: spec.template.spec.volumes[0].projected.sources
+          content:
+            configMap:
+              name: RELEASE-NAME-thanos-receive-hashrings
+              items:
+                - key: hashrings.json
+                  path: hashrings.json
+
+  - it: suffixes the headless service with -ingester in split mode
+    template: receive/service.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-ingester
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-ingester-headless
+        documentIndex: 1
+
+  - it: hashrings configmap points to ingester pods in split mode
+    template: receive/configmap-hashrings.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.replicaCount: 2
+    asserts:
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: "RELEASE-NAME-thanos-receive-ingester-0\\.RELEASE-NAME-thanos-receive-ingester-headless"
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: "RELEASE-NAME-thanos-receive-ingester-1\\.RELEASE-NAME-thanos-receive-ingester-headless"
+
+  - it: hashrings configmap points to receive pods in standalone mode
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+      receive.replicaCount: 2
+    asserts:
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: "RELEASE-NAME-thanos-receive-0\\.RELEASE-NAME-thanos-receive-headless"
+
+  - it: does not render the standalone ingress in split mode
+    template: receive/ingress.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.ingress.http.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: does not render the standalone httpRoute in split mode
+    template: receive/httproute.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.httpRoute.enabled: true
+      receive.ingester.httpRoute.parentRefs:
+        - name: gateway
+      receive.ingester.httpRoute.hostnames:
+        - thanos.example.com
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Split mode: router ---------------------------------------------------
+
+  - it: does not render the router deployment in standalone mode
+    template: receive/split/router-deployment.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders the router deployment in split mode
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file=/etc/thanos/hashrings.json
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-factor=1
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --tsdb.path=/var/thanos/receive
+
+  - it: applies the configured replication factor on the router
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.replicaCount: 4
+      receive.router.replicationFactor: 3
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 4
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-factor=3
+
+  - it: forwards tenancyHeader to the router when set
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.tenancyHeader: THANOS-TENANT
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.tenant-header=THANOS-TENANT
+
+  - it: renders the router service in split mode
+    template: receive/split/router-service.yaml
+    values:
+      - _split_defaults.yaml
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: receive-router
+
+  - it: does not render the router service in standalone mode
+    template: receive/split/router-service.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders the router servicemonitor when enabled in split mode
+    template: receive/split/router-servicemonitor.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+
+  - it: renders the router pdb when enabled in split mode
+    template: receive/split/router-pdb.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.pdb.enabled: true
+      receive.router.pdb.minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: renders the router networkpolicy in split mode when networkPolicies are enabled
+    template: receive/split/router-networkpolicy.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+
+  - it: renders the router ingress when enabled in split mode
+    template: receive/split/router-ingress.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.ingress.http.enabled: true
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router
+
+  - it: renders the router httpRoute when enabled in split mode
+    template: receive/split/router-httproute.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.httpRoute.enabled: true
+      receive.router.httpRoute.parentRefs:
+        - name: gateway
+      receive.router.httpRoute.hostnames:
+        - thanos-receive.example.com
+    asserts:
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-router

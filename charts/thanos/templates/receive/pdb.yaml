@@ -1,10 +1,12 @@
-{{- if and .Values.receive.enabled (or .Values.receive.pdb.enabled .Values.global.pdb.enabled) }}
-{{- $minAvail := .Values.receive.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
-{{- $maxUnavail := .Values.receive.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- if and .Values.receive.enabled (or $cfg.pdb.enabled .Values.global.pdb.enabled) }}
+{{- $pdb := $cfg.pdb -}}
+{{- $minAvail := $pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+{{- $maxUnavail := $pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ include "thanos.compName" (list . "receive") }}
+  name: {{ include "thanos.receive.workloadName" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
   annotations:
