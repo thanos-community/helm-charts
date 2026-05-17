@@ -103,7 +103,8 @@ tests:
           path: spec.template.spec.containers[0].volumeMounts
           content:
             name: objstore
-            mountPath: /etc/thanos
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
             readOnly: true
       - contains:
           path: spec.template.spec.volumes

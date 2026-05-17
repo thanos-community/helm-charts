@@ -68,7 +68,8 @@ spec:
             - name: data
               mountPath: /var/thanos/ruler
             - name: objstore
-              mountPath: /etc/thanos
+              mountPath: /etc/thanos/objstore.yml
+              subPath: objstore.yml
               readOnly: true
             - name: rules
               mountPath: /etc/thanos/rules
