@@ -2440,11 +2440,11 @@
           "properties": {
             "autogen": {
               "additionalProperties": true,
-              "description": "Auto-generated endpoints for the in-chart components (Receive, Store Gateway).",
+              "description": "Auto-generated endpoints for the in-chart components (Receive, Store Gateway, Ruler).",
               "properties": {
                 "enabled": {
                   "default": true,
-                  "description": "Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway).\nThese use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format.",
+                  "description": "Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway, Ruler).\nThese use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format.",
                   "required": [],
                   "title": "enabled",
                   "type": "boolean"

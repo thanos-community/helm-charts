@@ -89,6 +89,32 @@ tests:
             name: data
             emptyDir: {}
 
+  - it: configures object storage from global objstore secret
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      global.objstore.secretName: thanos-ruler-objstore
+      global.objstore.secretKey: objstore.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore.config-file=/etc/thanos/objstore.yml
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: objstore
+            secret:
+              secretName: thanos-ruler-objstore
+              items:
+                - key: objstore.yaml
+                  path: objstore.yml
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
