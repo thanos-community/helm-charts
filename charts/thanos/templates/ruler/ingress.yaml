@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.ruler.ingress.annotations | nindent 4 }}
+    {{- with .Values.ruler.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
 spec:
   {{- with .Values.ruler.ingress.className }}

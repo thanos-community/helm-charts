@@ -44,7 +44,7 @@ app.kubernetes.io/part-of: thanos
 {{- end }}
 
 {{- if $annotations }}
-  {{- toYaml $annotations | nindent 2 }}
+{{- toYaml $annotations }}
 {{- end }}
 {{- end }}
 

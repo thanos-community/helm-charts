@@ -581,6 +581,34 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-thanos-query-frontend
 
+  - it: applies global.podAnnotations to query-frontend ingress metadata
+    template: query-frontend/ingress.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.ingress.enabled: true
+      queryFrontend.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to query-frontend pod template
+    template: query-frontend/deployment.yaml
+    set:
+      queryFrontend.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
   - it: does not render ingress when disabled
     template: query-frontend/ingress.yaml
     set:

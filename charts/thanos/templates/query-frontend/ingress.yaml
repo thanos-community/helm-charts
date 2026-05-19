@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.queryFrontend.ingress.annotations | nindent 4 }}
+    {{- with .Values.queryFrontend.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
 spec:
   {{- with .Values.queryFrontend.ingress.className }}
