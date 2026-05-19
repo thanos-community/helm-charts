@@ -2223,6 +2223,29 @@
               "title": "additionalRuleGroupAnnotations",
               "type": "object"
             },
+            "disabledAlerts": {
+              "default": [],
+              "description": "List of alert names to exclude from the PrometheusRule. Useful for silencing specific alerts without disabling entire rule groups.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "disabledAlerts",
+              "type": "array"
+            },
+            "alertOverrides": {
+              "additionalProperties": {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              "default": {},
+              "description": "Per-alert label overrides. Keys are alert names; values are dicts of labels to merge into that alert's labels block. Useful for routing specific alerts to different receivers or adding custom metadata.",
+              "required": [],
+              "title": "alertOverrides",
+              "type": "object"
+            },
             "severity": {
               "additionalProperties": true,
               "description": "Severity label values injected into alert rules.",

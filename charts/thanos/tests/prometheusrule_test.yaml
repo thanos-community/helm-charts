@@ -465,7 +465,7 @@ tests:
       - lengthEqual:
           path: spec.groups[?(@.name == "thanos-rule")].rules
           count: 11
-  
+
   - it: non-existent disabled alert does not exclude any alerts
     set:
       ruler.enabled: true
