@@ -29,7 +29,7 @@ dependencies:
     repository: https://prometheus-community.github.io/helm-charts
     condition: kube-prometheus-stack.enabled
   - name: rustfs
-    version: "0.1.0"
+    version: 0.3.0
     repository: https://charts.rustfs.com/
     condition: rustfs.enabled
 annotations:
