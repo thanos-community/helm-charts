@@ -732,16 +732,24 @@ compactor:
       # -- Maximum memory resource enforced by the Compactor VPA.
       memory: 8Gi
 
+  # Retention policy for compacted blocks in the object store.
+  # Each duration follows the Prometheus duration syntax (e.g. 30d, 12h).
+  # An empty value disables retention for that resolution.
+  retention:
+    # -- Retention for raw resolution blocks (--retention.resolution-raw).
+    resolutionRaw: 30d
+    # -- Retention for 5m downsampled blocks (--retention.resolution-5m).
+    resolution5m: 90d
+    # -- Retention for 1h downsampled blocks (--retention.resolution-1h).
+    resolution1h: 365d
+
   # Additional CLI arguments appended to the `thanos compact` command.
-  # Use this to configure retention, consistency delay, and wait mode.
+  # `--wait` is always passed (the StatefulSet requires the compactor to run
+  # continuously); retention is managed via `retention.*` above.
   extraArgs:
     - --log.level=info
     - --log.format=logfmt
-    - --retention.resolution-raw=30d
-    - --retention.resolution-5m=90d
-    - --retention.resolution-1h=365d
     - --consistency-delay=30m
-    - --wait
 
   # -- Resource requests and limits for the Compactor container.
   # @default -- {}

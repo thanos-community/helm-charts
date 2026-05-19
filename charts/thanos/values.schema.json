@@ -846,25 +846,9 @@
           "type": "boolean"
         },
         "extraArgs": {
-          "description": "Additional CLI arguments appended to the `thanos compact` command.\nUse this to configure retention, consistency delay, and wait mode.",
+          "description": "Additional CLI arguments appended to the `thanos compact` command.\n`--wait` is always passed (the StatefulSet requires the compactor to run\ncontinuously); retention is managed via `retention.*` above.",
           "items": {
             "anyOf": [
-              {
-                "required": [],
-                "type": "string"
-              },
-              {
-                "required": [],
-                "type": "string"
-              },
-              {
-                "required": [],
-                "type": "string"
-              },
-              {
-                "required": [],
-                "type": "string"
-              },
               {
                 "required": [],
                 "type": "string"
@@ -883,6 +867,40 @@
           "required": [],
           "title": "extraArgs",
           "type": "array"
+        },
+        "retention": {
+          "additionalProperties": true,
+          "description": "Retention policy for compacted blocks in the object store.\nEach duration follows the Prometheus duration syntax (e.g. 30d, 12h).\nAn empty value disables retention for that resolution.",
+          "properties": {
+            "resolutionRaw": {
+              "default": "30d",
+              "description": "Retention for raw resolution blocks (--retention.resolution-raw).",
+              "required": [],
+              "title": "resolutionRaw",
+              "type": "string"
+            },
+            "resolution5m": {
+              "default": "90d",
+              "description": "Retention for 5m downsampled blocks (--retention.resolution-5m).",
+              "required": [],
+              "title": "resolution5m",
+              "type": "string"
+            },
+            "resolution1h": {
+              "default": "365d",
+              "description": "Retention for 1h downsampled blocks (--retention.resolution-1h).",
+              "required": [],
+              "title": "resolution1h",
+              "type": "string"
+            }
+          },
+          "required": [
+            "resolutionRaw",
+            "resolution5m",
+            "resolution1h"
+          ],
+          "title": "retention",
+          "type": "object"
         },
         "extraContainers": {
           "description": "Extra sidecar containers for the Compactor pod.",
@@ -1698,6 +1716,7 @@
         "ingress",
         "httpRoute",
         "vpa",
+        "retention",
         "extraArgs",
         "resources",
         "podSecurityContext",
