@@ -145,8 +145,7 @@ Usage:
 {{- define "thanos.rules.processGroups" -}}
 {{- $ctx := index . 0 -}}
 {{- $tr := index . 1 -}}
-{{- $disabledAlerts := $tr.disabledAlerts | default list }}
-{{- $rulesYaml := printf "groups:\n%s%s%s%s%s%s%s%s"
+{{- $allRules := list
   (include "thanos.rules.compact"         $ctx)
   (include "thanos.rules.query"           $ctx)
   (include "thanos.rules.receive"         $ctx)
@@ -156,23 +155,25 @@ Usage:
   (include "thanos.rules.bucketReplicate" $ctx)
   (include "thanos.rules.componentAbsent" $ctx)
 -}}
+{{- $rulesYaml := printf "groups:\n%s" (join "\n" $allRules) -}}
 {{- $parsedRules := $rulesYaml | fromYaml -}}
-{{- range $parsedRules.groups }}
-{{- $group := . }}
-{{- $filteredRules := list }}
-{{- range $group.rules }}
-{{- if not (has .alert $disabledAlerts) }}
-{{- $rule := . }}
-{{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) }}
-{{- $overrides := index $tr.alertOverrides .alert }}
-{{- $mergedLabels := merge (deepCopy $overrides) $rule.labels }}
-{{- $rule = merge (dict "labels" $mergedLabels) $rule }}
-{{- end }}
-{{- $filteredRules = append $filteredRules $rule }}
-{{- end }}
-{{- end }}
+{{- $disabledAlerts := $tr.disabledAlerts | default list -}}
+{{- range $parsedRules.groups -}}
+{{- $group := . -}}
+{{- $filteredRules := list -}}
+{{- range $group.rules -}}
+{{- if not (has .alert $disabledAlerts) -}}
+{{- $rule := . -}}
+{{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) -}}
+{{- $overrides := index $tr.alertOverrides .alert -}}
+{{- $mergedLabels := merge (deepCopy $overrides) $rule.labels -}}
+{{- $rule = merge (dict "labels" $mergedLabels) $rule -}}
+{{- end -}}
+{{- $filteredRules = append $filteredRules $rule -}}
+{{- end -}}
+{{- end -}}
 {{- if $filteredRules }}
 - {{ merge (dict "rules" $filteredRules) (omit $group "rules") | toYaml | nindent 2 | trimSuffix "\n" }}
-{{- end }}
-{{- end }}
+{{- end -}}
+{{- end -}}
 {{- end -}}
