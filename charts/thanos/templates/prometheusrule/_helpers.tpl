@@ -130,3 +130,38 @@ Usage:
 -}}
 {{- toYaml $ctx -}}
 {{- end -}}
+
+{{/*
+Filter and process rule groups based on disabledAlerts and alertOverrides.
+Takes a list with two elements:
+  - parsedRules: the parsed YAML structure containing groups
+  - tr: the .Values.global.thanosRules configuration
+
+Returns the filtered groups as YAML.
+
+Usage:
+  {{- include "thanos.rules.filterGroups" (list $parsedRules $tr) | nindent 2 }}
+*/}}
+{{- define "thanos.rules.filterGroups" -}}
+{{- $parsedRules := index . 0 -}}
+{{- $tr := index . 1 -}}
+{{- range $parsedRules.groups }}
+{{- $group := . }}
+{{- $filteredRules := list }}
+{{- range $group.rules }}
+{{- $disabledAlerts := $tr.disabledAlerts | default list }}
+{{- if not (has .alert $disabledAlerts) }}
+{{- $rule := . }}
+{{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) }}
+{{- $overrides := index $tr.alertOverrides .alert }}
+{{- $mergedLabels := merge (deepCopy $overrides) $rule.labels }}
+{{- $rule = merge (dict "labels" $mergedLabels) $rule }}
+{{- end }}
+{{- $filteredRules = append $filteredRules $rule }}
+{{- end }}
+{{- end }}
+{{- if $filteredRules }}
+- {{ merge (dict "rules" $filteredRules) (omit $group "rules") | toYaml | nindent 2 | trimSuffix "\n" }}
+{{- end }}
+{{- end }}
+{{- end -}}

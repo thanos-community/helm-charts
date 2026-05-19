@@ -39,23 +39,5 @@ spec:
   }}
   {{- $parsedRules := $rulesYaml | fromYaml }}
   groups:
-  {{- range $parsedRules.groups }}
-  {{- $group := . }}
-  {{- $filteredRules := list }}
-  {{- range $group.rules }}
-  {{- $disabledAlerts := $tr.disabledAlerts | default list }}
-  {{- if not (has .alert $disabledAlerts) }}
-  {{- $rule := . }}
-  {{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) }}
-  {{- $overrides := index $tr.alertOverrides .alert }}
-  {{- $mergedLabels := merge (deepCopy $overrides) $rule.labels }}
-  {{- $rule = merge (dict "labels" $mergedLabels) $rule }}
-  {{- end }}
-  {{- $filteredRules = append $filteredRules $rule }}
-  {{- end }}
-  {{- end }}
-  {{- if $filteredRules }}
-  - {{ merge (dict "rules" $filteredRules) (omit $group "rules") | toYaml | nindent 4 | trim }}
-  {{- end }}
-  {{- end }}
+  {{- include "thanos.rules.filterGroups" (list $parsedRules $tr) | nindent 2 }}
 {{- end }}

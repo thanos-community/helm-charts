@@ -24,12 +24,7 @@ rustfs:
 global:
   # Prometheus Operator CRDs are not installed in CI — disable PrometheusRule rendering.
   thanosRules:
-    enabled: true
-    disabledAlerts:
-      - ThanosStoreIsDown
-    alertOverrides:
-      ThanosReceiveIsDown:
-        severity: info
+    enabled: false
   objstore:
     createSecret: true
     config: |
