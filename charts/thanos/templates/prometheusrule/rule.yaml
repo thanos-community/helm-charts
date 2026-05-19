@@ -27,13 +27,35 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- $rulesYaml := printf "groups:\n%s%s%s%s%s%s%s%s"
+    (include "thanos.rules.compact"         $ctx)
+    (include "thanos.rules.query"           $ctx)
+    (include "thanos.rules.receive"         $ctx)
+    (include "thanos.rules.sidecar"         $ctx)
+    (include "thanos.rules.store"           $ctx)
+    (include "thanos.rules.rule"            $ctx)
+    (include "thanos.rules.bucketReplicate" $ctx)
+    (include "thanos.rules.componentAbsent" $ctx)
+  }}
+  {{- $parsedRules := $rulesYaml | fromYaml }}
   groups:
-    {{- include "thanos.rules.compact"          $ctx | nindent 4 }}
-    {{- include "thanos.rules.query"            $ctx | nindent 4 }}
-    {{- include "thanos.rules.receive"          $ctx | nindent 4 }}
-    {{- include "thanos.rules.sidecar"          $ctx | nindent 4 }}
-    {{- include "thanos.rules.store"            $ctx | nindent 4 }}
-    {{- include "thanos.rules.rule"             $ctx | nindent 4 }}
-    {{- include "thanos.rules.bucketReplicate"  $ctx | nindent 4 }}
-    {{- include "thanos.rules.componentAbsent"  $ctx | nindent 4 }}
+  {{- range $parsedRules.groups }}
+  {{- $group := . }}
+  {{- $filteredRules := list }}
+  {{- range $group.rules }}
+  {{- $disabledAlerts := $tr.disabledAlerts | default list }}
+  {{- if not (has .alert $disabledAlerts) }}
+  {{- $rule := . }}
+  {{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) }}
+  {{- $overrides := index $tr.alertOverrides .alert }}
+  {{- $mergedLabels := merge (deepCopy $overrides) $rule.labels }}
+  {{- $rule = merge (dict "labels" $mergedLabels) $rule }}
+  {{- end }}
+  {{- $filteredRules = append $filteredRules $rule }}
+  {{- end }}
+  {{- end }}
+  {{- if $filteredRules }}
+  - {{ merge (dict "rules" $filteredRules) (omit $group "rules") | toYaml | nindent 4 | trim }}
+  {{- end }}
+  {{- end }}
 {{- end }}

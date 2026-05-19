@@ -198,6 +198,27 @@ global:
     additionalRuleGroupAnnotations: {}
     # Severity label values injected into alert rules. Override these to
     # match your Alertmanager routing conventions.
+    # -- List of alert names to exclude from the PrometheusRule. Useful for
+    # silencing specific alerts without disabling entire rule groups.
+    # @default -- []
+    disabledAlerts: []
+    # Example:
+    # disabledAlerts:
+    #   - ThanosCompactMultipleRunning
+    #   - ThanosQueryHttpRequestQueryErrorRateHigh
+    # -- Per-alert label overrides. Keys are alert names; values are dicts
+    # of labels to merge into that alert's labels block. Useful for routing
+    # specific alerts to different receivers or adding custom metadata.
+    # @default -- {}
+    alertOverrides: {}
+    # Example:
+    # alertOverrides:
+    #   ThanosCompactHalted:
+    #     severity: critical
+    #     team: platform
+    #   ThanosQueryOverload:
+    #     severity: warning
+    #     oncall: query-team
     severity:
       # -- Severity label value used for critical alerts.
       critical: critical
