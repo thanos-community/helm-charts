@@ -27,17 +27,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- $rulesYaml := printf "groups:\n%s%s%s%s%s%s%s%s"
-    (include "thanos.rules.compact"         $ctx)
-    (include "thanos.rules.query"           $ctx)
-    (include "thanos.rules.receive"         $ctx)
-    (include "thanos.rules.sidecar"         $ctx)
-    (include "thanos.rules.store"           $ctx)
-    (include "thanos.rules.rule"            $ctx)
-    (include "thanos.rules.bucketReplicate" $ctx)
-    (include "thanos.rules.componentAbsent" $ctx)
-  }}
-  {{- $parsedRules := $rulesYaml | fromYaml }}
   groups:
-  {{- include "thanos.rules.filterGroups" (list $parsedRules $tr) | nindent 2 }}
+  {{- include "thanos.rules.processGroups" (list $ctx $tr) | nindent 2 }}
 {{- end }}

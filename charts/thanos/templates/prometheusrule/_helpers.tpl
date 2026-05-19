@@ -132,20 +132,31 @@ Usage:
 {{- end -}}
 
 {{/*
-Filter and process rule groups based on disabledAlerts and alertOverrides.
+Parse, filter and process rule groups based on disabledAlerts and alertOverrides.
 Takes a list with two elements:
-  - parsedRules: the parsed YAML structure containing groups
+  - ctx: the context dict from thanos.rules.context
   - tr: the .Values.global.thanosRules configuration
 
 Returns the filtered groups as YAML.
 
 Usage:
-  {{- include "thanos.rules.filterGroups" (list $parsedRules $tr) | nindent 2 }}
+  {{- include "thanos.rules.processGroups" (list $ctx $tr) | nindent 2 }}
 */}}
-{{- define "thanos.rules.filterGroups" -}}
-{{- $parsedRules := index . 0 -}}
+{{- define "thanos.rules.processGroups" -}}
+{{- $ctx := index . 0 -}}
 {{- $tr := index . 1 -}}
 {{- $disabledAlerts := $tr.disabledAlerts | default list }}
+{{- $rulesYaml := printf "groups:\n%s%s%s%s%s%s%s%s"
+  (include "thanos.rules.compact"         $ctx)
+  (include "thanos.rules.query"           $ctx)
+  (include "thanos.rules.receive"         $ctx)
+  (include "thanos.rules.sidecar"         $ctx)
+  (include "thanos.rules.store"           $ctx)
+  (include "thanos.rules.rule"            $ctx)
+  (include "thanos.rules.bucketReplicate" $ctx)
+  (include "thanos.rules.componentAbsent" $ctx)
+-}}
+{{- $parsedRules := $rulesYaml | fromYaml -}}
 {{- range $parsedRules.groups }}
 {{- $group := . }}
 {{- $filteredRules := list }}
