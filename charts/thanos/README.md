@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.12.3](https://img.shields.io/badge/Version-0.12.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.12.4](https://img.shields.io/badge/Version-0.12.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -963,6 +963,13 @@ The table below documents all available values. Top-level keys group settings by
 | receive.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
 | receive.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | receive.ingress.http.tls | list | [] | TLS configuration for the Receive HTTP Ingress. |
+| receive.ingress.remoteWrite.annotations | object | {} | Extra annotations for the Receive remote-write Ingress. |
+| receive.ingress.remoteWrite.className | string | `""` | Ingress class name for Receive remote-write endpoint (e.g. nginx, traefik). |
+| receive.ingress.remoteWrite.enabled | bool | `false` | Enable a Kubernetes Ingress for the Receive remote-write endpoint. |
+| receive.ingress.remoteWrite.hosts[0].host | string | `"thanos-receive-remote-write.local"` |  |
+| receive.ingress.remoteWrite.hosts[0].paths[0].path | string | `"/"` |  |
+| receive.ingress.remoteWrite.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| receive.ingress.remoteWrite.tls | list | [] | TLS configuration for the Receive remote-write Ingress. |
 | receive.ingress.tls | list | [] | Deprecated. Use `receive.ingress.http.tls` instead. |
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
 | receive.mode | string | `"standalone"` | Receive deployment topology. One of: `standalone` — single workload that both routes and ingests (RouterIngestor mode); `split` — separate Router (Deployment) and Ingester (StatefulSet) workloads, following the receive split proposal (https://thanos.io/tip/proposals-accepted/202012-receive-split.md).  Field shape depends on mode:   - `standalone`: configure the workload directly via top-level `receive.*`     fields (replicaCount, tsdb, service, persistence, etc.). `receive.ingester`     and `receive.router` are ignored.   - `split`: configure each workload via `receive.ingester.*` and     `receive.router.*`. Top-level `receive.*` fields are ignored. The schema     requires both `ingester` and `router` to be populated in this mode. |
