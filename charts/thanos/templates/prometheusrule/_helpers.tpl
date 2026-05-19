@@ -145,11 +145,11 @@ Usage:
 {{- define "thanos.rules.filterGroups" -}}
 {{- $parsedRules := index . 0 -}}
 {{- $tr := index . 1 -}}
+{{- $disabledAlerts := $tr.disabledAlerts | default list }}
 {{- range $parsedRules.groups }}
 {{- $group := . }}
 {{- $filteredRules := list }}
 {{- range $group.rules }}
-{{- $disabledAlerts := $tr.disabledAlerts | default list }}
 {{- if not (has .alert $disabledAlerts) }}
 {{- $rule := . }}
 {{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) }}
