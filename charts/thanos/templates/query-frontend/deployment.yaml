@@ -25,7 +25,9 @@ spec:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: query-frontend
       annotations:
-        {{- toYaml .Values.global.podAnnotations | nindent 8 }}
+        {{- with .Values.global.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" . }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "queryFrontend") | nindent 6 }}

@@ -574,6 +574,34 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-thanos-storegateway
 
+  - it: applies global.podAnnotations to storegateway ingress metadata
+    template: storegateway/ingress.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.ingress.enabled: true
+      storegateway.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to storegateway pod template
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
   - it: does not render ingress when disabled
     template: storegateway/ingress.yaml
     set:

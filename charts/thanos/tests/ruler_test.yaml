@@ -714,6 +714,34 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-thanos-ruler
 
+  - it: applies global.podAnnotations to ruler ingress metadata
+    template: ruler/ingress.yaml
+    set:
+      ruler.enabled: true
+      ruler.ingress.enabled: true
+      ruler.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to ruler pod template
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
   - it: does not render ingress when disabled
     template: ruler/ingress.yaml
     set:

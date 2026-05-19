@@ -113,3 +113,85 @@ tests:
       - matchRegex:
           path: spec.template.spec.containers[0].command[2]
           pattern: "my-bucket"
+
+  # -- global.podAnnotations ---------------------------------------------
+  # Regression coverage for github.com/thanos-community/helm-charts/issues/125
+  # The bug: empty ingress.annotations defaults emitted `{}` and broke YAML
+  # parsing once global.podAnnotations was merged in. These tests pin down
+  # both the resource-metadata and pod-template rendering paths.
+
+  - it: applies global.podAnnotations to resource metadata via thanos.annotations helper
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to pod template metadata
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: renders ingress cleanly when global.podAnnotations is set and ingress.annotations is empty
+    template: bucket/ingress.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.ingress.enabled: true
+      bucket.bucketweb.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: merges ingress.annotations with global.podAnnotations on the Ingress
+    template: bucket/ingress.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.ingress.enabled: true
+      bucket.bucketweb.ingress.annotations:
+        kubernetes.io/ingress.class: nginx
+      bucket.bucketweb.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["kubernetes.io/ingress.class"]
+          value: nginx
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: renders pod template annotations cleanly when global.podAnnotations is empty
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations.placeholder

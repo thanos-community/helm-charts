@@ -9,7 +9,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    {{- toYaml $ingress.annotations | nindent 4 }}
+    {{- with $ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- include "thanos.annotations" (dict "Values" $.Values "component" "storegateway") | nindent 4 }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}

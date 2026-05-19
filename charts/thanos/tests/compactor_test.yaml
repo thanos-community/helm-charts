@@ -643,6 +643,34 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-thanos-compactor
 
+  - it: applies global.podAnnotations to compactor ingress metadata
+    template: compactor/ingress.yaml
+    set:
+      compactor.enabled: true
+      compactor.ingress.enabled: true
+      compactor.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to compactor pod template
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
   - it: does not render ingress when disabled
     template: compactor/ingress.yaml
     set:

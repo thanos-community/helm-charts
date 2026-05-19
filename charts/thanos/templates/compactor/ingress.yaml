@@ -6,7 +6,9 @@ metadata:
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
   annotations:
-    {{- toYaml .Values.compactor.ingress.annotations | nindent 4 }}
+    {{- with .Values.compactor.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
 spec:
   {{- with .Values.compactor.ingress.className }}

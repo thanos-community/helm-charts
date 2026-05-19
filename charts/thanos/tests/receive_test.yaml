@@ -620,6 +620,64 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-thanos-receive
 
+  - it: applies global.podAnnotations to receive ingress metadata
+    template: receive/ingress.yaml
+    set:
+      receive.enabled: true
+      receive.ingress.enabled: true
+      receive.ingress.hosts:
+        - host: thanos.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to receive pod template
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to receive router ingress in split mode
+    template: receive/split/router-ingress.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.ingress.http.enabled: true
+      receive.router.ingress.http.hosts:
+        - host: receive.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
+  - it: applies global.podAnnotations to receive router pod template in split mode
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      global.podAnnotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["cluster-autoscaler.kubernetes.io/safe-to-evict"]
+          value: "false"
+
   - it: does not render ingress when disabled
     template: receive/ingress.yaml
     set:
