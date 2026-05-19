@@ -44,6 +44,16 @@ spec:
             - --http-address=0.0.0.0:{{ .Values.compactor.service.port }}
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --data-dir=/var/thanos/compact
+            - --wait
+          {{- with .Values.compactor.retention.resolutionRaw }}
+            - --retention.resolution-raw={{ . }}
+          {{- end }}
+          {{- with .Values.compactor.retention.resolution5m }}
+            - --retention.resolution-5m={{ . }}
+          {{- end }}
+          {{- with .Values.compactor.retention.resolution1h }}
+            - --retention.resolution-1h={{ . }}
+          {{- end }}
           {{- range .Values.compactor.extraArgs }}
             - {{ . | quote }}
           {{- end }}

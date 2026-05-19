@@ -49,11 +49,64 @@ tests:
       compactor.enabled: true
       compactor.extraArgs:
         - --log.level=debug
-        - --wait
     asserts:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "--log.level=debug"
+
+  - it: renders default retention flags and --wait
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-raw=30d"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-5m=90d"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-1h=365d"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--wait"
+
+  - it: overrides retention durations via compactor.retention
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.retention.resolutionRaw: 2d
+      compactor.retention.resolution5m: 10d
+      compactor.retention.resolution1h: 11d
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-raw=2d"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-5m=10d"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-1h=11d"
+
+  - it: omits retention flag when the value is empty
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.retention.resolutionRaw: ""
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: "--retention.resolution-raw="
+          any: true
+
+  - it: always passes --wait to keep the StatefulSet pod alive
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.extraArgs: []
+    asserts:
       - contains:
           path: spec.template.spec.containers[0].args
           content: "--wait"

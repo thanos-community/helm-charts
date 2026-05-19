@@ -364,12 +364,16 @@ compactor:
   enabled: true
   replicaCount: 1           # Do NOT increase — compactor must run as a singleton
 
+  # Retention is exposed as typed values. Set any of these to "" to disable.
+  retention:
+    resolutionRaw: 30d      # Keep raw samples for 30 days
+    resolution5m: 90d       # Keep 5m-downsampled data for 90 days
+    resolution1h: 365d      # Keep 1h-downsampled data for 1 year
+
+  # --wait is always passed by the chart so the compactor keeps running as a
+  # long-lived StatefulSet pod. Use extraArgs for everything else.
   extraArgs:
-    - --retention.resolution-raw=30d    # Keep raw samples for 30 days
-    - --retention.resolution-5m=90d     # Keep 5m-downsampled data for 90 days
-    - --retention.resolution-1h=365d    # Keep 1h-downsampled data for 1 year
     - --consistency-delay=30m
-    - --wait
 
   persistence:
     enabled: true

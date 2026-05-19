@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.12.1](https://img.shields.io/badge/Version-0.12.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.12.2](https://img.shields.io/badge/Version-0.12.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -376,12 +376,16 @@ compactor:
   enabled: true
   replicaCount: 1           # Do NOT increase — compactor must run as a singleton
 
+  # Retention is exposed as typed values. Set any of these to "" to disable.
+  retention:
+    resolutionRaw: 30d      # Keep raw samples for 30 days
+    resolution5m: 90d       # Keep 5m-downsampled data for 90 days
+    resolution1h: 365d      # Keep 1h-downsampled data for 1 year
+
+  # --wait is always passed by the chart so the compactor keeps running as a
+  # long-lived StatefulSet pod. Use extraArgs for everything else.
   extraArgs:
-    - --retention.resolution-raw=30d    # Keep raw samples for 30 days
-    - --retention.resolution-5m=90d     # Keep 5m-downsampled data for 90 days
-    - --retention.resolution-1h=365d    # Keep 1h-downsampled data for 1 year
     - --consistency-delay=30m
-    - --wait
 
   persistence:
     enabled: true
@@ -576,11 +580,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.enabled | bool | `true` | Enable the Compactor StatefulSet. |
 | compactor.extraArgs[0] | string | `"--log.level=info"` |  |
 | compactor.extraArgs[1] | string | `"--log.format=logfmt"` |  |
-| compactor.extraArgs[2] | string | `"--retention.resolution-raw=30d"` |  |
-| compactor.extraArgs[3] | string | `"--retention.resolution-5m=90d"` |  |
-| compactor.extraArgs[4] | string | `"--retention.resolution-1h=365d"` |  |
-| compactor.extraArgs[5] | string | `"--consistency-delay=30m"` |  |
-| compactor.extraArgs[6] | string | `"--wait"` |  |
+| compactor.extraArgs[2] | string | `"--consistency-delay=30m"` |  |
 | compactor.extraContainers | list | [] | Extra sidecar containers for the Compactor pod. |
 | compactor.extraEnv | list | [] | Extra environment variables injected into the Compactor container. |
 | compactor.extraEnvFrom | list | [] | Extra environment variable sources for the Compactor container. |
@@ -632,6 +632,9 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Compactor startup probe times out. |
 | compactor.replicaCount | int | `1` | Number of Compactor replicas. Must remain 1 — running multiple compactors against the same bucket causes data corruption. |
 | compactor.resources | object | {} | Resource requests and limits for the Compactor container. |
+| compactor.retention.resolution1h | string | `"365d"` | Retention for 1h downsampled blocks (--retention.resolution-1h). |
+| compactor.retention.resolution5m | string | `"90d"` | Retention for 5m downsampled blocks (--retention.resolution-5m). |
+| compactor.retention.resolutionRaw | string | `"30d"` | Retention for raw resolution blocks (--retention.resolution-raw). |
 | compactor.service.annotations | object | {} | Extra annotations for the Compactor Service. |
 | compactor.service.labels | object | {} | Extra labels for the Compactor Service. |
 | compactor.service.port | int | `10902` | HTTP port exposed by the Compactor Service. |
