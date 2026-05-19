@@ -441,3 +441,189 @@ tests:
       - matchRegex:
           path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryOverload")].annotations.runbook_url
           pattern: ^https://github\.com/thanos-io/thanos/tree/main/mixin/runbook\.md
+
+  # ----------------------------------------------------------------------
+  # disabledAlerts feature
+  # ----------------------------------------------------------------------
+  - it: empty disabledAlerts does not change existing rules
+    set:
+      ruler.enabled: true
+      global.thanosRules.disabledAlerts: []
+    asserts:
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          count: 5
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          count: 8
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-receive")].rules
+          count: 10
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-store")].rules
+          count: 4
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-rule")].rules
+          count: 11
+  
+  - it: non-existent disabled alert does not exclude any alerts
+    set:
+      ruler.enabled: true
+      global.thanosRules.disabledAlerts:
+        - NonExistingAlert
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: NonExistingAlert
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: ThanosCompactMultipleRunning
+          any: true
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          count: 5
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          count: 8
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-receive")].rules
+          count: 10
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-store")].rules
+          count: 4
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-rule")].rules
+          count: 11
+
+  - it: excludes alerts listed in disabledAlerts
+    set:
+      global.thanosRules.disabledAlerts:
+        - ThanosCompactHalted
+        - ThanosQueryHttpRequestQueryErrorRateHigh
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: ThanosCompactHalted
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          content:
+            alert: ThanosQueryHttpRequestQueryErrorRateHigh
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: ThanosCompactMultipleRunning
+          any: true
+
+  - it: disabledAlerts works with component-absent alerts
+    set:
+      global.thanosRules.disabledAlerts:
+        - ThanosCompactIsDown
+        - ThanosQueryIsDown
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosCompactIsDown
+          any: true
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosQueryIsDown
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-component-absent")].rules
+          content:
+            alert: ThanosReceiveIsDown
+          any: true
+
+  # ----------------------------------------------------------------------
+  # alertOverrides feature
+  # ----------------------------------------------------------------------
+
+  - it: applies alertOverrides to merge labels into specific alerts
+    set:
+      global.thanosRules.alertOverrides:
+        ThanosCompactHalted:
+          severity: critical
+          team: storage
+        ThanosQueryOverload:
+          oncall: query-team
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.severity
+          value: critical
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.team
+          value: storage
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryOverload")].labels.oncall
+          value: query-team
+
+  - it: alertOverrides does not affect other alerts
+    set:
+      global.thanosRules.alertOverrides:
+        ThanosCompactHalted:
+          team: storage
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.team
+          value: storage
+      - notExists:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactMultipleRunning")].labels.team
+
+  - it: alertOverrides can override severity while preserving other labels
+    set:
+      global.thanosRules.additionalRuleGroupLabels:
+        tenant: foo
+      global.thanosRules.alertOverrides:
+        ThanosCompactHalted:
+          severity: critical
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.severity
+          value: critical
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.tenant
+          value: foo
+
+  - it: alertOverrides takes precedence over per-group labels
+    set:
+      global.thanosRules.groups.thanosQuery.labels:
+        oncall: default-team
+      global.thanosRules.alertOverrides:
+        ThanosQueryOverload:
+          oncall: specialized-team
+    asserts:
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryOverload")].labels.oncall
+          value: specialized-team
+      - equal:
+          path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryGrpcServerErrorRate")].labels.oncall
+          value: default-team
+
+  # ----------------------------------------------------------------------
+  # Combined disabledAlerts and alertOverrides
+  # ----------------------------------------------------------------------
+
+  - it: disabledAlerts and alertOverrides work together
+    set:
+      global.thanosRules.disabledAlerts:
+        - ThanosCompactMultipleRunning
+      global.thanosRules.alertOverrides:
+        ThanosCompactHalted:
+          severity: critical
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: ThanosCompactMultipleRunning
+          any: true
+      - equal:
+          path: spec.groups[?(@.name == "thanos-compact")].rules[?(@.alert == "ThanosCompactHalted")].labels.severity
+          value: critical

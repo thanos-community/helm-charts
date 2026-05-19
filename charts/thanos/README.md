@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.11.0](https://img.shields.io/badge/Version-0.11.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.12.0](https://img.shields.io/badge/Version-0.12.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -701,7 +701,9 @@ The table below documents all available values. Top-level keys group settings by
 | global.serviceMonitor.tlsConfig | object | {} | TLS configuration for scraping when scheme is https. |
 | global.thanosRules.additionalRuleGroupAnnotations | object | {} | Annotations added to every alert rule across all groups. Applied on top of the rule's default annotations (summary, description, runbook_url). |
 | global.thanosRules.additionalRuleGroupLabels | object | {} | Labels added to every alert rule across all groups. Applied on top of the rule's default labels (severity). Useful for routing alerts to specific Alertmanager receivers (e.g. team, tenant). |
+| global.thanosRules.alertOverrides | object | {} | Per-alert label overrides. Keys are alert names; values are dicts of labels to merge into that alert's labels block. Useful for routing specific alerts to different receivers or adding custom metadata. |
 | global.thanosRules.annotations | object | {} | Extra annotations merged into the PrometheusRule resource metadata. |
+| global.thanosRules.disabledAlerts | list | [] | List of alert names to exclude from the PrometheusRule. Useful for silencing specific alerts without disabling entire rule groups. |
 | global.thanosRules.enabled | bool | `true` | Deploy a PrometheusRule resource with built-in Thanos alerting rules. |
 | global.thanosRules.groups.thanosBucketReplicate.annotations | object | {} | Extra annotations merged into every alert in this group. |
 | global.thanosRules.groups.thanosBucketReplicate.enabled | bool | `false` | Render the thanos-bucket-replicate rule group. |
@@ -735,6 +737,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.thanosRules.groups.thanosStore.jobPattern | string | `".*thanos.*store.*"` | Regex used to match the Prometheus `job` label of store gateway scrape targets. |
 | global.thanosRules.groups.thanosStore.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.labels | object | {} | Extra labels merged into the PrometheusRule resource metadata. |
+| global.thanosRules.severity | object | `{"critical":"critical","info":"info","warning":"warning"}` | Severity label values injected into alert rules. Override these to match your Alertmanager routing conventions. |
 | global.thanosRules.severity.critical | string | `"critical"` | Severity label value used for critical alerts. |
 | global.thanosRules.severity.info | string | `"info"` | Severity label value used for informational alerts. |
 | global.thanosRules.severity.warning | string | `"warning"` | Severity label value used for warning alerts. |

@@ -130,3 +130,55 @@ Usage:
 -}}
 {{- toYaml $ctx -}}
 {{- end -}}
+
+{{/*
+Parse, filter and process rule groups based on disabledAlerts and alertOverrides.
+Takes a list with two elements:
+  - ctx: the context dict from thanos.rules.context
+  - tr: the .Values.global.thanosRules configuration
+
+Returns the filtered groups as YAML.
+
+Usage:
+  {{- include "thanos.rules.processGroups" (list $ctx $tr) | nindent 2 }}
+*/}}
+{{- define "thanos.rules.processGroups" -}}
+{{- $ctx := index . 0 -}}
+{{- $tr := index . 1 -}}
+{{- $allRules := list
+  (include "thanos.rules.compact"         $ctx)
+  (include "thanos.rules.query"           $ctx)
+  (include "thanos.rules.receive"         $ctx)
+  (include "thanos.rules.sidecar"         $ctx)
+  (include "thanos.rules.store"           $ctx)
+  (include "thanos.rules.rule"            $ctx)
+  (include "thanos.rules.bucketReplicate" $ctx)
+  (include "thanos.rules.componentAbsent" $ctx)
+-}}
+{{- $rulesYaml := printf "groups:\n%s" (join "" $allRules) -}}
+{{- $parsedRules := $rulesYaml | fromYaml -}}
+{{- $disabledAlerts := $tr.disabledAlerts | default list -}}
+{{- range $parsedRules.groups -}}
+{{- $group := . -}}
+{{- $filteredRules := list -}}
+{{- range $group.rules -}}
+{{- if not (has .alert $disabledAlerts) -}}
+{{- $rule := . -}}
+{{- if and $tr.alertOverrides (hasKey $tr.alertOverrides .alert) -}}
+{{- $overrides := index $tr.alertOverrides .alert -}}
+{{- $mergedLabels := merge (deepCopy $overrides) $rule.labels -}}
+{{- $rule = merge (dict "labels" $mergedLabels) $rule -}}
+{{- end -}}
+{{- $filteredRules = append $filteredRules $rule -}}
+{{- end -}}
+{{- end -}}
+{{- if $filteredRules }}
+  - name: {{ $group.name }}
+{{- if $group.interval }}
+    interval: {{ $group.interval }}
+{{- end }}
+    rules:
+{{- $filteredRules | toYaml | nindent 4 }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
