@@ -155,7 +155,7 @@ Usage:
   (include "thanos.rules.bucketReplicate" $ctx)
   (include "thanos.rules.componentAbsent" $ctx)
 -}}
-{{- $rulesYaml := printf "groups:\n%s" (join "\n" $allRules) -}}
+{{- $rulesYaml := printf "groups:\n%s" (join "" $allRules) -}}
 {{- $parsedRules := $rulesYaml | fromYaml -}}
 {{- $disabledAlerts := $tr.disabledAlerts | default list -}}
 {{- range $parsedRules.groups -}}
@@ -173,7 +173,12 @@ Usage:
 {{- end -}}
 {{- end -}}
 {{- if $filteredRules }}
-- {{ merge (dict "rules" $filteredRules) (omit $group "rules") | toYaml | nindent 2 | trimSuffix "\n" }}
+  - name: {{ $group.name }}
+{{- if $group.interval }}
+    interval: {{ $group.interval }}
+{{- end }}
+    rules:
+{{- $filteredRules | toYaml | nindent 4 }}
 {{- end -}}
 {{- end -}}
 {{- end -}}

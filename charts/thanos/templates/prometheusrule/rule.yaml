@@ -28,5 +28,5 @@ metadata:
   {{- end }}
 spec:
   groups:
-  {{- include "thanos.rules.processGroups" (list $ctx $tr) | nindent 2 }}
+{{- include "thanos.rules.processGroups" (list $ctx $tr) | indent 2 }}
 {{- end }}

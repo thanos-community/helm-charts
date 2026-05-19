@@ -445,6 +445,58 @@ tests:
   # ----------------------------------------------------------------------
   # disabledAlerts feature
   # ----------------------------------------------------------------------
+  - it: empty disabledAlerts does not change existing rules
+    set:
+      ruler.enabled: true
+      global.thanosRules.disabledAlerts: []
+    asserts:
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          count: 5
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          count: 8
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-receive")].rules
+          count: 10
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-store")].rules
+          count: 4
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-rule")].rules
+          count: 11
+  
+  - it: non-existent disabled alert does not exclude any alerts
+    set:
+      ruler.enabled: true
+      global.thanosRules.disabledAlerts:
+        - NonExistingAlert
+    asserts:
+      - notContains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: NonExistingAlert
+          any: true
+      - contains:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          content:
+            alert: ThanosCompactMultipleRunning
+          any: true
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-compact")].rules
+          count: 5
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-query")].rules
+          count: 8
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-receive")].rules
+          count: 10
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-store")].rules
+          count: 4
+      - lengthEqual:
+          path: spec.groups[?(@.name == "thanos-rule")].rules
+          count: 11
 
   - it: excludes alerts listed in disabledAlerts
     set:
