@@ -196,8 +196,6 @@ global:
     # runbook_url).
     # @default -- {}
     additionalRuleGroupAnnotations: {}
-    # Severity label values injected into alert rules. Override these to
-    # match your Alertmanager routing conventions.
     # -- List of alert names to exclude from the PrometheusRule. Useful for
     # silencing specific alerts without disabling entire rule groups.
     # @default -- []
@@ -219,6 +217,8 @@ global:
     #   ThanosQueryOverload:
     #     severity: warning
     #     oncall: query-team
+    # -- Severity label values injected into alert rules. Override these to
+    # match your Alertmanager routing conventions.
     severity:
       # -- Severity label value used for critical alerts.
       critical: critical
