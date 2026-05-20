@@ -1,5 +1,11 @@
-{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") .Values.receive.router.ingress.http.enabled }}
-{{- $ingress := .Values.receive.router.ingress.http -}}
+{{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") }}
+{{- $http := .Values.receive.router.ingress.http }}
+{{- $remoteWrite := .Values.receive.router.ingress.remoteWrite }}
+{{- $ingresses := dict "http" $http "remote-write" $remoteWrite }}
+{{- $sep := "" }}
+{{- range $port, $ingress := $ingresses }}
+{{- if and $ingress $ingress.enabled }}
+{{ $sep -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -7,11 +13,11 @@ metadata:
     {{- with $ingress.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" $.Values "component" "router" "parent" "receive") | nindent 4 }}
   labels:
-    {{- include "thanos.labels" . | nindent 4 }}
+    {{- include "thanos.labels" $ | nindent 4 }}
     app.kubernetes.io/component: receive-router
-  name: {{ include "thanos.receive.routerName" . }}
+  name: {{ include "thanos.compName" (list $ (printf "receive-router%s" (eq $port "http" | ternary "" (printf "-%s" $port)))) }}
 spec:
   {{- with $ingress.className }}
   ingressClassName: {{ . }}
@@ -26,7 +32,7 @@ spec:
               service:
                 name: {{ include "thanos.receive.routerName" $ }}
                 port:
-                  name: http
+                  name: {{ $port }}
             path: {{ .path | quote }}
             pathType: {{ .pathType | default "Prefix" }}
         {{- end }}
@@ -35,4 +41,7 @@ spec:
   tls:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+{{- $sep = "---\n" }}
+{{- end }}
+{{- end }}
 {{- end }}
