@@ -12,6 +12,9 @@
       "/(^|/)charts/.+/values\\.yaml$/"
     ]
   },
+  "helmv3": {
+    "bumpVersion": "minor"
+  },
   "packageRules": [
     {
       "description": "Group Thanos image tag (values.yaml) and appVersion (Chart.yaml) into one PR",
