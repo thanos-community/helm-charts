@@ -42,6 +42,82 @@ tests:
           path: metadata.annotations.custom-annotation
           value: my-value
 
+  # -- ServiceAccount name resolution (thanos.serviceAccountName) --------
+  # Exercises every branch of the helper through the pod spec, plus the
+  # ClusterRoleBinding subject which must never resolve to an empty name.
+
+  - it: defaults the pod serviceAccountName to <fullname>-thanos when create is true
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.serviceAccount.create: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-thanos-thanos
+
+  - it: uses the name override for the pod serviceAccountName when create is true
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.serviceAccount.create: true
+      global.serviceAccount.name: custom-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: custom-sa
+
+  - it: falls back to the default serviceaccount when create is false and no name is set
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.serviceAccount.create: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: default
+
+  - it: uses the name override for the pod serviceAccountName when create is false
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      global.serviceAccount.create: false
+      global.serviceAccount.name: custom-sa
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: custom-sa
+
+  - it: binds the ruler rule-importer to the resolved serviceaccount name
+    template: ruler/rbac.yaml
+    documentIndex: 1
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+      global.serviceAccount.create: true
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: RELEASE-NAME-thanos-thanos
+
+  - it: binds the ruler rule-importer to the default serviceaccount when create is false
+    template: ruler/rbac.yaml
+    documentIndex: 1
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+      global.serviceAccount.create: false
+    asserts:
+      - equal:
+          path: subjects[0].name
+          value: default
+
   # -- PrometheusRule ----------------------------------------------------
 
   - it: renders prometheusrule when thanosRules are enabled
