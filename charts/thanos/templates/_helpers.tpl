@@ -655,15 +655,16 @@ same helper produces a valid hashring for both standalone and split modes.
 
 {{/*
 Resolve the ServiceAccount name.
-If global.serviceAccount.create is true, we default to "<release>-thanos"
-unless a name is provided. If create is false, we must use the provided name.
+- When global.serviceAccount.create is true, defaults to "<fullname>-thanos"
+  unless global.serviceAccount.name overrides it.
+- When create is false, uses global.serviceAccount.name if provided, otherwise
+  falls back to the namespace "default" ServiceAccount.
 */}}
 {{- define "thanos.serviceAccountName" -}}
-{{- $name := default (printf "%s-%s" (include "thanos.fullname" .) "thanos") .Values.global.serviceAccount.name -}}
 {{- if .Values.global.serviceAccount.create -}}
-{{- $name -}}
+{{- default (printf "%s-%s" (include "thanos.fullname" .) "thanos") .Values.global.serviceAccount.name -}}
 {{- else -}}
-{{- $name -}}
+{{- default "default" .Values.global.serviceAccount.name -}}
 {{- end -}}
 {{- end -}}
 
