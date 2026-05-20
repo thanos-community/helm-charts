@@ -7828,6 +7828,63 @@
           "title": "serviceMonitor",
           "type": "object"
         },
+        "sharded": {
+          "additionalProperties": true,
+          "description": "Sharded Store Gateway topology. When enabled, the chart renders one StatefulSet per shard so that each shard serves a subset of the object-storage blocks. The total number of shards is the cross-product of `timePartitioning` entries and `hashPartitioning.shards`.",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Enable sharded Store Gateway deployments (one StatefulSet per shard).",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "hashPartitioning": {
+              "additionalProperties": true,
+              "description": "Hash-based partitioning. Distributes blocks across shards using a `hashmod` relabel on `__block_id`.",
+              "properties": {
+                "extraRelabelingConfigs": {
+                  "description": "Extra relabeling rules prepended to the generated hashmod/keep pair in each shard's `--selector.relabel-config` (e.g. to drop blocks by external labels before hashing).",
+                  "items": {
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "extraRelabelingConfigs",
+                  "type": "array"
+                },
+                "shards": {
+                  "default": 0,
+                  "description": "Number of hash shards. A value greater than 1 enables hash partitioning; 0 or 1 disables it (use time partitioning only).",
+                  "required": [],
+                  "title": "shards",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "shards",
+                "extraRelabelingConfigs"
+              ],
+              "title": "hashPartitioning",
+              "type": "object"
+            },
+            "timePartitioning": {
+              "description": "Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "timePartitioning",
+              "type": "array"
+            }
+          },
+          "required": [
+            "enabled",
+            "hashPartitioning",
+            "timePartitioning"
+          ],
+          "title": "sharded",
+          "type": "object"
+        },
         "tolerations": {
           "description": "Tolerations for Store Gateway pod scheduling.",
           "items": {
@@ -7857,6 +7914,7 @@
       "required": [
         "enabled",
         "replicaCount",
+        "sharded",
         "service",
         "ingress",
         "httpRoute",

@@ -634,6 +634,75 @@ same helper produces a valid hashring for both standalone and split modes.
 {{- end -}}
 
 {{- /* ============================== */ -}}
+{{- /* Store Gateway sharding helpers  */ -}}
+{{- /* ============================== */ -}}
+
+{{- /*
+Returns "true" when Store Gateway sharding is enabled
+(storegateway.sharded.enabled). Empty string otherwise.
+*/ -}}
+{{- define "thanos.storegateway.sharded" -}}
+{{- if and .Values.storegateway.sharded .Values.storegateway.sharded.enabled -}}true{{- end -}}
+{{- end -}}
+
+{{- /*
+Computes the list of Store Gateway shards and returns it as YAML under a
+top-level `shards` key. Consume with:
+  {{ $shards := (include "thanos.storegateway.shards" . | fromYaml).shards }}
+
+Each shard is a dict with:
+  - index    sequential shard number (0-based)
+  - name     StatefulSet/resource name (`<fullname>-storegateway[-<index>]`)
+  - isSharded whether sharding is enabled (drives the shard selector label)
+  - minTime / maxTime  optional, from timePartitioning (--min-time/--max-time)
+  - relabelConfigs     optional list, rendered into --selector.relabel-config
+
+When sharding is disabled a single shard is returned with the unsuffixed
+name and no extras, so callers can range uniformly without changing the
+output of non-sharded deployments.
+
+The total shard count is the cross-product of timePartitioning entries and
+hashPartitioning.shards: each time partition is split into `shards` hash
+shards (hashmod on __block_id). Either dimension may be used on its own.
+*/ -}}
+{{- define "thanos.storegateway.shards" -}}
+{{- $base := include "thanos.compName" (list . "storegateway") -}}
+{{- $shards := list -}}
+{{- if eq (include "thanos.storegateway.sharded" .) "true" -}}
+  {{- $s := .Values.storegateway.sharded -}}
+  {{- $hashShards := int (dig "hashPartitioning" "shards" 1 $s) -}}
+  {{- $extra := dig "hashPartitioning" "extraRelabelingConfigs" (list) $s -}}
+  {{- $timeParts := $s.timePartitioning | default (list) -}}
+  {{- $useTime := gt (len $timeParts) 0 -}}
+  {{- $useHash := gt $hashShards 1 -}}
+  {{- $timeIter := $timeParts -}}
+  {{- if not $useTime -}}{{- $timeIter = list (dict) -}}{{- end -}}
+  {{- $hashCount := 1 -}}
+  {{- if $useHash -}}{{- $hashCount = $hashShards -}}{{- end -}}
+  {{- $index := 0 -}}
+  {{- range $tp := $timeIter -}}
+    {{- range $h := until $hashCount -}}
+      {{- $shard := dict "index" $index "name" (printf "%s-%d" $base $index) "isSharded" true -}}
+      {{- if and $useTime $tp.min -}}{{- $_ := set $shard "minTime" $tp.min -}}{{- end -}}
+      {{- if and $useTime $tp.max -}}{{- $_ := set $shard "maxTime" $tp.max -}}{{- end -}}
+      {{- $rc := list -}}
+      {{- range $extra -}}{{- $rc = append $rc . -}}{{- end -}}
+      {{- if $useHash -}}
+        {{- $rc = append $rc (dict "action" "hashmod" "source_labels" (list "__block_id") "target_label" "shard" "modulus" $hashShards) -}}
+        {{- $rc = append $rc (dict "action" "keep" "source_labels" (list "shard") "regex" (printf "%d" $h)) -}}
+      {{- end -}}
+      {{- if gt (len $rc) 0 -}}{{- $_ := set $shard "relabelConfigs" $rc -}}{{- end -}}
+      {{- $shards = append $shards $shard -}}
+      {{- $index = add $index 1 -}}
+    {{- end -}}
+  {{- end -}}
+{{- else -}}
+  {{- $shards = list (dict "index" 0 "name" $base "isSharded" false) -}}
+{{- end -}}
+{{- dict "shards" $shards | toYaml -}}
+{{- end -}}
+
+{{- /* ============================== */ -}}
 {{- /* Ruler query URLs helpers       */ -}}
 {{- /* ============================== */ -}}
 

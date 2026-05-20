@@ -1615,7 +1615,41 @@ storegateway:
   enabled: true
 
   # -- Number of Store Gateway pod replicas. Two or more is recommended for HA.
+  # In sharded mode this is the replica count *per shard*.
   replicaCount: 2
+
+  # Sharded Store Gateway topology. When enabled, the chart renders one
+  # StatefulSet per shard (named `<fullname>-storegateway-<index>`) so that each
+  # shard serves a subset of the object-storage blocks instead of every replica
+  # loading the full block set. All shard pods keep the
+  # `app.kubernetes.io/component: storegateway` label, so the (headless) Service,
+  # ServiceMonitor and Query DNS-SRV discovery automatically fan out across every
+  # shard with no extra configuration. The total number of shards is the
+  # cross-product of `timePartitioning` entries and `hashPartitioning.shards`.
+  # NOTE: changing the shard count or time partitions renumbers shards and
+  # triggers StatefulSet recreation. See https://thanos.io/tip/components/store.md/#time-based-partitioning
+  sharded:
+    # -- Enable sharded Store Gateway deployments (one StatefulSet per shard).
+    enabled: false
+    # Hash-based partitioning. Distributes blocks across shards using a
+    # `hashmod` relabel on `__block_id`.
+    hashPartitioning:
+      # -- Number of hash shards. A value greater than 1 enables hash
+      # partitioning; the default of 1 disables it (a single hash shard is
+      # equivalent to no hash partitioning — use time partitioning only).
+      shards: 1
+      # -- Extra relabeling rules prepended to the generated hashmod/keep pair
+      # in each shard's `--selector.relabel-config` (e.g. to drop blocks by
+      # external labels before hashing).
+      # @default -- []
+      extraRelabelingConfigs: []
+    # -- Time-based partitioning. A list of `{ min, max }` ranges; each entry
+    # becomes a shard (or, combined with `hashPartitioning.shards`, a set of
+    # shards) restricted to that range via `--min-time` / `--max-time`. Values
+    # accept Thanos time formats (RFC3339 or relative durations like `-6w`); an
+    # empty string leaves that bound open.
+    # @default -- []
+    timePartitioning: []
 
   # Kubernetes Service configuration for the Store Gateway.
   service:

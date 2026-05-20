@@ -1,22 +1,27 @@
 {{- if and .Values.storegateway.enabled .Values.storegateway.autoscaling.enabled }}
+{{- $shards := (include "thanos.storegateway.shards" . | fromYaml).shards }}
+{{- range $i, $shard := $shards }}
+{{- if $i }}
+---
+{{- end }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "thanos.compName" (list . "storegateway") }}
+  name: {{ $shard.name }}
   labels:
-    {{- include "thanos.labels" . | nindent 4 }}
+    {{- include "thanos.labels" $ | nindent 4 }}
   annotations:
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+    {{- include "thanos.annotations" (dict "Values" $.Values "component" "storegateway") | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
-    kind: {{ .Values.storegateway.autoscaling.targetKind | default "StatefulSet" }}
-    name: {{ include "thanos.compName" (list . "storegateway") }}
-  minReplicas: {{ .Values.storegateway.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.storegateway.autoscaling.maxReplicas }}
+    kind: {{ $.Values.storegateway.autoscaling.targetKind | default "StatefulSet" }}
+    name: {{ $shard.name }}
+  minReplicas: {{ $.Values.storegateway.autoscaling.minReplicas }}
+  maxReplicas: {{ $.Values.storegateway.autoscaling.maxReplicas }}
   metrics:
-  {{- $cpu := .Values.storegateway.autoscaling.targetCPUUtilizationPercentage }}
-  {{- $mem := .Values.storegateway.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- $cpu := $.Values.storegateway.autoscaling.targetCPUUtilizationPercentage }}
+  {{- $mem := $.Values.storegateway.autoscaling.targetMemoryUtilizationPercentage }}
   {{- if or $cpu $mem }}
     {{- if $cpu }}
     - type: Resource
@@ -42,4 +47,5 @@ spec:
           type: Utilization
           averageUtilization: 80
   {{- end }}
+{{- end }}
 {{- end }}
