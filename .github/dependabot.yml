@@ -1,9 +1,14 @@
+# Renovate owns version-update PRs for these ecosystems (see renovate.json).
+# Dependabot is kept enabled for security updates only: open-pull-requests-limit: 0
+# disables its routine version-update PRs while still allowing security PRs,
+# avoiding duplicate dependency PRs from both bots.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
       - "github-actions"
@@ -13,6 +18,7 @@ updates:
       - "/charts/*"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
       - "helm"

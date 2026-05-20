@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.12.5](https://img.shields.io/badge/Version-0.12.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.1.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 84.5.0 |
+| https://charts.rustfs.com/ | rustfs | 0.3.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 85.2.0 |
 
 ## Component Overview
 
@@ -1201,6 +1201,7 @@ The table below documents all available values. Top-level keys group settings by
 | rustfs.initBucket.existingSecretKeys.secretKey | string | `"secret-key"` | Key in the existing Secret for the secret key. |
 | rustfs.initBucket.image | string | `"rustfs/rc:latest"` | Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI. |
 | rustfs.initBucket.secretKey | string | `"rustfsadmin"` | RustFS admin password. Ignored when existingSecret is set. |
+| rustfs.secret.allowInsecureDefaults | bool | `true` | Opt into the well-known default rustfs credentials. Dev/CI only. |
 | storegateway.affinity | object | {} | Affinity rules for Store Gateway pod scheduling. |
 | storegateway.annotations | object | {} | Extra annotations applied to Store Gateway resources. |
 | storegateway.autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for the Store Gateway. |

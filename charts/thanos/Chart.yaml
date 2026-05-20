@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.12.5
+version: 0.13.0
 appVersion: "v0.41.0"
 keywords:
   - thanos
@@ -25,11 +25,11 @@ maintainers:
 dependencies:
   - name: kube-prometheus-stack
     alias: kube-prometheus-stack
-    version: 84.5.0
+    version: 85.2.0
     repository: https://prometheus-community.github.io/helm-charts
     condition: kube-prometheus-stack.enabled
   - name: rustfs
-    version: "0.1.0"
+    version: "0.3.0"
     repository: https://charts.rustfs.com/
     condition: rustfs.enabled
 annotations:
@@ -51,5 +51,7 @@ annotations:
     - name: Slack
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
-    - kind: added
-      description: GPG chart signing with ArtifactHub signKey annotation and Rekor transparency via helm-sigstore
+    - kind: changed
+      description: Upgrade kube-prometheus-stack dependency to 85.2.0
+    - kind: changed
+      description: Upgrade rustfs dependency to 0.3.0

@@ -2718,6 +2718,15 @@ rustfs:
   # -- Deploy a local RustFS instance as an S3-compatible object store alongside Thanos.
   # Intended for CI and development only. Do not enable in production.
   enabled: false
+  # RustFS subchart secret handling. Since rustfs 0.3.0 the subchart refuses
+  # to render unless real credentials are supplied (secret.rustfs.access_key /
+  # secret_key or secret.existingSecret) or the well-known defaults are opted
+  # into. As this instance is for CI/development only and the init-bucket Job
+  # below already uses the rustfsadmin defaults, opt in so it renders out of
+  # the box. For any real use, set credentials and remove allowInsecureDefaults.
+  secret:
+    # -- Opt into the well-known default rustfs credentials. Dev/CI only.
+    allowInsecureDefaults: true
   initBucket:
     # -- Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.
     image: rustfs/rc:latest
