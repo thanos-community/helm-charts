@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.13.0](https://img.shields.io/badge/Version-0.13.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.13.1](https://img.shields.io/badge/Version-0.13.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -1029,6 +1029,13 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.ingress.http.hosts[0].paths[0].path | string | `"/"` |  |
 | receive.router.ingress.http.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | receive.router.ingress.http.tls | list | [] | TLS configuration for the Router HTTP Ingress. |
+| receive.router.ingress.remoteWrite.annotations | object | {} | Extra annotations for the Router remote-write Ingress. |
+| receive.router.ingress.remoteWrite.className | string | `""` | Ingress class name for Router remote-write endpoint. |
+| receive.router.ingress.remoteWrite.enabled | bool | `false` | Enable a Kubernetes Ingress for the Router remote-write endpoint. |
+| receive.router.ingress.remoteWrite.hosts[0].host | string | `"thanos-receive-router-remote-write.local"` |  |
+| receive.router.ingress.remoteWrite.hosts[0].paths[0].path | string | `"/"` |  |
+| receive.router.ingress.remoteWrite.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
+| receive.router.ingress.remoteWrite.tls | list | [] | TLS configuration for the Router remote-write Ingress. |
 | receive.router.labels | object | {} | Extra labels applied to Router resources. |
 | receive.router.nodeSelector | object | {} | Node selector for Router pod scheduling. Falls back to receive.nodeSelector. |
 | receive.router.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Router. |
