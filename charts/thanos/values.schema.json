@@ -310,6 +310,13 @@
               "title": "labels",
               "type": "object"
             },
+            "podLabels": {
+              "additionalProperties": true,
+              "description": "Extra labels applied to Bucketweb pods (e.g. for workload identity).",
+              "required": [],
+              "title": "podLabels",
+              "type": "object"
+            },
             "nodeSelector": {
               "additionalProperties": true,
               "description": "Node selector for Bucketweb pod scheduling.",
@@ -790,6 +797,7 @@
             "priorityClassName",
             "annotations",
             "labels",
+            "podLabels",
             "extraVolumes",
             "extraVolumeMounts",
             "serviceMonitor",
@@ -1103,6 +1111,13 @@
           "description": "Extra labels applied to Compactor resources.",
           "required": [],
           "title": "labels",
+          "type": "object"
+        },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Compactor pods (e.g. for workload identity).",
+          "required": [],
+          "title": "podLabels",
           "type": "object"
         },
         "nodeSelector": {
@@ -1742,6 +1757,7 @@
         "priorityClassName",
         "annotations",
         "labels",
+        "podLabels",
         "extraVolumes",
         "extraVolumeMounts",
         "serviceMonitor",
@@ -3005,6 +3021,13 @@
           "title": "labels",
           "type": "object"
         },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Query pods (e.g. for workload identity).",
+          "required": [],
+          "title": "podLabels",
+          "type": "object"
+        },
         "nodeSelector": {
           "additionalProperties": true,
           "description": "Node selector for Query pod scheduling.",
@@ -3515,6 +3538,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb"
       ],
@@ -3837,6 +3861,13 @@
           "description": "Extra labels applied to Query Frontend resources.",
           "required": [],
           "title": "labels",
+          "type": "object"
+        },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Query Frontend pods (e.g. for workload identity).",
+          "required": [],
+          "title": "podLabels",
           "type": "object"
         },
         "nodeSelector": {
@@ -4315,6 +4346,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb"
       ],
@@ -5005,6 +5037,13 @@
           "description": "Extra labels applied to Receive resources.",
           "required": [],
           "title": "labels",
+          "type": "object"
+        },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Receive pods (e.g. for workload identity). In split mode this applies to the Ingester; use receive.ingester.podLabels and receive.router.podLabels to target each workload independently.",
+          "required": [],
+          "title": "podLabels",
           "type": "object"
         },
         "nodeSelector": {
@@ -5699,6 +5738,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb",
         "router"
@@ -6087,6 +6127,13 @@
           "description": "Extra labels applied to Ruler resources.",
           "required": [],
           "title": "labels",
+          "type": "object"
+        },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Ruler pods (e.g. for workload identity).",
+          "required": [],
+          "title": "podLabels",
           "type": "object"
         },
         "nodeSelector": {
@@ -6688,6 +6735,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb"
       ],
@@ -7355,6 +7403,13 @@
           "title": "labels",
           "type": "object"
         },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels applied to Store Gateway pods (e.g. for workload identity).",
+          "required": [],
+          "title": "podLabels",
+          "type": "object"
+        },
         "nodeSelector": {
           "additionalProperties": true,
           "description": "Node selector for Store Gateway pod scheduling.",
@@ -7973,6 +8028,7 @@
         "extraVolumeMounts",
         "annotations",
         "labels",
+        "podLabels",
         "serviceMonitor",
         "pdb"
       ],

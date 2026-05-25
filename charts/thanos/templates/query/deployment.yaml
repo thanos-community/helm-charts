@@ -24,6 +24,7 @@ spec:
       labels:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: query
+        {{- include "thanos.podLabels" (dict "root" . "key" "query") | nindent 8 }}
       annotations:
         {{- with .Values.global.podAnnotations }}
         {{- toYaml . | nindent 8 }}

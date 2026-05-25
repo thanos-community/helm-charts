@@ -28,6 +28,7 @@ spec:
       labels:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: ruler
+        {{- include "thanos.podLabels" (dict "root" . "key" "ruler") | nindent 8 }}
       annotations:
         checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
         {{- with .Values.global.podAnnotations }}

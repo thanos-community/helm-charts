@@ -39,6 +39,7 @@ spec:
         {{- if $shard.isSharded }}
         thanos.io/storegateway-shard: {{ $shard.index | quote }}
         {{- end }}
+        {{- include "thanos.podLabels" (dict "root" $ "key" "storegateway") | nindent 8 }}
       annotations:
         checksum/objstore-configuration: {{ $.Values.global.objstore.config | sha256sum }}
         {{- with $.Values.global.podAnnotations }}

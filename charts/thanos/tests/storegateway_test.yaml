@@ -99,6 +99,19 @@ tests:
           path: metadata.labels.team
           value: storage
 
+  - it: applies pod labels to the pod template only
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.podLabels:
+        azure.workload.identity/use: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["azure.workload.identity/use"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["azure.workload.identity/use"]
+
   - it: applies component annotations
     template: storegateway/statefulset.yaml
     set:

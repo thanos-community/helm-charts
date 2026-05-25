@@ -94,6 +94,20 @@ tests:
           path: metadata.labels.custom-label
           value: my-value
 
+  - it: applies pod labels to the pod template only
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.podLabels:
+        azure.workload.identity/use: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["azure.workload.identity/use"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["azure.workload.identity/use"]
+
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv
