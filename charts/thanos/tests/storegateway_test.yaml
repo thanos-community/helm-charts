@@ -32,6 +32,25 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: renders minReadySeconds when set
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.minReadySeconds: 30
+    asserts:
+      - equal:
+          path: spec.minReadySeconds
+          value: 30
+
+  - it: omits minReadySeconds when zero
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.minReadySeconds: 0
+    asserts:
+      - notExists:
+          path: spec.minReadySeconds
+
   - it: uses the global image repository and tag
     template: storegateway/statefulset.yaml
     set:

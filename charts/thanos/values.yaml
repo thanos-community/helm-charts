@@ -688,6 +688,13 @@ compactor:
   # compactors against the same bucket causes data corruption.
   replicaCount: 1
 
+  # -- Minimum number of seconds for which a newly created Compactor Pod must be
+  # Running and Ready, without any container crashing, before it is considered
+  # available during a rolling update (StatefulSet `spec.minReadySeconds`).
+  # Defaults to 0 (available as soon as Ready); the field is omitted when 0.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
+  minReadySeconds: 0
+
   # PersistentVolumeClaim configuration for the Compactor working directory.
   persistence:
     # -- Enable a PersistentVolumeClaim for the Compactor working directory.
@@ -1618,6 +1625,13 @@ storegateway:
   # In sharded mode this is the replica count *per shard*.
   replicaCount: 2
 
+  # -- Minimum number of seconds for which a newly created Store Gateway Pod must
+  # be Running and Ready, without any container crashing, before it is considered
+  # available during a rolling update (StatefulSet `spec.minReadySeconds`).
+  # Defaults to 0 (available as soon as Ready); the field is omitted when 0.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
+  minReadySeconds: 0
+
   # Sharded Store Gateway topology. When enabled, the chart renders one
   # StatefulSet per shard (named `<fullname>-storegateway-<index>`) so that each
   # shard serves a subset of the object-storage blocks instead of every replica
@@ -2014,6 +2028,14 @@ receive:
   # In `split` mode this controls the Ingester StatefulSet replica count.
   replicaCount: 3
 
+  # -- Minimum number of seconds for which a newly created Receive Pod must be
+  # Running and Ready, without any container crashing, before it is considered
+  # available during a rolling update (StatefulSet `spec.minReadySeconds`).
+  # Defaults to 0 (available as soon as Ready); the field is omitted when 0.
+  # In `split` mode set `receive.ingester.minReadySeconds` instead.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
+  minReadySeconds: 0
+
   # -- Optional HTTP header name used to segregate tenants in multi-tenant setups.
   # When set, Receive routes write requests to the correct tenant shard based on this header.
   tenancyHeader: ""
@@ -2406,7 +2428,7 @@ receive:
   # schema requires it to be populated when mode=split.
   #
   # The accepted shape mirrors the top-level `receive.*` fields
-  # (replicaCount, tsdb, hashrings, service, ingress, httpRoute, grpcRoute,
+  # (replicaCount, minReadySeconds, tsdb, hashrings, service, ingress, httpRoute, grpcRoute,
   # vpa, persistence, resources, extraArgs, podSecurityContext,
   # containerSecurityContext, dnsConfig, extraEnv, extraEnvFrom,
   # extraInitContainers, extraContainers, probes, nodeSelector, tolerations,
@@ -2748,6 +2770,13 @@ ruler:
   # -- Number of Ruler pod replicas. Multiple replicas require consistent
   # rule distribution to avoid duplicate alerts.
   replicaCount: 2
+
+  # -- Minimum number of seconds for which a newly created Ruler Pod must be
+  # Running and Ready, without any container crashing, before it is considered
+  # available during a rolling update (StatefulSet `spec.minReadySeconds`).
+  # Defaults to 0 (available as soon as Ready); the field is omitted when 0.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
+  minReadySeconds: 0
 
   # Query endpoint configuration used by the Ruler to evaluate rules.
   query:

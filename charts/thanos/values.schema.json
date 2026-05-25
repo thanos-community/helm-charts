@@ -1452,6 +1452,13 @@
           "title": "probes",
           "type": "object"
         },
+        "minReadySeconds": {
+          "default": 0,
+          "description": "Minimum number of seconds for which a newly created Compactor Pod must be\nRunning and Ready, without any container crashing, before it is considered\navailable during a rolling update (StatefulSet `spec.minReadySeconds`).\nDefaults to 0 (available as soon as Ready); the field is omitted when 0.\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds",
+          "required": [],
+          "title": "minReadySeconds",
+          "type": "integer"
+        },
         "replicaCount": {
           "default": 1,
           "description": "Number of Compactor replicas. Must remain 1 — running multiple\ncompactors against the same bucket causes data corruption.",
@@ -1711,6 +1718,7 @@
       "required": [
         "enabled",
         "replicaCount",
+        "minReadySeconds",
         "persistence",
         "service",
         "ingress",
@@ -5346,6 +5354,13 @@
           "title": "probes",
           "type": "object"
         },
+        "minReadySeconds": {
+          "default": 0,
+          "description": "Minimum number of seconds for which a newly created Receive Pod must be\nRunning and Ready, without any container crashing, before it is considered\navailable during a rolling update (StatefulSet `spec.minReadySeconds`).\nDefaults to 0 (available as soon as Ready); the field is omitted when 0.\nIn `split` mode set `receive.ingester.minReadySeconds` instead.\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds",
+          "required": [],
+          "title": "minReadySeconds",
+          "type": "integer"
+        },
         "replicaCount": {
           "default": 3,
           "description": "Number of Receive pod replicas. Minimum 3 is recommended for\nreplication factor 2 (write quorum = floor(replicaCount/2)+1).",
@@ -5655,6 +5670,7 @@
         "enabled",
         "mode",
         "replicaCount",
+        "minReadySeconds",
         "tenancyHeader",
         "tsdb",
         "hashrings",
@@ -6440,6 +6456,13 @@
           "title": "query",
           "type": "object"
         },
+        "minReadySeconds": {
+          "default": 0,
+          "description": "Minimum number of seconds for which a newly created Ruler Pod must be\nRunning and Ready, without any container crashing, before it is considered\navailable during a rolling update (StatefulSet `spec.minReadySeconds`).\nDefaults to 0 (available as soon as Ready); the field is omitted when 0.\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds",
+          "required": [],
+          "title": "minReadySeconds",
+          "type": "integer"
+        },
         "replicaCount": {
           "default": 2,
           "description": "Number of Ruler pod replicas. Multiple replicas require consistent\nrule distribution to avoid duplicate alerts.",
@@ -6636,6 +6659,7 @@
       "required": [
         "enabled",
         "replicaCount",
+        "minReadySeconds",
         "query",
         "alertmanagers",
         "alertQueryUrl",
@@ -7678,6 +7702,13 @@
           "title": "probes",
           "type": "object"
         },
+        "minReadySeconds": {
+          "default": 0,
+          "description": "Minimum number of seconds for which a newly created Store Gateway Pod must\nbe Running and Ready, without any container crashing, before it is considered\navailable during a rolling update (StatefulSet `spec.minReadySeconds`).\nDefaults to 0 (available as soon as Ready); the field is omitted when 0.\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds",
+          "required": [],
+          "title": "minReadySeconds",
+          "type": "integer"
+        },
         "replicaCount": {
           "default": 2,
           "description": "Number of Store Gateway pod replicas. Two or more is recommended for HA.",
@@ -7914,6 +7945,7 @@
       "required": [
         "enabled",
         "replicaCount",
+        "minReadySeconds",
         "sharded",
         "service",
         "ingress",
