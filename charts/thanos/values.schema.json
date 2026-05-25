@@ -1654,7 +1654,7 @@
                   "description": "Maximum CPU resource enforced by the Compactor VPA.",
                   "required": [],
                   "title": "cpu",
-                  "type": "integer"
+                  "type": "string"
                 },
                 "memory": {
                   "default": "8Gi",
