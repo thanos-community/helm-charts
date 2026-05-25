@@ -4,6 +4,65 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: added
+          description: Per-component podLabels to set extra labels on pods (e.g. for workload identity), rendered via a shared thanos.podLabels helper for all workloads (bucketweb, compactor, query, query-frontend, store gateway, receive, receive ingester/router, ruler)
+      artifacthub.io/containsSecurityUpdates: "false"
+      artifacthub.io/images: |
+        - name: thanos
+          image: quay.io/thanos/thanos:v0.41.0
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: Documentation
+          url: https://thanos.io/tip/thanos/getting-started.md/
+        - name: GitHub
+          url: https://github.com/thanos-io/thanos
+        - name: Slack
+          url: https://cloud-native.slack.com/archives/CL25937SP
+      artifacthub.io/operator: "false"
+      artifacthub.io/prerelease: "false"
+      artifacthub.io/signKey: |
+        fingerprint: BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
+        url: https://keys.openpgp.org/vks/v1/by-fingerprint/BEAD950E9E7EBFE8CEC7E3F29D8EA313A3D349D8
+    apiVersion: v2
+    appVersion: v0.41.0
+    created: "2026-05-25T15:18:57.110303394Z"
+    dependencies:
+    - alias: kube-prometheus-stack
+      condition: kube-prometheus-stack.enabled
+      name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 85.2.0
+    - condition: rustfs.enabled
+      name: rustfs
+      repository: https://charts.rustfs.com/
+      version: 0.3.0
+    description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus
+      setup with long term storage capabilities.
+    digest: dd1cc4d88a5768016975ee1f04517bb3c2f9e6c3341fd208d3f6f41103c67423
+    home: https://thanos.io/
+    icon: https://raw.githubusercontent.com/thanos-io/thanos/master/docs/img/Thanos-logo_fullmedium.png
+    keywords:
+    - thanos
+    - prometheus
+    - monitoring
+    - metrics
+    - alerting
+    - observability
+    - kube-prometheus-stack
+    kubeVersion: '>= 1.30.0-0'
+    maintainers:
+    - email: hamdi.khelil@kapheira.cloud
+      name: hamdikh
+    name: thanos
+    sources:
+    - https://github.com/thanos-io/thanos
+    - https://github.com/thanos-community/helm-charts
+    type: application
+    urls:
+    - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.18.0/thanos-0.18.0.tgz
+    version: 0.18.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: added
           description: Support configuring spec.minReadySeconds on the Receive, Ruler, Store Gateway and Compactor StatefulSets
       artifacthub.io/containsSecurityUpdates: "false"
       artifacthub.io/images: |
@@ -2522,4 +2581,4 @@ entries:
     urls:
     - https://github.com/thanos-community/helm-charts/releases/download/thanos-0.2.0/thanos-0.2.0.tgz
     version: 0.2.0
-generated: "2026-05-25T14:14:09.07496548Z"
+generated: "2026-05-25T15:18:57.110645575Z"
