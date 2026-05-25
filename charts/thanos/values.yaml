@@ -467,6 +467,38 @@ bucket:
       # Example:
       # hostnames:
       #   - bucketweb.example.com
+      # -- Gateway matches HTTPRoute rules match conditions.
+      # @default -- []
+      matches: []
+      # Example:
+      # matches:
+      #   - path:
+      #       type: PathPrefix
+      #       value: /
+      # -- Gateway filters HTTPRoute rules filter request/response.
+      # @default -- []
+      filters: []
+      # Example:
+      # filters:
+      #   - type: RequestHeaderModifier
+      #     requestHeaderModifier:
+      #       add:
+      #         - name: X-Forwarded-Proto
+      #           value: https
+      # -- Additional custom rules for Bucketweb HTTPRoute
+      # Each item should be a complete HTTPRouteRule object with
+      # its own backendRefs, matches, filters, etc.
+      # @default -- []
+      extraRules: []
+      # Example:
+      # extraRules:
+      #   - backendRefs:
+      #       - name: other-service
+      #         port: 80
+      #     matches:
+      #       - path:
+      #           type: PathPrefix
+      #           value: /api
 
     # HorizontalPodAutoscaler configuration for Bucketweb.
     autoscaling:
@@ -707,9 +739,49 @@ compactor:
     # -- Gateway parentRefs for the Compactor HTTPRoute.
     # @default -- []
     parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    #     sectionName: https
     # -- Hostnames to match on the Compactor HTTPRoute.
     # @default -- []
     hostnames: []
+    # Example:
+    # hostnames:
+    #   - compactor.example.com
+    # -- Gateway matches for the Compactor HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Compactor HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Compactor HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #       - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # VerticalPodAutoscaler configuration for the Compactor.
   vpa:
@@ -1010,6 +1082,38 @@ query:
     # Example:
     # hostnames:
     #   - thanos-query.example.com
+    # -- Gateway matches for the Query HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Query HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Query HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #       - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # Gateway API GRPCRoute configuration for the Query gRPC Store API.
   grpcRoute:
@@ -1285,9 +1389,49 @@ queryFrontend:
     # -- Gateway parentRefs for the Query Frontend HTTPRoute.
     # @default -- []
     parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    #     sectionName: https
     # -- Hostnames to match on the Query Frontend HTTPRoute.
     # @default -- []
     hostnames: []
+    # Example:
+    # hostnames:
+    #   - query-frontend.example.com
+    # -- Gateway matches for the Query Frontend HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Query Frontend HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Query Frontend HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #      - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # HorizontalPodAutoscaler configuration for the Query Frontend.
   autoscaling:
@@ -1555,9 +1699,49 @@ storegateway:
     # -- Gateway parentRefs for the Store Gateway HTTPRoute.
     # @default -- []
     parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    #     sectionName: https
     # -- Hostnames to match on the Store Gateway HTTPRoute.
     # @default -- []
     hostnames: []
+    # Example:
+    # hostnames:
+    #   - storegateway.example.com
+    # -- Gateway matches for the Store Gateway HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Store Gateway HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Store Gateway HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #       - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # Gateway API GRPCRoute configuration for the Store Gateway gRPC Store API.
   grpcRoute:
@@ -1930,9 +2114,49 @@ receive:
     # -- Gateway parentRefs for the Receive HTTPRoute.
     # @default -- []
     parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    #     sectionName: https
     # -- Hostnames to match on the Receive HTTPRoute.
     # @default -- []
     hostnames: []
+    # Example:
+    # hostnames:
+    #   - receive.example.com
+    # -- Gateway matches for the Receive HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Receive HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Receive HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #       - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # Gateway API GRPCRoute configuration for the Receive gRPC Store API.
   grpcRoute:
@@ -2255,9 +2479,49 @@ receive:
       # -- Gateway parentRefs for the Router HTTPRoute.
       # @default -- []
       parentRefs: []
+      # Example:
+      # parentRefs:
+      #   - name: my-gateway
+      #     namespace: gateway-system
+      #     sectionName: https
       # -- Hostnames to match on the Router HTTPRoute.
       # @default -- []
       hostnames: []
+      # Example:
+      # hostnames:
+      #   - receive-router.example.com
+      # -- Gateway matches for the Router HTTPRoute rules.
+      # @default -- []
+      matches: []
+      # Example:
+      # matches:
+      #   - path:
+      #       type: PathPrefix
+      #       value: /
+      # -- Gateway filters for the Router HTTPRoute rules.
+      # @default -- []
+      filters: []
+      # Example:
+      # filters:
+      #   - type: RequestHeaderModifier
+      #     requestHeaderModifier:
+      #       add:
+      #         - name: X-Forwarded-Proto
+      #           value: https
+      # -- Additional custom rules for Router HTTPRoute
+      # Each item should be a complete HTTPRouteRule object with
+      # its own backendRefs, matches, filters, etc.
+      # @default -- []
+      extraRules: []
+      # Example:
+      # extraRules:
+      #   - backendRefs:
+      #       - name: other-service
+      #         port: 80
+      #     matches:
+      #       - path:
+      #           type: PathPrefix
+      #           value: /api
 
     # VerticalPodAutoscaler configuration for the Router Deployment.
     vpa:
@@ -2563,9 +2827,49 @@ ruler:
     # -- Gateway parentRefs for the Ruler HTTPRoute.
     # @default -- []
     parentRefs: []
+    # Example:
+    # parentRefs:
+    #   - name: my-gateway
+    #     namespace: gateway-system
+    #     sectionName: https
     # -- Hostnames to match on the Ruler HTTPRoute.
     # @default -- []
     hostnames: []
+    # Example:
+    # hostnames:
+    #   - ruler.example.com
+    # -- Gateway matches for the Ruler HTTPRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - path:
+    #       type: PathPrefix
+    #       value: /
+    # -- Gateway filters for the Ruler HTTPRoute rules.
+    # @default -- []
+    filters: []
+    # Example:
+    # filters:
+    #   - type: RequestHeaderModifier
+    #     requestHeaderModifier:
+    #       add:
+    #         - name: X-Forwarded-Proto
+    #           value: https
+    # -- Additional custom rules for Ruler HTTPRoute
+    # Each item should be a complete HTTPRouteRule object with
+    # its own backendRefs, matches, filters, etc.
+    # @default -- []
+    extraRules: []
+    # Example:
+    # extraRules:
+    #   - backendRefs:
+    #       - name: other-service
+    #         port: 80
+    #     matches:
+    #       - path:
+    #           type: PathPrefix
+    #           value: /api
 
   # -- Resource requests and limits for the Ruler container.
   # @default -- {}

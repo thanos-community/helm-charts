@@ -73,6 +73,106 @@ tests:
           path: spec.rules[0].backendRefs[0].port
           value: 9090
 
+  - it: sets matches on query HTTPRoute
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+      query.httpRoute.matches:
+        - path:
+            type: PathPrefix
+            value: /
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.type
+          value: PathPrefix
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /
+
+  - it: sets filters on query HTTPRoute
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+      query.httpRoute.filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+    asserts:
+      - equal:
+          path: spec.rules[0].filters[0].requestRedirect.scheme
+          value: https
+      - equal:
+          path: spec.rules[0].filters[0].requestRedirect.statusCode
+          value: 301
+
+  - it: sets extraRules with matches on query HTTPRoute
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+      query.httpRoute.matches:
+        - path:
+            type: PathPrefix
+            value: /
+      query.httpRoute.extraRules:
+        - backendRefs:
+            - name: compactor
+              port: 10902
+          matches:
+            - path:
+                type: PathPrefix
+                value: /compactor
+    asserts:
+      - equal:
+          path: spec.rules[1].backendRefs[0].port
+          value: 10902
+      - equal:
+          path: spec.rules[1].matches[0].path.value
+          value: /compactor
+
+  - it: sets extraRules with filters on query HTTPRoute
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+      query.httpRoute.extraRules:
+        - backendRefs:
+            - name: other-service
+              port: 8080
+          matches:
+            - path:
+                type: PathPrefix
+                value: /api
+          filters:
+            - type: RequestRedirect
+              requestRedirect:
+                scheme: https
+                statusCode: 301
+    asserts:
+      - equal:
+          path: spec.rules[1].backendRefs[0].port
+          value: 8080
+      - equal:
+          path: spec.rules[1].matches[0].path.value
+          value: /api
+      - equal:
+          path: spec.rules[1].filters[0].requestRedirect.scheme
+          value: https
+      - equal:
+          path: spec.rules[1].filters[0].requestRedirect.statusCode
+          value: 301
+
   # -- Query GRPCRoute ------------------------------------------------
 
   - it: does not render query GRPCRoute when disabled
@@ -177,6 +277,77 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: sets matches on storegateway HTTPRoute
+    template: storegateway/httproute.yaml
+    set:
+      storegateway.httpRoute.enabled: true
+      storegateway.httpRoute.parentRefs:
+        - name: my-gateway
+      storegateway.httpRoute.matches:
+        - path:
+            type: PathPrefix
+            value: /storegateway
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.type
+          value: PathPrefix
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /storegateway
+
+  - it: sets filters on storegateway HTTPRoute
+    template: storegateway/httproute.yaml
+    set:
+      storegateway.httpRoute.enabled: true
+      storegateway.httpRoute.parentRefs:
+        - name: my-gateway
+      storegateway.httpRoute.filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            add:
+              - name: X-Forwarded-Proto
+                value: https
+    asserts:
+      - equal:
+          path: spec.rules[0].filters[0].type
+          value: RequestHeaderModifier
+      - equal:
+          path: spec.rules[0].filters[0].requestHeaderModifier.add[0].name
+          value: X-Forwarded-Proto
+
+  - it: sets extraRules with matches and filters on storegateway HTTPRoute
+    template: storegateway/httproute.yaml
+    set:
+      storegateway.httpRoute.enabled: true
+      storegateway.httpRoute.parentRefs:
+        - name: my-gateway
+      storegateway.httpRoute.extraRules:
+        - backendRefs:
+            - name: other-service
+              port: 8080
+          matches:
+            - path:
+                type: PathPrefix
+                value: /api
+          filters:
+            - type: RequestRedirect
+              requestRedirect:
+                scheme: https
+                statusCode: 301
+    asserts:
+      - equal:
+          path: spec.rules[1].backendRefs[0].port
+          value: 8080
+      - equal:
+          path: spec.rules[1].matches[0].path.value
+          value: /api
+      - equal:
+          path: spec.rules[1].filters[0].requestRedirect.scheme
+          value: https
+      - equal:
+          path: spec.rules[1].filters[0].requestRedirect.statusCode
+          value: 301
 
   # -- Receive HTTPRoute ----------------------------------------------
 

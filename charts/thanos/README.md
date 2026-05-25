@@ -517,7 +517,10 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.extraVolumes | list | [] | Extra volumes for Bucketweb pods. |
 | bucket.bucketweb.httpRoute.annotations | object | {} | Annotations for the HTTPRoute resource. |
 | bucket.bucketweb.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Bucketweb (alternative to Ingress). |
+| bucket.bucketweb.httpRoute.extraRules | list | [] | Additional custom rules Bucketweb HTTPRoute. |
+| bucket.bucketweb.httpRoute.filters | list | [] | Gateway filters for the Bucketweb HTTPRoute rules. |
 | bucket.bucketweb.httpRoute.hostnames | list | [] | Hostnames to match. Empty matches all hostnames on the parent Gateway. |
+| bucket.bucketweb.httpRoute.matches | list | [] | Gateway matches for the Bucketweb HTTPRoute rules. |
 | bucket.bucketweb.httpRoute.parentRefs | list | [] | Gateway parentRefs the HTTPRoute should attach to. |
 | bucket.bucketweb.ingress.annotations | object | {} | Extra annotations for the Ingress resource. |
 | bucket.bucketweb.ingress.className | string | `""` | Ingress class name (e.g. nginx, traefik). |
@@ -589,7 +592,10 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.extraVolumes | list | [] | Extra volumes for Compactor pods. |
 | compactor.httpRoute.annotations | object | {} | Annotations for the Compactor HTTPRoute resource. |
 | compactor.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Compactor HTTP endpoint. |
+| compactor.httpRoute.extraRules | list | [] | Additional custom rules Compactor HTTPRoute. |
+| compactor.httpRoute.filters | list | [] | Gateway filters for the Compactor HTTPRoute rules. |
 | compactor.httpRoute.hostnames | list | [] | Hostnames to match on the Compactor HTTPRoute. |
+| compactor.httpRoute.matches | list | [] | Gateway matches for the Compactor HTTPRoute rules. |
 | compactor.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Compactor HTTPRoute. |
 | compactor.ingress.className | string | `""` | Ingress class name for the Compactor (e.g. nginx, traefik). |
 | compactor.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Compactor HTTP endpoint. |
@@ -772,7 +778,10 @@ The table below documents all available values. Top-level keys group settings by
 | query.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Query GRPCRoute. |
 | query.httpRoute.annotations | object | {} | Annotations for the Query HTTPRoute resource. |
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
+| query.httpRoute.extraRules | list | [] | Additional custom rules for Query HTTPRoute. |
+| query.httpRoute.filters | list | [] | Gateway filters for the Query HTTPRoute rules. |
 | query.httpRoute.hostnames | list | [] | Hostnames to match on the Query HTTPRoute. |
+| query.httpRoute.matches | list | [] | Gateway matches for the Query HTTPRoute rules. |
 | query.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Query HTTPRoute. |
 | query.ingress.annotations | object | {} | Deprecated. Use `query.ingress.http.annotations` instead. |
 | query.ingress.className | string | `""` | Deprecated. Use `query.ingress.http.className` instead. |
@@ -865,7 +874,10 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.extraVolumes | list | [] | Extra volumes for Query Frontend pods. |
 | queryFrontend.httpRoute.annotations | object | {} | Annotations for the Query Frontend HTTPRoute resource. |
 | queryFrontend.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Query Frontend. |
+| queryFrontend.httpRoute.extraRules | list | [] | Additional custom rules for Query Frontend HTTPRoute. |
+| queryFrontend.httpRoute.filters | list | [] | Gateway filters for the Query Frontend HTTPRoute rules. |
 | queryFrontend.httpRoute.hostnames | list | [] | Hostnames to match on the Query Frontend HTTPRoute. |
+| queryFrontend.httpRoute.matches | list | [] | Gateway matches for the Query Frontend HTTPRoute rules. |
 | queryFrontend.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Query Frontend HTTPRoute. |
 | queryFrontend.ingress.annotations | object | {} | Extra annotations for the Query Frontend Ingress. |
 | queryFrontend.ingress.className | string | `""` | Ingress class name for Query Frontend (e.g. nginx, traefik). |
@@ -940,7 +952,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.hashrings.static | list | [] | Optional static hashring configuration. When non-empty this overrides `autogen` and gives full control over ring topology. |
 | receive.httpRoute.annotations | object | {} | Annotations for the Receive HTTPRoute resource. |
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |
+| receive.httpRoute.extraRules | list | [] | Additional custom rules Receive HTTPRoute. |
+| receive.httpRoute.filters | list | [] | Gateway filters for the Receive HTTPRoute rules. |
 | receive.httpRoute.hostnames | list | [] | Hostnames to match on the Receive HTTPRoute. |
+| receive.httpRoute.matches | list | [] | Gateway matches for the Receive HTTPRoute rules. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
 | receive.ingester | object | {} | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. |
 | receive.ingress.annotations | object | {} | Deprecated. Use `receive.ingress.http.annotations` instead. |
@@ -1020,7 +1035,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.extraVolumes | list | [] | Extra volumes for Router pods. |
 | receive.router.httpRoute.annotations | object | {} | Annotations for the Router HTTPRoute resource. |
 | receive.router.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Router HTTP endpoint. |
+| receive.router.httpRoute.extraRules | list | [] | Additional custom rules Router HTTPRoute. |
+| receive.router.httpRoute.filters | list | [] | Gateway filters for the Router HTTPRoute rules. |
 | receive.router.httpRoute.hostnames | list | [] | Hostnames to match on the Router HTTPRoute. |
+| receive.router.httpRoute.matches | list | [] | Gateway matches for the Router HTTPRoute rules. |
 | receive.router.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Router HTTPRoute. |
 | receive.router.ingress.http.annotations | object | {} | Extra annotations for the Router HTTP Ingress. |
 | receive.router.ingress.http.className | string | `""` | Ingress class name for Router HTTP endpoint. |
@@ -1138,7 +1156,10 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.extraVolumes | list | [] | Extra volumes for Ruler pods. |
 | ruler.httpRoute.annotations | object | {} | Annotations for the Ruler HTTPRoute resource. |
 | ruler.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Ruler HTTP endpoint. |
+| ruler.httpRoute.extraRules | list | [] | Additional custom rules Ruler HTTPRoute. |
+| ruler.httpRoute.filters | list | [] | Gateway filters for the Ruler HTTPRoute rules. |
 | ruler.httpRoute.hostnames | list | [] | Hostnames to match on the Ruler HTTPRoute. |
+| ruler.httpRoute.matches | list | [] | Gateway matches for the Ruler HTTPRoute rules. |
 | ruler.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Ruler HTTPRoute. |
 | ruler.ingress.annotations | object | {} | Extra annotations for the Ruler Ingress. |
 | ruler.ingress.className | string | `""` | Ingress class name for Ruler (e.g. nginx, traefik). |
@@ -1233,7 +1254,10 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway GRPCRoute. |
 | storegateway.httpRoute.annotations | object | {} | Annotations for the Store Gateway HTTPRoute resource. |
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
+| storegateway.httpRoute.extraRules | list | [] | Additional custom rules Store Gateway HTTPRoute. |
+| storegateway.httpRoute.filters | list | [] | Gateway filters for the Store Gateway HTTPRoute rules. |
 | storegateway.httpRoute.hostnames | list | [] | Hostnames to match on the Store Gateway HTTPRoute. |
+| storegateway.httpRoute.matches | list | [] | Gateway matches for the Store Gateway HTTPRoute rules. |
 | storegateway.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway HTTPRoute. |
 | storegateway.ingress.annotations | object | {} | Deprecated. Use `storegateway.ingress.http.annotations` instead. |
 | storegateway.ingress.className | string | `""` | Deprecated. Use `storegateway.ingress.http.className` instead. |
