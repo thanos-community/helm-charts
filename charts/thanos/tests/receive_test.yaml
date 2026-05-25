@@ -130,6 +130,19 @@ tests:
           path: metadata.labels.custom-label
           value: my-value
 
+  - it: applies pod labels to the pod template only in standalone mode
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.podLabels:
+        azure.workload.identity/use: "true"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["azure.workload.identity/use"]
+          value: "true"
+      - notExists:
+          path: metadata.labels["azure.workload.identity/use"]
+
   # -- Extra env vars -------------------------------------------------
 
   - it: injects component extraEnv
@@ -1428,6 +1441,42 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: applies ingester pod labels to the ingester pod template in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.podLabels:
+        role: ingester
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.role
+          value: ingester
+
+  - it: falls back to receive.podLabels for the ingester in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.podLabels:
+        tier: write
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.tier
+          value: write
+
+  - it: applies router pod labels to the router pod template in split mode
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.podLabels:
+        role: router
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels.role
+          value: router
 
   - it: renders the router deployment in split mode
     template: receive/split/router-deployment.yaml

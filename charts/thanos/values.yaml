@@ -631,6 +631,10 @@ bucket:
     # @default -- {}
     labels: {}
 
+    # -- Extra labels applied to Bucketweb pods (e.g. for workload identity).
+    # @default -- {}
+    podLabels: {}
+
     # -- Extra volumes for Bucketweb pods.
     # @default -- []
     extraVolumes: []
@@ -940,6 +944,10 @@ compactor:
   # -- Extra labels applied to Compactor resources.
   # @default -- {}
   labels: {}
+
+  # -- Extra labels applied to Compactor pods (e.g. for workload identity).
+  # @default -- {}
+  podLabels: {}
 
   # -- Extra volumes for Compactor pods.
   # @default -- []
@@ -1298,6 +1306,10 @@ query:
   # @default -- {}
   labels: {}
 
+  # -- Extra labels applied to Query pods (e.g. for workload identity).
+  # @default -- {}
+  podLabels: {}
+
   # Prometheus Operator ServiceMonitor configuration for the Query component.
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for Query.
@@ -1574,6 +1586,10 @@ queryFrontend:
   # -- Extra labels applied to Query Frontend resources.
   # @default -- {}
   labels: {}
+
+  # -- Extra labels applied to Query Frontend pods (e.g. for workload identity).
+  # @default -- {}
+  podLabels: {}
 
   # Prometheus Operator ServiceMonitor configuration for the Query Frontend.
   serviceMonitor:
@@ -1957,6 +1973,10 @@ storegateway:
   # -- Extra labels applied to Store Gateway resources.
   # @default -- {}
   labels: {}
+
+  # -- Extra labels applied to Store Gateway pods (e.g. for workload identity).
+  # @default -- {}
+  podLabels: {}
 
   # Prometheus Operator ServiceMonitor configuration for the Store Gateway.
   serviceMonitor:
@@ -2385,6 +2405,12 @@ receive:
   # @default -- {}
   labels: {}
 
+  # -- Extra labels applied to Receive pods (e.g. for workload identity).
+  # In split mode this applies to the Ingester; set `receive.ingester.podLabels`
+  # and `receive.router.podLabels` to target each workload independently.
+  # @default -- {}
+  podLabels: {}
+
   # Prometheus Operator ServiceMonitor configuration for the Receive component.
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for Receive.
@@ -2443,6 +2469,8 @@ receive:
   # Example (split mode):
   # ingester:
   #   replicaCount: 3
+  #   podLabels:
+  #     azure.workload.identity/use: "true"
   #   tsdb:
   #     retention: 24h
   #     walCompression: true
@@ -2721,6 +2749,10 @@ receive:
     # -- Extra labels applied to Router resources.
     # @default -- {}
     labels: {}
+
+    # -- Extra labels applied to Router pods (e.g. for workload identity).
+    # @default -- {}
+    podLabels: {}
 
     # Prometheus Operator ServiceMonitor configuration for the Router.
     serviceMonitor:
@@ -3056,6 +3088,10 @@ ruler:
   # -- Extra labels applied to Ruler resources.
   # @default -- {}
   labels: {}
+
+  # -- Extra labels applied to Ruler pods (e.g. for workload identity).
+  # @default -- {}
+  podLabels: {}
 
   # Prometheus Operator ServiceMonitor configuration for the Ruler component.
   serviceMonitor:

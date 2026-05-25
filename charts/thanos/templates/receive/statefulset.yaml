@@ -30,6 +30,7 @@ spec:
       labels:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: receive
+        {{- include "thanos.podLabels" (dict "root" . "key" "ingester" "parent" "receive") | nindent 8 }}
       annotations:
         {{- $anns := dict -}}
         {{- if .Values.global.podAnnotations }}

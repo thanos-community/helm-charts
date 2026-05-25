@@ -99,6 +99,31 @@ securityContext:
 {{- end }}
 
 {{- /*
+Render extra pod labels for a component with component → (optional parent) fallback.
+Returns the labels as YAML (no leading newline); empty when none are set.
+Usage:
+  {{- include "thanos.podLabels" (dict "root" . "key" "compactor") | nindent 8 }}
+  {{- include "thanos.podLabels" (dict "root" . "key" "ingester" "parent" "receive") | nindent 8 }}
+*/ -}}
+{{- define "thanos.podLabels" -}}
+{{- $root := .root -}}
+{{- $key := .key -}}
+{{- $parent := .parent | default "" -}}
+{{- $par := dict -}}
+{{- $comp := dict -}}
+{{- if $parent -}}
+{{- $par = index $root.Values $parent | default dict -}}
+{{- $comp = index $par $key | default dict -}}
+{{- else -}}
+{{- $comp = index $root.Values $key | default dict -}}
+{{- end -}}
+{{- $podLabels := $comp.podLabels | default $par.podLabels -}}
+{{- with $podLabels }}
+{{- toYaml . }}
+{{- end }}
+{{- end }}
+
+{{- /*
 Render dnsConfig with component → (optional parent) → global fallback.
 Usage:
   {{ include "thanos.dnsConfig" (dict "Values" .Values "component" "compactor") }}
