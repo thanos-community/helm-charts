@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.16.0
+version: 0.16.1
 appVersion: "v0.41.0"
 keywords:
   - thanos
@@ -52,6 +52,4 @@ annotations:
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
     - kind: fixed
-      description: Store Gateway CrashLoopBackOff when storegateway.cachingBucketConfig is set, caused by mounting the caching-bucket config into the read-only objstore Secret directory
-    - kind: added
-      description: Ruler now mounts the global objstore Secret and is auto-wired as a Query StoreAPI endpoint
+      description: Receive Router CrashLoopBackOff in split mode caused by missing uniquely-identifying external labels; the Router now sets --label=receive_router_replica

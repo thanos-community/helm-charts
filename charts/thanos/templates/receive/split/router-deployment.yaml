@@ -55,6 +55,7 @@ spec:
             - --receive.hashrings-file=/etc/thanos/hashrings.json
             - --receive.hashrings-algorithm=ketama
             - --receive.replication-factor={{ $rt.replicationFactor | default 1 }}
+            - --label=receive_router_replica="$(POD_NAME)"
             {{- if $cfg.tenancyHeader }}
             - --receive.tenant-header={{ $cfg.tenancyHeader }}
             {{- end }}
