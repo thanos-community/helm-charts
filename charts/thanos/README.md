@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.15.0](https://img.shields.io/badge/Version-0.15.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.16.0](https://img.shields.io/badge/Version-0.16.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -236,7 +236,7 @@ query:
     - prometheus_replica
     - receive_replica
 
-  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway) are auto-wired
+  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway, Ruler) are auto-wired
   # when autogen.enabled is true. Endpoints defined in static[] are always appended; set
   # autogen.enabled to false to take full control of what endpoint arguments are passed.
   endpoints:
@@ -763,7 +763,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.containerSecurityContext | object | {} | Container security context for Query. Overrides global.containerSecurityContext. |
 | query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
-| query.endpoints.autogen.enabled | bool | `true` | Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway). These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format. |
+| query.endpoints.autogen.enabled | bool | `true` | Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway, Ruler). These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format. |
 | query.endpoints.static | list | [] | Optional static endpoint arguments. When non-empty will be added as extra endpoints. When `query.endpoints.autogen.enabled` is `false`, these will give you full control over the endpoints. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |

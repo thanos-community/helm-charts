@@ -1112,6 +1112,45 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: mounts the objstore secret via subPath so it does not overlay /etc/thanos
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
+            readOnly: true
+
+  - it: mounts the caching bucket config alongside objstore without a mount conflict
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.cachingBucketConfig: |
+        type: IN-MEMORY
+        config:
+          max_size: 8GB
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--store.caching-bucket.config-file=/etc/thanos/caching-bucket.yaml"
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
+            readOnly: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: caching-bucket
+            mountPath: /etc/thanos/caching-bucket.yaml
+            subPath: caching-bucket.yaml
+
   # -- NetworkPolicy -------------------------------------------------------
 
   - it: does not render networkpolicy when networkPolicies is disabled

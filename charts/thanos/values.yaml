@@ -1144,9 +1144,9 @@ query:
 
   # Configuration for the --endpoint arguments passed to thanos query.
   endpoints:
-    # Auto-generated endpoints for the in-chart components (Receive, Store Gateway).
+    # Auto-generated endpoints for the in-chart components (Receive, Store Gateway, Ruler).
     autogen:
-      # -- Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway).
+      # -- Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway, Ruler).
       # These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format.
       enabled: true
     # -- Optional static endpoint arguments. When non-empty will be added as extra endpoints.
