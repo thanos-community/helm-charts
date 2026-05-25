@@ -1415,6 +1415,9 @@ tests:
       - contains:
           path: spec.template.spec.containers[0].args
           content: --receive.replication-factor=1
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --label=receive_router_replica="$(POD_NAME)"
       - notContains:
           path: spec.template.spec.containers[0].args
           content: --tsdb.path=/var/thanos/receive
