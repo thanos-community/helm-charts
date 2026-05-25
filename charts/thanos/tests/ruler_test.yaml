@@ -313,6 +313,35 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsNonRoot
           value: true
 
+  - it: applies global container security context to prometheus-rule-importer sidecar
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.containerSecurityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[1].name
+          value: prometheus-rule-importer
+      - equal:
+          path: spec.template.spec.containers[1].securityContext.allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: spec.template.spec.containers[1].securityContext.capabilities.drop[0]
+          value: ALL
+      - equal:
+          path: spec.template.spec.containers[1].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[1].securityContext.runAsNonRoot
+          value: true
+
   - it: applies component container security context overriding global
     template: ruler/statefulset.yaml
     set:
