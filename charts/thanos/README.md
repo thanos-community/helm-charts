@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.13.1](https://img.shields.io/badge/Version-0.13.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.15.0](https://img.shields.io/badge/Version-0.15.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -517,10 +517,10 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.extraVolumes | list | [] | Extra volumes for Bucketweb pods. |
 | bucket.bucketweb.httpRoute.annotations | object | {} | Annotations for the HTTPRoute resource. |
 | bucket.bucketweb.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Bucketweb (alternative to Ingress). |
-| bucket.bucketweb.httpRoute.extraRules | list | [] | Additional custom rules Bucketweb HTTPRoute. |
-| bucket.bucketweb.httpRoute.filters | list | [] | Gateway filters for the Bucketweb HTTPRoute rules. |
+| bucket.bucketweb.httpRoute.extraRules | list | [] | Additional custom rules for Bucketweb HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
+| bucket.bucketweb.httpRoute.filters | list | [] | Gateway filters HTTPRoute rules filter request/response. |
 | bucket.bucketweb.httpRoute.hostnames | list | [] | Hostnames to match. Empty matches all hostnames on the parent Gateway. |
-| bucket.bucketweb.httpRoute.matches | list | [] | Gateway matches for the Bucketweb HTTPRoute rules. |
+| bucket.bucketweb.httpRoute.matches | list | [] | Gateway matches HTTPRoute rules match conditions. |
 | bucket.bucketweb.httpRoute.parentRefs | list | [] | Gateway parentRefs the HTTPRoute should attach to. |
 | bucket.bucketweb.ingress.annotations | object | {} | Extra annotations for the Ingress resource. |
 | bucket.bucketweb.ingress.className | string | `""` | Ingress class name (e.g. nginx, traefik). |
@@ -592,7 +592,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.extraVolumes | list | [] | Extra volumes for Compactor pods. |
 | compactor.httpRoute.annotations | object | {} | Annotations for the Compactor HTTPRoute resource. |
 | compactor.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Compactor HTTP endpoint. |
-| compactor.httpRoute.extraRules | list | [] | Additional custom rules Compactor HTTPRoute. |
+| compactor.httpRoute.extraRules | list | [] | Additional custom rules for Compactor HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | compactor.httpRoute.filters | list | [] | Gateway filters for the Compactor HTTPRoute rules. |
 | compactor.httpRoute.hostnames | list | [] | Hostnames to match on the Compactor HTTPRoute. |
 | compactor.httpRoute.matches | list | [] | Gateway matches for the Compactor HTTPRoute rules. |
@@ -778,7 +778,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Query GRPCRoute. |
 | query.httpRoute.annotations | object | {} | Annotations for the Query HTTPRoute resource. |
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
-| query.httpRoute.extraRules | list | [] | Additional custom rules for Query HTTPRoute. |
+| query.httpRoute.extraRules | list | [] | Additional custom rules for Query HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | query.httpRoute.filters | list | [] | Gateway filters for the Query HTTPRoute rules. |
 | query.httpRoute.hostnames | list | [] | Hostnames to match on the Query HTTPRoute. |
 | query.httpRoute.matches | list | [] | Gateway matches for the Query HTTPRoute rules. |
@@ -874,7 +874,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.extraVolumes | list | [] | Extra volumes for Query Frontend pods. |
 | queryFrontend.httpRoute.annotations | object | {} | Annotations for the Query Frontend HTTPRoute resource. |
 | queryFrontend.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Query Frontend. |
-| queryFrontend.httpRoute.extraRules | list | [] | Additional custom rules for Query Frontend HTTPRoute. |
+| queryFrontend.httpRoute.extraRules | list | [] | Additional custom rules for Query Frontend HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | queryFrontend.httpRoute.filters | list | [] | Gateway filters for the Query Frontend HTTPRoute rules. |
 | queryFrontend.httpRoute.hostnames | list | [] | Hostnames to match on the Query Frontend HTTPRoute. |
 | queryFrontend.httpRoute.matches | list | [] | Gateway matches for the Query Frontend HTTPRoute rules. |
@@ -952,7 +952,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.hashrings.static | list | [] | Optional static hashring configuration. When non-empty this overrides `autogen` and gives full control over ring topology. |
 | receive.httpRoute.annotations | object | {} | Annotations for the Receive HTTPRoute resource. |
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |
-| receive.httpRoute.extraRules | list | [] | Additional custom rules Receive HTTPRoute. |
+| receive.httpRoute.extraRules | list | [] | Additional custom rules for Receive HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | receive.httpRoute.filters | list | [] | Gateway filters for the Receive HTTPRoute rules. |
 | receive.httpRoute.hostnames | list | [] | Hostnames to match on the Receive HTTPRoute. |
 | receive.httpRoute.matches | list | [] | Gateway matches for the Receive HTTPRoute rules. |
@@ -1035,7 +1035,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.extraVolumes | list | [] | Extra volumes for Router pods. |
 | receive.router.httpRoute.annotations | object | {} | Annotations for the Router HTTPRoute resource. |
 | receive.router.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Router HTTP endpoint. |
-| receive.router.httpRoute.extraRules | list | [] | Additional custom rules Router HTTPRoute. |
+| receive.router.httpRoute.extraRules | list | [] | Additional custom rules for Router HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | receive.router.httpRoute.filters | list | [] | Gateway filters for the Router HTTPRoute rules. |
 | receive.router.httpRoute.hostnames | list | [] | Hostnames to match on the Router HTTPRoute. |
 | receive.router.httpRoute.matches | list | [] | Gateway matches for the Router HTTPRoute rules. |
@@ -1156,7 +1156,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.extraVolumes | list | [] | Extra volumes for Ruler pods. |
 | ruler.httpRoute.annotations | object | {} | Annotations for the Ruler HTTPRoute resource. |
 | ruler.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Ruler HTTP endpoint. |
-| ruler.httpRoute.extraRules | list | [] | Additional custom rules Ruler HTTPRoute. |
+| ruler.httpRoute.extraRules | list | [] | Additional custom rules for Ruler HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | ruler.httpRoute.filters | list | [] | Gateway filters for the Ruler HTTPRoute rules. |
 | ruler.httpRoute.hostnames | list | [] | Hostnames to match on the Ruler HTTPRoute. |
 | ruler.httpRoute.matches | list | [] | Gateway matches for the Ruler HTTPRoute rules. |
@@ -1254,7 +1254,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway GRPCRoute. |
 | storegateway.httpRoute.annotations | object | {} | Annotations for the Store Gateway HTTPRoute resource. |
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
-| storegateway.httpRoute.extraRules | list | [] | Additional custom rules Store Gateway HTTPRoute. |
+| storegateway.httpRoute.extraRules | list | [] | Additional custom rules for Store Gateway HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
 | storegateway.httpRoute.filters | list | [] | Gateway filters for the Store Gateway HTTPRoute rules. |
 | storegateway.httpRoute.hostnames | list | [] | Hostnames to match on the Store Gateway HTTPRoute. |
 | storegateway.httpRoute.matches | list | [] | Gateway matches for the Store Gateway HTTPRoute rules. |
@@ -1313,7 +1313,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Store Gateway startup probe. |
 | storegateway.probes.startup.successThreshold | int | `1` | Consecutive successes before the Store Gateway startup probe is considered passed. |
 | storegateway.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Store Gateway startup probe times out. |
-| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. |
+| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. |
 | storegateway.resources | object | {} | Resource requests and limits for the Store Gateway container. |
 | storegateway.service.annotations | object | {} | Extra annotations for the Store Gateway Service. |
 | storegateway.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Store Gateway Service. |
@@ -1329,6 +1329,10 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.serviceMonitor.scheme | string | `""` | Scrape scheme for the Store Gateway (http or https). |
 | storegateway.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout for the Store Gateway. Empty uses the Prometheus operator default. |
 | storegateway.serviceMonitor.tlsConfig | object | {} | TLS configuration for Store Gateway scraping. |
+| storegateway.sharded.enabled | bool | `false` | Enable sharded Store Gateway deployments (one StatefulSet per shard). |
+| storegateway.sharded.hashPartitioning.extraRelabelingConfigs | list | [] | Extra relabeling rules prepended to the generated hashmod/keep pair in each shard's `--selector.relabel-config` (e.g. to drop blocks by external labels before hashing). |
+| storegateway.sharded.hashPartitioning.shards | int | `1` | Number of hash shards. A value greater than 1 enables hash partitioning; the default of 1 disables it (a single hash shard is equivalent to no hash partitioning — use time partitioning only). |
+| storegateway.sharded.timePartitioning | list | [] | Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open. |
 | storegateway.tolerations | list | [] | Tolerations for Store Gateway pod scheduling. |
 | storegateway.topologySpreadConstraints | list | [] | Topology spread constraints for Store Gateway pods. |
 

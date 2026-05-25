@@ -1,117 +1,140 @@
 {{- if .Values.storegateway.enabled }}
+{{- $shards := (include "thanos.storegateway.shards" . | fromYaml).shards }}
+{{- range $i, $shard := $shards }}
+{{- if $i }}
+---
+{{- end }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "thanos.compName" (list . "storegateway") }}
+  name: {{ $shard.name }}
   labels:
-    {{- include "thanos.labels" . | nindent 4 }}
-    {{- with .Values.storegateway.labels }}
+    {{- include "thanos.labels" $ | nindent 4 }}
+    {{- with $.Values.storegateway.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
-    {{- with .Values.storegateway.annotations }}
+    {{- include "thanos.annotations" (dict "Values" $.Values "component" "storegateway") | nindent 4 }}
+    {{- with $.Values.storegateway.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceName: {{ include "thanos.compName" (list . "storegateway") }}
-  replicas: {{ .Values.storegateway.replicaCount }}
+  serviceName: {{ include "thanos.compName" (list $ "storegateway") }}
+  replicas: {{ $.Values.storegateway.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/component: storegateway
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      {{- if $shard.isSharded }}
+      thanos.io/storegateway-shard: {{ $shard.index | quote }}
+      {{- end }}
   template:
     metadata:
       labels:
-        {{- include "thanos.labels" . | nindent 8 }}
+        {{- include "thanos.labels" $ | nindent 8 }}
         app.kubernetes.io/component: storegateway
+        {{- if $shard.isSharded }}
+        thanos.io/storegateway-shard: {{ $shard.index | quote }}
+        {{- end }}
       annotations:
-        checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
-        {{- with .Values.global.podAnnotations }}
+        checksum/objstore-configuration: {{ $.Values.global.objstore.config | sha256sum }}
+        {{- with $.Values.global.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
-      {{- include "thanos.affinity" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
-      {{- include "thanos.imagePullSecrets" . | nindent 6 }}
-      {{- include "thanos.podSC" (dict "root" . "key" "storegateway") | nindent 6 }}
+      serviceAccountName: {{ include "thanos.serviceAccountName" $ }}
+      {{- include "thanos.affinity" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.imagePullSecrets" $ | nindent 6 }}
+      {{- include "thanos.podSC" (dict "root" $ "key" "storegateway") | nindent 6 }}
       containers:
         - name: storegateway
-          image: "{{ .Values.global.image.repository }}:{{ .Values.global.image.tag }}"
-          imagePullPolicy: {{ .Values.global.image.pullPolicy }}
+          image: "{{ $.Values.global.image.repository }}:{{ $.Values.global.image.tag }}"
+          imagePullPolicy: {{ $.Values.global.image.pullPolicy }}
           args:
             - store
-            - --grpc-address=0.0.0.0:{{ .Values.storegateway.service.grpcPort }}
-            - --http-address=0.0.0.0:{{ .Values.storegateway.service.httpPort }}
+            - --grpc-address=0.0.0.0:{{ $.Values.storegateway.service.grpcPort }}
+            - --http-address=0.0.0.0:{{ $.Values.storegateway.service.httpPort }}
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --data-dir=/var/thanos/store
-          {{- if .Values.storegateway.cachingBucketConfig }}
+          {{- if $.Values.storegateway.cachingBucketConfig }}
             - --store.caching-bucket.config-file=/etc/thanos/caching-bucket.yaml
           {{- end }}
-          {{- range .Values.storegateway.extraArgs }}
+          {{- if $shard.minTime }}
+            - --min-time={{ $shard.minTime }}
+          {{- end }}
+          {{- if $shard.maxTime }}
+            - --max-time={{ $shard.maxTime }}
+          {{- end }}
+          {{- with $shard.relabelConfigs }}
+            - |-
+              --selector.relabel-config=
+              {{- toYaml . | nindent 14 }}
+          {{- end }}
+          {{- range $.Values.storegateway.extraArgs }}
             - {{ . | quote }}
           {{- end }}
-          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "storegateway") | nindent 10 }}
-          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "storegateway") | nindent 10 }}
+          {{- include "thanos.extraEnvBlock" (dict "Values" $.Values "component" "storegateway") | nindent 10 }}
+          {{- include "thanos.extraEnvFromBlock" (dict "Values" $.Values "component" "storegateway") | nindent 10 }}
           ports:
             - name: grpc
-              containerPort: {{ .Values.storegateway.service.grpcPort }}
+              containerPort: {{ $.Values.storegateway.service.grpcPort }}
             - name: http
-              containerPort: {{ .Values.storegateway.service.httpPort }}
+              containerPort: {{ $.Values.storegateway.service.httpPort }}
           volumeMounts:
             - name: data
               mountPath: /var/thanos/store
             - name: objstore
               mountPath: /etc/thanos
               readOnly: true
-            {{- if .Values.storegateway.cachingBucketConfig }}
+            {{- if $.Values.storegateway.cachingBucketConfig }}
             - name: caching-bucket
               mountPath: /etc/thanos/caching-bucket.yaml
               subPath: caching-bucket.yaml
             {{- end }}
-            {{- include "thanos.extraMountItems" (dict "root" . "key" "storegateway") | nindent 12 }}
-          {{- include "thanos.containerSC" (dict "root" . "key" "storegateway") | nindent 10 }}
+            {{- include "thanos.extraMountItems" (dict "root" $ "key" "storegateway") | nindent 12 }}
+          {{- include "thanos.containerSC" (dict "root" $ "key" "storegateway") | nindent 10 }}
           resources:
-            {{- toYaml .Values.storegateway.resources | nindent 12 }}
-          {{- include "thanos.httpProbes" (dict "root" . "key" "storegateway") | nindent 10 }}
-        {{- include "thanos.extraContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 8 }}
-      {{- include "thanos.dnsConfig" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
-      {{- include "thanos.initContainers" (dict "Values" .Values "component" "storegateway" "root" .) | nindent 6 }}
-      {{- include "thanos.nodeSelector" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
-      {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
-      {{- include "thanos.tolerations" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
-      {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "storegateway") | nindent 6 }}
+            {{- toYaml $.Values.storegateway.resources | nindent 12 }}
+          {{- include "thanos.httpProbes" (dict "root" $ "key" "storegateway") | nindent 10 }}
+        {{- include "thanos.extraContainers" (dict "Values" $.Values "component" "storegateway" "root" $) | nindent 8 }}
+      {{- include "thanos.dnsConfig" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.initContainers" (dict "Values" $.Values "component" "storegateway" "root" $) | nindent 6 }}
+      {{- include "thanos.nodeSelector" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.priorityClassName" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.tolerations" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
+      {{- include "thanos.topologySpreadConstraints" (dict "Values" $.Values "component" "storegateway") | nindent 6 }}
       volumes:
         - name: objstore
           secret:
-            secretName: {{ .Values.global.objstore.secretName }}
+            secretName: {{ $.Values.global.objstore.secretName }}
             items:
-              - key: {{ .Values.global.objstore.secretKey }}
+              - key: {{ $.Values.global.objstore.secretKey }}
                 path: objstore.yml
-        {{- if .Values.storegateway.cachingBucketConfig }}
+        {{- if $.Values.storegateway.cachingBucketConfig }}
         - name: caching-bucket
           configMap:
-            name: {{ include "thanos.compName" (list . "storegateway") }}-caching
+            name: {{ include "thanos.compName" (list $ "storegateway") }}-caching
         {{- end }}
-        {{- if not .Values.storegateway.persistence.enabled }}
+        {{- if not $.Values.storegateway.persistence.enabled }}
         - name: data
           emptyDir: {}
         {{- end }}
-        {{- include "thanos.extraVolumeItems" (dict "root" . "key" "storegateway") | nindent 8 }}
-  {{- if .Values.storegateway.persistence.enabled }}
+        {{- include "thanos.extraVolumeItems" (dict "root" $ "key" "storegateway") | nindent 8 }}
+  {{- if $.Values.storegateway.persistence.enabled }}
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
         accessModes:
-        {{- range .Values.storegateway.persistence.accessModes | default (list "ReadWriteOnce") }}
+        {{- range $.Values.storegateway.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- if .Values.storegateway.persistence.storageClass }}
-        storageClassName: {{ .Values.storegateway.persistence.storageClass }}
+        {{- if $.Values.storegateway.persistence.storageClass }}
+        storageClassName: {{ $.Values.storegateway.persistence.storageClass }}
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.storegateway.persistence.size }}
+            storage: {{ $.Values.storegateway.persistence.size }}
   {{- end }}
+{{- end }}
 {{- end }}
