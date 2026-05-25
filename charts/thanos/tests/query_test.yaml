@@ -76,10 +76,50 @@ tests:
       query.enabled: true
       storegateway.enabled: true
       receive.enabled: false
+      ruler.enabled: false
     asserts:
       - matchRegex:
           path: spec.template.spec.containers[0].args[3]
           pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*storegateway.*"
+
+  - it: adds store endpoints for ruler when enabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: false
+      receive.enabled: false
+      ruler.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[3]
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*ruler-headless.*"
+
+  - it: does not add a ruler endpoint when ruler is disabled
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+      ruler.enabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-ruler-headless.NAMESPACE.svc.cluster.local
+
+  - it: targets the ruler headless service with namespace and cluster domain
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      storegateway.enabled: false
+      receive.enabled: false
+      ruler.enabled: true
+      global.clusterDomain: custom.internal
+    release:
+      namespace: monitoring
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-ruler-headless.monitoring.svc.custom.internal
 
   - it: renders --endpoint args from query.endpoints.static when autogen disabled
     template: query/deployment.yaml
@@ -97,12 +137,13 @@ tests:
           path: spec.template.spec.containers[0].args
           content: --endpoint=store.example.com:10901
 
-  - it: static endpoints replace auto-wired storegateway and receive endpoints
+  - it: static endpoints replace auto-wired storegateway, receive, and ruler endpoints
     template: query/deployment.yaml
     set:
       query.enabled: true
       storegateway.enabled: true
       receive.enabled: true
+      ruler.enabled: true
       query.endpoints.autogen.enabled: false
       query.endpoints.static:
         - external.example.com:10901
@@ -116,6 +157,9 @@ tests:
       - notMatchRegex:
           path: spec.template.spec.containers[0].args[4]
           pattern: "--endpoint=dnssrv\\+_grpc\\._tcp\\..*receive.*"
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].args[4]
+          pattern: "--endpoint=dnssrv\\+_grpc\\._tcp\\..*ruler.*"
 
   - it: renders static endpoints alongside auto-wired endpoints when autogen enabled
     template: query/deployment.yaml
@@ -123,6 +167,7 @@ tests:
       query.enabled: true
       storegateway.enabled: true
       receive.enabled: true
+      ruler.enabled: true
       query.endpoints.autogen.enabled: true
       query.endpoints.static:
         - external.example.com:10901
@@ -133,8 +178,11 @@ tests:
       - matchRegex:
           path: spec.template.spec.containers[0].args[4]
           pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*receive.*"
-      - equal:
+      - matchRegex:
           path: spec.template.spec.containers[0].args[5]
+          pattern: "^--endpoint=dnssrv\\+_grpc\\._tcp\\..*ruler-headless.*"
+      - equal:
+          path: spec.template.spec.containers[0].args[6]
           value: --endpoint=external.example.com:10901
 
   - it: renders no --endpoint args when autogen disabled and static empty
@@ -143,6 +191,7 @@ tests:
       query.enabled: true
       storegateway.enabled: true
       receive.enabled: true
+      ruler.enabled: true
       query.endpoints.autogen.enabled: false
       query.endpoints.static: []
     asserts:

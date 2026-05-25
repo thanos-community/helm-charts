@@ -84,7 +84,8 @@ spec:
             - name: data
               mountPath: /var/thanos/store
             - name: objstore
-              mountPath: /etc/thanos
+              mountPath: /etc/thanos/objstore.yml
+              subPath: objstore.yml
               readOnly: true
             {{- if $.Values.storegateway.cachingBucketConfig }}
             - name: caching-bucket

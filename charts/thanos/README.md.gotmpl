@@ -224,7 +224,7 @@ query:
     - prometheus_replica
     - receive_replica
 
-  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway) are auto-wired
+  # gRPC --endpoint arguments. The in-chart components (Receive, Store Gateway, Ruler) are auto-wired
   # when autogen.enabled is true. Endpoints defined in static[] are always appended; set
   # autogen.enabled to false to take full control of what endpoint arguments are passed.
   endpoints:

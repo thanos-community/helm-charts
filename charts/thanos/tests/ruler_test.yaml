@@ -89,6 +89,77 @@ tests:
             name: data
             emptyDir: {}
 
+  - it: configures object storage from global objstore secret
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      global.objstore.secretName: thanos-ruler-objstore
+      global.objstore.secretKey: objstore.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore.config-file=/etc/thanos/objstore.yml
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: objstore
+            secret:
+              secretName: thanos-ruler-objstore
+              items:
+                - key: objstore.yaml
+                  path: objstore.yml
+
+  - it: mounts the objstore secret using the global defaults
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: objstore
+            secret:
+              secretName: thanos-objstore
+              items:
+                - key: objstore.yml
+                  path: objstore.yml
+
+  - it: mounts the objstore secret via subPath so it does not overlay /etc/thanos
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      # objstore, rules, alertmanagers and query-urls must all coexist under
+      # /etc/thanos, so objstore is a file-level (subPath) mount, never a
+      # read-only overlay of the whole directory (see issue #152).
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
+            readOnly: true
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: rules
+            mountPath: /etc/thanos/rules
+
+  - it: restarts pods on objstore config change via checksum annotation
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/objstore-configuration"]
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
