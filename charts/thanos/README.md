@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.16.1](https://img.shields.io/badge/Version-0.16.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.17.0](https://img.shields.io/badge/Version-0.17.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -604,6 +604,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | compactor.ingress.tls | list | [] | TLS configuration for the Compactor Ingress. |
 | compactor.labels | object | {} | Extra labels applied to Compactor resources. |
+| compactor.minReadySeconds | int | `0` | Minimum number of seconds for which a newly created Compactor Pod must be Running and Ready, without any container crashing, before it is considered available during a rolling update (StatefulSet `spec.minReadySeconds`). Defaults to 0 (available as soon as Ready); the field is omitted when 0. See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds |
 | compactor.nodeSelector | object | {} | Node selector for Compactor pod scheduling. |
 | compactor.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Compactor. |
 | compactor.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Compactor pods during a disruption. |
@@ -987,6 +988,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.ingress.remoteWrite.tls | list | [] | TLS configuration for the Receive remote-write Ingress. |
 | receive.ingress.tls | list | [] | Deprecated. Use `receive.ingress.http.tls` instead. |
 | receive.labels | object | {} | Extra labels applied to Receive resources. |
+| receive.minReadySeconds | int | `0` | Minimum number of seconds for which a newly created Receive Pod must be Running and Ready, without any container crashing, before it is considered available during a rolling update (StatefulSet `spec.minReadySeconds`). Defaults to 0 (available as soon as Ready); the field is omitted when 0. In `split` mode set `receive.ingester.minReadySeconds` instead. See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds |
 | receive.mode | string | `"standalone"` | Receive deployment topology. One of: `standalone` — single workload that both routes and ingests (RouterIngestor mode); `split` — separate Router (Deployment) and Ingester (StatefulSet) workloads, following the receive split proposal (https://thanos.io/tip/proposals-accepted/202012-receive-split.md).  Field shape depends on mode:   - `standalone`: configure the workload directly via top-level `receive.*`     fields (replicaCount, tsdb, service, persistence, etc.). `receive.ingester`     and `receive.router` are ignored.   - `split`: configure each workload via `receive.ingester.*` and     `receive.router.*`. Top-level `receive.*` fields are ignored. The schema     requires both `ingester` and `router` to be populated in this mode. |
 | receive.nodeSelector | object | {} | Node selector for Receive pod scheduling. |
 | receive.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for Receive. |
@@ -1169,6 +1171,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | ruler.ingress.tls | list | [] | TLS configuration for the Ruler Ingress. |
 | ruler.labels | object | {} | Extra labels applied to Ruler resources. |
+| ruler.minReadySeconds | int | `0` | Minimum number of seconds for which a newly created Ruler Pod must be Running and Ready, without any container crashing, before it is considered available during a rolling update (StatefulSet `spec.minReadySeconds`). Defaults to 0 (available as soon as Ready); the field is omitted when 0. See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds |
 | ruler.nodeSelector | object | {} | Node selector for Ruler pod scheduling. |
 | ruler.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Ruler. |
 | ruler.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Ruler pods during a disruption. |
@@ -1281,6 +1284,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.ingress.http.tls | list | [] | TLS configuration for the Store Gateway HTTP Ingress. |
 | storegateway.ingress.tls | list | [] | Deprecated. Use `storegateway.ingress.http.tls` instead. |
 | storegateway.labels | object | {} | Extra labels applied to Store Gateway resources. |
+| storegateway.minReadySeconds | int | `0` | Minimum number of seconds for which a newly created Store Gateway Pod must be Running and Ready, without any container crashing, before it is considered available during a rolling update (StatefulSet `spec.minReadySeconds`). Defaults to 0 (available as soon as Ready); the field is omitted when 0. See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds |
 | storegateway.nodeSelector | object | {} | Node selector for Store Gateway pod scheduling. |
 | storegateway.pdb.enabled | bool | `false` | Enable a PodDisruptionBudget for the Store Gateway. |
 | storegateway.pdb.maxUnavailable | int or string | `""` | Maximum unavailable Store Gateway pods during a disruption. |

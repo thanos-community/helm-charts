@@ -16,6 +16,9 @@ metadata:
 spec:
   serviceName: {{ include "thanos.compName" (list . "compactor") }}
   replicas: {{ .Values.compactor.replicaCount }}
+  {{- if .Values.compactor.minReadySeconds }}
+  minReadySeconds: {{ .Values.compactor.minReadySeconds }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: compactor

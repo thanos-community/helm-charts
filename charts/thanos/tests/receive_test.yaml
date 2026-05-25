@@ -32,6 +32,25 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: renders minReadySeconds when set
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.minReadySeconds: 30
+    asserts:
+      - equal:
+          path: spec.minReadySeconds
+          value: 30
+
+  - it: omits minReadySeconds when zero
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.minReadySeconds: 0
+    asserts:
+      - notExists:
+          path: spec.minReadySeconds
+
   - it: uses the global image repository and tag
     template: receive/statefulset.yaml
     set:
@@ -1288,6 +1307,17 @@ tests:
       - equal:
           path: spec.serviceName
           value: RELEASE-NAME-thanos-receive-ingester-headless
+
+  - it: renders ingester minReadySeconds in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.minReadySeconds: 45
+    asserts:
+      - equal:
+          path: spec.minReadySeconds
+          value: 45
 
   - it: omits router-only flags from the StatefulSet args in split mode
     template: receive/statefulset.yaml

@@ -21,6 +21,9 @@ metadata:
 spec:
   serviceName: {{ include "thanos.compName" (list $ "storegateway") }}
   replicas: {{ $.Values.storegateway.replicaCount }}
+  {{- if $.Values.storegateway.minReadySeconds }}
+  minReadySeconds: {{ $.Values.storegateway.minReadySeconds }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: storegateway

@@ -18,6 +18,9 @@ metadata:
 spec:
   serviceName: {{ include "thanos.receiveHeadless" . }}
   replicas: {{ $cfg.replicaCount }}
+  {{- if $cfg.minReadySeconds }}
+  minReadySeconds: {{ $cfg.minReadySeconds }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: receive

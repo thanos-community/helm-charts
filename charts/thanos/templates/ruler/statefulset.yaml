@@ -16,6 +16,9 @@ metadata:
 spec:
   serviceName: {{ include "thanos.compName" (list . "ruler") }}
   replicas: {{ .Values.ruler.replicaCount }}
+  {{- if .Values.ruler.minReadySeconds }}
+  minReadySeconds: {{ .Values.ruler.minReadySeconds }}
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/component: ruler
