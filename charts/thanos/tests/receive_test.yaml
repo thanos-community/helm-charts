@@ -148,6 +148,94 @@ tests:
           path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
           value: supported
 
+  - it: uses emptyDir when persistence is disabled
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
+  - it: mounts existing PVC when existingClaim is set
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.existingClaim: receive-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: receive-existing-pvc
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: creates volumeClaimTemplates when existingClaim is empty
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.existingClaim: ""
+      receive.persistence.size: 20Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 20Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ""
+          any: true
+
+  - it: mounts existing PVC in split mode when ingester existingClaim is set
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.persistence.enabled: true
+      receive.ingester.persistence.existingClaim: ingester-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ingester-existing-pvc
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: creates volumeClaimTemplates in split mode when ingester existingClaim is empty
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.persistence.enabled: true
+      receive.ingester.persistence.existingClaim: ""
+      receive.ingester.persistence.size: 20Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 20Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ""
+          any: true
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations

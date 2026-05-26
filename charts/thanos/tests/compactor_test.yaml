@@ -197,6 +197,43 @@ tests:
             name: data
             emptyDir: {}
 
+  - it: mounts existing PVC when existingClaim is set
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.existingClaim: compactor-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: compactor-existing-pvc
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: creates volumeClaimTemplates when existingClaim is empty
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.existingClaim: ""
+      compactor.persistence.size: 50Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ""
+          any: true
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
