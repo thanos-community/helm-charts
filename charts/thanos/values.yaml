@@ -705,6 +705,10 @@ compactor:
   persistence:
     # -- Enable a PersistentVolumeClaim for the Compactor working directory.
     enabled: true
+    # -- Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate
+    # is created and the named PVC is mounted directly. Takes precedence over
+    # size, storageClass and accessModes.
+    existingClaim: ""
     # -- Storage capacity for the Compactor PVC (used as a scratch space during compaction).
     size: 10Gi
     # -- StorageClass name for the Compactor PVC. Empty uses the cluster default.
@@ -1842,6 +1846,11 @@ storegateway:
   persistence:
     # -- Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store.
     enabled: true
+    # -- Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the
+    # named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.
+    # Not compatible with sharded mode — each shard requires its own PVC, use the default
+    # volumeClaimTemplates instead.
+    existingClaim: ""
     # -- Storage capacity for the Store Gateway PVC.
     size: 10Gi
     # -- StorageClass name for the Store Gateway PVC. Empty uses the cluster default.
@@ -2279,6 +2288,10 @@ receive:
   persistence:
     # -- Enable a PersistentVolumeClaim for the Receive TSDB WAL.
     enabled: true
+    # -- Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate
+    # is created and the named PVC is mounted directly. Takes precedence over
+    # size, storageClass and accessModes.
+    existingClaim: ""
     # -- Storage capacity for the Receive PVC.
     # Should be sized to hold at least `tsdb.retention` worth of data.
     size: 10Gi
@@ -2473,7 +2486,26 @@ receive:
   # -- Ingester StatefulSet config. Required when `receive.mode` is `split`;
   # ignored in `standalone` mode.
   # @default -- {}
-  ingester: {}
+  ingester:
+    # PersistentVolumeClaim configuration for the Ingester TSDB WAL.
+    persistence:
+      # -- Enable a PersistentVolumeClaim for the Ingester TSDB WAL.
+      enabled: true
+      # -- Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate
+      # is created and the named PVC is mounted directly. Takes precedence over
+      # size, storageClass and accessModes.
+      existingClaim: ""
+      # -- Storage capacity for the Ingester PVC.
+      # Should be sized to hold at least `tsdb.retention` worth of data.
+      size: 10Gi
+      # -- StorageClass name for the Ingester PVC. Empty uses the cluster default.
+      storageClass: ""
+      # -- [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ingester PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.
+      volumeAttributesClassName: ""
+      # Access modes for the Ingester PVC.
+      accessModes:
+        - ReadWriteOnce
+
   # Example (split mode):
   # ingester:
   #   replicaCount: 3
@@ -2884,6 +2916,10 @@ ruler:
   persistence:
     # -- Enable a PersistentVolumeClaim for the Ruler data directory.
     enabled: true
+    # -- Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate
+    # is created and the named PVC is mounted directly. Takes precedence over
+    # size, storageClass and accessModes.
+    existingClaim: ""
     # -- Storage capacity for the Ruler PVC.
     size: 10Gi
     # -- StorageClass name for the Ruler PVC. Empty uses the cluster default.

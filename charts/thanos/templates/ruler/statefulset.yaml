@@ -147,10 +147,15 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if and .Values.ruler.persistence.enabled .Values.ruler.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.ruler.persistence.existingClaim }}
+        {{- end }}
 
         {{- include "thanos.extraVolumeItems" (dict "root" . "key" "ruler") | nindent 8 }}
 
-  {{- if .Values.ruler.persistence.enabled }}
+  {{- if and .Values.ruler.persistence.enabled (not .Values.ruler.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
         name: data

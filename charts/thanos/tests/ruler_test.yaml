@@ -122,6 +122,43 @@ tests:
             name: data
             emptyDir: {}
 
+  - it: mounts existing PVC when existingClaim is set
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: true
+      ruler.persistence.existingClaim: ruler-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ruler-existing-pvc
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: creates volumeClaimTemplates when existingClaim is empty
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: true
+      ruler.persistence.existingClaim: ""
+      ruler.persistence.size: 25Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 25Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ""
+          any: true
+
   - it: configures object storage from global objstore secret
     template: ruler/statefulset.yaml
     set:

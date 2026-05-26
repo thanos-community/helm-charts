@@ -95,8 +95,13 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if and .Values.compactor.persistence.enabled .Values.compactor.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.compactor.persistence.existingClaim }}
+        {{- end }}
         {{- include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") | nindent 8 }}
-  {{- if .Values.compactor.persistence.enabled }}
+  {{- if and .Values.compactor.persistence.enabled (not .Values.compactor.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
         name: data

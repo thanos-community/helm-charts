@@ -135,13 +135,21 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if and $cfg.persistence.enabled $cfg.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ $cfg.persistence.existingClaim }}
+        {{- end }}
         {{- include "thanos.extraVolumeItems" (dict "root" . "key" "ingester" "parent" "receive") | nindent 8 }}
-  {{- if $cfg.persistence.enabled }}
+  {{- if and $cfg.persistence.enabled (not $cfg.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
         name: data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+        {{- range $cfg.persistence.accessModes | default (list "ReadWriteOnce") }}
+          - {{ . | quote }}
+        {{- end }}
         {{- if $cfg.persistence.storageClass }}
         storageClassName: {{ $cfg.persistence.storageClass }}
         {{- end }}
