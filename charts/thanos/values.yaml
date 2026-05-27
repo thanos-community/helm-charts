@@ -2866,6 +2866,10 @@ ruler:
         # -- Image pull policy for the kubectl sidecar.
         pullPolicy: IfNotPresent
 
+      # -- Resource requests and limits for the prometheus-rules sidecar.
+      # @default -- {}
+      resources: {}
+
   # PersistentVolumeClaim configuration for the Ruler data directory.
   persistence:
     # -- Enable a PersistentVolumeClaim for the Ruler data directory.

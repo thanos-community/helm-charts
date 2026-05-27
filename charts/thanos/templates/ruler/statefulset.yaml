@@ -100,6 +100,8 @@ spec:
           command:
             - /bin/sh
             - /scripts/import.sh
+          resources:
+            {{- toYaml .Values.ruler.autoImportPrometheusRules.sidecar.resources | nindent 12 }}
           volumeMounts:
             - name: generated-rules
               mountPath: /generated
