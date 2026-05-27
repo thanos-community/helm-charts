@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.23.0](https://img.shields.io/badge/Version-0.23.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.23.2](https://img.shields.io/badge/Version-0.23.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -845,6 +845,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
 | query.replicaLabels[0] | string | `"prometheus_replica"` |  |
 | query.replicaLabels[1] | string | `"receive_replica"` |  |
+| query.replicaLabels[2] | string | `"ruler_replica"` |  |
 | query.resources | object | {} | Resource requests and limits for the Query container. |
 | query.service.annotations | object | {} | Extra annotations for the Query Service. |
 | query.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Query Service. |
