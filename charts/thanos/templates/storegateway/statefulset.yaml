@@ -137,6 +137,7 @@ spec:
         {{- if $.Values.storegateway.persistence.storageClass }}
         storageClassName: {{ $.Values.storegateway.persistence.storageClass }}
         {{- end }}
+        {{- include "thanos.volumeAttributesClassName" (dict "root" $ "key" "storegateway" "persistence" $.Values.storegateway.persistence) | indent 8 }}
         resources:
           requests:
             storage: {{ $.Values.storegateway.persistence.size }}

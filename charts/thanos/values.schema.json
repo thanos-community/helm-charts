@@ -1214,6 +1214,13 @@
               "required": [],
               "title": "storageClass",
               "type": "string"
+            },
+            "volumeAttributesClassName": {
+              "default": "",
+              "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Compactor PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
+              "required": [],
+              "title": "volumeAttributesClassName",
+              "type": "string"
             }
           },
           "required": [
@@ -5148,6 +5155,13 @@
               "required": [],
               "title": "storageClass",
               "type": "string"
+            },
+            "volumeAttributesClassName": {
+              "default": "",
+              "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Receive PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
+              "required": [],
+              "title": "volumeAttributesClassName",
+              "type": "string"
             }
           },
           "required": [
@@ -6252,6 +6266,13 @@
               "description": "StorageClass name for the Ruler PVC. Empty uses the cluster default.",
               "required": [],
               "title": "storageClass",
+              "type": "string"
+            },
+            "volumeAttributesClassName": {
+              "default": "",
+              "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ruler PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
+              "required": [],
+              "title": "volumeAttributesClassName",
               "type": "string"
             }
           },
@@ -7526,6 +7547,13 @@
               "description": "StorageClass name for the Store Gateway PVC. Empty uses the cluster default.",
               "required": [],
               "title": "storageClass",
+              "type": "string"
+            },
+            "volumeAttributesClassName": {
+              "default": "",
+              "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Store Gateway PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
+              "required": [],
+              "title": "volumeAttributesClassName",
               "type": "string"
             }
           },

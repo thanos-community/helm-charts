@@ -99,6 +99,34 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 50Gi
+      - notExists:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+
+  - it: fail if persistence attribute class is specified but not supported
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.persistence.size: 50Gi
+      storegateway.persistence.volumeAttributesClassName: "unsupported"
+    asserts:
+      - failedTemplate:
+          errorMessage: "volumeAttributesClassName has been specified for 'storegateway'. However, 'storage.k8s.io/v1/VolumeAttributesClass' isn't supported"
+
+  - it: render persistence attribute class if specified and supported
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.persistence.size: 50Gi
+      storegateway.persistence.volumeAttributesClassName: "supported"
+    capabilities:
+      apiVersions:
+        - storage.k8s.io/v1/VolumeAttributesClass
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+          value: supported
 
   # -- Annotations and labels -----------------------------------------
 
