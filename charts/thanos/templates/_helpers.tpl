@@ -99,6 +99,22 @@ securityContext:
 {{- end }}
 
 {{- /*
+Render fully qualified Docker image reference (registry, image name, tag).
+Usage:
+  {{ include "thanos.image" (dict "root" . "image" .global.image) }}
+*/ -}}
+{{- define "thanos.image" -}}
+{{- $root := .root -}}
+{{- $image := .image }}
+{{- $registry := "" }}
+{{- with $image.registry }}
+{{- $registry = printf "%s/" . }}
+{{- end }}
+{{- $tag := $image.tag | default $root.Chart.AppVersion }}
+{{- printf "%s%s:%s" $registry $image.repository $tag }}
+{{- end }}
+
+{{- /*
 Render extra pod labels for a component with component → (optional parent) fallback.
 Returns the labels as YAML (no leading newline); empty when none are set.
 Usage:

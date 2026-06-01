@@ -192,7 +192,8 @@ Settings under `global` apply to **all components** unless overridden at the com
 ```yaml
 global:
   image:
-    repository: quay.io/thanos/thanos
+    registry: quay.io
+    repository: thanos/thanos
     tag: v0.39.2
     pullPolicy: IfNotPresent
 
@@ -477,6 +478,9 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
   --namespace monitoring \
   -f values.yaml
 ```
+
+> [!WARNING]
+> Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
 ## Values Reference
 

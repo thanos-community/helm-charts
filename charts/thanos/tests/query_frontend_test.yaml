@@ -32,11 +32,25 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: uses the global image repository and app version
+    template: query-frontend/deployment.yaml
+    set:
+      queryFrontend.enabled: true
+      global.image.registry: quay.io
+      global.image.repository: thanos/thanos
+    chart:
+      appVersion: "x.y.z"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: quay.io/thanos/thanos:x.y.z
+
   - it: uses the global image repository and tag
     template: query-frontend/deployment.yaml
     set:
       queryFrontend.enabled: true
-      global.image.repository: quay.io/thanos/thanos
+      global.image.registry: quay.io
+      global.image.repository: thanos/thanos
       global.image.tag: v0.40.0
     asserts:
       - equal:

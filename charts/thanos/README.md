@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.18.4](https://img.shields.io/badge/Version-0.18.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.22.0](https://img.shields.io/badge/Version-0.22.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.3.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 85.2.0 |
+| https://charts.rustfs.com/ | rustfs | 0.8.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 87.0.1 |
 
 ## Component Overview
 
@@ -204,7 +204,8 @@ Settings under `global` apply to **all components** unless overridden at the com
 ```yaml
 global:
   image:
-    repository: quay.io/thanos/thanos
+    registry: quay.io
+    repository: thanos/thanos
     tag: v0.39.2
     pullPolicy: IfNotPresent
 
@@ -490,6 +491,9 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
   -f values.yaml
 ```
 
+> [!WARNING]
+> Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
+
 ## Values Reference
 
 The table below documents all available values. Top-level keys group settings by component. Component-level keys always take precedence over `global` defaults.
@@ -681,8 +685,9 @@ The table below documents all available values. Top-level keys group settings by
 | global.extraVolumeMounts | list | [] | Additional volume mounts added to every main container by default. |
 | global.extraVolumes | list | [] | Additional volumes available to every pod by default. |
 | global.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy applied to every container. One of Always, IfNotPresent, Never. |
-| global.image.repository | string | `"quay.io/thanos/thanos"` | Docker repository for all Thanos containers by default. |
-| global.image.tag | string | `"v0.41.0"` | Container image tag. Changing this upgrades all components at once. |
+| global.image.registry | string | `"quay.io"` | Docker registry for Thanos images (e.g. quay.io). Empty means default registry. |
+| global.image.repository | string | `"thanos/thanos"` | Docker repository for all Thanos containers by default. |
+| global.image.tag | string | `""` | Container image tag. Changing this upgrades all components at once. |
 | global.imagePullSecrets | list | [] | List of imagePullSecrets applied to every pod by default. |
 | global.networkPolicies | bool | `false` | Create a NetworkPolicy for every enabled component. When true each component gets a NetworkPolicy that allows ingress on its service ports from within the namespace and permits all egress. |
 | global.nodeSelector | object | {} | Node selector applied to every pod by default. |
@@ -1150,6 +1155,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.enabled | bool | `true` | Enable automatic import of PrometheusRule CRDs from the cluster into the Ruler. Requires kube-prometheus-stack (or any Prometheus Operator deployment) to be present in the cluster. |
 | ruler.autoImportPrometheusRules.labelSelector | object | {} | Label selector used to filter which PrometheusRule CRDs are imported. Empty selector imports all PrometheusRule resources visible to the sidecar. |
 | ruler.autoImportPrometheusRules.sidecar.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the kubectl sidecar. |
+| ruler.autoImportPrometheusRules.sidecar.image.registry | string | `"docker.io"` | Docker Registry for the kubectl sidecar that reads PrometheusRule CRDs (e.g. docker.io).  Empty means default registry. |
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
 | ruler.autoImportPrometheusRules.sidecar.resources | object | {} | Resource requests and limits for the prometheus-rules sidecar. |
@@ -1238,7 +1244,7 @@ The table below documents all available values. Top-level keys group settings by
 | rustfs.initBucket.existingSecret | string | `""` | Name of an existing Secret containing the RustFS credentials. When set, accessKey and secretKey are ignored. The Secret must contain the keys defined in existingSecretKeys. |
 | rustfs.initBucket.existingSecretKeys.accessKey | string | `"access-key"` | Key in the existing Secret for the access key. |
 | rustfs.initBucket.existingSecretKeys.secretKey | string | `"secret-key"` | Key in the existing Secret for the secret key. |
-| rustfs.initBucket.image | string | `"rustfs/rc:latest"` | Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI. |
+| rustfs.initBucket.image | string | `"docker.io/rustfs/rc:latest"` | Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI. |
 | rustfs.initBucket.secretKey | string | `"rustfsadmin"` | RustFS admin password. Ignored when existingSecret is set. |
 | rustfs.secret.allowInsecureDefaults | bool | `true` | Opt into the well-known default rustfs credentials. Dev/CI only. |
 | storegateway.affinity | object | {} | Affinity rules for Store Gateway pod scheduling. |
