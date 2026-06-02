@@ -134,8 +134,9 @@ spec:
         {{- range $.Values.storegateway.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- if $.Values.storegateway.persistence.storageClass }}
-        storageClassName: {{ $.Values.storegateway.persistence.storageClass }}
+        {{- $sc := default $.Values.global.storageClass $.Values.storegateway.persistence.storageClass }}
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
         {{- end }}
         resources:
           requests:

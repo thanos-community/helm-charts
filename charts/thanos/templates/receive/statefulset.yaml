@@ -142,8 +142,9 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
-        {{- if $cfg.persistence.storageClass }}
-        storageClassName: {{ $cfg.persistence.storageClass }}
+        {{- $sc := default .Values.global.storageClass $cfg.persistence.storageClass }}
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
         {{- end }}
         resources:
           requests:

@@ -271,3 +271,52 @@ tests:
     asserts:
       - notExists:
           path: spec.template.metadata.annotations.placeholder
+
+  # -- global.storageClass behavior tests ---------------------------------
+
+  - it: uses cluster-default storageClass when both global.storageClass and component storageClass are empty for compactor
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.storageClass: ""
+      global.storageClass: ""
+    asserts:
+      - notExists:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+
+  - it: uses global.storageClass for compactor PVC when global is set and component empty
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      global.storageClass: my-global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: my-global-sc
+
+  - it: uses component storageClass when global.storageClass is empty for compactor
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.storageClass: comp-sc
+      global.storageClass: ""
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: comp-sc
+
+  - it: component storageClass overrides global for compactor
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.storageClass: comp-sc
+      global.storageClass: my-global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: comp-sc
+

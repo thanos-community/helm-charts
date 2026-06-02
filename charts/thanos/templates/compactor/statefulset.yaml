@@ -105,8 +105,9 @@ spec:
         {{- range .Values.compactor.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- if .Values.compactor.persistence.storageClass }}
-        storageClassName: {{ .Values.compactor.persistence.storageClass }}
+        {{- $sc := default .Values.global.storageClass .Values.compactor.persistence.storageClass }}
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
         {{- end }}
         resources:
           requests:
