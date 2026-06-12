@@ -696,6 +696,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
+| global.storageClass | string | `""` | Default StorageClass name to use for PersistentVolumeClaims. When empty (`""`), components fall back to their own storageClass behavior. When a component storageClass is also empty, the cluster default StorageClass applies. Component-level `persistence.storageClass` values override `global.storageClass`. |
 | global.rbac.create | bool | `true` | Create RBAC resources (ClusterRole, ClusterRoleBinding) required by components that need cluster-level access (e.g. Ruler auto-import). |
 | global.resources | object | {} | Default resource requests and limits. Override per component as needed. |
 | global.serviceAccount.annotations | object | {} | Extra annotations merged into every ServiceAccount. |

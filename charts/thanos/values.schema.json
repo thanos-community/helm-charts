@@ -2074,6 +2074,13 @@
           "title": "priorityClassName",
           "type": "string"
         },
+        "storageClass": {
+          "default": "",
+          "description": "Default StorageClass name to use for PersistentVolumeClaims. When empty, components fall back to their own storageClass behavior, which means the cluster default StorageClass will apply when the component storageClass is also empty.",
+          "required": [],
+          "title": "storageClass",
+          "type": "string"
+        },
         "rbac": {
           "additionalProperties": true,
           "description": "RBAC and ServiceAccount defaults.\nRBAC configuration applied globally across all components.",
