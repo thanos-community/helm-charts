@@ -660,7 +660,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.tolerations | list | [] | Tolerations for Compactor pod scheduling. |
 | compactor.topologySpreadConstraints | list | [] | Topology spread constraints for Compactor pods. |
 | compactor.vpa.enabled | bool | `true` | Enable a VerticalPodAutoscaler for the Compactor. |
-| compactor.vpa.maxAllowed.cpu | int | `4` | Maximum CPU resource enforced by the Compactor VPA. |
+| compactor.vpa.maxAllowed.cpu | string | `"4"` | Maximum CPU resource enforced by the Compactor VPA. |
 | compactor.vpa.maxAllowed.memory | string | `"8Gi"` | Maximum memory resource enforced by the Compactor VPA. |
 | compactor.vpa.minAllowed.cpu | string | `"500m"` | Minimum CPU resource enforced by the Compactor VPA. |
 | compactor.vpa.minAllowed.memory | string | `"512Mi"` | Minimum memory resource enforced by the Compactor VPA. |
