@@ -793,7 +793,7 @@ tests:
       compactor.vpa.enabled: true
       compactor.vpa.minAllowed.cpu: 500m
       compactor.vpa.minAllowed.memory: 512Mi
-      compactor.vpa.maxAllowed.cpu: 4
+      compactor.vpa.maxAllowed.cpu: "4"
       compactor.vpa.maxAllowed.memory: 8Gi
     asserts:
       - isKind:

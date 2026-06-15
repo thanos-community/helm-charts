@@ -811,7 +811,7 @@ compactor:
     # Maximum resource limits enforced by the Compactor VPA.
     maxAllowed:
       # -- Maximum CPU resource enforced by the Compactor VPA.
-      cpu: 4
+      cpu: "4"
       # -- Maximum memory resource enforced by the Compactor VPA.
       memory: 8Gi
 
