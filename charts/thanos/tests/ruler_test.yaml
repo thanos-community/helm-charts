@@ -1364,3 +1364,11 @@ tests:
       - equal:
           path: metadata.name
           value: RELEASE-NAME-thanos-ruler
+      - contains:
+          path: spec.ingress[0].ports
+          content:
+            port: grpc
+      - contains:
+          path: spec.ingress[0].ports
+          content:
+            port: http
