@@ -16,7 +16,7 @@ spec:
     updateMode: {{ .Values.compactor.vpa.updateMode | default "Auto" }}
   resourcePolicy:
     containerPolicies:
-      - containerName: thanos
+      - containerName: compactor
         mode: Auto
         controlledResources: ["cpu", "memory"]
         minAllowed:

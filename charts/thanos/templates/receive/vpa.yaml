@@ -18,7 +18,7 @@ spec:
     updateMode: {{ $vpa.updateMode | default "Auto" }}
   resourcePolicy:
     containerPolicies:
-      - containerName: thanos
+      - containerName: receive
         mode: Auto
         controlledResources:
           - cpu
