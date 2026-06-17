@@ -5871,6 +5871,13 @@
                       "type": "string"
                     }
                   },
+                  "resources": {
+                    "additionalProperties": true,
+                    "description": "Resource requests and limits for the prometheus-rules sidecar.",
+                    "required": [],
+                    "title": "resources",
+                    "type": "object"
+                  },
                   "required": [
                     "repository",
                     "tag",

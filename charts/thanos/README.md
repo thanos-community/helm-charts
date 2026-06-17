@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.18.0](https://img.shields.io/badge/Version-0.18.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.18.4](https://img.shields.io/badge/Version-0.18.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -1152,6 +1152,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.autoImportPrometheusRules.sidecar.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the kubectl sidecar. |
 | ruler.autoImportPrometheusRules.sidecar.image.repository | string | `"alpine/kubectl"` | Repository for the kubectl sidecar that reads PrometheusRule CRDs. |
 | ruler.autoImportPrometheusRules.sidecar.image.tag | string | `"latest"` | Tag for the kubectl sidecar image. |
+| ruler.autoImportPrometheusRules.sidecar.resources | object | {} | Resource requests and limits for the prometheus-rules sidecar. |
 | ruler.containerSecurityContext | object | {} | Container security context for Ruler. Overrides global.containerSecurityContext. |
 | ruler.dnsConfig | object | {} | DNS configuration for Ruler pods. Overrides global.dnsConfig. |
 | ruler.enabled | bool | `false` | Enable the Ruler StatefulSet. |
