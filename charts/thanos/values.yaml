@@ -15,10 +15,12 @@
 global:
   # Container image used for all Thanos components.
   image:
+    # -- Docker registry for Thanos images (e.g. quay.io). Empty means default registry.
+    registry: "quay.io"
     # -- Docker repository for all Thanos containers by default.
-    repository: quay.io/thanos/thanos
+    repository: "thanos/thanos"
     # -- Container image tag. Changing this upgrades all components at once.
-    tag: v0.41.0
+    tag: ""
     # -- Image pull policy applied to every container. One of Always, IfNotPresent, Never.
     pullPolicy: IfNotPresent
 
@@ -2859,6 +2861,8 @@ ruler:
     sidecar:
       # Container image for the kubectl sidecar used by autoImportPrometheusRules.
       image:
+        # -- Docker Registry for the kubectl sidecar that reads PrometheusRule CRDs (e.g. docker.io).  Empty means default registry.
+        registry: "docker.io"
         # -- Repository for the kubectl sidecar that reads PrometheusRule CRDs.
         repository: alpine/kubectl
         # -- Tag for the kubectl sidecar image.
@@ -3154,7 +3158,7 @@ rustfs:
     allowInsecureDefaults: true
   initBucket:
     # -- Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.
-    image: rustfs/rc:latest
+    image: "docker.io/rustfs/rc:latest"
     # -- S3 bucket name to create.
     bucketName: thanos
     # -- Name of an existing Secret containing the RustFS credentials.

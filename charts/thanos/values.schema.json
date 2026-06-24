@@ -1924,15 +1924,22 @@
               "title": "pullPolicy",
               "type": "string"
             },
+            "registry": {
+              "default": "quay.io",
+              "description": "Docker registry for Thanos images (e.g. quay.io). Empty means no registry.",
+              "required": [],
+              "title": "registry",
+              "type": "string"
+            },
             "repository": {
-              "default": "quay.io/thanos/thanos",
+              "default": "thanos/thanos",
               "description": "Docker repository for all Thanos containers by default.",
               "required": [],
               "title": "repository",
               "type": "string"
             },
             "tag": {
-              "default": "v0.39.2",
+              "default": "",
               "description": "Container image tag. Changing this upgrades all components at once.",
               "required": [],
               "title": "tag",
@@ -1940,6 +1947,7 @@
             }
           },
           "required": [
+            "registry",
             "repository",
             "tag",
             "pullPolicy"
@@ -5856,6 +5864,13 @@
                       "title": "pullPolicy",
                       "type": "string"
                     },
+                    "registry": {
+                      "default": "",
+                      "description": "Registry for the kubectl sidecar that reads PrometheusRule CRDs.",
+                      "required": [],
+                      "title": "registry",
+                      "type": "string"
+                    },
                     "repository": {
                       "default": "alpine/kubectl",
                       "description": "Repository for the kubectl sidecar that reads PrometheusRule CRDs.",
@@ -5879,6 +5894,7 @@
                     "type": "object"
                   },
                   "required": [
+                    "registry",
                     "repository",
                     "tag",
                     "pullPolicy"
@@ -6810,7 +6826,7 @@
               "type": "object"
             },
             "image": {
-              "default": "rustfs/rc:latest",
+              "default": "docker.io/rustfs/rc:latest",
               "description": "Image used by the init-bucket Job to create the S3 bucket via the RustFS CLI.",
               "required": [],
               "title": "image",
