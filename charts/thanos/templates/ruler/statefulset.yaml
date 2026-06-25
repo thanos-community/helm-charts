@@ -50,6 +50,8 @@ spec:
             - --data-dir=/var/thanos/ruler
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --rule-file=/etc/thanos/rules/*.yaml
+            - --label=ruler_replica="$(POD_NAME)"
+            - --alert.label-drop=ruler_replica
           {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
             - --rule-file=/etc/thanos/rules/generated/*.yaml
           {{- end }}
