@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.22.0](https://img.shields.io/badge/Version-0.22.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.23.0](https://img.shields.io/badge/Version-0.23.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -618,6 +618,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Compactor working directory. |
 | compactor.persistence.size | string | `"10Gi"` | Storage capacity for the Compactor PVC (used as a scratch space during compaction). |
 | compactor.persistence.storageClass | string | `""` | StorageClass name for the Compactor PVC. Empty uses the cluster default. |
+| compactor.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Compactor PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
 | compactor.podLabels | object | {} | Extra labels applied to Compactor pods (e.g. for workload identity). |
 | compactor.podSecurityContext.fsGroup | int | `1000` |  |
 | compactor.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
@@ -1007,6 +1008,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Receive TSDB WAL. |
 | receive.persistence.size | string | `"10Gi"` | Storage capacity for the Receive PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
 | receive.persistence.storageClass | string | `""` | StorageClass name for the Receive PVC. Empty uses the cluster default. |
+| receive.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Receive PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
 | receive.podLabels | object | {} | Extra labels applied to Receive pods (e.g. for workload identity). In split mode this applies to the Ingester; set `receive.ingester.podLabels` and `receive.router.podLabels` to target each workload independently. |
 | receive.podSecurityContext.fsGroup | int | `1000` |  |
 | receive.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
@@ -1193,6 +1195,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ruler data directory. |
 | ruler.persistence.size | string | `"10Gi"` | Storage capacity for the Ruler PVC. |
 | ruler.persistence.storageClass | string | `""` | StorageClass name for the Ruler PVC. Empty uses the cluster default. |
+| ruler.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ruler PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
 | ruler.podLabels | object | {} | Extra labels applied to Ruler pods (e.g. for workload identity). |
 | ruler.podSecurityContext.fsGroup | int | `1000` |  |
 | ruler.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |
@@ -1307,6 +1310,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store. |
 | storegateway.persistence.size | string | `"10Gi"` | Storage capacity for the Store Gateway PVC. |
 | storegateway.persistence.storageClass | string | `""` | StorageClass name for the Store Gateway PVC. Empty uses the cluster default. |
+| storegateway.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Store Gateway PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
 | storegateway.podLabels | object | {} | Extra labels applied to Store Gateway pods (e.g. for workload identity). |
 | storegateway.podSecurityContext.fsGroup | int | `1000` |  |
 | storegateway.podSecurityContext.fsGroupChangePolicy | string | `"OnRootMismatch"` |  |

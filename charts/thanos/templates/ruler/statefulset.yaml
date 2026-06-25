@@ -161,6 +161,7 @@ spec:
         {{- if .Values.ruler.persistence.storageClass }}
         storageClassName: {{ .Values.ruler.persistence.storageClass }}
         {{- end }}
+        {{- include "thanos.volumeAttributesClassName" (dict "root" . "key" "ruler" "persistence" .Values.ruler.persistence) | indent 8 }}
         resources:
           requests:
             storage: {{ .Values.ruler.persistence.size }}

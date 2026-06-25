@@ -108,6 +108,7 @@ spec:
         {{- if .Values.compactor.persistence.storageClass }}
         storageClassName: {{ .Values.compactor.persistence.storageClass }}
         {{- end }}
+        {{- include "thanos.volumeAttributesClassName" (dict "root" . "key" "compactor" "persistence" .Values.compactor.persistence) | indent 8 }}
         resources:
           requests:
             storage: {{ .Values.compactor.persistence.size }}

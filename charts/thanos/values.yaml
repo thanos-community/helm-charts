@@ -709,6 +709,8 @@ compactor:
     size: 10Gi
     # -- StorageClass name for the Compactor PVC. Empty uses the cluster default.
     storageClass: ""
+    # -- [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Compactor PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.
+    volumeAttributesClassName: ""
     # Access modes for the Compactor PVC.
     accessModes:
       - ReadWriteOnce
@@ -1844,6 +1846,8 @@ storegateway:
     size: 10Gi
     # -- StorageClass name for the Store Gateway PVC. Empty uses the cluster default.
     storageClass: ""
+    # -- [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Store Gateway PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.
+    volumeAttributesClassName: ""
     # Access modes for the Store Gateway PVC.
     accessModes:
       - ReadWriteOnce
@@ -2280,6 +2284,8 @@ receive:
     size: 10Gi
     # -- StorageClass name for the Receive PVC. Empty uses the cluster default.
     storageClass: ""
+    # -- [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Receive PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.
+    volumeAttributesClassName: ""
     # Access modes for the Receive PVC.
     accessModes:
       - ReadWriteOnce
@@ -2882,6 +2888,8 @@ ruler:
     size: 10Gi
     # -- StorageClass name for the Ruler PVC. Empty uses the cluster default.
     storageClass: ""
+    # -- [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ruler PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.
+    volumeAttributesClassName: ""
     # Access modes for the Ruler PVC.
     accessModes:
       - ReadWriteOnce

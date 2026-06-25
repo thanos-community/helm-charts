@@ -156,6 +156,34 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 50Gi
+      - notExists:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+
+  - it: fail if persistence attribute class is specified but not supported
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.size: 50Gi
+      compactor.persistence.volumeAttributesClassName: "unsupported"
+    asserts:
+      - failedTemplate:
+          errorMessage: "volumeAttributesClassName has been specified for 'compactor'. However, 'storage.k8s.io/v1/VolumeAttributesClass' isn't supported"
+
+  - it: render persistence attribute class if specified and supported
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.size: 50Gi
+      compactor.persistence.volumeAttributesClassName: "supported"
+    capabilities:
+      apiVersions:
+        - storage.k8s.io/v1/VolumeAttributesClass
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+          value: supported
 
   - it: uses emptyDir when persistence is disabled
     template: compactor/statefulset.yaml

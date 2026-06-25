@@ -119,6 +119,34 @@ tests:
       - equal:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 20Gi
+      - notExists:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+
+  - it: fail if persistence attribute class is specified but not supported
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.size: 20Gi
+      receive.persistence.volumeAttributesClassName: "unsupported"
+    asserts:
+      - failedTemplate:
+          errorMessage: "volumeAttributesClassName has been specified for 'receive'. However, 'storage.k8s.io/v1/VolumeAttributesClass' isn't supported"
+
+  - it: render persistence attribute class if specified and supported
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.size: 20Gi
+      receive.persistence.volumeAttributesClassName: "supported"
+    capabilities:
+      apiVersions:
+        - storage.k8s.io/v1/VolumeAttributesClass
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+          value: supported
 
   # -- Annotations and labels -----------------------------------------
 

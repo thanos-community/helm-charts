@@ -222,6 +222,23 @@ startupProbe:
 {{- end }}
 
 {{- /*
+Render volume attribute class name. Fail if provided but not supported.
+Usage:
+  {{ include "thanos.volumeAttributesClassName" (dict "root" . "key" "compactor" "persistence" .Values.compactor.persistence ) }}
+*/ -}}
+{{- define "thanos.volumeAttributesClassName" }}
+{{- $root := .root }}
+{{- $key := .key }}
+{{- $persistence := .persistence }}
+{{- with $persistence.volumeAttributesClassName }}
+  {{- if not ($root.Capabilities.APIVersions.Has "storage.k8s.io/v1/VolumeAttributesClass") }}
+  {{-   printf "volumeAttributesClassName has been specified for '%s'. However, 'storage.k8s.io/v1/VolumeAttributesClass' isn't supported" $key | fail }}
+  {{- end }}
+volumeAttributesClassName: {{ . | quote }}
+{{- end }}
+{{- end }}
+
+{{- /*
 Render extra volume entries (concatenated) from global, optional parent, then component.
 Usage:
   {{ include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") }}
