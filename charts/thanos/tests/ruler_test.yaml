@@ -87,6 +87,18 @@ tests:
           path: spec.template.spec.containers[0].args
           content: "--log.level=debug"
 
+  - it: sets the ruler replica label
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --label=ruler_replica="$(POD_NAME)"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --alert.label-drop=ruler_replica
+
   - it: sets alert query URL when configured
     template: ruler/statefulset.yaml
     set:

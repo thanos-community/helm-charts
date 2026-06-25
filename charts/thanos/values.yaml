@@ -1187,6 +1187,7 @@ query:
   replicaLabels:
     - prometheus_replica
     - receive_replica
+    - ruler_replica
 
   # Additional CLI arguments appended to the `thanos query` command.
   extraArgs:
