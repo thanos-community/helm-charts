@@ -115,6 +115,21 @@ Usage:
 {{- end }}
 
 {{- /*
+Render container security context for the Ruler PrometheusRule importer sidecar.
+It inherits the Ruler/global security context and defaults runAsUser to nobody
+because the kubectl image otherwise runs as root while runAsNonRoot is enabled.
+*/ -}}
+{{- define "thanos.ruler.autoImportPrometheusRules.containerSC" -}}
+{{- $base := dict "runAsUser" 65534 -}}
+{{- $csc := .Values.ruler.containerSecurityContext | default .Values.global.containerSecurityContext -}}
+{{- if $csc -}}
+{{- $base = mergeOverwrite $base (deepCopy $csc) -}}
+{{- end -}}
+securityContext:
+  {{- toYaml $base | nindent 2 }}
+{{- end }}
+
+{{- /*
 Render extra pod labels for a component with component → (optional parent) fallback.
 Returns the labels as YAML (no leading newline); empty when none are set.
 Usage:
