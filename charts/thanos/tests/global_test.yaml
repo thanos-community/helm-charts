@@ -11,6 +11,8 @@ tests:
     asserts:
       - isKind:
           of: ServiceAccount
+      - hasDocuments:
+          count: 4
 
   - it: does not render serviceaccount when create is false
     template: serviceaccount.yaml
@@ -42,11 +44,11 @@ tests:
           path: metadata.annotations.custom-annotation
           value: my-value
 
-  # -- ServiceAccount name resolution (thanos.serviceAccountName) --------
+  # -- ServiceAccount name resolution (thanos.componentServiceAccountName) --------
   # Exercises every branch of the helper through the pod spec, plus the
   # ClusterRoleBinding subject which must never resolve to an empty name.
 
-  - it: defaults the pod serviceAccountName to <fullname>-thanos when create is true
+  - it: defaults the pod serviceAccountName to <fullname>-<component> when create is true
     template: bucket/deployment.yaml
     set:
       bucket.enabled: true
@@ -55,7 +57,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: RELEASE-NAME-thanos-thanos
+          value: RELEASE-NAME-thanos-bucketweb
 
   - it: uses the name override for the pod serviceAccountName when create is true
     template: bucket/deployment.yaml
@@ -92,7 +94,7 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: custom-sa
 
-  - it: binds the ruler rule-importer to the resolved serviceaccount name
+  - it: binds the ruler rule-importer to the ruler serviceaccount name
     template: ruler/rbac.yaml
     documentIndex: 1
     set:
@@ -103,7 +105,7 @@ tests:
     asserts:
       - equal:
           path: subjects[0].name
-          value: RELEASE-NAME-thanos-thanos
+          value: RELEASE-NAME-thanos-ruler
 
   - it: binds the ruler rule-importer to the default serviceaccount when create is false
     template: ruler/rbac.yaml
