@@ -50,6 +50,7 @@ spec:
             - --data-dir=/var/thanos/ruler
             - --objstore.config-file=/etc/thanos/objstore.yml
             - --rule-file=/etc/thanos/rules/*.yaml
+            - --label=ruler_replica="$(POD_NAME)"
           {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
             - --rule-file=/etc/thanos/rules/generated/*.yaml
           {{- end }}
@@ -61,7 +62,12 @@ spec:
           {{- range .Values.ruler.extraArgs }}
             - {{ . | quote }}
           {{- end }}
-          {{- include "thanos.extraEnvBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "ruler") | nindent 12 }}
           {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
           ports:
             - name: http
