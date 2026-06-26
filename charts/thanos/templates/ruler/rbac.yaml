@@ -29,6 +29,6 @@ roleRef:
   name: {{ include "thanos.compName" (list . "ruler") }}-rule-importer
 subjects:
   - kind: ServiceAccount
-    name: {{ include "thanos.serviceAccountName" . }}
+    name: {{ include "thanos.componentServiceAccountName" (list . "ruler") }}
     namespace: {{ .Release.Namespace }}
 {{- end }}

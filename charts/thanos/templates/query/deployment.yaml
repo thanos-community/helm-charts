@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      serviceAccountName: {{ include "thanos.componentServiceAccountName" (list . "query") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "query") | nindent 6 }}
