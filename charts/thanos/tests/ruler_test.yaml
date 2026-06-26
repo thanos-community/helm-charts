@@ -1365,7 +1365,7 @@ tests:
         documentIndex: 1
       - equal:
           path: subjects[0].name
-          value: RELEASE-NAME-thanos-thanos
+          value: RELEASE-NAME-thanos-ruler
         documentIndex: 1
 
   - it: does not render rbac when ruler is disabled

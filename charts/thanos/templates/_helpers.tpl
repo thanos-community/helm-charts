@@ -796,17 +796,19 @@ shards (hashmod on __block_id). Either dimension may be used on its own.
 {{- end -}}
 
 {{/*
-Resolve the ServiceAccount name.
-- When global.serviceAccount.create is true, defaults to "<fullname>-thanos"
-  unless global.serviceAccount.name overrides it.
-- When create is false, uses global.serviceAccount.name if provided, otherwise
-  falls back to the namespace "default" ServiceAccount.
+Resolve the ServiceAccount name for a specific component.
+Usage: {{ include "thanos.componentServiceAccountName" (list . "compactor") }}
+- create=true, no name override: "<fullname>-<component>" (one SA per component)
+- create=true, name override set: the override name (single shared SA for all components)
+- create=false: name override if set, otherwise "default"
 */}}
-{{- define "thanos.serviceAccountName" -}}
-{{- if .Values.global.serviceAccount.create -}}
-{{- default (printf "%s-%s" (include "thanos.fullname" .) "thanos") .Values.global.serviceAccount.name -}}
+{{- define "thanos.componentServiceAccountName" -}}
+{{- $root := index . 0 -}}
+{{- $comp := index . 1 -}}
+{{- if $root.Values.global.serviceAccount.create -}}
+{{- default (include "thanos.compName" (list $root $comp)) $root.Values.global.serviceAccount.name -}}
 {{- else -}}
-{{- default "default" .Values.global.serviceAccount.name -}}
+{{- default "default" $root.Values.global.serviceAccount.name -}}
 {{- end -}}
 {{- end -}}
 

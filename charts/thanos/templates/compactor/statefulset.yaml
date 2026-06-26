@@ -35,7 +35,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      serviceAccountName: {{ include "thanos.componentServiceAccountName" (list . "compactor") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "compactor") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "compactor") | nindent 6 }}

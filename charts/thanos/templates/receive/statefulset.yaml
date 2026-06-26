@@ -42,7 +42,7 @@ spec:
         {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
         {{- toYaml $anns | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      serviceAccountName: {{ include "thanos.componentServiceAccountName" (list . (ternary "receive-ingester" "receive" (eq (include "thanos.receive.isSplit" .) "true"))) }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "ingester" "parent" "receive") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "ingester" "parent" "receive") | nindent 6 }}

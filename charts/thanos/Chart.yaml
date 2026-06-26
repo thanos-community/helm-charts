@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.23.1
+version: 0.24.0
 appVersion: "v0.41.0"
 keywords:
   - thanos
@@ -51,5 +51,5 @@ annotations:
     - name: Slack
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
-    - kind: added
-      description: Per-component podLabels to set extra labels on pods (e.g. for workload identity), rendered via a shared thanos.podLabels helper for all workloads (bucketweb, compactor, query, query-frontend, store gateway, receive, receive ingester/router, ruler)
+    - kind: changed
+      description: Each component now gets its own dedicated ServiceAccount named <fullname>-<component> instead of a single shared ServiceAccount. Set global.serviceAccount.name to use a shared SA.
