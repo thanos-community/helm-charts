@@ -63,6 +63,7 @@ receive:
         memory: 8Gi
     persistence:
       enabled: true
+      existingClaim: ""
       size: 10Gi
       storageClass: ""
       accessModes:

@@ -128,6 +128,55 @@ tests:
           path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
           value: supported
 
+  - it: uses emptyDir when persistence is disabled
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
+  - it: mounts existing PVC when existingClaim is set
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.persistence.existingClaim: storegateway-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: storegateway-existing-pvc
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: creates volumeClaimTemplates when existingClaim is empty
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.persistence.existingClaim: ""
+      storegateway.persistence.size: 50Gi
+    asserts:
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
+          value: 50Gi
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: ""
+          any: true
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component labels
@@ -1413,6 +1462,41 @@ tests:
               regex: team-a
               source_labels:
               - __meta_tenant
+
+  - it: falls back to volumeClaimTemplates in sharded mode even when existingClaim is set
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.persistence.enabled: true
+      storegateway.persistence.existingClaim: storegateway-existing-pvc
+      storegateway.persistence.size: 50Gi
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+        documentIndex: 0
+      - isNotEmpty:
+          path: spec.volumeClaimTemplates
+        documentIndex: 1
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: storegateway-existing-pvc
+          any: true
+        documentIndex: 0
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: storegateway-existing-pvc
+          any: true
+        documentIndex: 1
 
   # -- Sharding: Service -------------------------------------------------
 

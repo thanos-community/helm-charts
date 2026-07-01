@@ -1221,6 +1221,13 @@
               "required": [],
               "title": "volumeAttributesClassName",
               "type": "string"
+            },
+            "existingClaim": {
+              "default": "",
+              "description": "Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.",
+              "required": [],
+              "title": "existingClaim",
+              "type": "string"
             }
           },
           "required": [
@@ -4606,6 +4613,72 @@
           "additionalProperties": true,
           "default": {},
           "description": "Ingester StatefulSet config. Required (and must mirror the top-level `receive.*` shape) when `receive.mode` is `split`; ignored in `standalone` mode.",
+          "properties": {
+            "persistence": {
+              "additionalProperties": true,
+              "description": "PersistentVolumeClaim configuration for the Ingester TSDB WAL.",
+              "properties": {
+                "accessModes": {
+                  "description": "Access modes for the Ingester PVC.",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "required": [],
+                        "type": "string"
+                      }
+                    ],
+                    "required": []
+                  },
+                  "required": [],
+                  "title": "accessModes",
+                  "type": "array"
+                },
+                "enabled": {
+                  "default": true,
+                  "description": "Enable a PersistentVolumeClaim for the Ingester TSDB WAL.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "size": {
+                  "default": "10Gi",
+                  "description": "Storage capacity for the Ingester PVC.\nShould be sized to hold at least `tsdb.retention` worth of data.",
+                  "required": [],
+                  "title": "size",
+                  "type": "string"
+                },
+                "storageClass": {
+                  "default": "",
+                  "description": "StorageClass name for the Ingester PVC. Empty uses the cluster default.",
+                  "required": [],
+                  "title": "storageClass",
+                  "type": "string"
+                },
+                "volumeAttributesClassName": {
+                  "default": "",
+                  "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ingester PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
+                  "required": [],
+                  "title": "volumeAttributesClassName",
+                  "type": "string"
+                },
+                "existingClaim": {
+                  "default": "",
+                  "description": "Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.",
+                  "required": [],
+                  "title": "existingClaim",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "size",
+                "storageClass",
+                "accessModes"
+              ],
+              "title": "persistence",
+              "type": "object"
+            }
+          },
           "required": [],
           "title": "ingester",
           "type": "object"
@@ -5161,6 +5234,13 @@
               "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Receive PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
               "required": [],
               "title": "volumeAttributesClassName",
+              "type": "string"
+            },
+            "existingClaim": {
+              "default": "",
+              "description": "Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.",
+              "required": [],
+              "title": "existingClaim",
               "type": "string"
             }
           },
@@ -6273,6 +6353,13 @@
               "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ruler PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
               "required": [],
               "title": "volumeAttributesClassName",
+              "type": "string"
+            },
+            "existingClaim": {
+              "default": "",
+              "description": "Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.",
+              "required": [],
+              "title": "existingClaim",
               "type": "string"
             }
           },
@@ -7554,6 +7641,13 @@
               "description": "[Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Store Gateway PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster.",
               "required": [],
               "title": "volumeAttributesClassName",
+              "type": "string"
+            },
+            "existingClaim": {
+              "default": "",
+              "description": "Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes.",
+              "required": [],
+              "title": "existingClaim",
               "type": "string"
             }
           },

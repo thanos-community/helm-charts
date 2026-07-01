@@ -124,8 +124,13 @@ spec:
         - name: data
           emptyDir: {}
         {{- end }}
+        {{- if and $.Values.storegateway.persistence.enabled $.Values.storegateway.persistence.existingClaim (not $shard.isSharded) }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ $.Values.storegateway.persistence.existingClaim }}
+        {{- end }}
         {{- include "thanos.extraVolumeItems" (dict "root" $ "key" "storegateway") | nindent 8 }}
-  {{- if $.Values.storegateway.persistence.enabled }}
+  {{- if and $.Values.storegateway.persistence.enabled (or $shard.isSharded (not $.Values.storegateway.persistence.existingClaim)) }}
   volumeClaimTemplates:
     - metadata:
         name: data
