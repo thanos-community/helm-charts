@@ -3196,3 +3196,6 @@ kube-prometheus-stack:
   # -- Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator
   # and associated components into the same namespace as Thanos.
   enabled: false
+
+# -- Extra kubernetes objects to deploy with the release. Each item in the array should be a valid Kubernetes manifest (YAML or JSON) for an object to create. The object will be rendered and deployed alongside the Thanos components. This can be used to deploy additional resources such as ConfigMaps, Secrets, or custom resources that are required by your Thanos deployment.
+extraDeploy: []

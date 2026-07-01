@@ -61,7 +61,10 @@
                   "description": "Target memory utilisation percentage. Null disables memory-based scaling.",
                   "required": [],
                   "title": "targetMemoryUtilizationPercentage",
-                  "type": ["integer", "null"]
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
                 }
               },
               "required": [
@@ -72,8 +75,16 @@
               "title": "autoscaling",
               "type": "object",
               "anyOf": [
-                {"required": ["targetCPUUtilizationPercentage"]},
-                {"required": ["targetMemoryUtilizationPercentage"]}
+                {
+                  "required": [
+                    "targetCPUUtilizationPercentage"
+                  ]
+                },
+                {
+                  "required": [
+                    "targetMemoryUtilizationPercentage"
+                  ]
+                }
               ]
             },
             "containerSecurityContext": {
@@ -2486,7 +2497,10 @@
               "description": "Target memory utilisation percentage for Query autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": ["integer", "null"]
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -2497,8 +2511,16 @@
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            {
+              "required": [
+                "targetCPUUtilizationPercentage"
+              ]
+            },
+            {
+              "required": [
+                "targetMemoryUtilizationPercentage"
+              ]
+            }
           ]
         },
         "containerSecurityContext": {
@@ -3615,7 +3637,10 @@
               "description": "Target memory utilisation percentage for Query Frontend autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": ["integer", "null"]
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -3626,8 +3651,16 @@
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            {
+              "required": [
+                "targetCPUUtilizationPercentage"
+              ]
+            },
+            {
+              "required": [
+                "targetMemoryUtilizationPercentage"
+              ]
+            }
           ]
         },
         "cacheConfig": {
@@ -6935,7 +6968,10 @@
               "description": "Target memory utilisation percentage for Store Gateway autoscaling. Null disables memory-based scaling.",
               "required": [],
               "title": "targetMemoryUtilizationPercentage",
-              "type": ["integer", "null"]
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -6946,8 +6982,16 @@
           "title": "autoscaling",
           "type": "object",
           "anyOf": [
-            {"required": ["targetCPUUtilizationPercentage"]},
-            {"required": ["targetMemoryUtilizationPercentage"]}
+            {
+              "required": [
+                "targetCPUUtilizationPercentage"
+              ]
+            },
+            {
+              "required": [
+                "targetMemoryUtilizationPercentage"
+              ]
+            }
           ]
         },
         "cachingBucketConfig": {
@@ -8085,6 +8129,15 @@
       ],
       "title": "storegateway",
       "type": "object"
+    },
+    "extraDeploy": {
+      "description": "List of extra objects to deploy with the release.",
+      "items": {
+        "required": []
+      },
+      "required": [],
+      "title": "extraDeploy",
+      "type": "array"
     }
   },
   "required": [

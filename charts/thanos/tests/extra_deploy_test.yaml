@@ -1,0 +1,81 @@
+suite: extra deploy objects
+
+templates:
+  - extra-list.yaml
+
+tests:
+  - it: renders nothing when extraDeploy is empty
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders templated extra objects alongside the chart
+    set:
+      extraDeploy:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-extra'
+          data:
+            release: '{{ .Release.Name }}'
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-secret'
+          stringData:
+            chart: '{{ .Chart.Name }}'
+    asserts:
+      - hasDocuments:
+          count: 2
+
+  - it: renders the first extra object
+    documentIndex: 0
+    set:
+      extraDeploy:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-extra'
+          data:
+            release: '{{ .Release.Name }}'
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-secret'
+          stringData:
+            chart: '{{ .Chart.Name }}'
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-extra
+      - equal:
+          path: data.release
+          value: RELEASE-NAME
+
+  - it: renders the second extra object
+    documentIndex: 1
+    set:
+      extraDeploy:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-extra'
+          data:
+            release: '{{ .Release.Name }}'
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-secret'
+          stringData:
+            chart: '{{ .Chart.Name }}'
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-secret
+      - equal:
+          path: stringData.chart
+          value: thanos
