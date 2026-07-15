@@ -28,6 +28,14 @@
       "labels": [
         "renovate",
         "thanos"
+      ],
+      "bumpVersions": [
+        {
+          "name": "Bump chart version on Thanos updates",
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s+(?<version>[^\\s]+)"],
+          "bumpType": "minor"
+        }
       ]
     },
     {
