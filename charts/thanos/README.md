@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.25.1](https://img.shields.io/badge/Version-0.25.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.2](https://img.shields.io/badge/AppVersion-v0.42.2-informational?style=flat-square)
+![Version: 0.31.0](https://img.shields.io/badge/Version-0.31.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -45,8 +45,8 @@ Kubernetes: `>= 1.30.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://charts.rustfs.com/ | rustfs | 0.8.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 87.14.0 |
+| https://charts.rustfs.com/ | rustfs | 0.12.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.0.1 |
 
 ## Component Overview
 
@@ -707,6 +707,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.rbac.create | bool | `true` | Create RBAC resources (ClusterRole, ClusterRoleBinding) required by components that need cluster-level access (e.g. Ruler auto-import). |
 | global.resources | object | {} | Default resource requests and limits. Override per component as needed. |
 | global.serviceAccount.annotations | object | {} | Extra annotations merged into every ServiceAccount. |
+| global.serviceAccount.automountServiceAccountToken | bool | `true` | Mount the ServiceAccount token into pods by default. Set to false to disable automounting the token for all components. |
 | global.serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount for each component. |
 | global.serviceAccount.name | string | `""` | Name override for all ServiceAccounts. Empty means auto-generate per-component names based on the release name. |
 | global.serviceMonitor.annotations | object | {} | Extra annotations merged into every ServiceMonitor resource. |

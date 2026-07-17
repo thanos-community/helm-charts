@@ -30,6 +30,22 @@ tests:
       - hasDocuments:
           count: 0
 
+  - it: mounts the serviceaccount token by default
+    template: serviceaccount.yaml
+    asserts:
+      - equal:
+          path: automountServiceAccountToken
+          value: true
+
+  - it: disables serviceaccount token automount when set to false
+    template: serviceaccount.yaml
+    set:
+      global.serviceAccount.automountServiceAccountToken: false
+    asserts:
+      - equal:
+          path: automountServiceAccountToken
+          value: false
+
   - it: applies serviceaccount annotations
     template: serviceaccount.yaml
     set:

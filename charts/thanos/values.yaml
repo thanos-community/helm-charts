@@ -179,6 +179,9 @@ global:
     # -- Extra annotations merged into every ServiceAccount.
     # @default -- {}
     annotations: {}
+    # -- Mount the ServiceAccount token into pods by default. Set to false to
+    # disable automounting the token for all components.
+    automountServiceAccountToken: true
     # -- Name override for all ServiceAccounts. Empty means auto-generate
     # per-component names based on the release name.
     name: ""
