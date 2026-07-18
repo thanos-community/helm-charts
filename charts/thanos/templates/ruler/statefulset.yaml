@@ -63,12 +63,7 @@ spec:
           {{- range .Values.ruler.extraArgs }}
             - {{ . | quote }}
           {{- end }}
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            {{- include "thanos.extraEnvItems" (dict "Values" .Values "component" "ruler") | nindent 12 }}
+          {{- include "thanos.podNameEnvBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
           {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
           ports:
             - name: http
