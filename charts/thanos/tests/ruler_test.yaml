@@ -315,6 +315,35 @@ tests:
             name: SHARED_FROM
             value: component-value
 
+  - it: renders pod env injection with extraEnv and extraEnvFrom
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.extraEnv:
+        - name: LOG_FORMAT
+          value: json
+      ruler.extraEnvFrom:
+        - name: RULER_FROM
+          value: ruler-value
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_FORMAT
+            value: json
+      - contains:
+          path: spec.template.spec.containers[0].envFrom
+          content:
+            name: RULER_FROM
+            value: ruler-value
+
   # -- Security contexts ----------------------------------------------
 
   - it: applies global container security context

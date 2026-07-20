@@ -63,8 +63,7 @@ spec:
           {{- range .Values.ruler.extraArgs }}
             - {{ . | quote }}
           {{- end }}
-          {{- include "thanos.podNameEnvBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
-          {{- include "thanos.extraEnvFromBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
+          {{- include "thanos.podEnvBlock" (dict "Values" .Values "component" "ruler") | nindent 10 }}
           ports:
             - name: http
               containerPort: {{ .Values.ruler.service.httpPort }}

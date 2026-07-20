@@ -498,13 +498,14 @@ env:
 {{- end }}
 {{- end }}
 
-{{- define "thanos.podNameEnvBlock" -}}
+{{- define "thanos.podEnvBlock" -}}
 env:
   - name: POD_NAME
     valueFrom:
       fieldRef:
         fieldPath: metadata.name
   {{- include "thanos.extraEnvItems" . | nindent 2 }}
+{{- include "thanos.extraEnvFromBlock" . }}
 {{- end }}
 
 {{- define "thanos.extraEnvFromItems" -}}
