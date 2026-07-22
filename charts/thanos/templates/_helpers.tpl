@@ -504,7 +504,7 @@ env:
     valueFrom:
       fieldRef:
         fieldPath: metadata.name
-  {{- include "thanos.extraEnvItems" . | nindent 2 }}
+{{- include "thanos.extraEnvItems" . | nindent 2 }}
 {{- include "thanos.extraEnvFromBlock" . }}
 {{- end }}
 
