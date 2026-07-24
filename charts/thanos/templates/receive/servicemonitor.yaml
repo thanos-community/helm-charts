@@ -5,6 +5,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "thanos.receive.workloadName" . }}
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
     {{- if $sm.labels }}{{ toYaml $sm.labels | nindent 4 }}{{- end }}
@@ -13,7 +14,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - {{ include "thanos.namespace" . }}
   selector:
     matchLabels:
       app.kubernetes.io/name: thanos

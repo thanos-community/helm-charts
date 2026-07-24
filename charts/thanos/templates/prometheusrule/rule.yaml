@@ -15,6 +15,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: {{ include "thanos.fullname" . }}-rules
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     app.kubernetes.io/name: thanos
     app.kubernetes.io/instance: {{ .Release.Name }}

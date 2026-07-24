@@ -10,6 +10,7 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ $shard.name }}
+  namespace: {{ include "thanos.namespace" $ }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
   annotations:

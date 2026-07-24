@@ -14,6 +14,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   name: {{ include "thanos.compName" (list . "ruler") }}
+  namespace: {{ include "thanos.namespace" . }}
 spec:
   ports:
     - name: http
@@ -38,6 +39,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   name: {{ include "thanos.compName" (list . "ruler") }}-headless
+  namespace: {{ include "thanos.namespace" . }}
 spec:
   clusterIP: None
   type: ClusterIP

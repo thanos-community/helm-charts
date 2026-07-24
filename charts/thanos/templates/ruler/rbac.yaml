@@ -30,5 +30,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "thanos.serviceAccountName" . }}
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ include "thanos.namespace" . }}
 {{- end }}

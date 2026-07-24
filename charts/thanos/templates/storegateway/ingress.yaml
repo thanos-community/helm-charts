@@ -16,6 +16,7 @@ metadata:
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
   name: {{ include "thanos.compName" (list $ (printf "storegateway%s" (eq $port "http" | ternary "" (printf "-%s" $port)))) }}
+  namespace: {{ include "thanos.namespace" $ }}
 spec:
   {{- with $ingress.className }}
   ingressClassName: {{ . }}

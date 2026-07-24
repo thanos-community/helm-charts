@@ -3,6 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "thanos.compName" (list . "compactor") }}
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- if .Values.global.serviceMonitor.labels }}{{ toYaml .Values.global.serviceMonitor.labels | nindent 4 }}{{- end }}
     {{- if .Values.compactor.serviceMonitor.labels }}{{ toYaml .Values.compactor.serviceMonitor.labels | nindent 4 }}{{- end }}
@@ -11,7 +12,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - {{ include "thanos.namespace" . }}
   selector:
     matchLabels:
       app.kubernetes.io/name: thanos

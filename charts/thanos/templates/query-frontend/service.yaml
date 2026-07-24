@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "thanos.compName" (list . "query-frontend") }}
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     app.kubernetes.io/component: query-frontend
     {{- include "thanos.labels" . | nindent 4 }}

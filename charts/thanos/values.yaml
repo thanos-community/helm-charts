@@ -7,6 +7,16 @@
 # ======================================================================
 
 # ======================================================================
+# Chart naming and placement
+# ======================================================================
+# -- Partially override the chart name used to build resource names. Empty uses the chart name.
+nameOverride: ""
+# -- Fully override the generated resource name (`thanos.fullname`). Empty uses `<release>-<chart>`.
+fullnameOverride: ""
+# -- Namespace to deploy all chart resources into. Empty uses the release namespace (`.Release.Namespace`).
+namespaceOverride: ""
+
+# ======================================================================
 # Global settings
 # Applied as sensible defaults to all components.
 # Each component can override with its own section if needed.
