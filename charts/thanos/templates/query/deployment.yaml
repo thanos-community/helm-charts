@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "thanos.compName" (list . "query") }}
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
     {{- with .Values.query.labels }}
@@ -45,13 +46,13 @@ spec:
         {{- if .Values.query.endpoints.autogen.enabled }}
           {{- if .Values.storegateway.enabled }}
             # - --endpoint={{ include "thanos.compName" (list . "storegateway") }}:{{ .Values.storegateway.service.grpcPort }}
-            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "storegateway") }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "storegateway") }}.{{ include "thanos.namespace" . }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
           {{- if .Values.receive.enabled }}
-            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.receiveHeadless" . }}.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.receiveHeadless" . }}.{{ include "thanos.namespace" . }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
           {{- if .Values.ruler.enabled }}
-            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "ruler") }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.global.clusterDomain }}
+            - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "ruler") }}-headless.{{ include "thanos.namespace" . }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
         {{- end }}
           {{- range .Values.query.endpoints.static }}

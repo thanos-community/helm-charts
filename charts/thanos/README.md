@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.23.0](https://img.shields.io/badge/Version-0.23.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.41.0](https://img.shields.io/badge/AppVersion-v0.41.0-informational?style=flat-square)
+![Version: 0.25.1](https://img.shields.io/badge/Version-0.25.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.2](https://img.shields.io/badge/AppVersion-v0.42.2-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -46,7 +46,7 @@ Kubernetes: `>= 1.30.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.rustfs.com/ | rustfs | 0.8.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 87.0.1 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 87.14.0 |
 
 ## Component Overview
 
@@ -672,6 +672,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.vpa.minAllowed.memory | string | `"512Mi"` | Minimum memory resource enforced by the Compactor VPA. |
 | compactor.vpa.targetKind | string | `"StatefulSet"` | Kubernetes workload kind targeted by the Compactor VPA. |
 | compactor.vpa.updateMode | string | `"Auto"` | VPA update mode for the Compactor. One of Auto, Off, or Initial. |
+| fullnameOverride | string | `""` | Fully override the generated resource name (`thanos.fullname`). Empty uses `<release>-<chart>`. |
 | global.affinity | object | {} | Affinity rules applied to every pod by default. |
 | global.clusterDomain | string | `"cluster.local"` | Cluster DNS domain, used when constructing in-cluster endpoints. |
 | global.commonLabels | object | {} | Extra labels merged into every Kubernetes resource created by this chart. |
@@ -763,6 +764,8 @@ The table below documents all available values. Top-level keys group settings by
 | global.tolerations | list | [] | Toleration rules applied to every pod by default. |
 | global.topologySpreadConstraints | list | [] | Topology spread constraints applied to every pod by default. |
 | kube-prometheus-stack.enabled | bool | `false` | Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator and associated components into the same namespace as Thanos. |
+| nameOverride | string | `""` | Partially override the chart name used to build resource names. Empty uses the chart name. |
+| namespaceOverride | string | `""` | Namespace to deploy all chart resources into. Empty uses the release namespace (`.Release.Namespace`). |
 | query.affinity | object | {} | Affinity rules for Query pod scheduling. |
 | query.annotations | object | {} | Extra annotations applied to Query resources. |
 | query.autoscaling.enabled | bool | `false` | Enable HorizontalPodAutoscaler for the Query component. |

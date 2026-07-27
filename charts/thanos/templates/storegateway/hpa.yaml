@@ -8,6 +8,7 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ $shard.name }}
+  namespace: {{ include "thanos.namespace" $ }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
   annotations:

@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "thanos.compName" (list . "compactor") }}
+  namespace: {{ include "thanos.namespace" . }}
   labels:
     app.kubernetes.io/component: compactor
     {{- include "thanos.labels" . | nindent 4 }}

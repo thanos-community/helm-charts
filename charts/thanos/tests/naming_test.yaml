@@ -1,0 +1,567 @@
+suite: chart naming and namespace placement
+
+# Covers the three top-level naming values and the `thanos.namespace` helper:
+#   nameOverride       -> thanos.name
+#   fullnameOverride   -> thanos.fullname (and every thanos.compName derived name)
+#   namespaceOverride  -> metadata.namespace on every namespaced resource,
+#                         plus every in-chart cross-reference to that namespace
+#                         (DNS endpoints, hashrings, ServiceMonitor selectors,
+#                         ClusterRoleBinding subjects).
+
+tests:
+  # -- namespaceOverride: default behaviour -------------------------------
+
+  - it: defaults metadata.namespace to the release namespace
+    template: bucket/service.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: my-release-ns
+
+  - it: ignores an empty namespaceOverride and falls back to the release namespace
+    template: bucket/service.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: ""
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: my-release-ns
+
+  - it: overrides the release namespace when namespaceOverride is set
+    template: bucket/service.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: custom-ns
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: workload kinds ----------------------------------
+
+  - it: sets the namespace on a Deployment
+    template: query/deployment.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a StatefulSet
+    template: compactor/statefulset.yaml
+    set:
+      namespaceOverride: custom-ns
+      compactor.enabled: true
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a Job
+    template: rustfs/init-bucket.yaml
+    set:
+      namespaceOverride: custom-ns
+      rustfs.enabled: true
+    asserts:
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: resources rendered inside a range ---------------
+  # These templates loop (shards / per-port ingresses) so the helper must be
+  # called with `$` rather than `.`; a wrong root renders an empty namespace.
+
+  - it: sets the namespace on every sharded storegateway StatefulSet
+    template: storegateway/statefulset.yaml
+    set:
+      namespaceOverride: custom-ns
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 3
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on the per-shard storegateway Services
+    template: storegateway/service.yaml
+    set:
+      namespaceOverride: custom-ns
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on an Ingress rendered per port
+    template: query/ingress.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.ingress.enabled: true
+      query.ingress.hosts:
+        - host: query.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - isKind:
+          of: Ingress
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: remaining namespaced kinds ----------------------
+
+  - it: sets the namespace on a Service
+    template: query/service.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on both the receive Service and its headless Service
+    template: receive/service.yaml
+    set:
+      namespaceOverride: custom-ns
+      receive.enabled: true
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a ConfigMap
+    template: receive/configmap-hashrings.yaml
+    set:
+      namespaceOverride: custom-ns
+      receive.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a Secret
+    template: bucket/secret-objstore.yaml
+    set:
+      namespaceOverride: custom-ns
+      bucket.enabled: true
+      global.objstore.createSecret: true
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a HorizontalPodAutoscaler
+    template: query/hpa.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.autoscaling.enabled: true
+    asserts:
+      - isKind:
+          of: HorizontalPodAutoscaler
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a PodDisruptionBudget
+    template: query/pdb.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.pdb.enabled: true
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a VerticalPodAutoscaler
+    template: compactor/vpa.yaml
+    capabilities:
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
+    set:
+      namespaceOverride: custom-ns
+      compactor.enabled: true
+      compactor.vpa.enabled: true
+    asserts:
+      - isKind:
+          of: VerticalPodAutoscaler
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a NetworkPolicy
+    template: query/networkpolicy.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a ServiceMonitor
+    template: query/servicemonitor.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      global.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on the ServiceAccount
+    template: serviceaccount.yaml
+    set:
+      namespaceOverride: custom-ns
+      global.serviceAccount.create: true
+      global.rbac.create: true
+    asserts:
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on the PrometheusRule
+    template: prometheusrule/rule.yaml
+    set:
+      namespaceOverride: custom-ns
+      global.thanosRules.enabled: true
+    asserts:
+      - isKind:
+          of: PrometheusRule
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: Gateway API routes (rendered via helpers) -------
+
+  - it: sets the namespace on an HTTPRoute rendered by the shared helper
+    template: query/httproute.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+    asserts:
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on a GRPCRoute rendered by the shared helper
+    template: query/grpcroute.yaml
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.grpcRoute.enabled: true
+      query.grpcRoute.parentRefs:
+        - name: my-gateway
+    asserts:
+      - isKind:
+          of: GRPCRoute
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: split-mode receive ------------------------------
+
+  - it: sets the namespace on the split-mode router Deployment
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      namespaceOverride: custom-ns
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  - it: sets the namespace on the split-mode router HTTPRoute
+    template: receive/split/router-httproute.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      namespaceOverride: custom-ns
+      receive.router.httpRoute.enabled: true
+      receive.router.httpRoute.parentRefs:
+        - name: my-gateway
+    asserts:
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: metadata.namespace
+          value: custom-ns
+
+  # -- namespaceOverride: cluster-scoped resources are exempt -------------
+
+  - it: does not set a namespace on the cluster-scoped ClusterRole
+    template: ruler/rbac.yaml
+    documentIndex: 0
+    set:
+      namespaceOverride: custom-ns
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - notExists:
+          path: metadata.namespace
+
+  - it: does not set a namespace on the cluster-scoped ClusterRoleBinding
+    template: ruler/rbac.yaml
+    documentIndex: 1
+    set:
+      namespaceOverride: custom-ns
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - isKind:
+          of: ClusterRoleBinding
+      - notExists:
+          path: metadata.namespace
+
+  # -- namespaceOverride: in-chart cross-references follow the override ---
+  # A resource landing in the right namespace is not enough: everything that
+  # *points at* those resources must resolve to the same namespace too.
+
+  - it: points the ClusterRoleBinding subject at the override namespace
+    template: ruler/rbac.yaml
+    documentIndex: 1
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: custom-ns
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - equal:
+          path: subjects[0].namespace
+          value: custom-ns
+
+  - it: resolves query autogen DNS endpoints in the override namespace
+    template: query/deployment.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      query.endpoints.autogen.enabled: true
+      storegateway.enabled: true
+      receive.enabled: true
+      ruler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-storegateway.custom-ns.svc.cluster.local
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-receive-headless.custom-ns.svc.cluster.local
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-ruler-headless.custom-ns.svc.cluster.local
+
+  - it: resolves receive hashring endpoints in the override namespace
+    template: receive/configmap-hashrings.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: custom-ns
+      receive.enabled: true
+      receive.replicaCount: 2
+      receive.hashrings.autogen.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: RELEASE-NAME-thanos-receive-0\.RELEASE-NAME-thanos-receive-headless\.custom-ns\.svc\.cluster\.local:10901
+
+  - it: scopes the ServiceMonitor namespaceSelector to the override namespace
+    template: query/servicemonitor.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      namespaceOverride: custom-ns
+      query.enabled: true
+      global.serviceMonitor.enabled: true
+    asserts:
+      - equal:
+          path: spec.namespaceSelector.matchNames[0]
+          value: custom-ns
+
+  # -- fullnameOverride ---------------------------------------------------
+
+  - it: defaults resource names to <release>-<chart>-<component>
+    template: query/service.yaml
+    set:
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-query
+
+  - it: fully overrides the generated name on a Service
+    template: query/service.yaml
+    set:
+      fullnameOverride: my-thanos
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-query
+
+  - it: fully overrides the generated name on a StatefulSet
+    template: compactor/statefulset.yaml
+    set:
+      fullnameOverride: my-thanos
+      compactor.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-compactor
+
+  - it: applies fullnameOverride to the receive headless Service name
+    template: receive/service.yaml
+    documentIndex: 1
+    set:
+      fullnameOverride: my-thanos
+      receive.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-receive-headless
+
+  - it: applies fullnameOverride to the ServiceAccount name and its pod reference
+    template: serviceaccount.yaml
+    set:
+      fullnameOverride: my-thanos
+      global.serviceAccount.create: true
+      global.rbac.create: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-thanos
+
+  - it: applies fullnameOverride to the cluster-scoped ClusterRole name
+    template: ruler/rbac.yaml
+    documentIndex: 0
+    set:
+      fullnameOverride: my-thanos
+      ruler.enabled: true
+      ruler.autoImportPrometheusRules.enabled: true
+      global.rbac.create: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-ruler-rule-importer
+
+  - it: applies fullnameOverride to autogen DNS endpoints
+    template: query/deployment.yaml
+    set:
+      fullnameOverride: my-thanos
+      query.enabled: true
+      query.endpoints.autogen.enabled: true
+      storegateway.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.my-thanos-storegateway.NAMESPACE.svc.cluster.local
+
+  # -- nameOverride -------------------------------------------------------
+
+  - it: uses nameOverride in the generated resource name
+    template: query/service.yaml
+    set:
+      nameOverride: mythanos
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-mythanos-query
+
+  - it: uses nameOverride for the app.kubernetes.io/name label
+    template: query/service.yaml
+    set:
+      nameOverride: mythanos
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: mythanos
+
+  - it: lets fullnameOverride win over nameOverride for resource names
+    template: query/service.yaml
+    set:
+      nameOverride: mythanos
+      fullnameOverride: my-thanos
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-query
+
+  # -- combined -----------------------------------------------------------
+
+  - it: applies fullnameOverride and namespaceOverride together
+    template: query/deployment.yaml
+    release:
+      namespace: my-release-ns
+    set:
+      fullnameOverride: my-thanos
+      namespaceOverride: custom-ns
+      query.enabled: true
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-thanos-query
+      - equal:
+          path: metadata.namespace
+          value: custom-ns

@@ -15,6 +15,14 @@
 {{- end -}}
 {{- end -}}
 
+{{- /*
+Resolve the namespace all chart resources are deployed into.
+Defaults to the release namespace unless `.Values.namespaceOverride` overrides it.
+*/ -}}
+{{- define "thanos.namespace" -}}
+{{- default .Release.Namespace .Values.namespaceOverride -}}
+{{- end -}}
+
 {{- define "thanos.compName" -}}
 {{- $root := index . 0 -}}
 {{- $comp := index . 1 -}}
@@ -690,7 +698,7 @@ same helper produces a valid hashring for both standalone and split modes.
 {{- $vals := include "thanos.receive.cfg" . | fromYaml -}}
 {{- $grpcPort := int (dig "service" "grpcPort" 10901 $vals) -}}
 {{- $rc := int (default 1 $vals.replicaCount) -}}
-{{- $ns := .Release.Namespace -}}
+{{- $ns := include "thanos.namespace" . -}}
 {{- $domain := .Values.global.clusterDomain | default "cluster.local" -}}
 
 {{- if and (hasKey $vals "hashrings") (hasKey $vals.hashrings "static") (gt (len $vals.hashrings.static) 0) -}}
@@ -843,7 +851,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}
-  namespace: {{ $root.Release.Namespace }}
+  namespace: {{ include "thanos.namespace" $root }}
   labels:
     {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}
@@ -888,7 +896,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: GRPCRoute
 metadata:
   name: {{ include "thanos.compName" (list $root $comp) }}-grpc
-  namespace: {{ $root.Release.Namespace }}
+  namespace: {{ include "thanos.namespace" $root }}
   labels:
     {{- include "thanos.labels" $root | nindent 4 }}
     app.kubernetes.io/component: {{ $comp }}

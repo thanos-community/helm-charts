@@ -6,6 +6,7 @@ metadata:
     {{- include "thanos.labels" . | nindent 4 }}
     app.kubernetes.io/component: ruler
   name: {{ include "thanos.compName" (list . "ruler") }}
+  namespace: {{ include "thanos.namespace" . }}
 spec:
   egress:
     - {}

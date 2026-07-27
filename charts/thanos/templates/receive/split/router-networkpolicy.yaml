@@ -6,6 +6,7 @@ metadata:
     {{- include "thanos.labels" . | nindent 4 }}
     app.kubernetes.io/component: receive-router
   name: {{ include "thanos.receive.routerName" . }}
+  namespace: {{ include "thanos.namespace" . }}
 spec:
   egress:
     - {}

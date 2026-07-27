@@ -6,6 +6,7 @@ metadata:
     {{- include "thanos.labels" . | nindent 4 }}
     app.kubernetes.io/component: query
   name: {{ include "thanos.compName" (list . "query") }}
+  namespace: {{ include "thanos.namespace" . }}
 spec:
   egress:
     - {}
