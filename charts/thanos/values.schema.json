@@ -2134,6 +2134,13 @@
               "title": "annotations",
               "type": "object"
             },
+            "automountServiceAccountToken": {
+              "default": true,
+              "description": "Mount the ServiceAccount token into pods by default. Set to false to\ndisable automounting the token for all components.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": "boolean"
+            },
             "create": {
               "default": true,
               "description": "Create a dedicated ServiceAccount for each component.",
