@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.31.0
+version: 0.32.0
 appVersion: "v0.42.4"
 keywords:
   - thanos
@@ -52,4 +52,4 @@ annotations:
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
     - kind: added
-      description: Option to disable automountServiceAccountToken for all Thanos components if not desired
+      description: Per-component ServiceAccounts, each rendered from its own templates/<component>/serviceaccount.yaml with its own name, annotations (IRSA / Workload Identity) and token automount. Opt in per component with <component>.serviceAccount.create or for all components at once with global.serviceAccount.perComponent; the chart-wide ServiceAccount stays the default and is toggled by global.serviceAccount.create

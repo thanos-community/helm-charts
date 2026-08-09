@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.31.0](https://img.shields.io/badge/Version-0.31.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.32.0](https://img.shields.io/badge/Version-0.32.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -442,6 +442,54 @@ ruler:
     labelSelector: {}
 ```
 
+### ServiceAccounts
+
+By default every component runs as a single chart-wide ServiceAccount named `<release>-thanos-thanos`, created when `global.serviceAccount.create` is true:
+
+```yaml
+global:
+  serviceAccount:
+    create: true            # toggle the chart-wide ServiceAccount
+    name: ""                # empty derives <release>-thanos-thanos
+    annotations: {}         # applied to every ServiceAccount, shared and per-component
+    automountServiceAccountToken: true
+```
+
+Cloud identity (AWS IRSA, GKE Workload Identity, Azure Workload Identity) is granted per ServiceAccount, so a single shared account forces every component to share one set of object store permissions. Give a component its own ServiceAccount — rendered from `templates/<component>/serviceaccount.yaml` and named `<release>-thanos-<component>` — to scope those permissions:
+
+```yaml
+compactor:
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/thanos-compactor
+
+storegateway:
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/thanos-store
+```
+
+Component settings always take precedence over `global.serviceAccount`. To split every component out at once, and drop the then-unused shared account:
+
+```yaml
+global:
+  serviceAccount:
+    create: false           # nothing left to share
+    perComponent: true      # <release>-thanos-<component> for every component
+```
+
+`<component>.serviceAccount` is available on `bucket.bucketweb`, `compactor`, `query`, `queryFrontend`, `storegateway`, `ruler` and `receive` — in split mode on `receive.ingester` and `receive.router` instead of `receive`. All Store Gateway shards share the component ServiceAccount.
+
+To run a component as a ServiceAccount managed outside the chart, set its `name` without `create`:
+
+```yaml
+ruler:
+  serviceAccount:
+    name: my-externally-managed-sa
+```
+
 ### Monitoring (ServiceMonitor)
 
 Enable Prometheus scraping for each component by enabling its `serviceMonitor`:
@@ -570,6 +618,10 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.service.labels | object | {} | Extra labels for the Bucketweb Service. |
 | bucket.bucketweb.service.port | int | `10902` | HTTP port exposed by the Bucketweb Service. |
 | bucket.bucketweb.service.type | string | `"ClusterIP"` | Kubernetes Service type for Bucketweb. |
+| bucket.bucketweb.serviceAccount.annotations | object | {} | Extra annotations for the Bucketweb ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Bucketweb. Requires `create`. |
+| bucket.bucketweb.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Bucketweb pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| bucket.bucketweb.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Bucketweb instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| bucket.bucketweb.serviceAccount.name | string | `""` | Name of the ServiceAccount Bucketweb pods run as. Empty derives `<fullname>-bucketweb` when Bucketweb has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Bucketweb as a ServiceAccount managed outside this chart. |
 | bucket.bucketweb.serviceMonitor.annotations | object | {} | Extra annotations for the Bucketweb ServiceMonitor. |
 | bucket.bucketweb.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Bucketweb. |
 | bucket.bucketweb.serviceMonitor.interval | string | `""` | Scrape interval for Bucketweb. Empty uses the Prometheus operator default. |
@@ -654,6 +706,10 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.service.labels | object | {} | Extra labels for the Compactor Service. |
 | compactor.service.port | int | `10902` | HTTP port exposed by the Compactor Service. |
 | compactor.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Compactor HTTP endpoint. |
+| compactor.serviceAccount.annotations | object | {} | Extra annotations for the Compactor ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Compactor. Requires `create`. |
+| compactor.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Compactor pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| compactor.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Compactor instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| compactor.serviceAccount.name | string | `""` | Name of the ServiceAccount Compactor pods run as. Empty derives `<fullname>-compactor` when Compactor has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Compactor as a ServiceAccount managed outside this chart. |
 | compactor.serviceMonitor.annotations | object | {} | Extra annotations for the Compactor ServiceMonitor. |
 | compactor.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for the Compactor. |
 | compactor.serviceMonitor.interval | string | `""` | Scrape interval for the Compactor. Empty uses the Prometheus operator default. |
@@ -706,10 +762,11 @@ The table below documents all available values. Top-level keys group settings by
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
 | global.rbac.create | bool | `true` | Create RBAC resources (ClusterRole, ClusterRoleBinding) required by components that need cluster-level access (e.g. Ruler auto-import). |
 | global.resources | object | {} | Default resource requests and limits. Override per component as needed. |
-| global.serviceAccount.annotations | object | {} | Extra annotations merged into every ServiceAccount. |
+| global.serviceAccount.annotations | object | {} | Extra annotations merged into every ServiceAccount, including the per-component ones (e.g. a shared IRSA or Workload Identity annotation). |
 | global.serviceAccount.automountServiceAccountToken | bool | `true` | Mount the ServiceAccount token into pods by default. Set to false to disable automounting the token for all components. |
-| global.serviceAccount.create | bool | `true` | Create a dedicated ServiceAccount for each component. |
-| global.serviceAccount.name | string | `""` | Name override for all ServiceAccounts. Empty means auto-generate per-component names based on the release name. |
+| global.serviceAccount.create | bool | `true` | Create the chart-wide ServiceAccount. Components without a dedicated ServiceAccount run as it. Set to false to run them as an existing ServiceAccount (`global.serviceAccount.name`) or as the namespace `default` one. Turn it off together with `perComponent` to avoid an unused chart-wide ServiceAccount. |
+| global.serviceAccount.name | string | `""` | Name of the chart-wide ServiceAccount. Empty derives `<fullname>-thanos` from the release name. |
+| global.serviceAccount.perComponent | bool | `false` | Give every component its own ServiceAccount named `<fullname>-<component>` instead of the chart-wide one. Equivalent to setting `<component>.serviceAccount.create` on every component, and overridden by it per component. |
 | global.serviceMonitor.annotations | object | {} | Extra annotations merged into every ServiceMonitor resource. |
 | global.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for every component. Individual components can override this with their own serviceMonitor.enabled. |
 | global.serviceMonitor.interval | string | `""` | Scrape interval. Empty string uses the Prometheus operator default. |
@@ -857,6 +914,10 @@ The table below documents all available values. Top-level keys group settings by
 | query.service.httpPort | int | `9090` | HTTP/PromQL port exposed by the Query Service. |
 | query.service.labels | object | {} | Extra labels for the Query Service. |
 | query.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Query component. |
+| query.serviceAccount.annotations | object | {} | Extra annotations for the Query ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Query. Requires `create`. |
+| query.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Query pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| query.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Query instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| query.serviceAccount.name | string | `""` | Name of the ServiceAccount Query pods run as. Empty derives `<fullname>-query` when Query has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Query as a ServiceAccount managed outside this chart. |
 | query.serviceMonitor.annotations | object | {} | Extra annotations for the Query ServiceMonitor. |
 | query.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Query. |
 | query.serviceMonitor.interval | string | `""` | Scrape interval for Query. Empty uses the Prometheus operator default. |
@@ -937,6 +998,10 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.service.labels | object | {} | Extra labels for the Query Frontend Service. |
 | queryFrontend.service.port | int | `9090` | HTTP port exposed by the Query Frontend Service. |
 | queryFrontend.service.type | string | `"ClusterIP"` | Kubernetes Service type for Query Frontend. |
+| queryFrontend.serviceAccount.annotations | object | {} | Extra annotations for the Query Frontend ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Query Frontend. Requires `create`. |
+| queryFrontend.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Query Frontend pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| queryFrontend.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Query Frontend instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| queryFrontend.serviceAccount.name | string | `""` | Name of the ServiceAccount Query Frontend pods run as. Empty derives `<fullname>-query-frontend` when Query Frontend has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Query Frontend as a ServiceAccount managed outside this chart. |
 | queryFrontend.serviceMonitor.annotations | object | {} | Extra annotations for the Query Frontend ServiceMonitor. |
 | queryFrontend.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Query Frontend. |
 | queryFrontend.serviceMonitor.interval | string | `""` | Scrape interval for Query Frontend. Empty uses the Prometheus operator default. |
@@ -1111,6 +1176,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.service.labels | object | {} | Extra labels for the Router Service. |
 | receive.router.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Router Service. |
 | receive.router.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Router component. |
+| receive.router.serviceAccount.annotations | object | {} | Extra annotations for the Router ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Router. Requires `create`. |
+| receive.router.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Router pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| receive.router.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Router instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| receive.router.serviceAccount.name | string | `""` | Name of the ServiceAccount Router pods run as. Empty derives `<fullname>-receive-router` when Router has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Router as a ServiceAccount managed outside this chart. |
 | receive.router.serviceMonitor.annotations | object | {} | Extra annotations for the Router ServiceMonitor. |
 | receive.router.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Router. |
 | receive.router.serviceMonitor.interval | string | `""` | Scrape interval for Router. Empty uses the Prometheus operator default. |
@@ -1135,6 +1204,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.service.labels | object | {} | Extra labels for the Receive Service. |
 | receive.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Receive Service. |
 | receive.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Receive component. |
+| receive.serviceAccount.annotations | object | {} | Extra annotations for the Receive ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Receive. Requires `create`. |
+| receive.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Receive pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| receive.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Receive instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| receive.serviceAccount.name | string | `""` | Name of the ServiceAccount Receive pods run as. Empty derives `<fullname>-receive` when Receive has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Receive as a ServiceAccount managed outside this chart. |
 | receive.serviceMonitor.annotations | object | {} | Extra annotations for the Receive ServiceMonitor. |
 | receive.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for Receive. |
 | receive.serviceMonitor.interval | string | `""` | Scrape interval for Receive. Empty uses the Prometheus operator default. |
@@ -1236,6 +1309,10 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.service.httpPort | int | `10902` | HTTP port exposed by the Ruler Service. |
 | ruler.service.labels | object | {} | Extra labels for the Ruler Service. |
 | ruler.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Ruler component. |
+| ruler.serviceAccount.annotations | object | {} | Extra annotations for the Ruler ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Ruler. Requires `create`. |
+| ruler.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Ruler pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| ruler.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Ruler instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| ruler.serviceAccount.name | string | `""` | Name of the ServiceAccount Ruler pods run as. Empty derives `<fullname>-ruler` when Ruler has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Ruler as a ServiceAccount managed outside this chart. |
 | ruler.serviceMonitor.annotations | object | {} | Extra annotations for the Ruler ServiceMonitor. |
 | ruler.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for the Ruler. |
 | ruler.serviceMonitor.interval | string | `""` | Scrape interval for the Ruler. Empty uses the Prometheus operator default. |
@@ -1349,6 +1426,10 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.service.httpPort | int | `10902` | HTTP port exposed by the Store Gateway Service. |
 | storegateway.service.labels | object | {} | Extra labels for the Store Gateway Service. |
 | storegateway.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Store Gateway. |
+| storegateway.serviceAccount.annotations | object | {} | Extra annotations for the Store Gateway ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Store Gateway. Requires `create`. |
+| storegateway.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Store Gateway pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
+| storegateway.serviceAccount.create | string | `null` (inherit `global.serviceAccount.perComponent`) | Create a ServiceAccount for Store Gateway instead of sharing the chart-wide one. Null inherits `global.serviceAccount.perComponent`. |
+| storegateway.serviceAccount.name | string | `""` | Name of the ServiceAccount Store Gateway pods run as. Empty derives `<fullname>-storegateway` when Store Gateway has a dedicated ServiceAccount, and the chart-wide ServiceAccount name otherwise. Setting it without `create` runs Store Gateway as a ServiceAccount managed outside this chart. |
 | storegateway.serviceMonitor.annotations | object | {} | Extra annotations for the Store Gateway ServiceMonitor. |
 | storegateway.serviceMonitor.enabled | bool | `false` | Enable a Prometheus Operator ServiceMonitor for the Store Gateway. |
 | storegateway.serviceMonitor.interval | string | `""` | Scrape interval for the Store Gateway. Empty uses the Prometheus operator default. |

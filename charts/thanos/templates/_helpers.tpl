@@ -813,18 +813,128 @@ shards (hashmod on __block_id). Either dimension may be used on its own.
 {{- end }}
 {{- end -}}
 
-{{/*
-Resolve the ServiceAccount name.
-- When global.serviceAccount.create is true, defaults to "<fullname>-thanos"
-  unless global.serviceAccount.name overrides it.
-- When create is false, uses global.serviceAccount.name if provided, otherwise
-  falls back to the namespace "default" ServiceAccount.
-*/}}
-{{- define "thanos.serviceAccountName" -}}
-{{- if .Values.global.serviceAccount.create -}}
-{{- default (printf "%s-%s" (include "thanos.fullname" .) "thanos") .Values.global.serviceAccount.name -}}
+{{- /* ============================== */ -}}
+{{- /* ServiceAccount helpers         */ -}}
+{{- /* ============================== */ -}}
+
+{{- /*
+Name of the chart-wide ServiceAccount, shared by every component that does not
+declare one of its own: `global.serviceAccount.name` when set,
+`<fullname>-thanos` otherwise.
+*/ -}}
+{{- define "thanos.sharedServiceAccountName" -}}
+{{- $g := .Values.global.serviceAccount | default dict -}}
+{{- if $g.name -}}
+{{- $g.name -}}
 {{- else -}}
-{{- default "default" .Values.global.serviceAccount.name -}}
+{{- printf "%s-%s" (include "thanos.fullname" .) "thanos" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+Resolve the ServiceAccount of a single component. Returns a YAML dict; consume
+it with `fromYaml`:
+
+  {{- $sa := include "thanos.serviceAccount" (dict "root" . "component" "compactor") | fromYaml }}
+
+Keys:
+  name        ServiceAccount name for the pod spec (never empty)
+  dedicated   true when the chart renders a ServiceAccount for this component
+              alone (`templates/<component>/serviceaccount.yaml`), false when
+              the component falls back to the chart-wide ServiceAccount
+  annotations annotations of the dedicated ServiceAccount
+              (`global.serviceAccount.annotations` + component annotations)
+  automountServiceAccountToken  token automount of the dedicated ServiceAccount
+
+A component is dedicated when `<component>.serviceAccount.create` is set, and
+inherits `global.serviceAccount.perComponent` when it is null.
+
+Name resolution — component settings always take precedence over global ones:
+  1. `<component>.serviceAccount.name`
+  2. `<fullname>-<component>`                       when the component is dedicated
+  3. `global.serviceAccount.name`
+  4. `<fullname>-thanos`                            when `global.serviceAccount.create` is true
+  5. `default`                                      (the namespace default ServiceAccount)
+
+A `<component>.serviceAccount.name` without `create` therefore points the
+component at a ServiceAccount managed outside this chart.
+*/ -}}
+{{- define "thanos.serviceAccount" -}}
+{{- $root := .root -}}
+{{- $comp := .component -}}
+{{- $v := $root.Values -}}
+{{- $g := $v.global.serviceAccount | default dict -}}
+{{- $bucket := $v.bucket | default dict -}}
+{{- $receive := $v.receive | default dict -}}
+{{- $owners := dict
+      "bucketweb" ($bucket.bucketweb | default dict)
+      "compactor" ($v.compactor | default dict)
+      "query" ($v.query | default dict)
+      "query-frontend" ($v.queryFrontend | default dict)
+      "storegateway" ($v.storegateway | default dict)
+      "receive" $receive
+      "receive-ingester" ($receive.ingester | default dict)
+      "receive-router" ($receive.router | default dict)
+      "ruler" ($v.ruler | default dict) -}}
+{{- if not (hasKey $owners $comp) -}}
+{{- fail (printf "thanos.serviceAccount: unknown component %q" $comp) -}}
+{{- end -}}
+{{- $cfg := (index $owners $comp).serviceAccount | default dict -}}
+{{- $dedicated := $g.perComponent | default false -}}
+{{- if not (kindIs "invalid" $cfg.create) -}}
+{{- $dedicated = $cfg.create -}}
+{{- end -}}
+{{- $name := "" -}}
+{{- if $cfg.name -}}
+{{- $name = $cfg.name -}}
+{{- else if $dedicated -}}
+{{- $name = include "thanos.compName" (list $root $comp) -}}
+{{- else if or $g.name $g.create -}}
+{{- $name = include "thanos.sharedServiceAccountName" $root -}}
+{{- else -}}
+{{- $name = "default" -}}
+{{- end -}}
+{{- $automount := $g.automountServiceAccountToken -}}
+{{- if not (kindIs "invalid" $cfg.automountServiceAccountToken) -}}
+{{- $automount = $cfg.automountServiceAccountToken -}}
+{{- end -}}
+{{- if kindIs "invalid" $automount -}}
+{{- $automount = true -}}
+{{- end -}}
+{{- $annotations := merge (deepCopy ($cfg.annotations | default dict)) ($g.annotations | default dict) -}}
+{{- dict "name" $name "dedicated" $dedicated "annotations" $annotations "automountServiceAccountToken" $automount | toYaml -}}
+{{- end -}}
+
+{{- /*
+ServiceAccount name a component's pods run as.
+Usage: {{ include "thanos.serviceAccountName" (dict "root" . "component" "compactor") }}
+*/ -}}
+{{- define "thanos.serviceAccountName" -}}
+{{- (include "thanos.serviceAccount" . | fromYaml).name -}}
+{{- end -}}
+
+{{- /*
+Render the dedicated ServiceAccount of a component, or nothing when the
+component shares the chart-wide ServiceAccount. Backs the per-component
+`templates/<component>/serviceaccount.yaml` files.
+Usage: {{ include "thanos.componentServiceAccount" (dict "root" . "component" "compactor") }}
+*/ -}}
+{{- define "thanos.componentServiceAccount" -}}
+{{- $root := .root -}}
+{{- $comp := .component -}}
+{{- $sa := include "thanos.serviceAccount" . | fromYaml -}}
+{{- if $sa.dedicated -}}
+apiVersion: v1
+kind: ServiceAccount
+automountServiceAccountToken: {{ $sa.automountServiceAccountToken }}
+metadata:
+  name: {{ $sa.name }}
+  namespace: {{ include "thanos.namespace" $root }}
+  labels:
+    {{- include "thanos.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $comp }}
+  annotations:
+    {{- toYaml $sa.annotations | nindent 4 }}
 {{- end -}}
 {{- end -}}
 

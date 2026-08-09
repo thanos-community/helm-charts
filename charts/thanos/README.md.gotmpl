@@ -430,6 +430,54 @@ ruler:
     labelSelector: {}
 ```
 
+### ServiceAccounts
+
+By default every component runs as a single chart-wide ServiceAccount named `<release>-thanos-thanos`, created when `global.serviceAccount.create` is true:
+
+```yaml
+global:
+  serviceAccount:
+    create: true            # toggle the chart-wide ServiceAccount
+    name: ""                # empty derives <release>-thanos-thanos
+    annotations: {}         # applied to every ServiceAccount, shared and per-component
+    automountServiceAccountToken: true
+```
+
+Cloud identity (AWS IRSA, GKE Workload Identity, Azure Workload Identity) is granted per ServiceAccount, so a single shared account forces every component to share one set of object store permissions. Give a component its own ServiceAccount — rendered from `templates/<component>/serviceaccount.yaml` and named `<release>-thanos-<component>` — to scope those permissions:
+
+```yaml
+compactor:
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/thanos-compactor
+
+storegateway:
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/thanos-store
+```
+
+Component settings always take precedence over `global.serviceAccount`. To split every component out at once, and drop the then-unused shared account:
+
+```yaml
+global:
+  serviceAccount:
+    create: false           # nothing left to share
+    perComponent: true      # <release>-thanos-<component> for every component
+```
+
+`<component>.serviceAccount` is available on `bucket.bucketweb`, `compactor`, `query`, `queryFrontend`, `storegateway`, `ruler` and `receive` — in split mode on `receive.ingester` and `receive.router` instead of `receive`. All Store Gateway shards share the component ServiceAccount.
+
+To run a component as a ServiceAccount managed outside the chart, set its `name` without `create`:
+
+```yaml
+ruler:
+  serviceAccount:
+    name: my-externally-managed-sa
+```
+
 ### Monitoring (ServiceMonitor)
 
 Enable Prometheus scraping for each component by enabling its `serviceMonitor`:
