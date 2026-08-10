@@ -172,18 +172,30 @@ global:
     # components that need cluster-level access (e.g. Ruler auto-import).
     create: true
 
-  # ServiceAccount configuration applied to every component by default.
+  # Chart-wide ServiceAccount, shared by every component that does not declare
+  # its own `<component>.serviceAccount`. Component settings always win over
+  # the values below.
   serviceAccount:
-    # -- Create a dedicated ServiceAccount for each component.
+    # -- Create the chart-wide ServiceAccount. Components without a dedicated
+    # ServiceAccount run as it. Set to false to run them as an existing
+    # ServiceAccount (`global.serviceAccount.name`) or as the namespace
+    # `default` one. Turn it off together with `perComponent` to avoid an
+    # unused chart-wide ServiceAccount.
     create: true
-    # -- Extra annotations merged into every ServiceAccount.
+    # -- Give every component its own ServiceAccount named
+    # `<fullname>-<component>` instead of the chart-wide one. Equivalent to
+    # setting `<component>.serviceAccount.create` on every component, and
+    # overridden by it per component.
+    perComponent: false
+    # -- Extra annotations merged into every ServiceAccount, including the
+    # per-component ones (e.g. a shared IRSA or Workload Identity annotation).
     # @default -- {}
     annotations: {}
     # -- Mount the ServiceAccount token into pods by default. Set to false to
     # disable automounting the token for all components.
     automountServiceAccountToken: true
-    # -- Name override for all ServiceAccounts. Empty means auto-generate
-    # per-component names based on the release name.
+    # -- Name of the chart-wide ServiceAccount. Empty derives
+    # `<fullname>-thanos` from the release name.
     name: ""
 
   # Built-in Thanos alerting rules deployed as PrometheusRule CRDs.
@@ -649,6 +661,26 @@ bucket:
     # -- Extra labels applied to Bucketweb pods (e.g. for workload identity).
     # @default -- {}
     podLabels: {}
+    # ServiceAccount used by Bucketweb pods. Unset fields inherit `global.serviceAccount`.
+    serviceAccount:
+      # -- Create a ServiceAccount for Bucketweb instead of sharing the chart-wide one.
+      # Null inherits `global.serviceAccount.perComponent`.
+      # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+      create: null
+      # -- Name of the ServiceAccount Bucketweb pods run as. Empty derives
+      # `<fullname>-bucketweb` when Bucketweb has a dedicated ServiceAccount, and the
+      # chart-wide ServiceAccount name otherwise. Setting it without `create`
+      # runs Bucketweb as a ServiceAccount managed outside this chart.
+      name: ""
+      # -- Extra annotations for the Bucketweb ServiceAccount, merged on top of
+      # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+      # Identity binding to Bucketweb. Requires `create`.
+      # @default -- {}
+      annotations: {}
+      # -- Mount the ServiceAccount token into Bucketweb pods. Null inherits
+      # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+      # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+      automountServiceAccountToken: null
 
     # -- Extra volumes for Bucketweb pods.
     # @default -- []
@@ -965,6 +997,26 @@ compactor:
   # -- Extra labels applied to Compactor pods (e.g. for workload identity).
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Compactor pods. Unset fields inherit `global.serviceAccount`.
+  serviceAccount:
+    # -- Create a ServiceAccount for Compactor instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Compactor pods run as. Empty derives
+    # `<fullname>-compactor` when Compactor has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Compactor as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Compactor ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Compactor. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Compactor pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # -- Extra volumes for Compactor pods.
   # @default -- []
@@ -1327,6 +1379,26 @@ query:
   # -- Extra labels applied to Query pods (e.g. for workload identity).
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Query pods. Unset fields inherit `global.serviceAccount`.
+  serviceAccount:
+    # -- Create a ServiceAccount for Query instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Query pods run as. Empty derives
+    # `<fullname>-query` when Query has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Query as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Query ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Query. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Query pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # Prometheus Operator ServiceMonitor configuration for the Query component.
   serviceMonitor:
@@ -1608,6 +1680,26 @@ queryFrontend:
   # -- Extra labels applied to Query Frontend pods (e.g. for workload identity).
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Query Frontend pods. Unset fields inherit `global.serviceAccount`.
+  serviceAccount:
+    # -- Create a ServiceAccount for Query Frontend instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Query Frontend pods run as. Empty derives
+    # `<fullname>-query-frontend` when Query Frontend has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Query Frontend as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Query Frontend ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Query Frontend. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Query Frontend pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # Prometheus Operator ServiceMonitor configuration for the Query Frontend.
   serviceMonitor:
@@ -1997,6 +2089,26 @@ storegateway:
   # -- Extra labels applied to Store Gateway pods (e.g. for workload identity).
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Store Gateway pods. Unset fields inherit `global.serviceAccount`.
+  serviceAccount:
+    # -- Create a ServiceAccount for Store Gateway instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Store Gateway pods run as. Empty derives
+    # `<fullname>-storegateway` when Store Gateway has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Store Gateway as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Store Gateway ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Store Gateway. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Store Gateway pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # Prometheus Operator ServiceMonitor configuration for the Store Gateway.
   serviceMonitor:
@@ -2432,6 +2544,28 @@ receive:
   # and `receive.router.podLabels` to target each workload independently.
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Receive pods. Unset fields inherit `global.serviceAccount`.
+  # Ignored in split mode: configure `receive.ingester.serviceAccount` and
+  # `receive.router.serviceAccount` instead.
+  serviceAccount:
+    # -- Create a ServiceAccount for Receive instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Receive pods run as. Empty derives
+    # `<fullname>-receive` when Receive has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Receive as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Receive ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Receive. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Receive pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # Prometheus Operator ServiceMonitor configuration for the Receive component.
   serviceMonitor:
@@ -2481,7 +2615,7 @@ receive:
   # containerSecurityContext, dnsConfig, extraEnv, extraEnvFrom,
   # extraInitContainers, extraContainers, probes, nodeSelector, tolerations,
   # affinity, topologySpreadConstraints, priorityClassName, extraVolumes,
-  # extraVolumeMounts, annotations, labels, serviceMonitor, pdb,
+  # extraVolumeMounts, annotations, labels, serviceMonitor, pdb, serviceAccount,
   # tenancyHeader). Leave empty (`{}`) in standalone mode.
   # ======================================================================
   # -- Ingester StatefulSet config. Required when `receive.mode` is `split`;
@@ -2775,6 +2909,26 @@ receive:
     # -- Extra labels applied to Router pods (e.g. for workload identity).
     # @default -- {}
     podLabels: {}
+    # ServiceAccount used by Router pods. Unset fields inherit `global.serviceAccount`.
+    serviceAccount:
+      # -- Create a ServiceAccount for Router instead of sharing the chart-wide one.
+      # Null inherits `global.serviceAccount.perComponent`.
+      # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+      create: null
+      # -- Name of the ServiceAccount Router pods run as. Empty derives
+      # `<fullname>-receive-router` when Router has a dedicated ServiceAccount, and the
+      # chart-wide ServiceAccount name otherwise. Setting it without `create`
+      # runs Router as a ServiceAccount managed outside this chart.
+      name: ""
+      # -- Extra annotations for the Router ServiceAccount, merged on top of
+      # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+      # Identity binding to Router. Requires `create`.
+      # @default -- {}
+      annotations: {}
+      # -- Mount the ServiceAccount token into Router pods. Null inherits
+      # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+      # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+      automountServiceAccountToken: null
 
     # Prometheus Operator ServiceMonitor configuration for the Router.
     serviceMonitor:
@@ -3122,6 +3276,26 @@ ruler:
   # -- Extra labels applied to Ruler pods (e.g. for workload identity).
   # @default -- {}
   podLabels: {}
+  # ServiceAccount used by Ruler pods. Unset fields inherit `global.serviceAccount`.
+  serviceAccount:
+    # -- Create a ServiceAccount for Ruler instead of sharing the chart-wide one.
+    # Null inherits `global.serviceAccount.perComponent`.
+    # @default -- `null` (inherit `global.serviceAccount.perComponent`)
+    create: null
+    # -- Name of the ServiceAccount Ruler pods run as. Empty derives
+    # `<fullname>-ruler` when Ruler has a dedicated ServiceAccount, and the
+    # chart-wide ServiceAccount name otherwise. Setting it without `create`
+    # runs Ruler as a ServiceAccount managed outside this chart.
+    name: ""
+    # -- Extra annotations for the Ruler ServiceAccount, merged on top of
+    # `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload
+    # Identity binding to Ruler. Requires `create`.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into Ruler pods. Null inherits
+    # `global.serviceAccount.automountServiceAccountToken`. Requires `create`.
+    # @default -- `null` (inherit `global.serviceAccount.automountServiceAccountToken`)
+    automountServiceAccountToken: null
 
   # Prometheus Operator ServiceMonitor configuration for the Ruler component.
   serviceMonitor:

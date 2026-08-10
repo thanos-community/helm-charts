@@ -779,6 +779,52 @@
               "required": [],
               "title": "dnsConfig",
               "type": "object"
+            },
+            "serviceAccount": {
+              "additionalProperties": true,
+              "description": "ServiceAccount used by Bucketweb pods. Unset fields inherit `global.serviceAccount`.",
+              "properties": {
+                "annotations": {
+                  "additionalProperties": true,
+                  "description": "Extra annotations for the Bucketweb ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Bucketweb. Requires `create`.",
+                  "required": [],
+                  "title": "annotations",
+                  "type": "object"
+                },
+                "automountServiceAccountToken": {
+                  "default": "null",
+                  "description": "Mount the ServiceAccount token into Bucketweb pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+                  "required": [],
+                  "title": "automountServiceAccountToken",
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "create": {
+                  "default": "null",
+                  "description": "Create a ServiceAccount for Bucketweb instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+                  "required": [],
+                  "title": "create",
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "name": {
+                  "default": "",
+                  "description": "Name of the ServiceAccount Bucketweb pods run as. Empty derives\n`<fullname>-bucketweb` when Bucketweb has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Bucketweb as a ServiceAccount managed outside this chart.",
+                  "required": [],
+                  "title": "name",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "annotations"
+              ],
+              "title": "serviceAccount",
+              "type": "object"
             }
           },
           "required": [
@@ -810,7 +856,8 @@
             "extraVolumes",
             "extraVolumeMounts",
             "serviceMonitor",
-            "pdb"
+            "pdb",
+            "serviceAccount"
           ],
           "title": "bucketweb",
           "type": "object"
@@ -1744,6 +1791,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Compactor pods. Unset fields inherit `global.serviceAccount`.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Compactor ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Compactor. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Compactor pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Compactor instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Compactor pods run as. Empty derives\n`<fullname>-compactor` when Compactor has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Compactor as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -1777,7 +1870,8 @@
         "extraVolumes",
         "extraVolumeMounts",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "serviceAccount"
       ],
       "title": "compactor",
       "type": "object"
@@ -2125,11 +2219,11 @@
         },
         "serviceAccount": {
           "additionalProperties": true,
-          "description": "ServiceAccount configuration applied to every component by default.",
+          "description": "Chart-wide ServiceAccount, shared by every component that does not declare\nits own `<component>.serviceAccount`. Component settings always win over\nthe values below.",
           "properties": {
             "annotations": {
               "additionalProperties": true,
-              "description": "Extra annotations merged into every ServiceAccount.",
+              "description": "Extra annotations merged into every ServiceAccount, including the\nper-component ones (e.g. a shared IRSA or Workload Identity annotation).",
               "required": [],
               "title": "annotations",
               "type": "object"
@@ -2143,23 +2237,32 @@
             },
             "create": {
               "default": true,
-              "description": "Create a dedicated ServiceAccount for each component.",
+              "description": "Create the chart-wide ServiceAccount. Components without a dedicated\nServiceAccount run as it. Set to false to run them as an existing\nServiceAccount (`global.serviceAccount.name`) or as the namespace\n`default` one. Turn it off together with `perComponent` to avoid an\nunused chart-wide ServiceAccount.",
               "required": [],
               "title": "create",
               "type": "boolean"
             },
             "name": {
               "default": "",
-              "description": "Name override for all ServiceAccounts. Empty means auto-generate\nper-component names based on the release name.",
+              "description": "Name of the chart-wide ServiceAccount. Empty derives\n`<fullname>-thanos` from the release name.",
               "required": [],
               "title": "name",
               "type": "string"
+            },
+            "perComponent": {
+              "default": false,
+              "description": "Give every component its own ServiceAccount named\n`<fullname>-<component>` instead of the chart-wide one. Equivalent to\nsetting `<component>.serviceAccount.create` on every component, and\noverridden by it per component.",
+              "required": [],
+              "title": "perComponent",
+              "type": "boolean"
             }
           },
           "required": [
             "create",
             "annotations",
-            "name"
+            "name",
+            "perComponent",
+            "automountServiceAccountToken"
           ],
           "title": "serviceAccount",
           "type": "object"
@@ -3537,6 +3640,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Query pods. Unset fields inherit `global.serviceAccount`.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Query ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Query. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Query pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Query instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Query pods run as. Empty derives\n`<fullname>-query` when Query has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Query as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -3571,7 +3720,8 @@
         "labels",
         "podLabels",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "serviceAccount"
       ],
       "title": "query",
       "type": "object"
@@ -4347,6 +4497,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Query Frontend pods. Unset fields inherit `global.serviceAccount`.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Query Frontend ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Query Frontend. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Query Frontend pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Query Frontend instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Query Frontend pods run as. Empty derives\n`<fullname>-query-frontend` when Query Frontend has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Query Frontend as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -4379,7 +4575,8 @@
         "labels",
         "podLabels",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "serviceAccount"
       ],
       "title": "queryFrontend",
       "type": "object"
@@ -4535,7 +4732,7 @@
               "properties": {
                 "enabled": {
                   "default": true,
-                  "description": "Auto-generate a single default hashring whose endpoints are derived\nfrom the StatefulSet pod DNS names:\n`\u003cpod-0\u003e.\u003cheadless-svc\u003e:10901 ... \u003cpod-N\u003e.\u003cheadless-svc\u003e:10901`.",
+                  "description": "Auto-generate a single default hashring whose endpoints are derived\nfrom the StatefulSet pod DNS names:\n`<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`.",
                   "required": [],
                   "title": "enabled",
                   "type": "boolean"
@@ -5741,6 +5938,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Receive pods. Unset fields inherit `global.serviceAccount`. Ignored in split mode: configure `receive.ingester.serviceAccount` and\n`receive.router.serviceAccount` instead.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Receive ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Receive. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Receive pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Receive instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Receive pods run as. Empty derives\n`<fullname>-receive` when Receive has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Receive as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -5779,7 +6022,8 @@
         "podLabels",
         "serviceMonitor",
         "pdb",
-        "router"
+        "router",
+        "serviceAccount"
       ],
       "allOf": [
         {
@@ -6761,6 +7005,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Ruler pods. Unset fields inherit `global.serviceAccount`.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Ruler ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Ruler. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Ruler pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Ruler instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Ruler pods run as. Empty derives\n`<fullname>-ruler` when Ruler has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Ruler as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -6797,7 +7087,8 @@
         "labels",
         "podLabels",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "serviceAccount"
       ],
       "title": "ruler",
       "type": "object"
@@ -8062,6 +8353,52 @@
           "required": [],
           "title": "dnsConfig",
           "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount used by Store Gateway pods. Unset fields inherit `global.serviceAccount`.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Store Gateway ServiceAccount, merged on top of\n`global.serviceAccount.annotations`. Use it to scope an IRSA or Workload\nIdentity binding to Store Gateway. Requires `create`.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": "null",
+              "description": "Mount the ServiceAccount token into Store Gateway pods. Null inherits\n`global.serviceAccount.automountServiceAccountToken`. Requires `create`.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "create": {
+              "default": "null",
+              "description": "Create a ServiceAccount for Store Gateway instead of sharing the chart-wide one.\nNull inherits `global.serviceAccount.perComponent`.",
+              "required": [],
+              "title": "create",
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount Store Gateway pods run as. Empty derives\n`<fullname>-storegateway` when Store Gateway has a dedicated ServiceAccount, and the\nchart-wide ServiceAccount name otherwise. Setting it without `create`\nruns Store Gateway as a ServiceAccount managed outside this chart.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
         }
       },
       "required": [
@@ -8097,7 +8434,8 @@
         "labels",
         "podLabels",
         "serviceMonitor",
-        "pdb"
+        "pdb",
+        "serviceAccount"
       ],
       "title": "storegateway",
       "type": "object"

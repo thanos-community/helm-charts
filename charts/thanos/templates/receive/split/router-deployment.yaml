@@ -42,7 +42,7 @@ spec:
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
         {{- toYaml $anns | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "thanos.serviceAccountName" . }}
+      serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "receive-router") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "router" "parent" "receive") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "router" "parent" "receive") | nindent 6 }}

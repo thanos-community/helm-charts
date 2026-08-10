@@ -4,3 +4,4 @@ charts/*/requirements.lock
 .vscode/settings.json
 charts/**/*/local/**/*
 .claude/scheduled_tasks.lock
+.claude/settings.json
