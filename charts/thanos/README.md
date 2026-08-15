@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.32.0](https://img.shields.io/badge/Version-0.32.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.33.1](https://img.shields.io/badge/Version-0.33.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -46,7 +46,7 @@ Kubernetes: `>= 1.30.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.rustfs.com/ | rustfs | 0.12.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.0.1 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.2.0 |
 
 ## Component Overview
 

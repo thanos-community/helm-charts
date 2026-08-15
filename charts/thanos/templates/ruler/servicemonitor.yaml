@@ -15,7 +15,7 @@ spec:
       - {{ include "thanos.namespace" . }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: thanos
+      app.kubernetes.io/name: {{ include "thanos.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/component: ruler
   endpoints:

@@ -537,6 +537,39 @@ tests:
           path: metadata.labels["app.kubernetes.io/name"]
           value: mythanos
 
+  - it: uses nameOverride in the ServiceMonitor selector so it still matches the Service
+    template: query/servicemonitor.yaml
+    set:
+      nameOverride: mythanos
+      query.enabled: true
+      query.serviceMonitor.enabled: true
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: mythanos
+
+  - it: uses nameOverride in the receive router ServiceMonitor selector
+    template: receive/split/router-servicemonitor.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      nameOverride: mythanos
+      receive.router.serviceMonitor.enabled: true
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: mythanos
+
+  - it: uses nameOverride for the PrometheusRule name label
+    template: prometheusrule/rule.yaml
+    set:
+      nameOverride: mythanos
+      global.thanosRules.enabled: true
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: mythanos
+
   - it: lets fullnameOverride win over nameOverride for resource names
     template: query/service.yaml
     set:

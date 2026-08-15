@@ -17,7 +17,7 @@ metadata:
   name: {{ include "thanos.fullname" . }}-rules
   namespace: {{ include "thanos.namespace" . }}
   labels:
-    app.kubernetes.io/name: thanos
+    app.kubernetes.io/name: {{ include "thanos.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/part-of: thanos
     {{- with $tr.labels }}
