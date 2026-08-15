@@ -21,6 +21,9 @@ spec:
     - name: http
       port: {{ .Values.bucket.bucketweb.service.port }}
       targetPort: http
+      {{- with .Values.bucket.bucketweb.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: bucketweb
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -21,6 +21,9 @@ spec:
     - name: http
       port: {{ .Values.compactor.service.port }}
       targetPort: http
+      {{- with .Values.compactor.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: compactor
     app.kubernetes.io/instance: {{ .Release.Name }}

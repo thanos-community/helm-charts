@@ -21,9 +21,15 @@ spec:
     - name: http
       port: {{ .Values.query.service.httpPort }}
       targetPort: http
+      {{- with .Values.query.service.httpNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
     - name: grpc
       port: {{ .Values.query.service.grpcPort }}
       targetPort: grpc
+      {{- with .Values.query.service.grpcNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: query
     app.kubernetes.io/instance: {{ .Release.Name }}

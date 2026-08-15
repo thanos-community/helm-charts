@@ -1,0 +1,241 @@
+suite: service node ports
+
+tests:
+  # -- Bucketweb ------------------------------------------------------
+
+  - it: sets nodePort on the bucketweb service
+    template: bucket/service.yaml
+    set:
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.service.type: NodePort
+      bucket.bucketweb.service.nodePort: 30902
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30902
+
+  - it: omits nodePort on the bucketweb service by default
+    template: bucket/service.yaml
+    set:
+      bucket.bucketweb.enabled: true
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
+
+  # -- Compactor ------------------------------------------------------
+
+  - it: sets nodePort on the compactor service
+    template: compactor/service.yaml
+    set:
+      compactor.enabled: true
+      compactor.service.type: NodePort
+      compactor.service.nodePort: 30903
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30903
+
+  # -- Query ----------------------------------------------------------
+
+  - it: sets http and grpc node ports on the query service
+    template: query/service.yaml
+    set:
+      query.enabled: true
+      query.service.type: NodePort
+      query.service.httpNodePort: 30090
+      query.service.grpcNodePort: 30901
+    asserts:
+      - equal:
+          path: spec.ports[0].name
+          value: http
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30090
+      - equal:
+          path: spec.ports[1].name
+          value: grpc
+      - equal:
+          path: spec.ports[1].nodePort
+          value: 30901
+
+  - it: sets only the http node port when the grpc one is unset
+    template: query/service.yaml
+    set:
+      query.enabled: true
+      query.service.type: NodePort
+      query.service.httpNodePort: 30090
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30090
+      - notExists:
+          path: spec.ports[1].nodePort
+
+  - it: omits node ports on the query service by default
+    template: query/service.yaml
+    set:
+      query.enabled: true
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
+      - notExists:
+          path: spec.ports[1].nodePort
+
+  # -- Query Frontend -------------------------------------------------
+
+  - it: sets nodePort on the query-frontend service
+    template: query-frontend/service.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.service.type: NodePort
+      queryFrontend.service.nodePort: 30909
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30909
+
+  - it: omits nodePort on the query-frontend service by default
+    template: query-frontend/service.yaml
+    set:
+      queryFrontend.enabled: true
+    asserts:
+      - notExists:
+          path: spec.ports[0].nodePort
+
+  # -- Receive --------------------------------------------------------
+
+  - it: sets http and remote-write node ports on the receive service
+    template: receive/service.yaml
+    documentIndex: 0
+    set:
+      receive.enabled: true
+      receive.service.type: NodePort
+      receive.service.httpNodePort: 30902
+      receive.service.remoteWriteNodePort: 30908
+    asserts:
+      - equal:
+          path: spec.ports[0].name
+          value: http
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30902
+      - equal:
+          path: spec.ports[1].name
+          value: remote-write
+      - equal:
+          path: spec.ports[1].nodePort
+          value: 30908
+
+  - it: never sets a node port on the receive headless service
+    template: receive/service.yaml
+    documentIndex: 1
+    set:
+      receive.enabled: true
+      receive.service.type: NodePort
+      receive.service.httpNodePort: 30902
+      receive.service.remoteWriteNodePort: 30908
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.ports[0].nodePort
+
+  # -- Receive Router (split mode) -------------------------------------
+
+  - it: sets node ports on the receive router service
+    template: receive/split/router-service.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.service.type: NodePort
+      receive.router.service.httpNodePort: 31902
+      receive.router.service.remoteWriteNodePort: 31908
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 31902
+      - equal:
+          path: spec.ports[1].nodePort
+          value: 31908
+
+  # -- Ruler ----------------------------------------------------------
+
+  - it: sets the http node port on the ruler service
+    template: ruler/service.yaml
+    documentIndex: 0
+    set:
+      ruler.enabled: true
+      ruler.service.type: NodePort
+      ruler.service.httpNodePort: 30904
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30904
+
+  - it: never sets a node port on the ruler headless service
+    template: ruler/service.yaml
+    documentIndex: 1
+    set:
+      ruler.enabled: true
+      ruler.service.type: NodePort
+      ruler.service.httpNodePort: 30904
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.ports[0].nodePort
+
+  # -- Store Gateway ---------------------------------------------------
+
+  - it: sets http and grpc node ports on the storegateway service
+    template: storegateway/service.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: false
+      storegateway.service.type: NodePort
+      storegateway.service.httpNodePort: 30905
+      storegateway.service.grpcNodePort: 30906
+    asserts:
+      - equal:
+          path: spec.ports[0].nodePort
+          value: 30905
+      - equal:
+          path: spec.ports[1].nodePort
+          value: 30906
+
+  - it: ignores node ports on the storegateway service when sharded
+    template: storegateway/service.yaml
+    documentIndex: 0
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.service.type: NodePort
+      storegateway.service.httpNodePort: 30905
+      storegateway.service.grpcNodePort: 30906
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.ports[0].nodePort
+      - notExists:
+          path: spec.ports[1].nodePort
+
+  - it: never sets node ports on the per-shard storegateway services
+    template: storegateway/service.yaml
+    documentIndex: 1
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.service.type: NodePort
+      storegateway.service.httpNodePort: 30905
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway-0
+      - notExists:
+          path: spec.ports[0].nodePort

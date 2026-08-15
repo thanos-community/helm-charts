@@ -673,6 +673,15 @@
                   "required": [],
                   "title": "type",
                   "type": "string"
+                },
+                "nodePort": {
+                  "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+                  "required": [],
+                  "title": "nodePort",
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
                 }
               },
               "required": [
@@ -1612,6 +1621,15 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "nodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "nodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -3554,6 +3572,24 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "grpcNodePort": {
+              "description": "Static node port for the gRPC port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "grpcNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "httpNodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "httpNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -4436,6 +4472,15 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "nodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "nodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -5769,6 +5814,24 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "httpNodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "httpNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "remoteWriteNodePort": {
+              "description": "Static node port for the remote-write port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "remoteWriteNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -6973,6 +7036,15 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "httpNodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "httpNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
@@ -8279,6 +8351,24 @@
               "required": [],
               "title": "type",
               "type": "string"
+            },
+            "grpcNodePort": {
+              "description": "Static node port for the gRPC port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "grpcNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "httpNodePort": {
+              "description": "Static node port for the HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
+              "required": [],
+              "title": "httpNodePort",
+              "type": [
+                "integer",
+                "null"
+              ]
             }
           },
           "required": [
