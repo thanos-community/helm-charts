@@ -197,6 +197,21 @@
                   "required": [],
                   "title": "parentRefs",
                   "type": "array"
+                },
+                "timeouts": {
+                  "additionalProperties": true,
+                  "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+                  "properties": {
+                    "backendRequest": {
+                      "type": "string"
+                    },
+                    "request": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [],
+                  "title": "timeouts",
+                  "type": "object"
                 }
               },
               "required": [
@@ -1055,6 +1070,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [
@@ -2823,6 +2853,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [
@@ -3922,6 +3967,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [
@@ -4804,6 +4864,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [
@@ -6304,6 +6379,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [
@@ -7422,6 +7512,21 @@
               "required": [],
               "title": "parentRefs",
               "type": "array"
+            },
+            "timeouts": {
+              "additionalProperties": true,
+              "description": "Timeouts for the HTTPRoute rule (Gateway API HTTPRouteTimeouts).\nExample:\ntimeouts:\n  request: 60s\n  backendRequest: 55s",
+              "properties": {
+                "backendRequest": {
+                  "type": "string"
+                },
+                "request": {
+                  "type": "string"
+                }
+              },
+              "required": [],
+              "title": "timeouts",
+              "type": "object"
             }
           },
           "required": [

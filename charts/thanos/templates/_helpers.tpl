@@ -988,6 +988,10 @@ spec:
       filters:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with $cfg.timeouts }}
+      timeouts:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   {{- with $cfg.extraRules }}
     {{- toYaml . | nindent 4 }}
   {{- end }}

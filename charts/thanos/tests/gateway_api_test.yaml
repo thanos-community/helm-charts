@@ -112,6 +112,35 @@ tests:
           path: spec.rules[0].filters[0].requestRedirect.statusCode
           value: 301
 
+  - it: sets timeouts on query HTTPRoute
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+      query.httpRoute.timeouts:
+        request: 300s
+        backendRequest: 295s
+    asserts:
+      - equal:
+          path: spec.rules[0].timeouts.request
+          value: 300s
+      - equal:
+          path: spec.rules[0].timeouts.backendRequest
+          value: 295s
+
+  - it: omits timeouts on query HTTPRoute when unset
+    template: query/httproute.yaml
+    set:
+      query.enabled: true
+      query.httpRoute.enabled: true
+      query.httpRoute.parentRefs:
+        - name: my-gateway
+    asserts:
+      - notExists:
+          path: spec.rules[0].timeouts
+
   - it: sets extraRules with matches on query HTTPRoute
     template: query/httproute.yaml
     set:
@@ -538,6 +567,20 @@ tests:
       - equal:
           path: spec.rules[0].backendRefs[0].port
           value: 9090
+
+  - it: sets timeouts on query-frontend HTTPRoute
+    template: query-frontend/httproute.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.httpRoute.enabled: true
+      queryFrontend.httpRoute.parentRefs:
+        - name: my-gateway
+      queryFrontend.httpRoute.timeouts:
+        request: 0s
+    asserts:
+      - equal:
+          path: spec.rules[0].timeouts.request
+          value: 0s
 
   - it: does not render query-frontend HTTPRoute when disabled
     template: query-frontend/httproute.yaml
