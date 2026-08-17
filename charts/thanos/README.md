@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.33.1](https://img.shields.io/badge/Version-0.33.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.34.0](https://img.shields.io/badge/Version-0.34.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -575,6 +575,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.httpRoute.hostnames | list | [] | Hostnames to match. Empty matches all hostnames on the parent Gateway. |
 | bucket.bucketweb.httpRoute.matches | list | [] | Gateway matches HTTPRoute rules match conditions. |
 | bucket.bucketweb.httpRoute.parentRefs | list | [] | Gateway parentRefs the HTTPRoute should attach to. |
+| bucket.bucketweb.httpRoute.timeouts | object | {} | Timeouts for the Bucketweb HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | bucket.bucketweb.ingress.annotations | object | {} | Extra annotations for the Ingress resource. |
 | bucket.bucketweb.ingress.className | string | `""` | Ingress class name (e.g. nginx, traefik). |
 | bucket.bucketweb.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for Bucketweb. |
@@ -655,6 +656,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.httpRoute.hostnames | list | [] | Hostnames to match on the Compactor HTTPRoute. |
 | compactor.httpRoute.matches | list | [] | Gateway matches for the Compactor HTTPRoute rules. |
 | compactor.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Compactor HTTPRoute. |
+| compactor.httpRoute.timeouts | object | {} | Timeouts for the Compactor HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | compactor.ingress.className | string | `""` | Ingress class name for the Compactor (e.g. nginx, traefik). |
 | compactor.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Compactor HTTP endpoint. |
 | compactor.ingress.hosts[0].host | string | `"compactor.local"` |  |
@@ -854,6 +856,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.httpRoute.hostnames | list | [] | Hostnames to match on the Query HTTPRoute. |
 | query.httpRoute.matches | list | [] | Gateway matches for the Query HTTPRoute rules. |
 | query.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Query HTTPRoute. |
+| query.httpRoute.timeouts | object | {} | Timeouts for the Query HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | query.ingress.annotations | object | {} | Deprecated. Use `query.ingress.http.annotations` instead. |
 | query.ingress.className | string | `""` | Deprecated. Use `query.ingress.http.className` instead. |
 | query.ingress.enabled | bool | `false` | Deprecated. Use `query.ingress.http.enabled` instead. |
@@ -956,6 +959,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.httpRoute.hostnames | list | [] | Hostnames to match on the Query Frontend HTTPRoute. |
 | queryFrontend.httpRoute.matches | list | [] | Gateway matches for the Query Frontend HTTPRoute rules. |
 | queryFrontend.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Query Frontend HTTPRoute. |
+| queryFrontend.httpRoute.timeouts | object | {} | Timeouts for the Query Frontend HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | queryFrontend.ingress.annotations | object | {} | Extra annotations for the Query Frontend Ingress. |
 | queryFrontend.ingress.className | string | `""` | Ingress class name for Query Frontend (e.g. nginx, traefik). |
 | queryFrontend.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for Query Frontend. |
@@ -1039,6 +1043,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.httpRoute.hostnames | list | [] | Hostnames to match on the Receive HTTPRoute. |
 | receive.httpRoute.matches | list | [] | Gateway matches for the Receive HTTPRoute rules. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
+| receive.httpRoute.timeouts | object | {} | Timeouts for the Receive HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | receive.ingester | object | {} | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. |
 | receive.ingress.annotations | object | {} | Deprecated. Use `receive.ingress.http.annotations` instead. |
 | receive.ingress.className | string | `""` | Deprecated. Use `receive.ingress.http.className` instead. |
@@ -1125,6 +1130,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.httpRoute.hostnames | list | [] | Hostnames to match on the Router HTTPRoute. |
 | receive.router.httpRoute.matches | list | [] | Gateway matches for the Router HTTPRoute rules. |
 | receive.router.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Router HTTPRoute. |
+| receive.router.httpRoute.timeouts | object | {} | Timeouts for the Router HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | receive.router.ingress.http.annotations | object | {} | Extra annotations for the Router HTTP Ingress. |
 | receive.router.ingress.http.className | string | `""` | Ingress class name for Router HTTP endpoint. |
 | receive.router.ingress.http.enabled | bool | `false` | Enable a Kubernetes Ingress for the Router HTTP endpoint. |
@@ -1257,6 +1263,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.httpRoute.hostnames | list | [] | Hostnames to match on the Ruler HTTPRoute. |
 | ruler.httpRoute.matches | list | [] | Gateway matches for the Ruler HTTPRoute rules. |
 | ruler.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Ruler HTTPRoute. |
+| ruler.httpRoute.timeouts | object | {} | Timeouts for the Ruler HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | ruler.ingress.annotations | object | {} | Extra annotations for the Ruler Ingress. |
 | ruler.ingress.className | string | `""` | Ingress class name for Ruler (e.g. nginx, traefik). |
 | ruler.ingress.enabled | bool | `false` | Enable a Kubernetes Ingress for the Ruler HTTP endpoint. |
@@ -1362,6 +1369,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.httpRoute.hostnames | list | [] | Hostnames to match on the Store Gateway HTTPRoute. |
 | storegateway.httpRoute.matches | list | [] | Gateway matches for the Store Gateway HTTPRoute rules. |
 | storegateway.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway HTTPRoute. |
+| storegateway.httpRoute.timeouts | object | {} | Timeouts for the Store Gateway HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
 | storegateway.ingress.annotations | object | {} | Deprecated. Use `storegateway.ingress.http.annotations` instead. |
 | storegateway.ingress.className | string | `""` | Deprecated. Use `storegateway.ingress.http.className` instead. |
 | storegateway.ingress.enabled | bool | `false` | Deprecated. Use `storegateway.ingress.http.enabled` instead. |

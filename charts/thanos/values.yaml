@@ -512,6 +512,13 @@ bucket:
       #       add:
       #         - name: X-Forwarded-Proto
       #           value: https
+      # -- Timeouts for the Bucketweb HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+      # @default -- {}
+      timeouts: {}
+      # Example:
+      # timeouts:
+      #   request: 60s
+      #   backendRequest: 55s
       # -- Additional custom rules for Bucketweb HTTPRoute
       # Each item should be a complete HTTPRouteRule object with
       # its own backendRefs, matches, filters, etc.
@@ -828,6 +835,13 @@ compactor:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Compactor HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Compactor HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
@@ -1184,6 +1198,13 @@ query:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Query HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Query HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
@@ -1527,6 +1548,13 @@ queryFrontend:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Query Frontend HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Query Frontend HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
@@ -1902,6 +1930,13 @@ storegateway:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Store Gateway HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Store Gateway HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
@@ -2351,6 +2386,13 @@ receive:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Receive HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Receive HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
@@ -2748,6 +2790,13 @@ receive:
       #       add:
       #         - name: X-Forwarded-Proto
       #           value: https
+      # -- Timeouts for the Router HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+      # @default -- {}
+      timeouts: {}
+      # Example:
+      # timeouts:
+      #   request: 60s
+      #   backendRequest: 55s
       # -- Additional custom rules for Router HTTPRoute
       # Each item should be a complete HTTPRouteRule object with
       # its own backendRefs, matches, filters, etc.
@@ -3135,6 +3184,13 @@ ruler:
     #       add:
     #         - name: X-Forwarded-Proto
     #           value: https
+    # -- Timeouts for the Ruler HTTPRoute rule (Gateway API HTTPRouteTimeouts).
+    # @default -- {}
+    timeouts: {}
+    # Example:
+    # timeouts:
+    #   request: 60s
+    #   backendRequest: 55s
     # -- Additional custom rules for Ruler HTTPRoute
     # Each item should be a complete HTTPRouteRule object with
     # its own backendRefs, matches, filters, etc.
