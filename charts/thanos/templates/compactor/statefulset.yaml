@@ -22,8 +22,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: compactor
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "compactor") | nindent 6 }}
   template:
     metadata:
       labels:
@@ -101,6 +100,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        labels:
+          {{- include "thanos.labels" $ | nindent 10 }}
+          app.kubernetes.io/component: compactor
       spec:
         accessModes:
         {{- range .Values.compactor.persistence.accessModes | default (list "ReadWriteOnce") }}

@@ -31,6 +31,5 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: query
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "query") | nindent 4 }}
 {{- end }}

@@ -18,8 +18,7 @@ spec:
   replicas: {{ .Values.query.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: query
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "query") | nindent 6 }}
   template:
     metadata:
       labels:

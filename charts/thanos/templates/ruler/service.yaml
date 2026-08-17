@@ -24,8 +24,7 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: ruler
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 4 }}
   type: {{ .Values.ruler.service.type }}
 ---
 apiVersion: v1
@@ -51,6 +50,5 @@ spec:
       port: {{ .Values.ruler.service.grpcPort }}
       targetPort: grpc
   selector:
-    app.kubernetes.io/component: ruler
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 4 }}
 {{- end }}

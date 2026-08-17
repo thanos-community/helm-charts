@@ -43,8 +43,7 @@ spec:
       {{- end }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: storegateway
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "storegateway") | nindent 4 }}
 {{- if eq (include "thanos.storegateway.sharded" .) "true" }}
 {{- $shards := (include "thanos.storegateway.shards" . | fromYaml).shards }}
 {{- range $shard := $shards }}
@@ -78,8 +77,7 @@ spec:
       port: {{ $.Values.storegateway.service.httpPort }}
       targetPort: http
   selector:
-    app.kubernetes.io/component: storegateway
-    app.kubernetes.io/instance: {{ $.Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "storegateway") | nindent 4 }}
     thanos.io/storegateway-shard: {{ $shard.index | quote }}
 {{- end }}
 {{- end }}

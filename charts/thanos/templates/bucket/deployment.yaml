@@ -19,8 +19,7 @@ spec:
   replicas: {{ .Values.bucket.bucketweb.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: bucketweb
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucketweb") | nindent 6 }}
   template:
     metadata:
       labels:

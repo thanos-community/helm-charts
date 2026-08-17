@@ -16,8 +16,7 @@ spec:
         - port: http
   podSelector:
     matchLabels:
-      app.kubernetes.io/component: storegateway
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "storegateway") | nindent 6 }}
   policyTypes:
     - Egress
     - Ingress

@@ -32,8 +32,7 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: receive
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 4 }}
 ---
 apiVersion: v1
 kind: Service
@@ -59,6 +58,5 @@ spec:
       port: {{ $cfg.service.grpcPort }}
       targetPort: grpc
   selector:
-    app.kubernetes.io/component: receive
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 4 }}
 {{- end }}

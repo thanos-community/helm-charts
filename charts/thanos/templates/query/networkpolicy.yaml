@@ -16,8 +16,7 @@ spec:
         - port: http
   podSelector:
     matchLabels:
-      app.kubernetes.io/component: query
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "query") | nindent 6 }}
   policyTypes:
     - Egress
     - Ingress

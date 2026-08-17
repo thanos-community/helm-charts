@@ -13,8 +13,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: compactor
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "compactor") | nindent 6 }}
   {{- if $minAvail }}
   minAvailable: {{ $minAvail }}
   {{- else if $maxUnavail }}

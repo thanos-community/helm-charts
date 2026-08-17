@@ -24,8 +24,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: receive
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 6 }}
   template:
     metadata:
       labels:
@@ -141,6 +140,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        labels:
+          {{- include "thanos.labels" $ | nindent 10 }}
+          app.kubernetes.io/component: receive
       spec:
         accessModes: ["ReadWriteOnce"]
         {{- if $cfg.persistence.storageClass }}

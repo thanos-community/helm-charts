@@ -29,9 +29,40 @@ Defaults to the release namespace unless `.Values.namespaceOverride` overrides i
 {{- printf "%s-%s" (include "thanos.fullname" $root) $comp | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- /*
+Selector labels identifying the pods of a single component. Rendered into every
+`spec.selector` / `spec.podSelector` in the chart and always a subset of the pod
+template labels produced by `thanos.labels`.
+
+`app.kubernetes.io/name` is part of the set so that an umbrella chart deploying
+another application under the same release name and namespace cannot collide:
+`component: compactor` + `instance: <release>` alone also matches, say, a Loki
+compactor.
+
+Deliberately excludes `global.commonLabels` and `app.kubernetes.io/part-of`:
+workload selectors are immutable, so anything user-tunable must stay out of them.
+
+The root context is passed explicitly because callers such as the Store Gateway
+templates render selectors inside a `range` where `.` is the shard, not the root.
+`component` is optional.
+Usage:
+  {{- include "thanos.selectorLabels" (dict "root" $ "component" "compactor") | nindent 6 }}
+*/ -}}
+{{- define "thanos.selectorLabels" -}}
+{{- $root := .root -}}
+app.kubernetes.io/name: {{ include "thanos.name" $root }}
+app.kubernetes.io/instance: {{ $root.Release.Name }}
+{{- with .component }}
+app.kubernetes.io/component: {{ . }}
+{{- end }}
+{{- end -}}
+
+{{- /*
+Labels stamped on every resource the chart renders: the selector labels plus the
+chart-wide `part-of` marker and any `global.commonLabels`.
+*/ -}}
 {{- define "thanos.labels" -}}
-app.kubernetes.io/name: {{ include "thanos.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "thanos.selectorLabels" (dict "root" .) }}
 app.kubernetes.io/part-of: thanos
 {{- range $k, $v := .Values.global.commonLabels }}
 {{ $k }}: {{ $v | quote }}

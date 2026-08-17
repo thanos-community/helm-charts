@@ -2,7 +2,7 @@ apiVersion: v2
 name: thanos
 description: A helm chart to setup Thanos on Kubernetes, a highly available Prometheus setup with long term storage capabilities.
 type: application
-version: 0.35.0
+version: 0.36.0
 appVersion: "v0.42.4"
 keywords:
   - thanos
@@ -51,5 +51,9 @@ annotations:
     - name: Slack
       url: https://cloud-native.slack.com/archives/CL25937SP
   artifacthub.io/changes: |
+    - kind: changed
+      description: "BREAKING: app.kubernetes.io/name is now part of every spec.selector and spec.podSelector, so a component can no longer select the pods of another application installed under the same release name and namespace. Deployment and StatefulSet selectors are immutable, so recreate those workloads once with 'kubectl delete statefulset,deployment -l app.kubernetes.io/part-of=thanos,app.kubernetes.io/instance=<release> --cascade=orphan' before upgrading; pods and PVCs stay up and are re-adopted. See the Upgrading section of the chart README"
     - kind: added
-      description: Per-component ServiceAccounts, each rendered from its own templates/<component>/serviceaccount.yaml with its own name, annotations (IRSA / Workload Identity) and token automount. Opt in per component with <component>.serviceAccount.create or for all components at once with global.serviceAccount.perComponent; the chart-wide ServiceAccount stays the default and is toggled by global.serviceAccount.create
+      description: Chart labels (app.kubernetes.io/name, instance, part-of, component and global.commonLabels) on ServiceMonitors, on the Ruler rule-importer ConfigMap and on every volumeClaimTemplate, all of which previously rendered without them
+    - kind: added
+      description: thanos.selectorLabels template helper, now the single source of every selector in the chart and the basis of thanos.labels
