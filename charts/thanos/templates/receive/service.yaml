@@ -22,9 +22,15 @@ spec:
     - name: http
       port: {{ $cfg.service.httpPort }}
       targetPort: http
+      {{- with $cfg.service.httpNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
     - name: remote-write
       port: {{ $cfg.service.remoteWritePort }}
       targetPort: remote-write
+      {{- with $cfg.service.remoteWriteNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: receive
     app.kubernetes.io/instance: {{ .Release.Name }}

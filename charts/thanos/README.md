@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.34.0](https://img.shields.io/badge/Version-0.34.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.35.0](https://img.shields.io/badge/Version-0.35.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -617,6 +617,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.resources | object | {} | Resource requests and limits for the Bucketweb container. |
 | bucket.bucketweb.service.annotations | object | {} | Extra annotations for the Bucketweb Service. |
 | bucket.bucketweb.service.labels | object | {} | Extra labels for the Bucketweb Service. |
+| bucket.bucketweb.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Bucketweb HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | bucket.bucketweb.service.port | int | `10902` | HTTP port exposed by the Bucketweb Service. |
 | bucket.bucketweb.service.type | string | `"ClusterIP"` | Kubernetes Service type for Bucketweb. |
 | bucket.bucketweb.serviceAccount.annotations | object | {} | Extra annotations for the Bucketweb ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Bucketweb. Requires `create`. |
@@ -706,6 +707,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.retention.resolutionRaw | string | `"30d"` | Retention for raw resolution blocks (--retention.resolution-raw). |
 | compactor.service.annotations | object | {} | Extra annotations for the Compactor Service. |
 | compactor.service.labels | object | {} | Extra labels for the Compactor Service. |
+| compactor.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Compactor HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | compactor.service.port | int | `10902` | HTTP port exposed by the Compactor Service. |
 | compactor.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Compactor HTTP endpoint. |
 | compactor.serviceAccount.annotations | object | {} | Extra annotations for the Compactor ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Compactor. Requires `create`. |
@@ -913,7 +915,9 @@ The table below documents all available values. Top-level keys group settings by
 | query.replicaLabels[2] | string | `"ruler_replica"` |  |
 | query.resources | object | {} | Resource requests and limits for the Query container. |
 | query.service.annotations | object | {} | Extra annotations for the Query Service. |
+| query.service.grpcNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Query gRPC port. |
 | query.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Query Service. |
+| query.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Query HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | query.service.httpPort | int | `9090` | HTTP/PromQL port exposed by the Query Service. |
 | query.service.labels | object | {} | Extra labels for the Query Service. |
 | query.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Query component. |
@@ -1000,6 +1004,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.resources | object | {} | Resource requests and limits for the Query Frontend container. |
 | queryFrontend.service.annotations | object | {} | Extra annotations for the Query Frontend Service. |
 | queryFrontend.service.labels | object | {} | Extra labels for the Query Frontend Service. |
+| queryFrontend.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Query Frontend HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | queryFrontend.service.port | int | `9090` | HTTP port exposed by the Query Frontend Service. |
 | queryFrontend.service.type | string | `"ClusterIP"` | Kubernetes Service type for Query Frontend. |
 | queryFrontend.serviceAccount.annotations | object | {} | Extra annotations for the Query Frontend ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Query Frontend. Requires `create`. |
@@ -1178,8 +1183,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.replicationFactor | int | `1` | Replication factor used when forwarding writes to Ingesters. Each write is sent to this many Ingesters. Must be <= ingester replicaCount. |
 | receive.router.resources | object | {} | Resource requests and limits for the Router container. |
 | receive.router.service.annotations | object | {} | Extra annotations for the Router Service. |
+| receive.router.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Router HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | receive.router.service.httpPort | int | `10902` | HTTP port exposed by the Router Service (metrics, probes). |
 | receive.router.service.labels | object | {} | Extra labels for the Router Service. |
+| receive.router.service.remoteWriteNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Router remote-write port. |
 | receive.router.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Router Service. |
 | receive.router.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Router component. |
 | receive.router.serviceAccount.annotations | object | {} | Extra annotations for the Router ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Router. Requires `create`. |
@@ -1206,8 +1213,10 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.vpa.updateMode | string | `"Auto"` | VPA update mode for Router. One of Auto, Off, or Initial. |
 | receive.service.annotations | object | {} | Extra annotations for the Receive Service. |
 | receive.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Receive Service. |
+| receive.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Receive HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | receive.service.httpPort | int | `10902` | HTTP port exposed by the Receive Service. |
 | receive.service.labels | object | {} | Extra labels for the Receive Service. |
+| receive.service.remoteWriteNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Receive remote-write port. |
 | receive.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Receive Service. |
 | receive.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Receive component. |
 | receive.serviceAccount.annotations | object | {} | Extra annotations for the Receive ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Receive. Requires `create`. |
@@ -1313,6 +1322,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.rules."example-alerts.yaml" | string | `"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"` |  |
 | ruler.service.annotations | object | {} | Extra annotations for the Ruler Service. |
 | ruler.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Ruler headless Service. |
+| ruler.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Ruler HTTP port. The gRPC port is only exposed on the headless Service, which never has node ports. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | ruler.service.httpPort | int | `10902` | HTTP port exposed by the Ruler Service. |
 | ruler.service.labels | object | {} | Extra labels for the Ruler Service. |
 | ruler.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Ruler component. |
@@ -1430,7 +1440,9 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. |
 | storegateway.resources | object | {} | Resource requests and limits for the Store Gateway container. |
 | storegateway.service.annotations | object | {} | Extra annotations for the Store Gateway Service. |
+| storegateway.service.grpcNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Store Gateway gRPC port. Ignored when sharding is enabled. |
 | storegateway.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Store Gateway Service. |
+| storegateway.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Store Gateway HTTP port. Ignored when sharding is enabled, because the aggregate Service is headless then and the per-shard Services cannot share a single node port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | storegateway.service.httpPort | int | `10902` | HTTP port exposed by the Store Gateway Service. |
 | storegateway.service.labels | object | {} | Extra labels for the Store Gateway Service. |
 | storegateway.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Store Gateway. |

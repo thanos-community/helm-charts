@@ -442,6 +442,11 @@ bucket:
       type: ClusterIP
       # -- HTTP port exposed by the Bucketweb Service.
       port: 10902
+      # -- Static node port for the Bucketweb HTTP port.
+      # Only honoured when `type` is NodePort or LoadBalancer; null lets
+      # Kubernetes allocate one from the node-port range.
+      # @default -- `null` (allocated by Kubernetes)
+      nodePort: null
       # -- Extra annotations for the Bucketweb Service.
       # @default -- {}
       annotations: {}
@@ -773,6 +778,11 @@ compactor:
     type: ClusterIP
     # -- HTTP port exposed by the Compactor Service.
     port: 10902
+    # -- Static node port for the Compactor HTTP port.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    nodePort: null
     # -- Extra annotations for the Compactor Service.
     # @default -- {}
     annotations: {}
@@ -1096,6 +1106,14 @@ query:
     httpPort: 9090
     # -- gRPC Store API port exposed by the Query Service.
     grpcPort: 10901
+    # -- Static node port for the Query HTTP port.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    httpNodePort: null
+    # -- Static node port for the Query gRPC port.
+    # @default -- `null` (allocated by Kubernetes)
+    grpcNodePort: null
     # -- Extra annotations for the Query Service.
     # @default -- {}
     annotations: {}
@@ -1483,6 +1501,11 @@ queryFrontend:
     type: ClusterIP
     # -- HTTP port exposed by the Query Frontend Service.
     port: 9090
+    # -- Static node port for the Query Frontend HTTP port.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    nodePort: null
     # -- Extra annotations for the Query Frontend Service.
     # @default -- {}
     annotations: {}
@@ -1827,6 +1850,17 @@ storegateway:
     grpcPort: 10901
     # -- HTTP port exposed by the Store Gateway Service.
     httpPort: 10902
+    # -- Static node port for the Store Gateway HTTP port. Ignored when
+    # sharding is enabled, because the aggregate Service is headless then and
+    # the per-shard Services cannot share a single node port.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    httpNodePort: null
+    # -- Static node port for the Store Gateway gRPC port. Ignored when
+    # sharding is enabled.
+    # @default -- `null` (allocated by Kubernetes)
+    grpcNodePort: null
     # -- Extra annotations for the Store Gateway Service.
     # @default -- {}
     annotations: {}
@@ -2265,6 +2299,14 @@ receive:
     httpPort: 10902
     # -- Remote-write ingestion port exposed by the Receive Service.
     remoteWritePort: 10908
+    # -- Static node port for the Receive HTTP port.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    httpNodePort: null
+    # -- Static node port for the Receive remote-write port.
+    # @default -- `null` (allocated by Kubernetes)
+    remoteWriteNodePort: null
     # -- Extra annotations for the Receive Service.
     # @default -- {}
     annotations: {}
@@ -2706,6 +2748,14 @@ receive:
       httpPort: 10902
       # -- Remote-write ingestion port exposed by the Router Service.
       remoteWritePort: 10908
+      # -- Static node port for the Router HTTP port.
+      # Only honoured when `type` is NodePort or LoadBalancer; null lets
+      # Kubernetes allocate one from the node-port range.
+      # @default -- `null` (allocated by Kubernetes)
+      httpNodePort: null
+      # -- Static node port for the Router remote-write port.
+      # @default -- `null` (allocated by Kubernetes)
+      remoteWriteNodePort: null
       # -- Extra annotations for the Router Service.
       # @default -- {}
       annotations: {}
@@ -3119,6 +3169,12 @@ ruler:
     grpcPort: 10901
     # -- HTTP port exposed by the Ruler Service.
     httpPort: 10902
+    # -- Static node port for the Ruler HTTP port. The gRPC port is only
+    # exposed on the headless Service, which never has node ports.
+    # Only honoured when `type` is NodePort or LoadBalancer; null lets
+    # Kubernetes allocate one from the node-port range.
+    # @default -- `null` (allocated by Kubernetes)
+    httpNodePort: null
     # -- Extra annotations for the Ruler Service.
     # @default -- {}
     annotations: {}

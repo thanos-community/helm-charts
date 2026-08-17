@@ -22,9 +22,15 @@ spec:
     - name: http
       port: {{ $rt.service.httpPort | default 10902 }}
       targetPort: http
+      {{- with $rt.service.httpNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
     - name: remote-write
       port: {{ $rt.service.remoteWritePort | default 10908 }}
       targetPort: remote-write
+      {{- with $rt.service.remoteWriteNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: receive-router
     app.kubernetes.io/instance: {{ .Release.Name }}

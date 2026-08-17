@@ -23,12 +23,25 @@ spec:
   clusterIP: None
   {{- end }}
   ports:
+    # nodePorts are only valid on the aggregate Service while it has a cluster
+    # IP: sharding turns it headless, and the per-shard Services below cannot
+    # share one fixed node port.
     - name: http
       port: {{ .Values.storegateway.service.httpPort }}
       targetPort: http
+      {{- if ne (include "thanos.storegateway.sharded" .) "true" }}
+      {{- with .Values.storegateway.service.httpNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
+      {{- end }}
     - name: grpc
       port: {{ .Values.storegateway.service.grpcPort }}
       targetPort: grpc
+      {{- if ne (include "thanos.storegateway.sharded" .) "true" }}
+      {{- with .Values.storegateway.service.grpcNodePort }}
+      nodePort: {{ . }}
+      {{- end }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: storegateway
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -21,6 +21,9 @@ spec:
     - name: http
       port: {{ .Values.queryFrontend.service.port }}
       targetPort: http
+      {{- with .Values.queryFrontend.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
   selector:
     app.kubernetes.io/component: query-frontend
     app.kubernetes.io/instance: {{ .Release.Name }}
