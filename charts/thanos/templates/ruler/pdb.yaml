@@ -8,6 +8,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
 spec:

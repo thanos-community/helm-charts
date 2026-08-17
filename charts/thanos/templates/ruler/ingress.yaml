@@ -6,6 +6,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
   annotations:
     {{- with .Values.ruler.ingress.annotations }}
     {{- toYaml . | nindent 4 }}

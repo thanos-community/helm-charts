@@ -34,13 +34,17 @@ spec:
   selector:
     {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 4 }}
 ---
+# Headless Service backing the StatefulSet: stable per-pod DNS for the hashring
+# endpoints. Like the per-shard Store Gateway Services, it intentionally omits
+# the `app.kubernetes.io/component: receive` metadata label so the shared
+# ServiceMonitor selects only the ClusterIP Service above and does not scrape
+# every pod twice.
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "thanos.receiveHeadless" . }}
   namespace: {{ include "thanos.namespace" . }}
   labels:
-    app.kubernetes.io/component: receive
     {{- include "thanos.labels" . | nindent 4 }}
     {{- with $cfg.service.labels }}
     {{- toYaml . | nindent 4 }}

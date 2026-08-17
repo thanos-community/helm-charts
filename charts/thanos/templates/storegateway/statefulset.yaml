@@ -11,6 +11,7 @@ metadata:
   namespace: {{ include "thanos.namespace" $ }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: storegateway
     {{- with $.Values.storegateway.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

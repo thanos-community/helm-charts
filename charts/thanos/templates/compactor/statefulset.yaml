@@ -6,6 +6,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: compactor
     {{- with .Values.compactor.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}

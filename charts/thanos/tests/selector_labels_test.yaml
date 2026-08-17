@@ -376,6 +376,120 @@ tests:
           path: spec.volumeClaimTemplates[0].metadata.labels["thanos.io/storegateway-shard"]
           value: "1"
 
+  # -- headless Services stay out of the ServiceMonitor ---------------------
+  #
+  # A ServiceMonitor selects on name + instance + component, and matchLabels is
+  # a subset match, so any Service carrying all three is scraped. The headless
+  # Services front the very same pods as the ClusterIP Service, so they must
+  # omit `component` or every pod is scraped twice. The per-shard Store Gateway
+  # Services omit it for the same reason.
+
+  - it: keeps the component label off the receive headless Service
+    template: receive/service.yaml
+    documentIndex: 1
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: thanos
+      - isNull:
+          path: metadata.labels["app.kubernetes.io/component"]
+
+  - it: keeps the component label off the ruler headless Service
+    template: ruler/service.yaml
+    documentIndex: 1
+    set:
+      ruler.enabled: true
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - isNull:
+          path: metadata.labels["app.kubernetes.io/component"]
+
+  - it: keeps the component label off the per-shard storegateway Services
+    template: storegateway/service.yaml
+    documentIndex: 1
+    set:
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+    asserts:
+      - isNull:
+          path: metadata.labels["app.kubernetes.io/component"]
+      - equal:
+          path: metadata.labels["thanos.io/storegateway-shard"]
+          value: "0"
+
+  - it: keeps the component label on the ClusterIP Service the ServiceMonitor selects
+    template: receive/service.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: receive
+
+  # -- component label on every other resource ------------------------------
+
+  - it: labels the compactor StatefulSet with its component
+    template: compactor/statefulset.yaml
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: compactor
+
+  - it: labels the query Deployment with its component
+    template: query/deployment.yaml
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: query
+
+  - it: labels the query PDB with its component
+    template: query/pdb.yaml
+    set:
+      query.pdb.enabled: true
+      query.pdb.minAvailable: 1
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: query
+
+  - it: labels the query HPA with its component
+    template: query/hpa.yaml
+    set:
+      query.autoscaling.enabled: true
+      query.autoscaling.minReplicas: 1
+      query.autoscaling.maxReplicas: 3
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: query
+
+  - it: labels the query Ingress with its component
+    template: query/ingress.yaml
+    set:
+      query.ingress.enabled: true
+      query.ingress.hosts:
+        - host: q.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: query
+
+  - it: labels the receive hashrings ConfigMap with its component
+    template: receive/configmap-hashrings.yaml
+    asserts:
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: receive
+
   # -- the rule-importer ConfigMap ------------------------------------------
 
   - it: labels the ruler rule-importer ConfigMap
