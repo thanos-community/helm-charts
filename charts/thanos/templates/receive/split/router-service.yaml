@@ -32,6 +32,5 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: receive-router
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive-router") | nindent 4 }}
 {{- end }}

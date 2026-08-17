@@ -25,6 +25,5 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: bucketweb
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucketweb") | nindent 4 }}
 {{- end }}

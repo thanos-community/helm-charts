@@ -8,13 +8,13 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: query-frontend
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: query-frontend
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "query-frontend") | nindent 6 }}
   {{- if $minAvail }}
   minAvailable: {{ $minAvail }}
   {{- else if $maxUnavail }}

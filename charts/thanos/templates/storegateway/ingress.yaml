@@ -15,6 +15,7 @@ metadata:
     {{- include "thanos.annotations" (dict "Values" $.Values "component" "storegateway") | nindent 4 }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: storegateway
   name: {{ include "thanos.compName" (list $ (printf "storegateway%s" (eq $port "http" | ternary "" (printf "-%s" $port)))) }}
   namespace: {{ include "thanos.namespace" $ }}
 spec:

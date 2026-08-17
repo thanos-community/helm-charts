@@ -23,8 +23,7 @@ spec:
   replicas: {{ $rt.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: receive-router
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive-router") | nindent 6 }}
   template:
     metadata:
       labels:

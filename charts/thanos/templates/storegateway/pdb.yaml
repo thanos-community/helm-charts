@@ -13,13 +13,13 @@ metadata:
   namespace: {{ include "thanos.namespace" $ }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: storegateway
   annotations:
     {{- include "thanos.annotations" (dict "Values" $.Values "component" "storegateway") | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: storegateway
-      app.kubernetes.io/instance: {{ $.Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "storegateway") | nindent 6 }}
       {{- if $shard.isSharded }}
       thanos.io/storegateway-shard: {{ $shard.index | quote }}
       {{- end }}

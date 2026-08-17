@@ -6,6 +6,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ruler
     {{- with .Values.ruler.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -22,8 +23,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: ruler
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 6 }}
   template:
     metadata:
       labels:
@@ -156,6 +156,9 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
+        labels:
+          {{- include "thanos.labels" $ | nindent 10 }}
+          app.kubernetes.io/component: ruler
       spec:
         accessModes:
         {{- range .Values.ruler.persistence.accessModes | default (list "ReadWriteOnce") }}

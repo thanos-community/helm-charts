@@ -10,13 +10,13 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: receive
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: receive
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 6 }}
   {{- if $minAvail }}
   minAvailable: {{ $minAvail }}
   {{- else if $maxUnavail }}

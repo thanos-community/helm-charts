@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.35.0](https://img.shields.io/badge/Version-0.35.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.36.0](https://img.shields.io/badge/Version-0.36.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -542,6 +542,36 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
+
+### Upgrading to 0.36.0 — selector labels
+
+`app.kubernetes.io/name` is now part of every `spec.selector` / `spec.podSelector` the chart renders ([#197](https://github.com/thanos-community/helm-charts/issues/197)). Without it, `component: compactor` + `instance: <release>` was the whole discriminator, so a Thanos component installed by an umbrella chart could select the pods of another application sharing the release name and namespace — a Loki compactor, for instance.
+
+Pod templates have always carried this label, so the tightened selectors match exactly the same pods as before. Services, PodDisruptionBudgets and NetworkPolicies update in place.
+
+`spec.selector` on a Deployment or StatefulSet is immutable, however, so those workloads must be recreated once. Orphan them first, which leaves the pods and PVCs running:
+
+```bash
+kubectl delete statefulset,deployment --namespace monitoring \
+  --selector app.kubernetes.io/part-of=thanos,app.kubernetes.io/instance=thanos \
+  --cascade=orphan
+
+helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  -f values.yaml
+```
+
+The recreated StatefulSets adopt the orphaned pods, and the Deployments adopt their existing ReplicaSets — the pod template is unchanged, so its hash is unchanged and no pod restarts. Skipping the step makes `helm upgrade` fail with `field is immutable`.
+
+The same release also adds the chart labels to `volumeClaimTemplates`, which is likewise immutable and covered by the recreation above. Claims that already exist are not relabelled, because a StatefulSet never touches existing PVCs; relabel them by name if you select PVCs by label for backups or cost reporting:
+
+```bash
+kubectl label pvc --namespace monitoring data-thanos-compactor-0 \
+  app.kubernetes.io/name=thanos \
+  app.kubernetes.io/instance=thanos \
+  app.kubernetes.io/part-of=thanos \
+  app.kubernetes.io/component=compactor
+```
 
 ## Values Reference
 

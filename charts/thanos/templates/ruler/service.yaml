@@ -24,10 +24,14 @@ spec:
       nodePort: {{ . }}
       {{- end }}
   selector:
-    app.kubernetes.io/component: ruler
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 4 }}
   type: {{ .Values.ruler.service.type }}
 ---
+# Headless Service backing the StatefulSet: stable per-pod DNS for Query's gRPC
+# fan-out. Like the per-shard Store Gateway Services, it intentionally omits the
+# `app.kubernetes.io/component: ruler` metadata label so the shared
+# ServiceMonitor selects only the ClusterIP Service above and does not scrape
+# every pod twice.
 apiVersion: v1
 kind: Service
 metadata:
@@ -51,6 +55,5 @@ spec:
       port: {{ .Values.ruler.service.grpcPort }}
       targetPort: grpc
   selector:
-    app.kubernetes.io/component: ruler
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 4 }}
 {{- end }}

@@ -6,6 +6,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: bucketweb
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
 spec:

@@ -7,6 +7,7 @@ metadata:
   namespace: {{ include "thanos.namespace" . }}
   labels:
     {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: bucketweb
     {{- with .Values.bucket.bucketweb.labels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -19,8 +20,7 @@ spec:
   replicas: {{ .Values.bucket.bucketweb.replicaCount }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: bucketweb
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucketweb") | nindent 6 }}
   template:
     metadata:
       labels:

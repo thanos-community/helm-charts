@@ -17,8 +17,7 @@ spec:
         - port: remote-write
   podSelector:
     matchLabels:
-      app.kubernetes.io/component: receive
-      app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 6 }}
   policyTypes:
     - Egress
     - Ingress
