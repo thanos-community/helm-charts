@@ -234,12 +234,34 @@ Usage:
 {{- $comp = index $root.Values $key | default dict -}}
 {{- end -}}
 {{- $probes := $comp.probes | default $par.probes | default dict -}}
+{{- /*
+  Thanos applies --http.config to its whole HTTP mux, including /-/healthy and /-/ready, so a
+  config with basic_auth_users makes HTTP probes fail with 401 and TLS makes them fail on scheme.
+  tcpSocket sidesteps both; scheme covers the TLS-without-basic-auth case.
+
+  Resolved global -> parent -> component with hasKey rather than `default`, so a component can
+  set tcpSocket back to false against a global true.
+*/ -}}
+{{- $tcpSocket := false -}}
+{{- $scheme := "" -}}
+{{- range $src := list ($root.Values.global.probes | default dict) ($par.probes | default dict) ($comp.probes | default dict) }}
+{{- if hasKey $src "tcpSocket" }}{{- $tcpSocket = $src.tcpSocket -}}{{- end }}
+{{- if hasKey $src "scheme" }}{{- $scheme = $src.scheme -}}{{- end }}
+{{- end }}
 {{- with $probes.readiness }}
 {{- if .enabled }}
 readinessProbe:
+{{- if $tcpSocket }}
+  tcpSocket:
+    port: http
+{{- else }}
   httpGet:
     path: {{ default "/-/ready" .path | quote }}
     port: http
+    {{- if $scheme }}
+    scheme: {{ $scheme }}
+    {{- end }}
+{{- end }}
   initialDelaySeconds: {{ default 5 .initialDelaySeconds }}
   periodSeconds: {{ default 10 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}
@@ -250,9 +272,17 @@ readinessProbe:
 {{- with $probes.liveness }}
 {{- if .enabled }}
 livenessProbe:
+{{- if $tcpSocket }}
+  tcpSocket:
+    port: http
+{{- else }}
   httpGet:
     path: {{ default "/-/healthy" .path | quote }}
     port: http
+    {{- if $scheme }}
+    scheme: {{ $scheme }}
+    {{- end }}
+{{- end }}
   initialDelaySeconds: {{ default 30 .initialDelaySeconds }}
   periodSeconds: {{ default 10 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}
@@ -263,9 +293,17 @@ livenessProbe:
 {{- with $probes.startup }}
 {{- if .enabled }}
 startupProbe:
+{{- if $tcpSocket }}
+  tcpSocket:
+    port: http
+{{- else }}
   httpGet:
     path: {{ default "/-/ready" .path | quote }}
     port: http
+    {{- if $scheme }}
+    scheme: {{ $scheme }}
+    {{- end }}
+{{- end }}
   initialDelaySeconds: {{ default 0 .initialDelaySeconds }}
   periodSeconds: {{ default 5 .periodSeconds }}
   timeoutSeconds: {{ default 5 .timeoutSeconds }}

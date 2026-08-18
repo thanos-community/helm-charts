@@ -2322,10 +2322,40 @@
           "title": "serviceAccount",
           "type": "object"
         },
+        "probes": {
+          "additionalProperties": true,
+          "description": "Probe defaults shared by every component. A component's own probes block overrides these.",
+          "properties": {
+            "scheme": {
+              "default": "",
+              "description": "Scheme for HTTP probes. Set to HTTPS when components serve TLS through --http.config.",
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
+            "tcpSocket": {
+              "default": false,
+              "description": "Use a TCP probe instead of an HTTP one. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
+            }
+          },
+          "required": [],
+          "title": "probes",
+          "type": "object"
+        },
         "serviceMonitor": {
           "additionalProperties": true,
           "description": "ServiceMonitor defaults for Prometheus Operator scraping.\nComponents inherit these defaults and can override per-component.\nDefault ServiceMonitor configuration inherited by all components.",
           "properties": {
+            "basicAuth": {
+              "additionalProperties": true,
+              "description": "Basic auth credentials for scraping, as username/password secret references. Needed when --http.config sets basic_auth_users, which also protects /metrics.",
+              "required": [],
+              "title": "basicAuth",
+              "type": "object"
+            },
             "annotations": {
               "additionalProperties": true,
               "description": "Extra annotations merged into every ServiceMonitor resource.",

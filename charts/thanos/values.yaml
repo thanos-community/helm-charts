@@ -380,6 +380,15 @@ global:
 
   # ServiceMonitor defaults for Prometheus Operator scraping.
   # Components inherit these defaults and can override per-component.
+  # -- Probe defaults shared by every component. A component's own `probes` block overrides these.
+  probes:
+    # -- Scheme for HTTP probes. Set to `HTTPS` when components serve TLS through
+    # `--http.config` (https://thanos.io/tip/operating/https.md/). Omitted when empty, so
+    # rendered manifests are unchanged unless this is set.
+    scheme: ""
+    # -- Use a TCP probe instead of an HTTP one. Required when `--http.config` sets
+    # `basic_auth_users`: Thanos protects `/-/healthy` and `/-/ready` too, so HTTP probes 401.
+    tcpSocket: false
   # Default ServiceMonitor configuration inherited by all components.
   serviceMonitor:
     # -- Enable a Prometheus Operator ServiceMonitor for every component.
@@ -403,6 +412,10 @@ global:
     # -- TLS configuration for scraping when scheme is https.
     # @default -- {}
     tlsConfig: {}
+    # -- Basic auth credentials for scraping, as `username`/`password` secret references.
+    # Needed when `--http.config` sets `basic_auth_users`, which also protects `/metrics`.
+    # @default -- {}
+    basicAuth: {}
     # -- Relabeling rules applied to scraped metrics before ingestion.
     # @default -- []
     relabelings: []

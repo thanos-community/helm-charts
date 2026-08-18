@@ -1,0 +1,101 @@
+suite: probes and servicemonitor auth for --http.config
+
+tests:
+  # -- Probes: default output is unchanged ---------------------------------
+
+  - it: keeps httpGet probes with no scheme by default
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /-/ready
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.scheme
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe.tcpSocket
+
+  # -- Probes: TLS via --http.config ---------------------------------------
+
+  - it: sets the probe scheme when global.probes.scheme is HTTPS
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      global.probes.scheme: HTTPS
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.scheme
+          value: HTTPS
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.scheme
+          value: HTTPS
+
+  # -- Probes: basic auth via --http.config ---------------------------------
+  # Thanos applies --http.config to its whole mux, so /-/healthy and /-/ready
+  # need credentials too and an HTTP probe would 401. A TCP probe does not.
+
+  - it: swaps HTTP probes for TCP probes when global.probes.tcpSocket is true
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      global.probes.tcpSocket: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.tcpSocket.port
+          value: http
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.tcpSocket.port
+          value: http
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet
+
+  - it: lets a component override the global probe transport
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      global.probes.tcpSocket: true
+      compactor.probes.tcpSocket: false
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /-/ready
+      - isNull:
+          path: spec.template.spec.containers[0].readinessProbe.tcpSocket
+
+  # -- ServiceMonitor: scheme, tlsConfig and basicAuth ---------------------
+
+  - it: renders basicAuth, scheme and tlsConfig on the servicemonitor
+    template: receive/servicemonitor.yaml
+    set:
+      receive.enabled: true
+      global.serviceMonitor.enabled: true
+      global.serviceMonitor.scheme: https
+      global.serviceMonitor.tlsConfig:
+        insecureSkipVerify: true
+      global.serviceMonitor.basicAuth:
+        username:
+          name: thanos-http-auth
+          key: username
+        password:
+          name: thanos-http-auth
+          key: password
+    asserts:
+      - equal:
+          path: spec.endpoints[0].scheme
+          value: https
+      - equal:
+          path: spec.endpoints[0].tlsConfig.insecureSkipVerify
+          value: true
+      - equal:
+          path: spec.endpoints[0].basicAuth.username.name
+          value: thanos-http-auth
+
+  - it: omits basicAuth when unset
+    template: receive/servicemonitor.yaml
+    set:
+      receive.enabled: true
+      global.serviceMonitor.enabled: true
+    asserts:
+      - isNull:
+          path: spec.endpoints[0].basicAuth
