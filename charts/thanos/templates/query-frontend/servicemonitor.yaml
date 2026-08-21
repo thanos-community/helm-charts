@@ -23,6 +23,17 @@ spec:
       path: /metrics
       interval: {{ default .Values.global.serviceMonitor.interval .Values.queryFrontend.serviceMonitor.interval | quote }}
       scrapeTimeout: {{ default .Values.global.serviceMonitor.scrapeTimeout .Values.queryFrontend.serviceMonitor.scrapeTimeout | quote }}
+      {{- with (default .Values.global.serviceMonitor.scheme .Values.queryFrontend.serviceMonitor.scheme) }}
+      scheme: {{ . }}
+      {{- end }}
+      {{- with (default .Values.global.serviceMonitor.tlsConfig .Values.queryFrontend.serviceMonitor.tlsConfig) }}
+      tlsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with (default .Values.global.serviceMonitor.basicAuth .Values.queryFrontend.serviceMonitor.basicAuth) }}
+      basicAuth:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with (default .Values.global.serviceMonitor.metricRelabelings .Values.queryFrontend.serviceMonitor.metricRelabelings) }}
       metricRelabelings:
         {{- toYaml . | nindent 8 }}
