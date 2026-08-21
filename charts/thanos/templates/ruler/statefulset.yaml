@@ -169,8 +169,9 @@ spec:
         {{- range .Values.ruler.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- if .Values.ruler.persistence.storageClass }}
-        storageClassName: {{ .Values.ruler.persistence.storageClass }}
+        {{- $sc := default .Values.global.storageClass .Values.ruler.persistence.storageClass }}
+        {{- if $sc }}
+        storageClassName: {{ $sc | quote }}
         {{- end }}
         {{- include "thanos.volumeAttributesClassName" (dict "root" . "key" "ruler" "persistence" .Values.ruler.persistence) | indent 8 }}
         resources:
