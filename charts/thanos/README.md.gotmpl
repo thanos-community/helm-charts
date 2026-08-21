@@ -430,6 +430,39 @@ ruler:
     labelSelector: {}
 ```
 
+### Persistence
+
+Compactor, Receive (the Ingester in split mode), Ruler and Store Gateway are StatefulSets and provision their own PersistentVolumeClaims from a `volumeClaimTemplate`:
+
+```yaml
+compactor:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""            # empty uses the cluster default StorageClass
+    accessModes:
+      - ReadWriteOnce
+```
+
+Set `persistence.enabled: false` on a component to run it on an `emptyDir` instead. Everything is then lost on restart, which is fine for a scratch Compactor but not for Receive.
+
+#### Using a pre-provisioned claim
+
+`persistence.existingClaim` mounts a PVC you created yourself and skips the `volumeClaimTemplate` entirely, which is what you want when the volume is managed outside the chart — restored from a snapshot, provisioned by Terraform, or shared with another tool:
+
+```yaml
+ruler:
+  persistence:
+    enabled: true
+    existingClaim: thanos-ruler-data   # size, storageClass and accessModes are ignored
+```
+
+Three things to keep in mind:
+
+- The claim is mounted by **every replica** of the StatefulSet, unlike a `volumeClaimTemplate`, which gives each pod its own claim. Only use `existingClaim` on a single-replica component, or with an access mode that genuinely supports concurrent writers — Thanos does not expect two processes writing the same TSDB or index cache directory.
+- `persistence.enabled: false` wins. With persistence off the component gets an `emptyDir` and `existingClaim` is ignored.
+- A **sharded** Store Gateway falls back to `volumeClaimTemplates` and ignores `existingClaim`, because each shard needs its own volume and a single claim cannot be split across them.
+
 ### ServiceAccounts
 
 By default every component runs as a single chart-wide ServiceAccount named `<release>-thanos-thanos`, created when `global.serviceAccount.create` is true:

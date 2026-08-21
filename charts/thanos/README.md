@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.36.0](https://img.shields.io/badge/Version-0.36.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.37.0](https://img.shields.io/badge/Version-0.37.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -442,6 +442,39 @@ ruler:
     labelSelector: {}
 ```
 
+### Persistence
+
+Compactor, Receive (the Ingester in split mode), Ruler and Store Gateway are StatefulSets and provision their own PersistentVolumeClaims from a `volumeClaimTemplate`:
+
+```yaml
+compactor:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""            # empty uses the cluster default StorageClass
+    accessModes:
+      - ReadWriteOnce
+```
+
+Set `persistence.enabled: false` on a component to run it on an `emptyDir` instead. Everything is then lost on restart, which is fine for a scratch Compactor but not for Receive.
+
+#### Using a pre-provisioned claim
+
+`persistence.existingClaim` mounts a PVC you created yourself and skips the `volumeClaimTemplate` entirely, which is what you want when the volume is managed outside the chart — restored from a snapshot, provisioned by Terraform, or shared with another tool:
+
+```yaml
+ruler:
+  persistence:
+    enabled: true
+    existingClaim: thanos-ruler-data   # size, storageClass and accessModes are ignored
+```
+
+Three things to keep in mind:
+
+- The claim is mounted by **every replica** of the StatefulSet, unlike a `volumeClaimTemplate`, which gives each pod its own claim. Only use `existingClaim` on a single-replica component, or with an access mode that genuinely supports concurrent writers — Thanos does not expect two processes writing the same TSDB or index cache directory.
+- `persistence.enabled: false` wins. With persistence off the component gets an `emptyDir` and `existingClaim` is ignored.
+- A **sharded** Store Gateway falls back to `volumeClaimTemplates` and ignores `existingClaim`, because each shard needs its own volume and a single claim cannot be split across them.
+
 ### ServiceAccounts
 
 By default every component runs as a single chart-wide ServiceAccount named `<release>-thanos-thanos`, created when `global.serviceAccount.create` is true:
@@ -702,6 +735,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.pdb.minAvailable | int or string | `""` | Minimum available Compactor pods during a disruption. |
 | compactor.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | compactor.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Compactor working directory. |
+| compactor.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. |
 | compactor.persistence.size | string | `"10Gi"` | Storage capacity for the Compactor PVC (used as a scratch space during compaction). |
 | compactor.persistence.storageClass | string | `""` | StorageClass name for the Compactor PVC. Empty uses the cluster default. |
 | compactor.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Compactor PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
@@ -1079,7 +1113,12 @@ The table below documents all available values. Top-level keys group settings by
 | receive.httpRoute.matches | list | [] | Gateway matches for the Receive HTTPRoute rules. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
 | receive.httpRoute.timeouts | object | {} | Timeouts for the Receive HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
-| receive.ingester | object | {} | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. |
+| receive.ingester | object | see `receive.ingester.persistence.*` below | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. Only `persistence` is defaulted by the chart. |
+| receive.ingester.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ingester TSDB WAL. |
+| receive.ingester.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. |
+| receive.ingester.persistence.size | string | `"10Gi"` | Storage capacity for the Ingester PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
+| receive.ingester.persistence.storageClass | string | `""` | StorageClass name for the Ingester PVC. Empty uses the cluster default. |
+| receive.ingester.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ingester PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
 | receive.ingress.annotations | object | {} | Deprecated. Use `receive.ingress.http.annotations` instead. |
 | receive.ingress.className | string | `""` | Deprecated. Use `receive.ingress.http.className` instead. |
 | receive.ingress.enabled | bool | `false` | Deprecated. Use `receive.ingress.http.enabled` instead. |
@@ -1117,6 +1156,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.pdb.minAvailable | int or string | `""` | Minimum available Receive pods during a disruption. |
 | receive.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | receive.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Receive TSDB WAL. |
+| receive.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. |
 | receive.persistence.size | string | `"10Gi"` | Storage capacity for the Receive PVC. Should be sized to hold at least `tsdb.retention` worth of data. |
 | receive.persistence.storageClass | string | `""` | StorageClass name for the Receive PVC. Empty uses the cluster default. |
 | receive.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Receive PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
@@ -1318,6 +1358,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.pdb.minAvailable | int or string | `""` | Minimum available Ruler pods during a disruption. |
 | ruler.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | ruler.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ruler data directory. |
+| ruler.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. |
 | ruler.persistence.size | string | `"10Gi"` | Storage capacity for the Ruler PVC. |
 | ruler.persistence.storageClass | string | `""` | StorageClass name for the Ruler PVC. Empty uses the cluster default. |
 | ruler.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Ruler PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
@@ -1439,6 +1480,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.pdb.minAvailable | int or string | `""` | Minimum available Store Gateway pods during a disruption. |
 | storegateway.persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
 | storegateway.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Store Gateway index cache and chunk store. |
+| storegateway.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. Not compatible with sharded mode — each shard requires its own PVC, use the default volumeClaimTemplates instead. |
 | storegateway.persistence.size | string | `"10Gi"` | Storage capacity for the Store Gateway PVC. |
 | storegateway.persistence.storageClass | string | `""` | StorageClass name for the Store Gateway PVC. Empty uses the cluster default. |
 | storegateway.persistence.volumeAttributesClassName | string | `""` | [Volume attributes class](https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/) name for the Store Gateway PVC. Requires Kubernetes 1.31+ ([with feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/#feature-gates-for-graduated-or-deprecated-features)) or 1.36+. Chart will fail if provided but not supported by cluster. |
