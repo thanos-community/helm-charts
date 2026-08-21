@@ -2247,13 +2247,6 @@
           "title": "priorityClassName",
           "type": "string"
         },
-        "storageClass": {
-          "default": "",
-          "description": "Default StorageClass name to use for PersistentVolumeClaims. When empty, components fall back to their own storageClass behavior, which means the cluster default StorageClass will apply when the component storageClass is also empty.",
-          "required": [],
-          "title": "storageClass",
-          "type": "string"
-        },
         "rbac": {
           "additionalProperties": true,
           "description": "RBAC and ServiceAccount defaults.\nRBAC configuration applied globally across all components.",
@@ -2422,6 +2415,13 @@
           ],
           "title": "serviceMonitor",
           "type": "object"
+        },
+        "storageClass": {
+          "default": "",
+          "description": "Default StorageClass name for every PersistentVolumeClaim the chart creates. A component's own `persistence.storageClass` takes precedence; when both are empty nothing is rendered and the cluster default StorageClass applies.",
+          "required": [],
+          "title": "storageClass",
+          "type": "string"
         },
         "thanosRules": {
           "additionalProperties": true,

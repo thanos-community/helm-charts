@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.37.0](https://img.shields.io/badge/Version-0.37.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.38.0](https://img.shields.io/badge/Version-0.38.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -221,6 +221,10 @@ global:
   resources: {}
   nodeSelector: {}
   tolerations: []
+
+  # Fallback StorageClass for every PVC the chart creates. A component's own
+  # persistence.storageClass wins; empty on both means the cluster default.
+  storageClass: ""
 ```
 
 ### Query
@@ -451,12 +455,27 @@ compactor:
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: ""            # empty uses the cluster default StorageClass
+    storageClass: ""            # falls back to global.storageClass, then the cluster default
     accessModes:
       - ReadWriteOnce
 ```
 
 Set `persistence.enabled: false` on a component to run it on an `emptyDir` instead. Everything is then lost on restart, which is fine for a scratch Compactor but not for Receive.
+
+#### Choosing a StorageClass
+
+`persistence.storageClass` is resolved per component, with `global.storageClass` as the chart-wide fallback:
+
+```yaml
+global:
+  storageClass: fast-ssd       # used by every PVC the chart creates
+
+storegateway:
+  persistence:
+    storageClass: bulk-hdd     # except this one, which wins locally
+```
+
+When both are empty no `storageClassName` is rendered at all and the cluster default StorageClass applies, which is the behaviour of an install that sets neither. `storageClass` is ignored entirely when `existingClaim` is set — the pre-provisioned claim already has one.
 
 #### Using a pre-provisioned claim
 
@@ -575,6 +594,43 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
+
+### Upgrading to 0.38.0 — `global.storageClass`
+
+`global.storageClass` is new in 0.38.0 and is used as the fallback `storageClassName` for every PersistentVolumeClaim the chart creates — Compactor, Receive, Ruler and Store Gateway. A component's own `persistence.storageClass` still wins, and when both are empty nothing is rendered, so an install that never set either keeps using the cluster default StorageClass and is unaffected.
+
+The one case that needs attention is an umbrella chart. `global` values propagate into subcharts, so if the parent chart already sets `global.storageClass` for another dependency, Thanos now picks it up and renders a `storageClassName` on StatefulSets that previously had none. `volumeClaimTemplates` are immutable, so the API server rejects the upgrade with `field is immutable`.
+
+Check before upgrading:
+
+```bash
+helm get values thanos --namespace monitoring --all | grep -A1 '^global:'
+kubectl get statefulset --namespace monitoring \
+  --selector app.kubernetes.io/part-of=thanos \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.volumeClaimTemplates[*].spec.storageClassName}{"\n"}{end}'
+```
+
+If a `global.storageClass` is in play and the existing claims render a different class (or none), either pin the previous behaviour per component:
+
+```yaml
+compactor:
+  persistence:
+    storageClass: ""   # and the same for receive, ruler, storegateway
+```
+
+or recreate the StatefulSets once, which leaves the pods and PVCs running:
+
+```bash
+kubectl delete statefulset --namespace monitoring \
+  --selector app.kubernetes.io/part-of=thanos,app.kubernetes.io/instance=thanos \
+  --cascade=orphan
+
+helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  -f values.yaml
+```
+
+Recreating the StatefulSet only changes the template. Existing PVCs are never touched by a StatefulSet, so the new class applies to claims created from then on; move existing data with a restore or a volume clone if you actually want it on the new class.
 
 ### Upgrading to 0.36.0 — selector labels
 
@@ -828,7 +884,6 @@ The table below documents all available values. Top-level keys group settings by
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
-| global.storageClass | string | `""` | Default StorageClass name to use for PersistentVolumeClaims. When empty (`""`), components fall back to their own storageClass behavior. When a component storageClass is also empty, the cluster default StorageClass applies. Component-level `persistence.storageClass` values override `global.storageClass`. |
 | global.rbac.create | bool | `true` | Create RBAC resources (ClusterRole, ClusterRoleBinding) required by components that need cluster-level access (e.g. Ruler auto-import). |
 | global.resources | object | {} | Default resource requests and limits. Override per component as needed. |
 | global.serviceAccount.annotations | object | {} | Extra annotations merged into every ServiceAccount, including the per-component ones (e.g. a shared IRSA or Workload Identity annotation). |
@@ -846,6 +901,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.serviceMonitor.scheme | string | `""` | Scrape scheme: http or https. |
 | global.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout. Empty string uses the Prometheus operator default. |
 | global.serviceMonitor.tlsConfig | object | {} | TLS configuration for scraping when scheme is https. |
+| global.storageClass | string | `""` | Default StorageClass name for every PersistentVolumeClaim the chart creates (Compactor, Receive, Ruler and Store Gateway). A component's own `persistence.storageClass` takes precedence; when both are empty no `storageClassName` is rendered and the cluster default StorageClass applies. |
 | global.thanosRules.additionalRuleGroupAnnotations | object | {} | Annotations added to every alert rule across all groups. Applied on top of the rule's default annotations (summary, description, runbook_url). |
 | global.thanosRules.additionalRuleGroupLabels | object | {} | Labels added to every alert rule across all groups. Applied on top of the rule's default labels (severity). Useful for routing alerts to specific Alertmanager receivers (e.g. team, tenant). |
 | global.thanosRules.alertOverrides | object | {} | Per-alert label overrides. Keys are alert names; values are dicts of labels to merge into that alert's labels block. Useful for routing specific alerts to different receivers or adding custom metadata. |

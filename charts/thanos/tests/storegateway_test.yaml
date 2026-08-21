@@ -177,6 +177,91 @@ tests:
               claimName: ""
           any: true
 
+  - it: falls back to global.storageClass when storegateway sets none
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: lets storegateway.persistence.storageClass win over global.storageClass
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      global.storageClass: global-sc
+      storegateway.persistence.storageClass: storegateway-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: storegateway-sc
+
+  - it: falls back to global.storageClass on every shard when sharded
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 3
+      global.storageClass: global-sc
+    asserts:
+      - hasDocuments:
+          count: 3
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+        documentIndex: 0
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+        documentIndex: 1
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+        documentIndex: 2
+
+  - it: lets storegateway.persistence.storageClass win on every shard
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      global.storageClass: global-sc
+      storegateway.persistence.storageClass: storegateway-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: storegateway-sc
+        documentIndex: 0
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: storegateway-sc
+        documentIndex: 1
+
+  - it: still renders the shard storageClass when existingClaim is set and ignored
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.persistence.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.persistence.existingClaim: storegateway-existing-pvc
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+        documentIndex: 0
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+        documentIndex: 1
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component labels

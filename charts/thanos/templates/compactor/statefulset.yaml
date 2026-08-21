@@ -114,11 +114,7 @@ spec:
         {{- range .Values.compactor.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- $sc := default .Values.global.storageClass .Values.compactor.persistence.storageClass }}
-        {{- if $sc }}
-        storageClassName: {{ $sc | quote }}
-        {{- end }}
-        {{- include "thanos.volumeAttributesClassName" (dict "root" . "key" "compactor" "persistence" .Values.compactor.persistence) | indent 8 }}
+        {{- include "thanos.storageClass" (dict "root" . "key" "compactor" "persistence" .Values.compactor.persistence) | indent 8 }}
         resources:
           requests:
             storage: {{ .Values.compactor.persistence.size }}

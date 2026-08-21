@@ -293,6 +293,22 @@ volumeAttributesClassName: {{ . | quote }}
 {{- end }}
 
 {{- /*
+Render the storage-class fields of a PVC spec: `storageClassName`, taken from the
+component's own `persistence.storageClass` and falling back to the chart-wide
+`global.storageClass` when it is empty, followed by `volumeAttributesClassName`.
+Renders nothing when neither is set, so the cluster default StorageClass applies.
+Usage:
+  {{ include "thanos.storageClass" (dict "root" . "key" "compactor" "persistence" .Values.compactor.persistence) }}
+*/ -}}
+{{- define "thanos.storageClass" }}
+{{- $sc := .persistence.storageClass | default .root.Values.global.storageClass }}
+{{- with $sc }}
+storageClassName: {{ . | quote }}
+{{- end }}
+{{- include "thanos.volumeAttributesClassName" (dict "root" .root "key" .key "persistence" .persistence) }}
+{{- end }}
+
+{{- /*
 Render extra volume entries (concatenated) from global, optional parent, then component.
 Usage:
   {{ include "thanos.extraVolumeItems" (dict "root" . "key" "compactor") }}
