@@ -234,6 +234,28 @@ tests:
               claimName: ""
           any: true
 
+  - it: ignores existingClaim when persistence is disabled
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.persistence.enabled: false
+      compactor.persistence.existingClaim: compactor-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: compactor-existing-pvc
+          any: true
+      - notExists:
+          path: spec.volumeClaimTemplates
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations

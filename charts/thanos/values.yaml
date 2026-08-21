@@ -2713,11 +2713,15 @@ receive:
   # extraInitContainers, extraContainers, probes, nodeSelector, tolerations,
   # affinity, topologySpreadConstraints, priorityClassName, extraVolumes,
   # extraVolumeMounts, annotations, labels, serviceMonitor, pdb, serviceAccount,
-  # tenancyHeader). Leave empty (`{}`) in standalone mode.
+  # tenancyHeader). Ignored entirely in standalone mode.
+  #
+  # `persistence` is the only sub-block with chart defaults, so that a split-mode
+  # install that does not care about storage still renders; every other field
+  # above has to be supplied.
   # ======================================================================
   # -- Ingester StatefulSet config. Required when `receive.mode` is `split`;
-  # ignored in `standalone` mode.
-  # @default -- {}
+  # ignored in `standalone` mode. Only `persistence` is defaulted by the chart.
+  # @default -- see `receive.ingester.persistence.*` below
   ingester:
     # PersistentVolumeClaim configuration for the Ingester TSDB WAL.
     persistence:

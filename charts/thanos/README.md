@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.36.0](https://img.shields.io/badge/Version-0.36.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.37.0](https://img.shields.io/badge/Version-0.37.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -441,6 +441,39 @@ ruler:
     enabled: true
     labelSelector: {}
 ```
+
+### Persistence
+
+Compactor, Receive (the Ingester in split mode), Ruler and Store Gateway are StatefulSets and provision their own PersistentVolumeClaims from a `volumeClaimTemplate`:
+
+```yaml
+compactor:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""            # empty uses the cluster default StorageClass
+    accessModes:
+      - ReadWriteOnce
+```
+
+Set `persistence.enabled: false` on a component to run it on an `emptyDir` instead. Everything is then lost on restart, which is fine for a scratch Compactor but not for Receive.
+
+#### Using a pre-provisioned claim
+
+`persistence.existingClaim` mounts a PVC you created yourself and skips the `volumeClaimTemplate` entirely, which is what you want when the volume is managed outside the chart — restored from a snapshot, provisioned by Terraform, or shared with another tool:
+
+```yaml
+ruler:
+  persistence:
+    enabled: true
+    existingClaim: thanos-ruler-data   # size, storageClass and accessModes are ignored
+```
+
+Three things to keep in mind:
+
+- The claim is mounted by **every replica** of the StatefulSet, unlike a `volumeClaimTemplate`, which gives each pod its own claim. Only use `existingClaim` on a single-replica component, or with an access mode that genuinely supports concurrent writers — Thanos does not expect two processes writing the same TSDB or index cache directory.
+- `persistence.enabled: false` wins. With persistence off the component gets an `emptyDir` and `existingClaim` is ignored.
+- A **sharded** Store Gateway falls back to `volumeClaimTemplates` and ignores `existingClaim`, because each shard needs its own volume and a single claim cannot be split across them.
 
 ### ServiceAccounts
 
@@ -1080,7 +1113,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.httpRoute.matches | list | [] | Gateway matches for the Receive HTTPRoute rules. |
 | receive.httpRoute.parentRefs | list | [] | Gateway parentRefs for the Receive HTTPRoute. |
 | receive.httpRoute.timeouts | object | {} | Timeouts for the Receive HTTPRoute rule (Gateway API HTTPRouteTimeouts). |
-| receive.ingester | object | {} | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. |
+| receive.ingester | object | see `receive.ingester.persistence.*` below | Ingester StatefulSet config. Required when `receive.mode` is `split`; ignored in `standalone` mode. Only `persistence` is defaulted by the chart. |
 | receive.ingester.persistence.enabled | bool | `true` | Enable a PersistentVolumeClaim for the Ingester TSDB WAL. |
 | receive.ingester.persistence.existingClaim | string | `""` | Use an existing PersistentVolumeClaim. When set, no volumeClaimTemplate is created and the named PVC is mounted directly. Takes precedence over size, storageClass and accessModes. |
 | receive.ingester.persistence.size | string | `"10Gi"` | Storage capacity for the Ingester PVC. Should be sized to hold at least `tsdb.retention` worth of data. |

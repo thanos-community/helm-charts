@@ -236,6 +236,41 @@ tests:
               claimName: ""
           any: true
 
+  - it: honours receive.persistence.accessModes on the generated claim
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      receive.persistence.accessModes:
+        - ReadWriteMany
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.accessModes
+          value:
+            - ReadWriteMany
+
+  - it: ignores existingClaim when persistence is disabled
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: false
+      receive.persistence.existingClaim: receive-existing-pvc
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: receive-existing-pvc
+          any: true
+      - notExists:
+          path: spec.volumeClaimTemplates
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
