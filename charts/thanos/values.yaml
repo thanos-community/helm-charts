@@ -107,6 +107,12 @@ global:
   # -- Priority class name applied to every pod by default.
   priorityClassName: ""
 
+  # -- Default StorageClass name for every PersistentVolumeClaim the chart
+  # creates (Compactor, Receive, Ruler and Store Gateway). A component's own
+  # `persistence.storageClass` takes precedence; when both are empty no
+  # `storageClassName` is rendered and the cluster default StorageClass applies.
+  storageClass: ""
+
   # -- Extra environment variables injected into every main container by default.
   # @default -- []
   extraEnv: []

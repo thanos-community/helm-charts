@@ -296,3 +296,105 @@ tests:
     asserts:
       - notExists:
           path: spec.template.metadata.annotations.placeholder
+
+  # -- global.storageClass -----------------------------------------------
+
+  - it: renders no storageClassName when neither global nor component sets one
+    templates:
+      - compactor/statefulset.yaml
+      - receive/statefulset.yaml
+      - ruler/statefulset.yaml
+      - storegateway/statefulset.yaml
+    set:
+      receive.enabled: true
+      ruler.enabled: true
+    asserts:
+      - notExists:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+
+  - it: falls back to global.storageClass on every PVC-producing component
+    templates:
+      - compactor/statefulset.yaml
+      - receive/statefulset.yaml
+      - ruler/statefulset.yaml
+      - storegateway/statefulset.yaml
+    set:
+      receive.enabled: true
+      ruler.enabled: true
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: lets the component storageClass win over global.storageClass
+    templates:
+      - compactor/statefulset.yaml
+      - receive/statefulset.yaml
+      - ruler/statefulset.yaml
+      - storegateway/statefulset.yaml
+    set:
+      receive.enabled: true
+      ruler.enabled: true
+      global.storageClass: global-sc
+      compactor.persistence.storageClass: compactor-sc
+      receive.persistence.storageClass: receive-sc
+      ruler.persistence.storageClass: ruler-sc
+      storegateway.persistence.storageClass: storegateway-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: compactor-sc
+        template: compactor/statefulset.yaml
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: receive-sc
+        template: receive/statefulset.yaml
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ruler-sc
+        template: ruler/statefulset.yaml
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: storegateway-sc
+        template: storegateway/statefulset.yaml
+
+  - it: keeps volumeAttributesClassName alongside the global storageClass
+    template: compactor/statefulset.yaml
+    set:
+      global.storageClass: global-sc
+      compactor.persistence.volumeAttributesClassName: gold
+    capabilities:
+      apiVersions:
+        - storage.k8s.io/v1/VolumeAttributesClass
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.volumeAttributesClassName
+          value: gold
+
+  - it: does not render storageClassName when persistence is disabled
+    template: compactor/statefulset.yaml
+    set:
+      global.storageClass: global-sc
+      compactor.persistence.enabled: false
+    asserts:
+      - notExists:
+          path: spec.volumeClaimTemplates
+
+  - it: ignores global.storageClass when a component mounts an existing claim
+    template: compactor/statefulset.yaml
+    set:
+      global.storageClass: global-sc
+      compactor.persistence.existingClaim: compactor-existing-pvc
+    asserts:
+      - notExists:
+          path: spec.volumeClaimTemplates
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: compactor-existing-pvc

@@ -209,6 +209,10 @@ global:
   resources: {}
   nodeSelector: {}
   tolerations: []
+
+  # Fallback StorageClass for every PVC the chart creates. A component's own
+  # persistence.storageClass wins; empty on both means the cluster default.
+  storageClass: ""
 ```
 
 ### Query
@@ -439,12 +443,27 @@ compactor:
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: ""            # empty uses the cluster default StorageClass
+    storageClass: ""            # falls back to global.storageClass, then the cluster default
     accessModes:
       - ReadWriteOnce
 ```
 
 Set `persistence.enabled: false` on a component to run it on an `emptyDir` instead. Everything is then lost on restart, which is fine for a scratch Compactor but not for Receive.
+
+#### Choosing a StorageClass
+
+`persistence.storageClass` is resolved per component, with `global.storageClass` as the chart-wide fallback:
+
+```yaml
+global:
+  storageClass: fast-ssd       # used by every PVC the chart creates
+
+storegateway:
+  persistence:
+    storageClass: bulk-hdd     # except this one, which wins locally
+```
+
+When both are empty no `storageClassName` is rendered at all and the cluster default StorageClass applies, which is the behaviour of an install that sets neither. `storageClass` is ignored entirely when `existingClaim` is set — the pre-provisioned claim already has one.
 
 #### Using a pre-provisioned claim
 
@@ -563,6 +582,43 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
+
+### Upgrading to 0.38.0 — `global.storageClass`
+
+`global.storageClass` is new in 0.38.0 and is used as the fallback `storageClassName` for every PersistentVolumeClaim the chart creates — Compactor, Receive, Ruler and Store Gateway. A component's own `persistence.storageClass` still wins, and when both are empty nothing is rendered, so an install that never set either keeps using the cluster default StorageClass and is unaffected.
+
+The one case that needs attention is an umbrella chart. `global` values propagate into subcharts, so if the parent chart already sets `global.storageClass` for another dependency, Thanos now picks it up and renders a `storageClassName` on StatefulSets that previously had none. `volumeClaimTemplates` are immutable, so the API server rejects the upgrade with `field is immutable`.
+
+Check before upgrading:
+
+```bash
+helm get values thanos --namespace monitoring --all | grep -A1 '^global:'
+kubectl get statefulset --namespace monitoring \
+  --selector app.kubernetes.io/part-of=thanos \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.volumeClaimTemplates[*].spec.storageClassName}{"\n"}{end}'
+```
+
+If a `global.storageClass` is in play and the existing claims render a different class (or none), either pin the previous behaviour per component:
+
+```yaml
+compactor:
+  persistence:
+    storageClass: ""   # and the same for receive, ruler, storegateway
+```
+
+or recreate the StatefulSets once, which leaves the pods and PVCs running:
+
+```bash
+kubectl delete statefulset --namespace monitoring \
+  --selector app.kubernetes.io/part-of=thanos,app.kubernetes.io/instance=thanos \
+  --cascade=orphan
+
+helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
+  --namespace monitoring \
+  -f values.yaml
+```
+
+Recreating the StatefulSet only changes the template. Existing PVCs are never touched by a StatefulSet, so the new class applies to claims created from then on; move existing data with a restore or a volume clone if you actually want it on the new class.
 
 ### Upgrading to 0.36.0 — selector labels
 

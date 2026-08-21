@@ -2416,6 +2416,13 @@
           "title": "serviceMonitor",
           "type": "object"
         },
+        "storageClass": {
+          "default": "",
+          "description": "Default StorageClass name for every PersistentVolumeClaim the chart creates. A component's own `persistence.storageClass` takes precedence; when both are empty nothing is rendered and the cluster default StorageClass applies.",
+          "required": [],
+          "title": "storageClass",
+          "type": "string"
+        },
         "thanosRules": {
           "additionalProperties": true,
           "description": "Built-in Thanos alerting rules deployed as PrometheusRule CRDs. Sourced from the upstream Thanos monitoring-mixin and grouped per Thanos component. Each group can be toggled and decorated with labels and annotations.",

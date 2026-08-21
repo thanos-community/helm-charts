@@ -129,6 +129,29 @@ tests:
           path: spec.volumeClaimTemplates[0].spec.resources.requests.storage
           value: 10Gi
 
+  - it: falls back to global.storageClass when ruler sets none
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: true
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: lets ruler.persistence.storageClass win over global.storageClass
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.persistence.enabled: true
+      global.storageClass: global-sc
+      ruler.persistence.storageClass: ruler-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ruler-sc
+
   - it: uses emptyDir when persistence is disabled
     template: ruler/statefulset.yaml
     set:

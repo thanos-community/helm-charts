@@ -154,10 +154,7 @@ spec:
         {{- range $cfg.persistence.accessModes | default (list "ReadWriteOnce") }}
           - {{ . | quote }}
         {{- end }}
-        {{- if $cfg.persistence.storageClass }}
-        storageClassName: {{ $cfg.persistence.storageClass }}
-        {{- end }}
-        {{- include "thanos.volumeAttributesClassName" (dict "root" . "key" "receive" "persistence" $cfg.persistence) | indent 8 }}
+        {{- include "thanos.storageClass" (dict "root" . "key" "receive" "persistence" $cfg.persistence) | indent 8 }}
         resources:
           requests:
             storage: {{ $cfg.persistence.size }}

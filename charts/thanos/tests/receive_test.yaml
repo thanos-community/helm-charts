@@ -271,6 +271,52 @@ tests:
       - notExists:
           path: spec.volumeClaimTemplates
 
+  - it: falls back to global.storageClass when receive sets none
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: lets receive.persistence.storageClass win over global.storageClass
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.persistence.enabled: true
+      global.storageClass: global-sc
+      receive.persistence.storageClass: receive-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: receive-sc
+
+  - it: falls back to global.storageClass on the ingester in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      global.storageClass: global-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: global-sc
+
+  - it: lets receive.ingester.persistence.storageClass win in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      global.storageClass: global-sc
+      receive.ingester.persistence.storageClass: ingester-sc
+    asserts:
+      - equal:
+          path: spec.volumeClaimTemplates[0].spec.storageClassName
+          value: ingester-sc
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
