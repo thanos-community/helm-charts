@@ -884,8 +884,8 @@ The table below documents all available values. Top-level keys group settings by
 | global.podAnnotations | object | {} | Annotations added to every pod by default. Component-level annotations are merged on top. |
 | global.podSecurityContext | object | {} | Pod-level security context applied to every pod. Component-level values override this. |
 | global.priorityClassName | string | `""` | Priority class name applied to every pod by default. |
-| global.probes | object | `{"scheme":"","tcpSocket":false}` | Probe defaults shared by every component. A component's own `probes` block overrides these. |
-| global.probes.scheme | string | `""` | Scheme for HTTP probes. Set to `HTTPS` when components serve TLS through `--http.config` (https://thanos.io/tip/operating/https.md/). Omitted when empty, so rendered manifests are unchanged unless this is set. |
+| global.probes | object | `{"scheme":"","tcpSocket":false}` | Probe *transport* defaults shared by every component: `scheme` and `tcpSocket` only. Timings and paths are not inherited from here — set those on each component's own `probes.readiness`/`liveness`/`startup`. Any other key here fails schema validation. |
+| global.probes.scheme | string | `""` | Scheme for HTTP probes. Uppercase, as the kubelet requires — unlike its neighbour `serviceMonitor.scheme`, which is lowercase. Set to `HTTPS` when components serve TLS through `--http.config` (https://thanos.io/tip/operating/https.md/). Omitted when empty, so rendered manifests are unchanged unless this is set. |
 | global.probes.tcpSocket | bool | `false` | Use a TCP probe instead of an HTTP one. Required when `--http.config` sets `basic_auth_users`: Thanos protects `/-/healthy` and `/-/ready` too, so HTTP probes 401. |
 | global.rbac.create | bool | `true` | Create RBAC resources (ClusterRole, ClusterRoleBinding) required by components that need cluster-level access (e.g. Ruler auto-import). |
 | global.resources | object | {} | Default resource requests and limits. Override per component as needed. |
