@@ -553,6 +553,17 @@
                   "title": "readiness",
                   "type": "object"
                 },
+                "scheme": {
+                  "description": "Scheme for HTTP probes for Bucketweb, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+                  "enum": [
+                    "",
+                    "HTTP",
+                    "HTTPS"
+                  ],
+                  "required": [],
+                  "title": "scheme",
+                  "type": "string"
+                },
                 "startup": {
                   "additionalProperties": true,
                   "description": "Startup probe for Bucketweb.",
@@ -618,6 +629,12 @@
                   ],
                   "title": "startup",
                   "type": "object"
+                },
+                "tcpSocket": {
+                  "description": "Use a TCP probe instead of an HTTP one for Bucketweb, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+                  "required": [],
+                  "title": "tcpSocket",
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -1501,6 +1518,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Compactor, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Compactor.",
@@ -1566,6 +1594,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Compactor, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
@@ -3479,6 +3513,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Query component, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Query component.",
@@ -3544,6 +3589,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Query component, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
@@ -4401,6 +4452,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Query Frontend, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Query Frontend.",
@@ -4466,6 +4528,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Query Frontend, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
@@ -5795,6 +5863,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Receive component, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Receive component.",
@@ -5860,6 +5939,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Receive component, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
@@ -6994,6 +7079,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Ruler component, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Ruler component.",
@@ -7059,6 +7155,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Ruler component, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
@@ -8353,6 +8455,17 @@
               "title": "readiness",
               "type": "object"
             },
+            "scheme": {
+              "description": "Scheme for HTTP probes for the Store Gateway, overriding global.probes.scheme. Uppercase, as the kubelet requires. Set to HTTPS when this component serves TLS through --http.config.",
+              "enum": [
+                "",
+                "HTTP",
+                "HTTPS"
+              ],
+              "required": [],
+              "title": "scheme",
+              "type": "string"
+            },
             "startup": {
               "additionalProperties": true,
               "description": "Startup probe for the Store Gateway.",
@@ -8418,6 +8531,12 @@
               ],
               "title": "startup",
               "type": "object"
+            },
+            "tcpSocket": {
+              "description": "Use a TCP probe instead of an HTTP one for the Store Gateway, overriding global.probes.tcpSocket. Required when --http.config sets basic_auth_users, which also protects /-/healthy and /-/ready. Set false here to opt out of a global true.",
+              "required": [],
+              "title": "tcpSocket",
+              "type": "boolean"
             }
           },
           "required": [
