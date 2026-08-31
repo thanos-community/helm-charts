@@ -1,4 +1,5 @@
 {{- if .Values.ruler.enabled }}
+{{- $stateless := .Values.ruler.remoteWrite.enabled -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -30,11 +31,21 @@ spec:
         {{- include "thanos.labels" . | nindent 8 }}
         app.kubernetes.io/component: ruler
         {{- include "thanos.podLabels" (dict "root" . "key" "ruler") | nindent 8 }}
+      {{- $anns := dict -}}
+      {{- if $stateless }}
+      {{- if .Values.ruler.remoteWrite.createSecret }}
+      {{- $_ := set $anns "checksum/remote-write-configuration" (.Values.ruler.remoteWrite.config | sha256sum) -}}
+      {{- end }}
+      {{- else }}
+      {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
+      {{- end }}
+      {{- with .Values.global.podAnnotations }}
+      {{- $anns = merge $anns . -}}
+      {{- end }}
+      {{- with $anns }}
       annotations:
-        checksum/objstore-configuration: {{ .Values.global.objstore.config | sha256sum }}
-        {{- with .Values.global.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "ruler") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "ruler") | nindent 6 }}
@@ -49,7 +60,11 @@ spec:
             - --http-address=0.0.0.0:{{ .Values.ruler.service.httpPort }}
             - --grpc-address=0.0.0.0:{{ .Values.ruler.service.grpcPort }}
             - --data-dir=/var/thanos/ruler
+          {{- if $stateless }}
+            - --remote-write.config-file=/etc/thanos/remote-write.yml
+          {{- else }}
             - --objstore.config-file=/etc/thanos/objstore.yml
+          {{- end }}
             - --rule-file=/etc/thanos/rules/*.yaml
             - --label=ruler_replica="$(POD_NAME)"
             - --alert.label-drop=ruler_replica
@@ -73,10 +88,17 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/thanos/ruler
+          {{- if $stateless }}
+            - name: remote-write
+              mountPath: /etc/thanos/remote-write.yml
+              subPath: remote-write.yml
+              readOnly: true
+          {{- else }}
             - name: objstore
               mountPath: /etc/thanos/objstore.yml
               subPath: objstore.yml
               readOnly: true
+          {{- end }}
             - name: rules
               mountPath: /etc/thanos/rules
           {{- if .Values.ruler.autoImportPrometheusRules.enabled }}
@@ -119,12 +141,21 @@ spec:
       {{- include "thanos.tolerations" (dict "Values" .Values "component" "ruler") | nindent 6 }}
       {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "ruler") | nindent 6 }}
       volumes:
+        {{- if $stateless }}
+        - name: remote-write
+          secret:
+            secretName: {{ .Values.ruler.remoteWrite.secretName }}
+            items:
+              - key: {{ .Values.ruler.remoteWrite.secretKey }}
+                path: remote-write.yml
+        {{- else }}
         - name: objstore
           secret:
             secretName: {{ .Values.global.objstore.secretName }}
             items:
               - key: {{ .Values.global.objstore.secretKey }}
                 path: objstore.yml
+        {{- end }}
         - name: rules
           configMap:
             name: {{ include "thanos.compName" (list . "ruler") }}-rules

@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.39.0](https://img.shields.io/badge/Version-0.39.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.42.0](https://img.shields.io/badge/Version-0.42.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -46,7 +46,7 @@ Kubernetes: `>= 1.30.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.rustfs.com/ | rustfs | 0.12.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.2.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.6.0 |
 
 ## Component Overview
 
@@ -445,6 +445,30 @@ ruler:
     enabled: true
     labelSelector: {}
 ```
+
+#### Stateless mode
+
+`ruler.remoteWrite.enabled` runs the Ruler [statelessly](https://thanos.io/tip/components/rule.md/): evaluation results are written to a remote-write endpoint — usually Receive — instead of being uploaded to the object store, and the Ruler keeps a WAL rather than a full TSDB. The chart then passes `--remote-write.config-file` in place of `--objstore.config-file` and mounts the remote-write Secret instead of the object store one.
+
+The configuration can carry credentials for the write endpoint, so it follows the same contract as `global.objstore`: the Secret is managed outside the chart by default.
+
+```yaml
+ruler:
+  enabled: true
+  remoteWrite:
+    enabled: true
+    secretName: thanos-ruler-remote-write   # created by you, e.g. from Vault or ESO
+    secretKey: remote-write.yml
+    # createSecret: true                    # opt in to let the chart render it from `config`
+    # config: |
+    #   remote_write:
+    #     - url: http://<release>-thanos-receive:10908/api/v1/receive
+```
+
+Two things to keep in mind:
+
+- A stateless Ruler serves no Store API, so the chart stops registering it as a Query endpoint. Query it through the receiver its results land in.
+- `--data-dir` and the PersistentVolumeClaim stay, since the WAL still needs somewhere to live.
 
 ### Persistence
 
@@ -1449,6 +1473,11 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.probes.startup.successThreshold | int | `1` | Consecutive successes before the Ruler startup probe is considered passed. |
 | ruler.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Ruler startup probe times out. |
 | ruler.query.urls | list | [] | List of Query component base URLs used by the Ruler to evaluate rules. |
+| ruler.remoteWrite.config | string | "" | Inline remote-write configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`. |
+| ruler.remoteWrite.createSecret | bool | `false` | When true, the chart creates `secretName` from the inline `config` below. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.). |
+| ruler.remoteWrite.enabled | bool | `false` | Run the Ruler in stateless mode. It then keeps a WAL only, stops uploading blocks and no longer serves the Store API. |
+| ruler.remoteWrite.secretKey | string | `"remote-write.yml"` | Key inside the Secret whose value is the remote-write YAML. |
+| ruler.remoteWrite.secretName | string | `"thanos-ruler-remote-write"` | Name of the Secret that carries the remote-write config. |
 | ruler.replicaCount | int | `2` | Number of Ruler pod replicas. Multiple replicas require consistent rule distribution to avoid duplicate alerts. |
 | ruler.resources | object | {} | Resource requests and limits for the Ruler container. |
 | ruler.rules."example-alerts.yaml" | string | `"groups:\n  - name: thanos-example\n    rules:\n      - alert: ExampleAlwaysFiring\n        expr: vector(1)\n        for: 1m\n        labels:\n          severity: warning\n        annotations:\n          summary: Example alert firing\n"` |  |
