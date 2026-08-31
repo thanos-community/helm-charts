@@ -1,0 +1,169 @@
+suite: receive Cap'n Proto replication
+
+tests:
+  # -- Default (protobuf) ----------------------------------------------
+
+  - it: passes no replication flags by default
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-protocol=capnproto
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.capnproto-address=0.0.0.0:19391
+
+  - it: exposes no Cap'n Proto container port by default
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: capnproto
+            containerPort: 19391
+
+  # -- Standalone mode --------------------------------------------------
+
+  - it: routes and listens over Cap'n Proto in standalone mode
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.replication.protocol: capnproto
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-protocol=capnproto
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.capnproto-address=0.0.0.0:19391
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: capnproto
+            containerPort: 19391
+
+  - it: honours a custom Cap'n Proto port
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.replication.protocol: capnproto
+      receive.service.capnprotoPort: 29391
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.capnproto-address=0.0.0.0:29391
+      - contains:
+          path: spec.template.spec.containers[0].ports
+          content:
+            name: capnproto
+            containerPort: 29391
+
+  # -- Hashring ----------------------------------------------------------
+
+  - it: keeps plain string endpoints in the hashring by default
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+      receive.replicaCount: 2
+    asserts:
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: '"RELEASE-NAME-thanos-receive-0\.RELEASE-NAME-thanos-receive-headless\.NAMESPACE\.svc\.cluster\.local:10901"'
+
+  - it: renders explicit capnproto_address endpoints in the hashring
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+      receive.replicaCount: 2
+      receive.replication.protocol: capnproto
+    asserts:
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: '"address": "RELEASE-NAME-thanos-receive-0\.RELEASE-NAME-thanos-receive-headless\.NAMESPACE\.svc\.cluster\.local:10901"'
+      - matchRegex:
+          path: data["hashrings.json"]
+          pattern: '"capnproto_address": "RELEASE-NAME-thanos-receive-1\.RELEASE-NAME-thanos-receive-headless\.NAMESPACE\.svc\.cluster\.local:19391"'
+
+  # -- Services and NetworkPolicy ----------------------------------------
+
+  - it: adds the Cap'n Proto port to the headless Service only
+    template: receive/service.yaml
+    set:
+      receive.enabled: true
+      receive.replication.protocol: capnproto
+    documentIndex: 1
+    asserts:
+      - contains:
+          path: spec.ports
+          content:
+            name: capnproto
+            port: 19391
+            targetPort: capnproto
+
+  - it: leaves the ClusterIP Service untouched
+    template: receive/service.yaml
+    set:
+      receive.enabled: true
+      receive.replication.protocol: capnproto
+    documentIndex: 0
+    asserts:
+      - notContains:
+          path: spec.ports
+          content:
+            name: capnproto
+            port: 19391
+            targetPort: capnproto
+
+  - it: opens the Cap'n Proto port in the NetworkPolicy
+    template: receive/networkpolicy.yaml
+    set:
+      receive.enabled: true
+      global.networkPolicies: true
+      receive.replication.protocol: capnproto
+    asserts:
+      - contains:
+          path: spec.ingress[0].ports
+          content:
+            port: capnproto
+
+  - it: leaves the NetworkPolicy ports untouched by default
+    template: receive/networkpolicy.yaml
+    set:
+      receive.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - notContains:
+          path: spec.ingress[0].ports
+          content:
+            port: capnproto
+
+  # -- Split mode ---------------------------------------------------------
+
+  - it: dials over Cap'n Proto from the router
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.replication.protocol: capnproto
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-protocol=capnproto
+
+  - it: listens on Cap'n Proto from the ingester without routing
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.replication.protocol: capnproto
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.capnproto-address=0.0.0.0:19391
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.replication-protocol=capnproto

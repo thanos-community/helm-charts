@@ -15,6 +15,9 @@ spec:
         - port: grpc
         - port: http
         - port: remote-write
+        {{- if eq (include "thanos.receive.isCapnproto" .) "true" }}
+        - port: capnproto
+        {{- end }}
   podSelector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 6 }}

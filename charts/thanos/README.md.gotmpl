@@ -344,6 +344,23 @@ In split mode clients should remote-write to the Router service:
 http://<release>-thanos-receive-router.<namespace>.svc.cluster.local:10908/api/v1/receive
 ```
 
+#### Cap'n Proto replication
+
+`receive.replication.protocol` selects the wire protocol used to replicate writes between Receive endpoints. It is read in both modes, like `mode`: in split mode the Router dials over it and the Ingester listens on it, in standalone mode the same workload does both.
+
+```yaml
+receive:
+  replication:
+    protocol: capnproto     # protobuf (default) | capnproto
+  service:
+    capnprotoPort: 19391    # this is the default
+```
+
+Two things to keep in mind:
+
+- The port is rendered on the container, on the headless Service and — with `global.networkPolicies` enabled — in the NetworkPolicy. It is deliberately left off the ClusterIP Service, since replication addresses one specific peer through its per-pod DNS name and a load-balanced port would reach a different one.
+- Auto-generated hashrings switch from plain string endpoints to objects carrying an explicit `capnproto_address`, which [the Thanos docs](https://thanos.io/tip/components/receive.md/) recommend over letting Thanos infer it from the gRPC address. Static hashrings are passed through untouched, so add `capnproto_address` to them yourself.
+
 ### Store Gateway
 
 The Store Gateway exposes historical blocks from the object store over the Store API. Query routes requests for older data to this component.

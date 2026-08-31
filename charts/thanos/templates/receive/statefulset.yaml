@@ -1,6 +1,7 @@
 {{- if .Values.receive.enabled }}
 {{- $isSplit := eq (include "thanos.receive.isSplit" .) "true" -}}
 {{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- $capnproto := eq (include "thanos.receive.isCapnproto" .) "true" -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -64,6 +65,12 @@ spec:
             - --receive.hashrings-algorithm=ketama
             - --receive.local-endpoint=$(NAME).{{ include "thanos.receiveHeadless" . }}.$(NAMESPACE).svc.{{ .Values.global.clusterDomain }}:{{ $cfg.service.grpcPort }}
             {{- end }}
+            {{- if $capnproto }}
+            - --receive.capnproto-address=0.0.0.0:{{ include "thanos.receive.capnprotoPort" . }}
+            {{- if not $isSplit }}
+            - --receive.replication-protocol=capnproto
+            {{- end }}
+            {{- end }}
             {{- if $cfg.tenancyHeader }}
             - --receive.tenant-header={{ $cfg.tenancyHeader }}
             {{- end }}
@@ -83,6 +90,10 @@ spec:
               containerPort: {{ default 10902 $cfg.service.httpPort }}
             - name: remote-write
               containerPort: {{ $cfg.service.remoteWritePort }}
+            {{- if $capnproto }}
+            - name: capnproto
+              containerPort: {{ include "thanos.receive.capnprotoPort" . }}
+            {{- end }}
           env:
             - name: POD_NAME
               valueFrom:
