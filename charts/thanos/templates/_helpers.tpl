@@ -954,6 +954,31 @@ shards (hashmod on __block_id). Either dimension may be used on its own.
 {{- end -}}
 
 {{- /* ============================== */ -}}
+{{- /* Ruler remote-write helpers     */ -}}
+{{- /* ============================== */ -}}
+
+{{- /*
+Name of the Secret holding the Ruler remote-write configuration.
+An explicit `secretName` always wins. With `createSecret` the chart owns the
+Secret and derives a name; without it the Secret comes from outside the release
+and must be named, since a wrong or missing name only shows up as a pod stuck
+waiting for a volume.
+*/ -}}
+{{- define "thanos.ruler.remoteWriteSecretName" -}}
+{{- $rw := .Values.ruler.remoteWrite -}}
+{{- if and $rw.createSecret (not $rw.config) -}}
+{{- fail "ruler.remoteWrite.config is required when ruler.remoteWrite.createSecret is true: an empty config renders an empty Secret, and the Ruler would evaluate rules whose results go nowhere" -}}
+{{- end -}}
+{{- if $rw.secretName -}}
+{{- $rw.secretName -}}
+{{- else if $rw.createSecret -}}
+{{- printf "%s-remote-write" (include "thanos.compName" (list . "ruler")) -}}
+{{- else -}}
+{{- fail "ruler.remoteWrite.secretName is required when ruler.remoteWrite.createSecret is false: name the externally managed Secret that holds the remote-write configuration" -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* ============================== */ -}}
 {{- /* Ruler query URLs helpers       */ -}}
 {{- /* ============================== */ -}}
 
