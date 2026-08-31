@@ -351,11 +351,15 @@ global:
         # @default -- {}
         annotations: {}
       # Bucket replicate alerts (thanos-bucket-replicate rule group).
-      # Disabled by default because this chart does not deploy the
-      # bucket-replicate component.
       thanosBucketReplicate:
-        # -- Render the thanos-bucket-replicate rule group.
-        enabled: false
+        # @schema
+        # type: [boolean, "null"]
+        # @schema
+        # -- Render the thanos-bucket-replicate rule group. Null follows
+        # `bucketReplicate.enabled`; set it explicitly to alert on a
+        # bucket-replicate running outside this chart.
+        # @default -- `null`
+        enabled: null
         # -- Regex used to match the Prometheus `job` label of bucket-replicate scrape targets.
         jobPattern: ".*thanos.*bucket-replicate.*"
         # -- Extra labels merged into every alert in this group.
@@ -775,6 +779,264 @@ bucket:
 # Must run as a singleton — do not set replicaCount above 1.
 # ======================================================================
 # Compactor component — compacts and downsamples blocks. Must run as a singleton.
+# ======================================================================
+# Bucket Replicate component — copies blocks from the object store into a
+# second one (`thanos tools bucket replicate`), for disaster-recovery
+# copies or migrations between providers. Runs continuously.
+# ======================================================================
+bucketReplicate:
+  # -- Enable the Bucket Replicate Deployment.
+  enabled: false
+
+  # -- Number of Bucket Replicate pod replicas. Replicating the same blocks
+  # from several pods only duplicates work; keep this at 1.
+  replicaCount: 1
+
+  # Destination object store. The source is `global.objstore`.
+  objstoreTo:
+    # -- When true, the chart creates `secretName` from the inline `config`
+    # below. Set to false when the Secret is managed externally (Vault,
+    # External Secrets Operator, kubectl, etc.).
+    createSecret: false
+    # -- Name of the Secret that carries the destination object store config.
+    secretName: thanos-objstore-to
+    # -- Key inside the Secret whose value is the object store YAML.
+    secretKey: objstore.yml
+    # -- Inline destination object store configuration rendered into the Secret
+    # when `createSecret` is true. Processed via `tpl`.
+    # @default -- ""
+    config: ""
+
+  # -- Resolutions to replicate, as Go durations. Empty leaves the Thanos
+  # default of every resolution (`0s`, `5m`, `1h`).
+  # @default -- []
+  resolutions: []
+
+  # Compaction levels to replicate.
+  compaction:
+    # -- Explicit compaction levels to replicate. Overrides `min` and `max`.
+    # @default -- []
+    levels: []
+    # @schema
+    # type: [integer, "null"]
+    # @schema
+    # -- Lowest compaction level to replicate. Null leaves the Thanos default.
+    # @default -- `null`
+    min: null
+    # @schema
+    # type: [integer, "null"]
+    # @schema
+    # -- Highest compaction level to replicate. Null leaves the Thanos default.
+    # @default -- `null`
+    max: null
+
+  # -- Prometheus matcher limiting replication to blocks whose external labels
+  # match, e.g. `cluster="eu-west-1"`. Empty replicates every block.
+  matcher: ""
+
+  # -- Start of the time range to replicate, as RFC3339 or a relative duration
+  # such as `-6w`. Empty leaves the Thanos default.
+  minTime: ""
+
+  # -- End of the time range to replicate. Empty leaves the Thanos default.
+  maxTime: ""
+
+  # -- Skip blocks that carry a deletion mark.
+  ignoreMarkedForDeletion: false
+
+  # Kubernetes Service configuration. Bucket Replicate serves no UI; the
+  # Service exists for `/metrics` and the probe endpoints.
+  service:
+    # -- Kubernetes Service type for Bucket Replicate.
+    type: ClusterIP
+    # -- HTTP port exposed by the Bucket Replicate Service.
+    port: 10902
+    # -- Static node port. Only honoured when `type` is NodePort or
+    # LoadBalancer; null lets Kubernetes allocate one.
+    # @default -- `null` (allocated by Kubernetes)
+    nodePort: null
+    # -- Extra annotations for the Bucket Replicate Service.
+    # @default -- {}
+    annotations: {}
+    # -- Extra labels for the Bucket Replicate Service.
+    # @default -- {}
+    labels: {}
+
+  # -- Additional CLI arguments appended to the command.
+  # @default -- []
+  extraArgs: []
+
+  # -- Resource requests and limits for the Bucket Replicate container.
+  # @default -- {}
+  resources: {}
+
+  # -- Pod-level securityContext. Falls back to `global.podSecurityContext`.
+  # @default -- {}
+  podSecurityContext: {}
+
+  # -- Container-level securityContext. Falls back to
+  # `global.containerSecurityContext`.
+  # @default -- {}
+  containerSecurityContext: {}
+
+  # -- Pod DNS configuration. Falls back to `global.dnsConfig`.
+  # @default -- {}
+  dnsConfig: {}
+
+  # -- Extra environment variables. Merged with `global.extraEnv`.
+  # @default -- []
+  extraEnv: []
+
+  # -- Extra environment variable sources. Merged with `global.extraEnvFrom`.
+  # @default -- []
+  extraEnvFrom: []
+
+  # -- Extra init containers. Merged with `global.extraInitContainers`.
+  # @default -- []
+  extraInitContainers: []
+
+  # -- Extra sidecar containers. Merged with `global.extraContainers`.
+  # @default -- []
+  extraContainers: []
+
+  # Probe configuration for the Bucket Replicate container.
+  probes:
+    readiness:
+      # -- Enable the readiness probe.
+      enabled: true
+      # -- HTTP path for the readiness probe.
+      path: /-/ready
+      # -- Seconds before the first readiness probe.
+      initialDelaySeconds: 5
+      # -- Seconds between readiness probes.
+      periodSeconds: 10
+      # -- Readiness probe timeout in seconds.
+      timeoutSeconds: 5
+      # -- Consecutive failures before the pod is marked unready.
+      failureThreshold: 6
+      # -- Consecutive successes before the pod is marked ready.
+      successThreshold: 1
+    liveness:
+      # -- Enable the liveness probe.
+      enabled: true
+      # -- HTTP path for the liveness probe.
+      path: /-/healthy
+      # -- Seconds before the first liveness probe.
+      initialDelaySeconds: 30
+      # -- Seconds between liveness probes.
+      periodSeconds: 10
+      # -- Liveness probe timeout in seconds.
+      timeoutSeconds: 5
+      # -- Consecutive failures before the container is restarted.
+      failureThreshold: 6
+      # -- Consecutive successes before the container counts as live.
+      successThreshold: 1
+    startup:
+      # -- Enable the startup probe.
+      enabled: true
+      # -- HTTP path for the startup probe.
+      path: /-/ready
+      # -- Seconds before the first startup probe.
+      initialDelaySeconds: 0
+      # -- Seconds between startup probes.
+      periodSeconds: 5
+      # -- Startup probe timeout in seconds.
+      timeoutSeconds: 5
+      # -- Consecutive failures before the container is restarted at startup.
+      failureThreshold: 60
+      # -- Consecutive successes before startup counts as complete.
+      successThreshold: 1
+
+  # -- Node labels for pod assignment. Falls back to `global.nodeSelector`.
+  # @default -- {}
+  nodeSelector: {}
+
+  # -- Tolerations for pod assignment. Falls back to `global.tolerations`.
+  # @default -- []
+  tolerations: []
+
+  # -- Affinity rules. Falls back to `global.affinity`.
+  # @default -- {}
+  affinity: {}
+
+  # -- Topology spread constraints. Falls back to
+  # `global.topologySpreadConstraints`.
+  # @default -- []
+  topologySpreadConstraints: []
+
+  # -- PriorityClass name. Falls back to `global.priorityClassName`.
+  priorityClassName: ""
+
+  # -- Extra volumes for the pod. Merged with `global.extraVolumes`.
+  # @default -- []
+  extraVolumes: []
+
+  # -- Extra volume mounts for the container. Merged with
+  # `global.extraVolumeMounts`.
+  # @default -- []
+  extraVolumeMounts: []
+
+  # -- Extra annotations for the Deployment.
+  # @default -- {}
+  annotations: {}
+
+  # -- Extra labels for the Deployment.
+  # @default -- {}
+  labels: {}
+
+  # -- Extra labels for the pods.
+  # @default -- {}
+  podLabels: {}
+
+  # ServiceAccount for Bucket Replicate.
+  serviceAccount:
+    # -- Create a dedicated ServiceAccount instead of using the chart-wide one.
+    create: false
+    # -- Name of the ServiceAccount. Empty derives
+    # `<fullname>-bucket-replicate`.
+    name: ""
+    # -- Extra annotations for the ServiceAccount.
+    # @default -- {}
+    annotations: {}
+    # -- Mount the ServiceAccount token into the pod.
+    automountServiceAccountToken: true
+
+  # Prometheus Operator ServiceMonitor for Bucket Replicate.
+  serviceMonitor:
+    # -- Create a ServiceMonitor for Bucket Replicate.
+    enabled: false
+    # -- Extra labels for the ServiceMonitor.
+    # @default -- {}
+    labels: {}
+    # -- Extra annotations for the ServiceMonitor.
+    # @default -- {}
+    annotations: {}
+    # -- Scrape interval. Empty falls back to `global.serviceMonitor.interval`.
+    interval: ""
+    # -- Scrape timeout. Empty falls back to
+    # `global.serviceMonitor.scrapeTimeout`.
+    scrapeTimeout: ""
+    # -- Scrape scheme. Empty falls back to `global.serviceMonitor.scheme`.
+    scheme: ""
+    # -- TLS configuration for scraping.
+    # @default -- {}
+    tlsConfig: {}
+    # -- Relabeling rules applied to the scraped targets.
+    # @default -- []
+    relabelings: []
+    # -- Relabeling rules applied to the scraped metrics.
+    # @default -- []
+    metricRelabelings: []
+
+  # PodDisruptionBudget for Bucket Replicate.
+  pdb:
+    # -- Create a PodDisruptionBudget. Falls back to `global.pdb.enabled`.
+    enabled: false
+    # -- Minimum available pods. Falls back to `global.pdb.minAvailable`.
+    minAvailable: ""
+    # -- Maximum unavailable pods. Falls back to `global.pdb.maxUnavailable`.
+    maxUnavailable: ""
+
 compactor:
   # -- Enable the Compactor StatefulSet.
   enabled: true

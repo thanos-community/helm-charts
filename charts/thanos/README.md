@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.46.0](https://img.shields.io/badge/Version-0.46.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.47.0](https://img.shields.io/badge/Version-0.47.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -61,6 +61,7 @@ The chart deploys each Thanos component as an independent workload. Enable only 
 | **query-frontend** | No | Deployment | Optional caching and query-splitting layer in front of Query. Reduces load for repeated or heavy queries. |
 | **ruler** | No | StatefulSet | Evaluates alerting and recording rules by querying the Query component. Sends alerts to Alertmanager. |
 | **bucket (bucketweb)** | No | Deployment | Read-only web UI for inspecting blocks in the object store. Useful for debugging, not needed in production. |
+| **bucketReplicate** | No | Deployment | Copies blocks from the object store into a second one, for disaster-recovery copies or migrations between providers. |
 
 ## Installation
 
@@ -543,6 +544,38 @@ Two things to keep in mind:
 
 - The Ruler stays a Query endpoint. It advertises no Store API without a local TSDB, so Query never asks it for series — those come from the receiver the results are written to — but it still serves the Rules API, which is what keeps its rules and alerts visible in Query's `/rules` and `/alerts`.
 - `--data-dir` and the PersistentVolumeClaim stay, since the WAL still needs somewhere to live.
+### Bucket Replicate (optional)
+
+Runs `thanos tools bucket replicate` as a long-lived Deployment, copying blocks from `global.objstore` into a second bucket — a disaster-recovery copy, or a migration between providers. The destination follows the same contract as the source: the Secret is managed outside the chart unless you opt in to `createSecret`.
+
+```yaml
+bucketReplicate:
+  enabled: true
+
+  objstoreTo:
+    secretName: thanos-objstore-to    # created by you
+    secretKey: objstore.yml
+    # createSecret: true              # opt in to let the chart render it from `config`
+    # config: |
+    #   type: S3
+    #   config:
+    #     bucket: my-dr-bucket
+
+  # Everything below is optional and unset by default, which replicates every block.
+  resolutions: [0s, 5m, 1h]
+  compaction:
+    min: 1
+    max: 4
+  matcher: cluster="eu-west-1"
+  minTime: -6w
+  ignoreMarkedForDeletion: true
+```
+
+Three things to keep in mind:
+
+- Keep `replicaCount` at 1. Several pods replicating the same blocks only duplicates work.
+- The chart's `thanos-bucket-replicate` alert group is gated on this component, so enabling it also starts alerting on failed replication runs. Turn the group off again with `global.thanosRules.groups.thanosBucketReplicate.enabled: false`.
+- `--single-run` and `--id` are deliberately not exposed. Both make the process exit after one pass, which a Deployment would restart forever; run those as a `Job` instead.
 
 ### Persistence
 
@@ -853,6 +886,81 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.tolerations | list | [] | Tolerations for Bucketweb pod scheduling. |
 | bucket.bucketweb.topologySpreadConstraints | list | [] | Topology spread constraints for Bucketweb pods. |
 | bucket.enabled | bool | `true` | Enable the bucket group. Must be true for the objstore Secret to be created when global.objstore.createSecret is true. |
+| bucketReplicate.affinity | object | {} | Affinity rules. Falls back to `global.affinity`. |
+| bucketReplicate.annotations | object | {} | Extra annotations for the Deployment. |
+| bucketReplicate.compaction.levels | list | [] | Explicit compaction levels to replicate. Overrides `min` and `max`. |
+| bucketReplicate.compaction.max | string | `null` | Highest compaction level to replicate. Null leaves the Thanos default. |
+| bucketReplicate.compaction.min | string | `null` | Lowest compaction level to replicate. Null leaves the Thanos default. |
+| bucketReplicate.containerSecurityContext | object | {} | Container-level securityContext. Falls back to `global.containerSecurityContext`. |
+| bucketReplicate.dnsConfig | object | {} | Pod DNS configuration. Falls back to `global.dnsConfig`. |
+| bucketReplicate.enabled | bool | `false` | Enable the Bucket Replicate Deployment. |
+| bucketReplicate.extraArgs | list | [] | Additional CLI arguments appended to the command. |
+| bucketReplicate.extraContainers | list | [] | Extra sidecar containers. Merged with `global.extraContainers`. |
+| bucketReplicate.extraEnv | list | [] | Extra environment variables. Merged with `global.extraEnv`. |
+| bucketReplicate.extraEnvFrom | list | [] | Extra environment variable sources. Merged with `global.extraEnvFrom`. |
+| bucketReplicate.extraInitContainers | list | [] | Extra init containers. Merged with `global.extraInitContainers`. |
+| bucketReplicate.extraVolumeMounts | list | [] | Extra volume mounts for the container. Merged with `global.extraVolumeMounts`. |
+| bucketReplicate.extraVolumes | list | [] | Extra volumes for the pod. Merged with `global.extraVolumes`. |
+| bucketReplicate.ignoreMarkedForDeletion | bool | `false` | Skip blocks that carry a deletion mark. |
+| bucketReplicate.labels | object | {} | Extra labels for the Deployment. |
+| bucketReplicate.matcher | string | `""` | Prometheus matcher limiting replication to blocks whose external labels match, e.g. `cluster="eu-west-1"`. Empty replicates every block. |
+| bucketReplicate.maxTime | string | `""` | End of the time range to replicate. Empty leaves the Thanos default. |
+| bucketReplicate.minTime | string | `""` | Start of the time range to replicate, as RFC3339 or a relative duration such as `-6w`. Empty leaves the Thanos default. |
+| bucketReplicate.nodeSelector | object | {} | Node labels for pod assignment. Falls back to `global.nodeSelector`. |
+| bucketReplicate.objstoreTo.config | string | "" | Inline destination object store configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`. |
+| bucketReplicate.objstoreTo.createSecret | bool | `false` | When true, the chart creates `secretName` from the inline `config` below. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.). |
+| bucketReplicate.objstoreTo.secretKey | string | `"objstore.yml"` | Key inside the Secret whose value is the object store YAML. |
+| bucketReplicate.objstoreTo.secretName | string | `"thanos-objstore-to"` | Name of the Secret that carries the destination object store config. |
+| bucketReplicate.pdb.enabled | bool | `false` | Create a PodDisruptionBudget. Falls back to `global.pdb.enabled`. |
+| bucketReplicate.pdb.maxUnavailable | string | `""` | Maximum unavailable pods. Falls back to `global.pdb.maxUnavailable`. |
+| bucketReplicate.pdb.minAvailable | string | `""` | Minimum available pods. Falls back to `global.pdb.minAvailable`. |
+| bucketReplicate.podLabels | object | {} | Extra labels for the pods. |
+| bucketReplicate.podSecurityContext | object | {} | Pod-level securityContext. Falls back to `global.podSecurityContext`. |
+| bucketReplicate.priorityClassName | string | `""` | PriorityClass name. Falls back to `global.priorityClassName`. |
+| bucketReplicate.probes.liveness.enabled | bool | `true` | Enable the liveness probe. |
+| bucketReplicate.probes.liveness.failureThreshold | int | `6` | Consecutive failures before the container is restarted. |
+| bucketReplicate.probes.liveness.initialDelaySeconds | int | `30` | Seconds before the first liveness probe. |
+| bucketReplicate.probes.liveness.path | string | `"/-/healthy"` | HTTP path for the liveness probe. |
+| bucketReplicate.probes.liveness.periodSeconds | int | `10` | Seconds between liveness probes. |
+| bucketReplicate.probes.liveness.successThreshold | int | `1` | Consecutive successes before the container counts as live. |
+| bucketReplicate.probes.liveness.timeoutSeconds | int | `5` | Liveness probe timeout in seconds. |
+| bucketReplicate.probes.readiness.enabled | bool | `true` | Enable the readiness probe. |
+| bucketReplicate.probes.readiness.failureThreshold | int | `6` | Consecutive failures before the pod is marked unready. |
+| bucketReplicate.probes.readiness.initialDelaySeconds | int | `5` | Seconds before the first readiness probe. |
+| bucketReplicate.probes.readiness.path | string | `"/-/ready"` | HTTP path for the readiness probe. |
+| bucketReplicate.probes.readiness.periodSeconds | int | `10` | Seconds between readiness probes. |
+| bucketReplicate.probes.readiness.successThreshold | int | `1` | Consecutive successes before the pod is marked ready. |
+| bucketReplicate.probes.readiness.timeoutSeconds | int | `5` | Readiness probe timeout in seconds. |
+| bucketReplicate.probes.startup.enabled | bool | `true` | Enable the startup probe. |
+| bucketReplicate.probes.startup.failureThreshold | int | `60` | Consecutive failures before the container is restarted at startup. |
+| bucketReplicate.probes.startup.initialDelaySeconds | int | `0` | Seconds before the first startup probe. |
+| bucketReplicate.probes.startup.path | string | `"/-/ready"` | HTTP path for the startup probe. |
+| bucketReplicate.probes.startup.periodSeconds | int | `5` | Seconds between startup probes. |
+| bucketReplicate.probes.startup.successThreshold | int | `1` | Consecutive successes before startup counts as complete. |
+| bucketReplicate.probes.startup.timeoutSeconds | int | `5` | Startup probe timeout in seconds. |
+| bucketReplicate.replicaCount | int | `1` | Number of Bucket Replicate pod replicas. Replicating the same blocks from several pods only duplicates work; keep this at 1. |
+| bucketReplicate.resolutions | list | [] | Resolutions to replicate, as Go durations. Empty leaves the Thanos default of every resolution (`0s`, `5m`, `1h`). |
+| bucketReplicate.resources | object | {} | Resource requests and limits for the Bucket Replicate container. |
+| bucketReplicate.service.annotations | object | {} | Extra annotations for the Bucket Replicate Service. |
+| bucketReplicate.service.labels | object | {} | Extra labels for the Bucket Replicate Service. |
+| bucketReplicate.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one. |
+| bucketReplicate.service.port | int | `10902` | HTTP port exposed by the Bucket Replicate Service. |
+| bucketReplicate.service.type | string | `"ClusterIP"` | Kubernetes Service type for Bucket Replicate. |
+| bucketReplicate.serviceAccount.annotations | object | {} | Extra annotations for the ServiceAccount. |
+| bucketReplicate.serviceAccount.automountServiceAccountToken | bool | `true` | Mount the ServiceAccount token into the pod. |
+| bucketReplicate.serviceAccount.create | bool | `false` | Create a dedicated ServiceAccount instead of using the chart-wide one. |
+| bucketReplicate.serviceAccount.name | string | `""` | Name of the ServiceAccount. Empty derives `<fullname>-bucket-replicate`. |
+| bucketReplicate.serviceMonitor.annotations | object | {} | Extra annotations for the ServiceMonitor. |
+| bucketReplicate.serviceMonitor.enabled | bool | `false` | Create a ServiceMonitor for Bucket Replicate. |
+| bucketReplicate.serviceMonitor.interval | string | `""` | Scrape interval. Empty falls back to `global.serviceMonitor.interval`. |
+| bucketReplicate.serviceMonitor.labels | object | {} | Extra labels for the ServiceMonitor. |
+| bucketReplicate.serviceMonitor.metricRelabelings | list | [] | Relabeling rules applied to the scraped metrics. |
+| bucketReplicate.serviceMonitor.relabelings | list | [] | Relabeling rules applied to the scraped targets. |
+| bucketReplicate.serviceMonitor.scheme | string | `""` | Scrape scheme. Empty falls back to `global.serviceMonitor.scheme`. |
+| bucketReplicate.serviceMonitor.scrapeTimeout | string | `""` | Scrape timeout. Empty falls back to `global.serviceMonitor.scrapeTimeout`. |
+| bucketReplicate.serviceMonitor.tlsConfig | object | {} | TLS configuration for scraping. |
+| bucketReplicate.tolerations | list | [] | Tolerations for pod assignment. Falls back to `global.tolerations`. |
+| bucketReplicate.topologySpreadConstraints | list | [] | Topology spread constraints. Falls back to `global.topologySpreadConstraints`. |
 | compactor.affinity | object | {} | Affinity rules for Compactor pod scheduling. |
 | compactor.annotations | object | {} | Extra annotations applied to Compactor resources. |
 | compactor.containerSecurityContext | object | {} | Container security context for the Compactor. Overrides global.containerSecurityContext. |
@@ -1011,7 +1119,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.thanosRules.disabledAlerts | list | [] | List of alert names to exclude from the PrometheusRule. Useful for silencing specific alerts without disabling entire rule groups. |
 | global.thanosRules.enabled | bool | `true` | Deploy a PrometheusRule resource with built-in Thanos alerting rules. |
 | global.thanosRules.groups.thanosBucketReplicate.annotations | object | {} | Extra annotations merged into every alert in this group. |
-| global.thanosRules.groups.thanosBucketReplicate.enabled | bool | `false` | Render the thanos-bucket-replicate rule group. |
+| global.thanosRules.groups.thanosBucketReplicate.enabled | string | `null` | Render the thanos-bucket-replicate rule group. Null follows `bucketReplicate.enabled`; set it explicitly to alert on a bucket-replicate running outside this chart. |
 | global.thanosRules.groups.thanosBucketReplicate.jobPattern | string | `".*thanos.*bucket-replicate.*"` | Regex used to match the Prometheus `job` label of bucket-replicate scrape targets. |
 | global.thanosRules.groups.thanosBucketReplicate.labels | object | {} | Extra labels merged into every alert in this group. |
 | global.thanosRules.groups.thanosCompact.annotations | object | {} | Extra annotations merged into every alert in this group. |
