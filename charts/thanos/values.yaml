@@ -1319,6 +1319,28 @@ query:
     #   - thanos-gateway.cluster2.internal:443
     #   - thanos-gateway.cluster3.internal:443
 
+    # File-based endpoint discovery, re-read at runtime instead of baked into
+    # the pod spec like `autogen` and `static`.
+    sdConfig:
+      # -- Existing ConfigMap holding the endpoint definitions. Takes
+      # precedence over `config` and is never written by the chart.
+      existingConfigMap: ""
+      # -- Key inside the ConfigMap holding the endpoint definitions.
+      key: endpoints.yml
+      # -- Inline endpoint definitions in Prometheus file-SD format, rendered
+      # into a ConfigMap when `existingConfigMap` is empty. Processed via `tpl`.
+      # @default -- ""
+      config: ""
+      # -- How often Query re-reads the endpoint definitions. Empty leaves the
+      # Thanos default.
+      reloadInterval: ""
+    # Example
+    # sdConfig:
+    #   config: |
+    #     - targets:
+    #         - thanos-sidecar-0.prometheus:10901
+    #         - thanos-sidecar-1.prometheus:10901
+
   # -- Deprecated. Use `query.endpoints.static[]` instead.
   # @default -- []
   stores: []

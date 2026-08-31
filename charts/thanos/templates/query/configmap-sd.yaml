@@ -1,0 +1,16 @@
+{{- if and .Values.query.enabled .Values.query.endpoints.sdConfig.config (not .Values.query.endpoints.sdConfig.existingConfigMap) -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "thanos.compName" (list . "query") }}-endpoints
+  namespace: {{ include "thanos.namespace" . }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: query
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "query") | nindent 4 }}
+data:
+  {{ .Values.query.endpoints.sdConfig.key }}: |
+    {{- tpl .Values.query.endpoints.sdConfig.config . | nindent 4 }}
+{{- end -}}
