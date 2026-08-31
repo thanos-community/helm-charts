@@ -2311,6 +2311,17 @@ receive:
 
   # Hashring topology configuration for the Receive StatefulSet.
   hashrings:
+    # @schema
+    # enum:
+    #   - ketama
+    #   - hashmod
+    # @schema
+    # -- Hashring algorithm. `ketama` is consistent hashing; `hashmod` is the
+    # legacy one and reshuffles nearly every series when the ring changes.
+    algorithm: ketama
+    # -- How often Receive re-reads the hashring file, as a Go duration.
+    # Empty leaves the Thanos default. Only useful when the file changes at runtime.
+    refreshInterval: ""
     # Auto-generated single-ring configuration derived from the StatefulSet pod DNS names.
     autogen:
       # -- Auto-generate a single default hashring whose endpoints are derived
@@ -2329,6 +2340,16 @@ receive:
     #     endpoints:
     #       - thanos-receive-0.thanos-receive:10901
     #       - thanos-receive-1.thanos-receive:10901
+
+    # Hashring configuration owned outside the chart, e.g. by thanos-receive-controller.
+    external:
+      # -- Mount a hashring ConfigMap managed outside the chart and render none
+      # of its own. Ignores `autogen` and `static`.
+      enabled: false
+      # -- Name of the externally managed ConfigMap. Required when `enabled`.
+      configMapName: ""
+      # -- Key inside that ConfigMap holding the hashring JSON.
+      key: hashrings.json
 
   # Kubernetes Service configuration for the Receive component.
   service:

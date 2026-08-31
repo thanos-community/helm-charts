@@ -1,6 +1,7 @@
 {{- if and .Values.receive.enabled (eq (include "thanos.receive.isSplit" .) "true") }}
 {{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
 {{- $rt := .Values.receive.router -}}
+{{- $external := include "thanos.receive.hashringsExternal" . | fromYaml -}}
 {{- $httpPort := default 10902 $rt.service.httpPort -}}
 {{- $rwPort := default 10908 $rt.service.remoteWritePort -}}
 apiVersion: apps/v1
@@ -38,7 +39,9 @@ spec:
         {{- if .Values.global.podAnnotations }}
         {{- $anns = merge $anns .Values.global.podAnnotations -}}
         {{- end }}
+        {{- if not $external.enabled }}
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
+        {{- end }}
         {{- toYaml $anns | nindent 8 }}
     spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "receive-router") }}
@@ -54,7 +57,10 @@ spec:
             - --http-address=0.0.0.0:{{ $httpPort }}
             - --remote-write.address=0.0.0.0:{{ $rwPort }}
             - --receive.hashrings-file=/etc/thanos/hashrings.json
-            - --receive.hashrings-algorithm=ketama
+            - --receive.hashrings-algorithm={{ include "thanos.receive.hashringsAlgorithm" . }}
+            {{- with include "thanos.receive.hashringsRefreshInterval" . }}
+            - --receive.hashrings-file-refresh-interval={{ . }}
+            {{- end }}
             - --receive.replication-factor={{ $rt.replicationFactor | default 1 }}
             - --label=receive_router_replica="$(POD_NAME)"
             {{- if $cfg.tenancyHeader }}
@@ -100,7 +106,7 @@ spec:
           configMap:
             name: {{ include "thanos.receive.hashringsConfigMapName" . }}
             items:
-              - key: hashrings.json
+              - key: {{ include "thanos.receive.hashringsKey" . }}
                 path: hashrings.json
         {{- include "thanos.extraVolumeItems" (dict "root" . "key" "router" "parent" "receive") | nindent 8 }}
 {{- end }}
