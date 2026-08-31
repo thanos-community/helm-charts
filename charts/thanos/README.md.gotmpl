@@ -49,6 +49,7 @@ The chart deploys each Thanos component as an independent workload. Enable only 
 | **query-frontend** | No | Deployment | Optional caching and query-splitting layer in front of Query. Reduces load for repeated or heavy queries. |
 | **ruler** | No | StatefulSet | Evaluates alerting and recording rules by querying the Query component. Sends alerts to Alertmanager. |
 | **bucket (bucketweb)** | No | Deployment | Read-only web UI for inspecting blocks in the object store. Useful for debugging, not needed in production. |
+| **bucketReplicate** | No | Deployment | Copies blocks from the object store into a second one, for disaster-recovery copies or migrations between providers. |
 
 ## Installation
 
@@ -498,6 +499,38 @@ Two things to keep in mind:
 
 - The Ruler stays a Query endpoint. It advertises no Store API without a local TSDB, so Query never asks it for series — those come from the receiver the results are written to — but it still serves the Rules API, which is what keeps its rules and alerts visible in Query's `/rules` and `/alerts`.
 - `--data-dir` and the PersistentVolumeClaim stay, since the WAL still needs somewhere to live.
+### Bucket Replicate (optional)
+
+Runs `thanos tools bucket replicate` as a long-lived Deployment, copying blocks from `global.objstore` into a second bucket — a disaster-recovery copy, or a migration between providers. The destination follows the same contract as the source: the Secret is managed outside the chart unless you opt in to `createSecret`.
+
+```yaml
+bucketReplicate:
+  enabled: true
+
+  objstoreTo:
+    secretName: thanos-objstore-to    # created by you
+    secretKey: objstore.yml
+    # createSecret: true              # opt in to let the chart render it from `config`
+    # config: |
+    #   type: S3
+    #   config:
+    #     bucket: my-dr-bucket
+
+  # Everything below is optional and unset by default, which replicates every block.
+  resolutions: [0s, 5m, 1h]
+  compaction:
+    min: 1
+    max: 4
+  matcher: cluster="eu-west-1"
+  minTime: -6w
+  ignoreMarkedForDeletion: true
+```
+
+Three things to keep in mind:
+
+- Keep `replicaCount` at 1. Several pods replicating the same blocks only duplicates work.
+- The chart's `thanos-bucket-replicate` alert group is gated on this component, so enabling it also starts alerting on failed replication runs. Turn the group off again with `global.thanosRules.groups.thanosBucketReplicate.enabled: false`.
+- `--single-run` and `--id` are deliberately not exposed. Both make the process exit after one pass, which a Deployment would restart forever; run those as a `Job` instead.
 
 ### Persistence
 

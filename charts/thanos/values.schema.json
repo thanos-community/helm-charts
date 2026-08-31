@@ -918,6 +918,433 @@
       "title": "bucket",
       "type": "object"
     },
+    "bucketReplicate": {
+      "additionalProperties": true,
+      "description": "Bucket Replicate component — copies blocks from the object store into a second one (`thanos tools bucket replicate`), for disaster-recovery copies or migrations between providers. Runs continuously.",
+      "properties": {
+        "affinity": {
+          "additionalProperties": true,
+          "description": "Affinity rules. Falls back to `global.affinity`.",
+          "required": [],
+          "title": "affinity",
+          "type": "object"
+        },
+        "annotations": {
+          "additionalProperties": true,
+          "description": "Extra annotations for the Deployment.",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "compaction": {
+          "additionalProperties": true,
+          "description": "Compaction levels to replicate.",
+          "properties": {
+            "levels": {
+              "description": "Explicit compaction levels to replicate. Overrides `min` and `max`.",
+              "items": {
+                "type": "integer"
+              },
+              "required": [],
+              "title": "levels",
+              "type": "array"
+            },
+            "max": {
+              "description": "Highest compaction level to replicate. Null leaves the Thanos default.",
+              "required": [],
+              "title": "max",
+              "type": ["integer", "null"]
+            },
+            "min": {
+              "description": "Lowest compaction level to replicate. Null leaves the Thanos default.",
+              "required": [],
+              "title": "min",
+              "type": ["integer", "null"]
+            }
+          },
+          "required": [
+            "levels"
+          ],
+          "title": "compaction",
+          "type": "object"
+        },
+        "containerSecurityContext": {
+          "additionalProperties": true,
+          "description": "Container-level securityContext. Falls back to `global.containerSecurityContext`.",
+          "required": [],
+          "title": "containerSecurityContext",
+          "type": "object"
+        },
+        "dnsConfig": {
+          "additionalProperties": true,
+          "description": "Pod DNS configuration. Falls back to `global.dnsConfig`.",
+          "required": [],
+          "title": "dnsConfig",
+          "type": "object"
+        },
+        "enabled": {
+          "default": false,
+          "description": "Enable the Bucket Replicate Deployment.",
+          "required": [],
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "extraArgs": {
+          "description": "Additional CLI arguments appended to the command.",
+          "items": {
+            "type": "string"
+          },
+          "required": [],
+          "title": "extraArgs",
+          "type": "array"
+        },
+        "extraContainers": {
+          "description": "Extra sidecar containers. Merged with `global.extraContainers`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraContainers",
+          "type": "array"
+        },
+        "extraEnv": {
+          "description": "Extra environment variables. Merged with `global.extraEnv`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnv",
+          "type": "array"
+        },
+        "extraEnvFrom": {
+          "description": "Extra environment variable sources. Merged with `global.extraEnvFrom`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraEnvFrom",
+          "type": "array"
+        },
+        "extraInitContainers": {
+          "description": "Extra init containers. Merged with `global.extraInitContainers`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraInitContainers",
+          "type": "array"
+        },
+        "extraVolumeMounts": {
+          "description": "Extra volume mounts for the container. Merged with `global.extraVolumeMounts`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumeMounts",
+          "type": "array"
+        },
+        "extraVolumes": {
+          "description": "Extra volumes for the pod. Merged with `global.extraVolumes`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "extraVolumes",
+          "type": "array"
+        },
+        "ignoreMarkedForDeletion": {
+          "default": false,
+          "description": "Skip blocks that carry a deletion mark.",
+          "required": [],
+          "title": "ignoreMarkedForDeletion",
+          "type": "boolean"
+        },
+        "labels": {
+          "additionalProperties": true,
+          "description": "Extra labels for the Deployment.",
+          "required": [],
+          "title": "labels",
+          "type": "object"
+        },
+        "matcher": {
+          "default": "",
+          "description": "Prometheus matcher limiting replication to blocks whose external labels match. Empty replicates every block.",
+          "required": [],
+          "title": "matcher",
+          "type": "string"
+        },
+        "maxTime": {
+          "default": "",
+          "description": "End of the time range to replicate. Empty leaves the Thanos default.",
+          "required": [],
+          "title": "maxTime",
+          "type": "string"
+        },
+        "minTime": {
+          "default": "",
+          "description": "Start of the time range to replicate, as RFC3339 or a relative duration such as `-6w`. Empty leaves the Thanos default.",
+          "required": [],
+          "title": "minTime",
+          "type": "string"
+        },
+        "nodeSelector": {
+          "additionalProperties": true,
+          "description": "Node labels for pod assignment. Falls back to `global.nodeSelector`.",
+          "required": [],
+          "title": "nodeSelector",
+          "type": "object"
+        },
+        "objstoreTo": {
+          "additionalProperties": true,
+          "description": "Destination object store. The source is `global.objstore`.",
+          "properties": {
+            "config": {
+              "default": "",
+              "description": "Inline destination object store configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`.",
+              "required": [],
+              "title": "config",
+              "type": "string"
+            },
+            "createSecret": {
+              "default": false,
+              "description": "When true, the chart creates `secretName` from the inline `config`. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.).",
+              "required": [],
+              "title": "createSecret",
+              "type": "boolean"
+            },
+            "secretKey": {
+              "default": "objstore.yml",
+              "description": "Key inside the Secret whose value is the object store YAML.",
+              "required": [],
+              "title": "secretKey",
+              "type": "string"
+            },
+            "secretName": {
+              "default": "thanos-objstore-to",
+              "description": "Name of the Secret that carries the destination object store config.",
+              "required": [],
+              "title": "secretName",
+              "type": "string"
+            }
+          },
+          "required": [
+            "createSecret",
+            "secretName",
+            "secretKey",
+            "config"
+          ],
+          "title": "objstoreTo",
+          "type": "object"
+        },
+        "pdb": {
+          "additionalProperties": true,
+          "description": "PodDisruptionBudget for Bucket Replicate.",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "description": "Create a PodDisruptionBudget. Falls back to `global.pdb.enabled`.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "maxUnavailable": {
+              "default": "",
+              "description": "Maximum unavailable pods. Falls back to `global.pdb.maxUnavailable`.",
+              "required": [],
+              "title": "maxUnavailable",
+              "type": ["string", "integer"]
+            },
+            "minAvailable": {
+              "default": "",
+              "description": "Minimum available pods. Falls back to `global.pdb.minAvailable`.",
+              "required": [],
+              "title": "minAvailable",
+              "type": ["string", "integer"]
+            }
+          },
+          "required": [
+            "enabled",
+            "minAvailable",
+            "maxUnavailable"
+          ],
+          "title": "pdb",
+          "type": "object"
+        },
+        "podLabels": {
+          "additionalProperties": true,
+          "description": "Extra labels for the pods.",
+          "required": [],
+          "title": "podLabels",
+          "type": "object"
+        },
+        "podSecurityContext": {
+          "additionalProperties": true,
+          "description": "Pod-level securityContext. Falls back to `global.podSecurityContext`.",
+          "required": [],
+          "title": "podSecurityContext",
+          "type": "object"
+        },
+        "priorityClassName": {
+          "default": "",
+          "description": "PriorityClass name. Falls back to `global.priorityClassName`.",
+          "required": [],
+          "title": "priorityClassName",
+          "type": "string"
+        },
+        "probes": {
+          "additionalProperties": true,
+          "description": "Probe configuration for the Bucket Replicate container.",
+          "required": [],
+          "title": "probes",
+          "type": "object"
+        },
+        "replicaCount": {
+          "default": 1,
+          "description": "Number of Bucket Replicate pod replicas. Replicating the same blocks from several pods only duplicates work; keep this at 1.",
+          "required": [],
+          "title": "replicaCount",
+          "type": "integer"
+        },
+        "resolutions": {
+          "description": "Resolutions to replicate, as Go durations. Empty leaves the Thanos default of every resolution (`0s`, `5m`, `1h`).",
+          "items": {
+            "type": "string"
+          },
+          "required": [],
+          "title": "resolutions",
+          "type": "array"
+        },
+        "resources": {
+          "additionalProperties": true,
+          "description": "Resource requests and limits for the Bucket Replicate container.",
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        },
+        "service": {
+          "additionalProperties": true,
+          "description": "Kubernetes Service configuration. Bucket Replicate serves no UI; the Service exists for `/metrics` and the probe endpoints.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the Bucket Replicate Service.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "labels": {
+              "additionalProperties": true,
+              "description": "Extra labels for the Bucket Replicate Service.",
+              "required": [],
+              "title": "labels",
+              "type": "object"
+            },
+            "nodePort": {
+              "description": "Static node port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one.",
+              "required": [],
+              "title": "nodePort",
+              "type": ["integer", "null"]
+            },
+            "port": {
+              "default": 10902,
+              "description": "HTTP port exposed by the Bucket Replicate Service.",
+              "required": [],
+              "title": "port",
+              "type": "integer"
+            },
+            "type": {
+              "default": "ClusterIP",
+              "description": "Kubernetes Service type for Bucket Replicate.",
+              "required": [],
+              "title": "type",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "port",
+            "annotations",
+            "labels"
+          ],
+          "title": "service",
+          "type": "object"
+        },
+        "serviceAccount": {
+          "additionalProperties": true,
+          "description": "ServiceAccount for Bucket Replicate.",
+          "properties": {
+            "annotations": {
+              "additionalProperties": true,
+              "description": "Extra annotations for the ServiceAccount.",
+              "required": [],
+              "title": "annotations",
+              "type": "object"
+            },
+            "automountServiceAccountToken": {
+              "default": true,
+              "description": "Mount the ServiceAccount token into the pod.",
+              "required": [],
+              "title": "automountServiceAccountToken",
+              "type": "boolean"
+            },
+            "create": {
+              "default": false,
+              "description": "Create a dedicated ServiceAccount instead of using the chart-wide one.",
+              "required": [],
+              "title": "create",
+              "type": "boolean"
+            },
+            "name": {
+              "default": "",
+              "description": "Name of the ServiceAccount. Empty derives `<fullname>-bucket-replicate`.",
+              "required": [],
+              "title": "name",
+              "type": "string"
+            }
+          },
+          "required": [
+            "create",
+            "name",
+            "annotations"
+          ],
+          "title": "serviceAccount",
+          "type": "object"
+        },
+        "serviceMonitor": {
+          "additionalProperties": true,
+          "description": "Prometheus Operator ServiceMonitor for Bucket Replicate.",
+          "required": [],
+          "title": "serviceMonitor",
+          "type": "object"
+        },
+        "tolerations": {
+          "description": "Tolerations for pod assignment. Falls back to `global.tolerations`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "tolerations",
+          "type": "array"
+        },
+        "topologySpreadConstraints": {
+          "description": "Topology spread constraints. Falls back to `global.topologySpreadConstraints`.",
+          "items": {
+            "required": []
+          },
+          "required": [],
+          "title": "topologySpreadConstraints",
+          "type": "array"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicaCount",
+        "objstoreTo",
+        "service"
+      ],
+      "title": "bucketReplicate",
+      "type": "object"
+    },
     "compactor": {
       "additionalProperties": true,
       "description": "======================================================================\nCompactor component\nCompacts, downsamples and deduplicates blocks in the object store.\nMust run as a singleton — do not set replicaCount above 1.\n======================================================================\nCompactor component — compacts and downsamples blocks. Must run as a singleton.",
