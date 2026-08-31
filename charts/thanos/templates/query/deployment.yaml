@@ -1,4 +1,8 @@
 {{- if .Values.query.enabled }}
+{{- $sd := dig "endpoints" "sdConfig" dict .Values.query -}}
+{{- $sdKey := dig "key" "endpoints.yml" $sd -}}
+{{- $sdEnabled := or (dig "existingConfigMap" "" $sd) (dig "config" "" $sd) -}}
+{{- $sdConfigMap := dig "existingConfigMap" "" $sd | default (printf "%s-endpoints" (include "thanos.compName" (list . "query"))) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,6 +65,12 @@ spec:
           {{- range .Values.query.stores }}
             - --endpoint={{ . }}
           {{- end }}
+          {{- if $sdEnabled }}
+            - --endpoint.sd-config-file=/etc/thanos/endpoints/{{ $sdKey }}
+            {{- with dig "reloadInterval" "" $sd }}
+            - --endpoint.sd-config-reload-interval={{ . }}
+            {{- end }}
+          {{- end }}
           {{- range .Values.query.replicaLabels }}
             - --query.replica-label={{ . }}
           {{- end }}
@@ -74,7 +84,8 @@ spec:
               containerPort: {{ .Values.query.service.httpPort }}
             - name: grpc
               containerPort: {{ .Values.query.service.grpcPort }}
-          {{- include "thanos.extraMountsBlock" (dict "root" . "key" "query") | nindent 10 }}
+          {{- $ownMounts := ternary "- name: endpoint-sd\n  mountPath: /etc/thanos/endpoints\n  readOnly: true" "" (not (empty $sdEnabled)) -}}
+          {{- include "thanos.extraMountsBlock" (dict "root" . "key" "query" "items" $ownMounts) | nindent 10 }}
           {{- include "thanos.containerSC" (dict "root" . "key" "query") | nindent 10 }}
           resources:
             {{- toYaml .Values.query.resources | nindent 12 }}
@@ -86,5 +97,7 @@ spec:
       {{- include "thanos.priorityClassName" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.tolerations" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.topologySpreadConstraints" (dict "Values" .Values "component" "query") | nindent 6 }}
-      {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
+      {{- $sdVolume := printf "- name: endpoint-sd\n  configMap:\n    name: %s" $sdConfigMap -}}
+      {{- $ownVolumes := ternary $sdVolume "" (not (empty $sdEnabled)) -}}
+      {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "query" "items" $ownVolumes) | nindent 6 }}
 {{- end }}
