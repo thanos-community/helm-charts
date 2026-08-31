@@ -3153,6 +3153,25 @@ ruler:
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
 
+  # Stateless mode: evaluation results are shipped to a remote-write endpoint
+  # instead of being uploaded to the object store.
+  remoteWrite:
+    # -- Run the Ruler in stateless mode. It then keeps a WAL only, stops
+    # uploading blocks and no longer serves the Store API.
+    enabled: false
+    # -- When true, the chart creates `secretName` from the inline `config`
+    # below. Set to false when the Secret is managed externally (Vault,
+    # External Secrets Operator, kubectl, etc.).
+    createSecret: false
+    # -- Name of the Secret that carries the remote-write config.
+    secretName: thanos-ruler-remote-write
+    # -- Key inside the Secret whose value is the remote-write YAML.
+    secretKey: remote-write.yml
+    # -- Inline remote-write configuration rendered into the Secret when
+    # `createSecret` is true. Processed via `tpl`.
+    # @default -- ""
+    config: ""
+
   # Query endpoint configuration used by the Ruler to evaluate rules.
   query:
     # -- List of Query component base URLs used by the Ruler to evaluate rules.

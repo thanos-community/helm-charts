@@ -1,0 +1,148 @@
+suite: stateless ruler
+
+tests:
+  # -- Default (stateful) ----------------------------------------------
+
+  - it: uploads to the object store by default
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore.config-file=/etc/thanos/objstore.yml
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --remote-write.config-file=/etc/thanos/remote-write.yml
+      - exists:
+          path: spec.template.metadata.annotations["checksum/objstore-configuration"]
+
+  - it: renders no remote-write Secret by default
+    template: ruler/secret-remote-write.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Stateless mode ----------------------------------------------------
+
+  - it: swaps the object store for a remote-write config
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --remote-write.config-file=/etc/thanos/remote-write.yml
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore.config-file=/etc/thanos/objstore.yml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --data-dir=/var/thanos/ruler
+
+  - it: mounts the remote-write Secret instead of the objstore one
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+      ruler.remoteWrite.secretName: my-remote-write
+      ruler.remoteWrite.secretKey: rw.yml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: remote-write
+            secret:
+              secretName: my-remote-write
+              items:
+                - key: rw.yml
+                  path: remote-write.yml
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: objstore
+            mountPath: /etc/thanos/objstore.yml
+            subPath: objstore.yml
+            readOnly: true
+
+  - it: swaps the objstore checksum annotation for the remote-write one
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+      ruler.remoteWrite.createSecret: true
+      ruler.remoteWrite.config: |
+        remote_write:
+          - url: http://thanos-receive:19291/api/v1/receive
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/remote-write-configuration"]
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/objstore-configuration"]
+
+  - it: checksums nothing while the Secret is managed externally
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/remote-write-configuration"]
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/objstore-configuration"]
+
+  # -- Secret handling ----------------------------------------------------
+
+  - it: creates no Secret while the config is managed externally
+    template: ruler/secret-remote-write.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: creates the Secret from the inline config when opted in
+    template: ruler/secret-remote-write.yaml
+    set:
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+      ruler.remoteWrite.createSecret: true
+      ruler.remoteWrite.config: |
+        remote_write:
+          - url: http://thanos-receive:19291/api/v1/receive
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: metadata.name
+          value: thanos-ruler-remote-write
+      - matchRegex:
+          path: stringData["remote-write.yml"]
+          pattern: 'url: http://thanos-receive:19291/api/v1/receive'
+
+  # -- Query wiring --------------------------------------------------------
+
+  - it: registers the ruler as a query endpoint when it serves the Store API
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      ruler.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-ruler-headless.NAMESPACE.svc.cluster.local
+
+  - it: drops the ruler query endpoint in stateless mode
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      ruler.enabled: true
+      ruler.remoteWrite.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --endpoint=dnssrv+_grpc._tcp.RELEASE-NAME-thanos-ruler-headless.NAMESPACE.svc.cluster.local

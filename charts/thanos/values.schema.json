@@ -7171,6 +7171,56 @@
           "title": "probes",
           "type": "object"
         },
+        "remoteWrite": {
+          "additionalProperties": true,
+          "description": "Stateless mode: evaluation results are shipped to a remote-write endpoint instead of being uploaded to the object store.",
+          "properties": {
+            "config": {
+              "default": "",
+              "description": "Inline remote-write configuration rendered into the Secret when `createSecret` is true. Processed via `tpl`.",
+              "required": [],
+              "title": "config",
+              "type": "string"
+            },
+            "createSecret": {
+              "default": false,
+              "description": "When true, the chart creates `secretName` from the inline `config`. Set to false when the Secret is managed externally (Vault, External Secrets Operator, kubectl, etc.).",
+              "required": [],
+              "title": "createSecret",
+              "type": "boolean"
+            },
+            "enabled": {
+              "default": false,
+              "description": "Run the Ruler in stateless mode. It then keeps a WAL only, stops uploading blocks and no longer serves the Store API.",
+              "required": [],
+              "title": "enabled",
+              "type": "boolean"
+            },
+            "secretKey": {
+              "default": "remote-write.yml",
+              "description": "Key inside the Secret whose value is the remote-write YAML.",
+              "required": [],
+              "title": "secretKey",
+              "type": "string"
+            },
+            "secretName": {
+              "default": "thanos-ruler-remote-write",
+              "description": "Name of the Secret that carries the remote-write config.",
+              "required": [],
+              "title": "secretName",
+              "type": "string"
+            }
+          },
+          "required": [
+            "enabled",
+            "createSecret",
+            "secretName",
+            "secretKey",
+            "config"
+          ],
+          "title": "remoteWrite",
+          "type": "object"
+        },
         "query": {
           "additionalProperties": true,
           "description": "Query endpoint configuration used by the Ruler to evaluate rules.",
@@ -7450,6 +7500,7 @@
         "enabled",
         "replicaCount",
         "minReadySeconds",
+        "remoteWrite",
         "query",
         "alertmanagers",
         "alertQueryUrl",

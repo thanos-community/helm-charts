@@ -434,6 +434,30 @@ ruler:
     labelSelector: {}
 ```
 
+#### Stateless mode
+
+`ruler.remoteWrite.enabled` runs the Ruler [statelessly](https://thanos.io/tip/components/rule.md/): evaluation results are written to a remote-write endpoint — usually Receive — instead of being uploaded to the object store, and the Ruler keeps a WAL rather than a full TSDB. The chart then passes `--remote-write.config-file` in place of `--objstore.config-file` and mounts the remote-write Secret instead of the object store one.
+
+The configuration can carry credentials for the write endpoint, so it follows the same contract as `global.objstore`: the Secret is managed outside the chart by default.
+
+```yaml
+ruler:
+  enabled: true
+  remoteWrite:
+    enabled: true
+    secretName: thanos-ruler-remote-write   # created by you, e.g. from Vault or ESO
+    secretKey: remote-write.yml
+    # createSecret: true                    # opt in to let the chart render it from `config`
+    # config: |
+    #   remote_write:
+    #     - url: http://<release>-thanos-receive:10908/api/v1/receive
+```
+
+Two things to keep in mind:
+
+- A stateless Ruler serves no Store API, so the chart stops registering it as a Query endpoint. Query it through the receiver its results land in.
+- `--data-dir` and the PersistentVolumeClaim stay, since the WAL still needs somewhere to live.
+
 ### Persistence
 
 Compactor, Receive (the Ingester in split mode), Ruler and Store Gateway are StatefulSets and provision their own PersistentVolumeClaims from a `volumeClaimTemplate`:
