@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.39.0](https://img.shields.io/badge/Version-0.39.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.42.0](https://img.shields.io/badge/Version-0.42.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -46,7 +46,7 @@ Kubernetes: `>= 1.30.0-0`
 | Repository | Name | Version |
 |------------|------|---------|
 | https://charts.rustfs.com/ | rustfs | 0.12.0 |
-| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.2.0 |
+| https://prometheus-community.github.io/helm-charts | kube-prometheus-stack(kube-prometheus-stack) | 88.6.0 |
 
 ## Component Overview
 
@@ -267,6 +267,38 @@ query:
             - path: /
               pathType: Prefix
 ```
+
+#### File-based endpoint discovery
+
+`autogen` and `static` bake their endpoints into the pod spec, so every change to the store topology is a `helm upgrade` and a restart. `query.endpoints.sdConfig` instead passes `--endpoint.sd-config-file`, which Thanos re-reads at runtime — the right fit when the set of Store API servers changes without the chart knowing, for example sidecars appearing next to new Prometheus instances.
+
+Point it at a ConfigMap somebody else maintains:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      existingConfigMap: thanos-endpoints
+      key: endpoints.yml
+      reloadInterval: 30s
+```
+
+Or let the chart render one from inline definitions in [Prometheus file-SD format](https://thanos.io/tip/components/query.md/):
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      config: |
+        - targets:
+            - thanos-sidecar-0.prometheus:10901
+            - thanos-sidecar-1.prometheus:10901
+```
+
+Two things to keep in mind:
+
+- The ConfigMap is mounted as a directory rather than with `subPath`, because the kubelet only keeps the projected file current without one. With `subPath` the file would freeze at its first version and re-reading it would find nothing new.
+- File SD is additive: `autogen` and `static` endpoints are still passed as `--endpoint` arguments alongside it.
 
 ### Receive
 
@@ -964,6 +996,10 @@ The table below documents all available values. Top-level keys group settings by
 | query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
 | query.endpoints.autogen.enabled | bool | `true` | Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway, Ruler). These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format. |
+| query.endpoints.sdConfig.config | string | "" | Inline endpoint definitions in Prometheus file-SD format, rendered into a ConfigMap when `existingConfigMap` is empty. Processed via `tpl`. |
+| query.endpoints.sdConfig.existingConfigMap | string | `""` | Existing ConfigMap holding the endpoint definitions. Takes precedence over `config` and is never written by the chart. |
+| query.endpoints.sdConfig.key | string | `"endpoints.yml"` | Key inside the ConfigMap holding the endpoint definitions. |
+| query.endpoints.sdConfig.reloadInterval | string | `""` | How often Query re-reads the endpoint definitions. Empty leaves the Thanos default. |
 | query.endpoints.static | list | [] | Optional static endpoint arguments. When non-empty will be added as extra endpoints. When `query.endpoints.autogen.enabled` is `false`, these will give you full control over the endpoints. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |

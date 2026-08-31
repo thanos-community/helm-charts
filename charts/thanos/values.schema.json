@@ -2795,11 +2795,54 @@
               "required": [],
               "title": "static",
               "type": "array"
+            },
+            "sdConfig": {
+              "additionalProperties": true,
+              "description": "File-based endpoint discovery, re-read at runtime instead of baked into the pod spec like `autogen` and `static`.",
+              "properties": {
+                "config": {
+                  "default": "",
+                  "description": "Inline endpoint definitions in Prometheus file-SD format, rendered into a ConfigMap when `existingConfigMap` is empty. Processed via `tpl`.",
+                  "required": [],
+                  "title": "config",
+                  "type": "string"
+                },
+                "existingConfigMap": {
+                  "default": "",
+                  "description": "Existing ConfigMap holding the endpoint definitions. Takes precedence over `config` and is never written by the chart.",
+                  "required": [],
+                  "title": "existingConfigMap",
+                  "type": "string"
+                },
+                "key": {
+                  "default": "endpoints.yml",
+                  "description": "Key inside the ConfigMap holding the endpoint definitions.",
+                  "required": [],
+                  "title": "key",
+                  "type": "string"
+                },
+                "reloadInterval": {
+                  "default": "",
+                  "description": "How often Query re-reads the endpoint definitions. Empty leaves the Thanos default.",
+                  "required": [],
+                  "title": "reloadInterval",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "existingConfigMap",
+                "key",
+                "config",
+                "reloadInterval"
+              ],
+              "title": "sdConfig",
+              "type": "object"
             }
           },
           "required": [
             "autogen",
-            "static"
+            "static",
+            "sdConfig"
           ],
           "title": "endpoints",
           "type": "object"
