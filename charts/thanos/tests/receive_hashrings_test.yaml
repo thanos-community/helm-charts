@@ -1,0 +1,168 @@
+suite: receive hashring configuration
+
+tests:
+  # -- Algorithm and refresh interval ----------------------------------
+
+  - it: defaults the hashring algorithm to ketama
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=ketama
+
+  - it: renders a custom hashring algorithm
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.algorithm: hashmod
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=hashmod
+
+  - it: omits the hashring refresh interval by default
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file-refresh-interval=5m
+
+  - it: renders the hashring refresh interval when set
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.refreshInterval: 30s
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file-refresh-interval=30s
+
+  # -- Externally managed hashring -------------------------------------
+
+  - it: renders the hashrings ConfigMap by default
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-receive-hashrings
+
+  - it: renders no hashrings ConfigMap when the ring is externally managed
+    template: receive/configmap-hashrings.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.external.enabled: true
+      receive.hashrings.external.configMapName: thanos-receive-controller-generated
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: mounts the external ConfigMap and key on the ingester
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.external.enabled: true
+      receive.hashrings.external.configMapName: thanos-receive-controller-generated
+      receive.hashrings.external.key: ring.json
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].projected.sources[1].configMap.name
+          value: thanos-receive-controller-generated
+      - equal:
+          path: spec.template.spec.volumes[0].projected.sources[1].configMap.items[0].key
+          value: ring.json
+      - equal:
+          path: spec.template.spec.volumes[0].projected.sources[1].configMap.items[0].path
+          value: hashrings.json
+
+  - it: defaults the external ConfigMap key to hashrings.json
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.external.enabled: true
+      receive.hashrings.external.configMapName: thanos-receive-controller-generated
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].projected.sources[1].configMap.items[0].key
+          value: hashrings.json
+
+  - it: keeps the hashrings checksum annotation by default
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/hashrings"]
+
+  - it: drops the hashrings checksum annotation when the ring is externally managed
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.external.enabled: true
+      receive.hashrings.external.configMapName: thanos-receive-controller-generated
+    asserts:
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/hashrings"]
+
+  - it: fails when the external ConfigMap name is missing
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hashrings.external.enabled: true
+      receive.hashrings.external.configMapName: ""
+    asserts:
+      - failedTemplate:
+          errorPattern: "configMapName is required"
+
+  # -- Split mode -------------------------------------------------------
+
+  - it: renders no hashrings ConfigMap in split mode when the ring is externally managed
+    template: receive/configmap-hashrings.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.hashrings.external.enabled: true
+      receive.ingester.hashrings.external.configMapName: thanos-receive-controller-generated
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: mounts the external ConfigMap on the router
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.hashrings.external.enabled: true
+      receive.ingester.hashrings.external.configMapName: thanos-receive-controller-generated
+      receive.ingester.hashrings.external.key: ring.json
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].configMap.name
+          value: thanos-receive-controller-generated
+      - equal:
+          path: spec.template.spec.volumes[0].configMap.items[0].key
+          value: ring.json
+      - notExists:
+          path: spec.template.metadata.annotations["checksum/hashrings"]
+
+  - it: renders algorithm and refresh interval on the router
+    template: receive/split/router-deployment.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.hashrings.algorithm: hashmod
+      receive.ingester.hashrings.refreshInterval: 1m
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-algorithm=hashmod
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --receive.hashrings-file-refresh-interval=1m

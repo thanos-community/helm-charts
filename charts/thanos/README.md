@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.41.1](https://img.shields.io/badge/Version-0.41.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.42.0](https://img.shields.io/badge/Version-0.42.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -355,6 +355,27 @@ In split mode clients should remote-write to the Router service:
 ```
 http://<release>-thanos-receive-router.<namespace>.svc.cluster.local:10908/api/v1/receive
 ```
+
+#### Externally managed hashrings
+
+`receive.hashrings.external` points the chart at a hashring ConfigMap owned by something else — typically [thanos-receive-controller](https://github.com/observatorium/thanos-receive-controller), which watches the Receive pods and rewrites the ring as they come and go, so that scaling needs no redeploy:
+
+```yaml
+receive:
+  hashrings:
+    refreshInterval: 30s      # re-read the file the controller rewrites
+    external:
+      enabled: true
+      configMapName: thanos-receive-controller-generated
+      key: hashrings.json     # this is the default
+```
+
+Two things to keep in mind:
+
+- The chart renders no hashring ConfigMap of its own while this is enabled, and `autogen` and `static` are ignored. Without that, Helm and the controller would fight over the same object.
+- The `checksum/hashrings` pod annotation is dropped, since the ring content is unknown at render time. Receive watches the hashring file with fsnotify and re-reads it on change; `--receive.hashrings-file-refresh-interval` (Thanos default `5m`) re-reads it regardless, which covers the case where the watch cannot be re-established after the file is replaced — what a ConfigMap update does. `refreshInterval` tightens that bound.
+
+`hashrings.algorithm` is independent of all this and applies to standalone and split mode alike: `ketama` (the default, consistent hashing) or the legacy `hashmod`.
 
 ### Store Gateway
 
@@ -1163,8 +1184,13 @@ The table below documents all available values. Top-level keys group settings by
 | receive.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Receive gRPC Store API endpoint. |
 | receive.grpcRoute.hostnames | list | [] | Hostnames to match on the Receive GRPCRoute. |
 | receive.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Receive GRPCRoute. |
+| receive.hashrings.algorithm | string | `"ketama"` | Hashring algorithm. `ketama` is consistent hashing; `hashmod` is the legacy one and reshuffles nearly every series when the ring changes. |
 | receive.hashrings.autogen.enabled | bool | `true` | Auto-generate a single default hashring whose endpoints are derived from the StatefulSet pod DNS names: `<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`. |
 | receive.hashrings.autogen.name | string | `"default"` | Name of the auto-generated hashring. |
+| receive.hashrings.external.configMapName | string | `""` | Name of the externally managed ConfigMap. Required when `enabled`. |
+| receive.hashrings.external.enabled | bool | `false` | Mount a hashring ConfigMap managed outside the chart and render none of its own. Ignores `autogen` and `static`. |
+| receive.hashrings.external.key | string | `"hashrings.json"` | Key inside that ConfigMap holding the hashring JSON. |
+| receive.hashrings.refreshInterval | string | `""` | How often Receive re-reads the hashring file, as a Go duration. Empty leaves the Thanos default. Only useful when the file changes at runtime. |
 | receive.hashrings.static | list | [] | Optional static hashring configuration. When non-empty this overrides `autogen` and gives full control over ring topology. |
 | receive.httpRoute.annotations | object | {} | Annotations for the Receive HTTPRoute resource. |
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |

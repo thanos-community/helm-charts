@@ -769,8 +769,49 @@ or from the top-level `receive.*` fields in standalone mode (see
 {{- /* Receive hashrings helpers      */ -}}
 {{- /* ============================== */ -}}
 
+{{- /*
+Returns the resolved `hashrings.external` block as YAML ({} when unset), so
+callers can `fromYaml` it and branch on `.enabled`.
+*/ -}}
+{{- define "thanos.receive.hashringsExternal" -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- toYaml (dig "hashrings" "external" dict $cfg) -}}
+{{- end -}}
+
+{{- /*
+Name of the hashring ConfigMap. When the ring is externally managed this is
+that ConfigMap, so every mount points at the foreign object and the chart
+renders none of its own.
+*/ -}}
 {{- define "thanos.receive.hashringsConfigMapName" -}}
+{{- $ext := include "thanos.receive.hashringsExternal" . | fromYaml -}}
+{{- if $ext.enabled -}}
+{{- required "receive.hashrings.external.configMapName is required when receive.hashrings.external.enabled is true" $ext.configMapName -}}
+{{- else -}}
 {{- include "thanos.compName" (list . "receive-hashrings") -}}
+{{- end -}}
+{{- end -}}
+
+{{- /* Key holding the hashring JSON inside that ConfigMap. */ -}}
+{{- define "thanos.receive.hashringsKey" -}}
+{{- $ext := include "thanos.receive.hashringsExternal" . | fromYaml -}}
+{{- if $ext.enabled -}}
+{{- $ext.key | default "hashrings.json" -}}
+{{- else -}}
+hashrings.json
+{{- end -}}
+{{- end -}}
+
+{{- /* Hashring algorithm passed to --receive.hashrings-algorithm. */ -}}
+{{- define "thanos.receive.hashringsAlgorithm" -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- dig "hashrings" "algorithm" "ketama" $cfg -}}
+{{- end -}}
+
+{{- /* Refresh interval for the hashring file; empty leaves the Thanos default. */ -}}
+{{- define "thanos.receive.hashringsRefreshInterval" -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- dig "hashrings" "refreshInterval" "" $cfg -}}
 {{- end -}}
 
 {{- /*
