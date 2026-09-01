@@ -61,3 +61,5 @@ annotations:
       description: The Receive ServiceMonitor no longer scrapes every Receive pod twice. It matched both the ClusterIP Service and the headless Service, since both carried app.kubernetes.io/component; the headless Service now omits that label, as the per-shard Store Gateway Services already did
     - kind: added
       description: thanos.selectorLabels template helper, now the single source of every selector in the chart and the basis of thanos.labels
+    - kind: fixed
+      description: Swapped the order of the sources in the Chart.yaml so https://github.com/thanos-community/helm-charts is on top and will be in the package annotation for org.opencontainers.image.source
