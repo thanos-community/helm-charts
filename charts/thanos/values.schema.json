@@ -4948,6 +4948,17 @@
           "additionalProperties": true,
           "description": "Hashring topology configuration for the Receive StatefulSet.",
           "properties": {
+            "algorithm": {
+              "default": "ketama",
+              "description": "Hashring algorithm. `ketama` is consistent hashing; `hashmod` is the legacy one and reshuffles nearly every series when the ring changes.",
+              "enum": [
+                "ketama",
+                "hashmod"
+              ],
+              "required": [],
+              "title": "algorithm",
+              "type": "string"
+            },
             "autogen": {
               "additionalProperties": true,
               "description": "Auto-generated single-ring configuration derived from the StatefulSet pod DNS names.",
@@ -4974,6 +4985,47 @@
               "title": "autogen",
               "type": "object"
             },
+            "external": {
+              "additionalProperties": true,
+              "description": "Hashring configuration owned outside the chart, e.g. by thanos-receive-controller.",
+              "properties": {
+                "configMapName": {
+                  "default": "",
+                  "description": "Name of the externally managed ConfigMap. Required when `enabled`.",
+                  "required": [],
+                  "title": "configMapName",
+                  "type": "string"
+                },
+                "enabled": {
+                  "default": false,
+                  "description": "Mount a hashring ConfigMap managed outside the chart and render none of its own. Ignores `autogen` and `static`.",
+                  "required": [],
+                  "title": "enabled",
+                  "type": "boolean"
+                },
+                "key": {
+                  "default": "hashrings.json",
+                  "description": "Key inside that ConfigMap holding the hashring JSON.",
+                  "required": [],
+                  "title": "key",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "enabled",
+                "configMapName",
+                "key"
+              ],
+              "title": "external",
+              "type": "object"
+            },
+            "refreshInterval": {
+              "default": "",
+              "description": "How often Receive re-reads the hashring file, as a Go duration. Empty leaves the Thanos default. Only useful when the file changes at runtime.",
+              "required": [],
+              "title": "refreshInterval",
+              "type": "string"
+            },
             "static": {
               "description": "Optional static hashring configuration. When non-empty this overrides\n`autogen` and gives full control over ring topology.",
               "items": {
@@ -4985,7 +5037,10 @@
             }
           },
           "required": [
+            "algorithm",
             "autogen",
+            "external",
+            "refreshInterval",
             "static"
           ],
           "title": "hashrings",

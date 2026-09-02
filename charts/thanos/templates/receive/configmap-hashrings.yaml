@@ -1,4 +1,5 @@
-{{- if .Values.receive.enabled }}
+{{- $external := include "thanos.receive.hashringsExternal" . | fromYaml -}}
+{{- if and .Values.receive.enabled (not $external.enabled) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
