@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.41.1](https://img.shields.io/badge/Version-0.41.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.42.0](https://img.shields.io/badge/Version-0.42.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -355,6 +355,23 @@ In split mode clients should remote-write to the Router service:
 ```
 http://<release>-thanos-receive-router.<namespace>.svc.cluster.local:10908/api/v1/receive
 ```
+
+#### Cap'n Proto replication
+
+`receive.replication.protocol` selects the wire protocol used to replicate writes between Receive endpoints. It is read in both modes, like `mode`: in split mode the Router dials over it and the Ingester listens on it, in standalone mode the same workload does both.
+
+```yaml
+receive:
+  replication:
+    protocol: capnproto     # protobuf (default) | capnproto
+  service:
+    capnprotoPort: 19391    # this is the default
+```
+
+Two things to keep in mind:
+
+- The port is rendered on the container, on the headless Service and — with `global.networkPolicies` enabled — in the NetworkPolicy. It is deliberately left off the ClusterIP Service, since replication addresses one specific peer through its per-pod DNS name and a load-balanced port would reach a different one.
+- Auto-generated hashrings switch from plain string endpoints to objects carrying an explicit `capnproto_address`, which [the Thanos docs](https://thanos.io/tip/components/receive.md/) recommend over letting Thanos infer it from the gRPC address. Static hashrings are passed through untouched, so add `capnproto_address` to them yourself.
 
 ### Store Gateway
 
@@ -1247,6 +1264,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.probes.startup.successThreshold | int | `1` | Consecutive successes before the Receive startup probe is considered passed. |
 | receive.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Receive startup probe times out. |
 | receive.replicaCount | int | `3` | Number of Receive pod replicas. Minimum 3 is recommended for replication factor 2 (write quorum = floor(replicaCount/2)+1). In `split` mode this controls the Ingester StatefulSet replica count. |
+| receive.replication.protocol | string | `"protobuf"` | Wire protocol used to replicate writes between Receive endpoints. `capnproto` needs `service.capnprotoPort` reachable between the pods. |
 | receive.resources | object | {} | Resource requests and limits for the Receive container. |
 | receive.router.affinity | object | {} | Affinity rules for Router pod scheduling. Falls back to receive.affinity. |
 | receive.router.annotations | object | {} | Extra annotations applied to Router resources. |
@@ -1343,6 +1361,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.vpa.targetKind | string | `"Deployment"` | Kubernetes workload kind targeted by the Router VPA. |
 | receive.router.vpa.updateMode | string | `"Auto"` | VPA update mode for Router. One of Auto, Off, or Initial. |
 | receive.service.annotations | object | {} | Extra annotations for the Receive Service. |
+| receive.service.capnprotoPort | int | `19391` | Cap'n Proto replication port. Only rendered when `replication.protocol` is `capnproto`. |
 | receive.service.grpcPort | int | `10901` | gRPC Store API port exposed by the Receive Service. |
 | receive.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Receive HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | receive.service.httpPort | int | `10902` | HTTP port exposed by the Receive Service. |

@@ -2309,6 +2309,17 @@ receive:
     # -- Enable WAL compression to reduce disk I/O and storage usage.
     walCompression: true
 
+  # Replication between Receive endpoints. Read in both modes, like `mode`.
+  replication:
+    # @schema
+    # enum:
+    #   - protobuf
+    #   - capnproto
+    # @schema
+    # -- Wire protocol used to replicate writes between Receive endpoints.
+    # `capnproto` needs `service.capnprotoPort` reachable between the pods.
+    protocol: protobuf
+
   # Hashring topology configuration for the Receive StatefulSet.
   hashrings:
     # Auto-generated single-ring configuration derived from the StatefulSet pod DNS names.
@@ -2340,6 +2351,9 @@ receive:
     httpPort: 10902
     # -- Remote-write ingestion port exposed by the Receive Service.
     remoteWritePort: 10908
+    # -- Cap'n Proto replication port. Only rendered when
+    # `replication.protocol` is `capnproto`.
+    capnprotoPort: 19391
     # -- Static node port for the Receive HTTP port.
     # Only honoured when `type` is NodePort or LoadBalancer; null lets
     # Kubernetes allocate one from the node-port range.

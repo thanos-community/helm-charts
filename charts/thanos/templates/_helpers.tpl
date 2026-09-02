@@ -773,11 +773,31 @@ or from the top-level `receive.*` fields in standalone mode (see
 {{- include "thanos.compName" (list . "receive-hashrings") -}}
 {{- end -}}
 
+{{- /* Replication protocol between Receive endpoints: protobuf (default) or capnproto. */ -}}
+{{- define "thanos.receive.replicationProtocol" -}}
+{{- dig "replication" "protocol" "protobuf" .Values.receive -}}
+{{- end -}}
+
+{{- /* "true" when replication runs over Cap'n Proto; empty string otherwise. */ -}}
+{{- define "thanos.receive.isCapnproto" -}}
+{{- if eq (include "thanos.receive.replicationProtocol" .) "capnproto" -}}true{{- end -}}
+{{- end -}}
+
+{{- /* Cap'n Proto port of the resolved workload (standalone or Ingester). */ -}}
+{{- define "thanos.receive.capnprotoPort" -}}
+{{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- dig "service" "capnprotoPort" 19391 $cfg -}}
+{{- end -}}
+
 {{- /*
 Render the hashrings JSON. Endpoints reference the Receive workload pods
 via its headless service. The workload name is resolved by
 `thanos.receive.workloadName` (`-ingester` suffix in split mode), so the
 same helper produces a valid hashring for both standalone and split modes.
+
+Under Cap'n Proto replication each endpoint becomes an object carrying an
+explicit `capnproto_address`, as Thanos would otherwise have to infer it
+from the gRPC address.
 */ -}}
 {{- define "thanos.receive.hashrings" -}}
 {{- $vals := include "thanos.receive.cfg" . | fromYaml -}}
@@ -785,6 +805,8 @@ same helper produces a valid hashring for both standalone and split modes.
 {{- $rc := int (default 1 $vals.replicaCount) -}}
 {{- $ns := include "thanos.namespace" . -}}
 {{- $domain := .Values.global.clusterDomain | default "cluster.local" -}}
+{{- $capnproto := eq (include "thanos.receive.isCapnproto" .) "true" -}}
+{{- $capnprotoPort := int (include "thanos.receive.capnprotoPort" .) -}}
 
 {{- if and (hasKey $vals "hashrings") (hasKey $vals.hashrings "static") (gt (len $vals.hashrings.static) 0) -}}
 {{ $vals.hashrings.static | toPrettyJson }}
@@ -795,6 +817,9 @@ same helper produces a valid hashring for both standalone and split modes.
   {{- $eps := list -}}
   {{- range $i, $_ := until $rc -}}
     {{- $ep := printf "%s-%d.%s.%s.svc.%s:%d" $name $i $svcName $ns $domain $grpcPort -}}
+    {{- if $capnproto -}}
+      {{- $ep = dict "address" $ep "capnproto_address" (printf "%s-%d.%s.%s.svc.%s:%d" $name $i $svcName $ns $domain $capnprotoPort) -}}
+    {{- end -}}
     {{- $eps = append $eps $ep -}}
   {{- end -}}
   {{- $rings := list (dict "endpoints" $eps) -}}
@@ -803,8 +828,11 @@ same helper produces a valid hashring for both standalone and split modes.
 {{- else -}}
   {{- $name := include "thanos.receive.workloadName" . -}}
   {{- $svcName := include "thanos.receiveHeadless" . -}}
-  {{- $eps := list (printf "%s-0.%s.%s.svc.%s:%d" $name $svcName $ns $domain $grpcPort) -}}
-  {{- $rings := list (dict "endpoints" $eps) -}}
+  {{- $ep := printf "%s-0.%s.%s.svc.%s:%d" $name $svcName $ns $domain $grpcPort -}}
+  {{- if $capnproto -}}
+    {{- $ep = dict "address" $ep "capnproto_address" (printf "%s-0.%s.%s.svc.%s:%d" $name $svcName $ns $domain $capnprotoPort) -}}
+  {{- end -}}
+  {{- $rings := list (dict "endpoints" (list $ep)) -}}
 {{ $rings | toPrettyJson }}
 {{- end -}}
 {{- end -}}
