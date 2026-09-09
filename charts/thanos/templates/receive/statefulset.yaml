@@ -1,6 +1,7 @@
 {{- if .Values.receive.enabled }}
 {{- $isSplit := eq (include "thanos.receive.isSplit" .) "true" -}}
 {{- $cfg := include "thanos.receive.cfg" . | fromYaml -}}
+{{- $external := include "thanos.receive.hashringsExternal" . | fromYaml -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -37,7 +38,7 @@ spec:
         {{- if .Values.global.podAnnotations }}
         {{- $anns = merge $anns .Values.global.podAnnotations -}}
         {{- end }}
-        {{- if not $isSplit }}
+        {{- if and (not $isSplit) (not $external.enabled) }}
         {{- $_ := set $anns "checksum/hashrings" (include "thanos.receive.hashrings" . | sha256sum) -}}
         {{- end }}
         {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
@@ -61,7 +62,10 @@ spec:
             - --label=receive_replica="$(POD_NAME)"
             {{- if not $isSplit }}
             - --receive.hashrings-file=/etc/thanos/hashrings.json
-            - --receive.hashrings-algorithm=ketama
+            - --receive.hashrings-algorithm={{ include "thanos.receive.hashringsAlgorithm" . }}
+            {{- with include "thanos.receive.hashringsRefreshInterval" . }}
+            - --receive.hashrings-file-refresh-interval={{ . }}
+            {{- end }}
             - --receive.local-endpoint=$(NAME).{{ include "thanos.receiveHeadless" . }}.$(NAMESPACE).svc.{{ .Values.global.clusterDomain }}:{{ $cfg.service.grpcPort }}
             {{- end }}
             {{- if $cfg.tenancyHeader }}
@@ -129,7 +133,7 @@ spec:
               - configMap:
                   name: {{ include "thanos.receive.hashringsConfigMapName" . }}
                   items:
-                    - key: hashrings.json
+                    - key: {{ include "thanos.receive.hashringsKey" . }}
                       path: hashrings.json
               {{- end }}
         {{- if not $cfg.persistence.enabled }}
