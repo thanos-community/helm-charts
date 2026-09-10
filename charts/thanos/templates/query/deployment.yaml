@@ -51,7 +51,8 @@ spec:
           {{- if .Values.receive.enabled }}
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.receiveHeadless" . }}.{{ include "thanos.namespace" . }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
-          {{- if .Values.ruler.enabled }}
+          {{- /* A stateless Ruler serves no Store API, so it is not an endpoint. */}}
+          {{- if and .Values.ruler.enabled (not .Values.ruler.remoteWrite.enabled) }}
             - --endpoint=dnssrv+_grpc._tcp.{{ include "thanos.compName" (list . "ruler") }}-headless.{{ include "thanos.namespace" . }}.svc.{{ .Values.global.clusterDomain }}
           {{- end }}
         {{- end }}
