@@ -61,6 +61,13 @@ spec:
     - name: grpc
       port: {{ $cfg.service.grpcPort }}
       targetPort: grpc
+    {{- if eq (include "thanos.receive.isCapnproto" .) "true" }}
+    # Peer-to-peer over the per-pod DNS names in the hashring, so this port
+    # stays off the ClusterIP Service, which would balance it to another pod.
+    - name: capnproto
+      port: {{ include "thanos.receive.capnprotoPort" . }}
+      targetPort: capnproto
+    {{- end }}
   selector:
     {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 4 }}
 {{- end }}

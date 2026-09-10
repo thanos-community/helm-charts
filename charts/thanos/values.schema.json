@@ -6031,6 +6031,28 @@
           "title": "resources",
           "type": "object"
         },
+        "replication": {
+          "additionalProperties": true,
+          "description": "Replication between Receive endpoints. Read in both modes, like `mode`.",
+          "properties": {
+            "protocol": {
+              "default": "protobuf",
+              "description": "Wire protocol used to replicate writes between Receive endpoints. `capnproto` needs `service.capnprotoPort` reachable between the pods.",
+              "enum": [
+                "protobuf",
+                "capnproto"
+              ],
+              "required": [],
+              "title": "protocol",
+              "type": "string"
+            }
+          },
+          "required": [
+            "protocol"
+          ],
+          "title": "replication",
+          "type": "object"
+        },
         "service": {
           "additionalProperties": true,
           "description": "Kubernetes Service configuration for the Receive component.",
@@ -6070,6 +6092,13 @@
               "title": "remoteWritePort",
               "type": "integer"
             },
+            "capnprotoPort": {
+              "default": 19391,
+              "description": "Cap'n Proto replication port. Only rendered when `replication.protocol` is `capnproto`.",
+              "required": [],
+              "title": "capnprotoPort",
+              "type": "integer"
+            },
             "type": {
               "default": "ClusterIP",
               "description": "Kubernetes Service type for the Receive component.",
@@ -6101,6 +6130,7 @@
             "grpcPort",
             "httpPort",
             "remoteWritePort",
+            "capnprotoPort",
             "annotations",
             "labels"
           ],
@@ -6393,6 +6423,7 @@
         "minReadySeconds",
         "tenancyHeader",
         "tsdb",
+        "replication",
         "hashrings",
         "service",
         "ingress",
