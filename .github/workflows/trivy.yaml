@@ -1,0 +1,65 @@
+name: Trivy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "charts/**"
+  pull_request:
+    paths:
+      - "charts/**"
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  config-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # upload SARIF to code scanning
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Helm
+        uses: azure/setup-helm@dda3372f752e03dde6b3237bc9431cdc2f7a02a2  # v5.0.0
+
+      - name: Render charts
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add rustfs https://charts.rustfs.com/
+          mkdir -p rendered
+          for chart in charts/*/; do
+            name=$(basename "$chart")
+            helm dependency build "$chart"
+            helm template "$name" "$chart" > "rendered/${name}.yaml"
+          done
+
+      - name: Scan rendered manifests
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: rendered
+          format: sarif
+          output: trivy-results.sarif
+          severity: MEDIUM,HIGH,CRITICAL
+          exit-code: "0"
+
+      - name: Upload to code scanning
+        # Fork PRs get a read-only token and cannot upload SARIF.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63  # v4.38.0
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-config

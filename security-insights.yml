@@ -1,0 +1,148 @@
+header:
+  schema-version: 2.0.0
+  last-updated: '2026-09-15'
+  last-reviewed: '2026-09-15'
+  url: https://raw.githubusercontent.com/thanos-community/helm-charts/master/security-insights.yml
+  comment: |
+    OpenSSF Security Insights file for the Thanos community Helm charts.
+    Consumed by LFX Insights for OSPS Baseline security assessments.
+
+project:
+  name: Thanos Community Helm Charts
+  homepage: https://github.com/thanos-community/helm-charts
+  administrators:
+    - name: Hamdi LION
+      affiliation: Kapheira
+      email: hamdi.khelil@kapheira.cloud
+      social: https://github.com/hamdikh
+      primary: true
+  documentation:
+    quickstart-guide: https://github.com/thanos-community/helm-charts#quick-start
+    detailed-guide: https://github.com/thanos-community/helm-charts/blob/master/charts/thanos/README.md
+    code-of-conduct: https://github.com/cncf/foundation/blob/main/code-of-conduct.md
+    release-process: https://github.com/thanos-community/helm-charts/blob/master/CONTRIBUTING.md#release-process
+    support-policy: https://github.com/thanos-community/helm-charts/blob/master/SECURITY.md#supported-versions
+    signature-verification: https://github.com/thanos-community/helm-charts/blob/master/SECURITY.md#release-integrity
+  repositories:
+    - name: helm-charts
+      url: https://github.com/thanos-community/helm-charts
+      comment: |
+        Community-maintained Helm charts for deploying Thanos on Kubernetes.
+  vulnerability-reporting:
+    reports-accepted: true
+    bug-bounty-available: false
+    contact:
+      name: Thanos Team
+      email: thanos-io@googlegroups.com
+      primary: true
+    policy: https://github.com/thanos-community/helm-charts/blob/master/SECURITY.md
+    comment: |
+      Report vulnerabilities privately via GitHub Security Advisories
+      (https://github.com/thanos-community/helm-charts/security/advisories/new)
+      or by email. Vulnerabilities in the Thanos binary are handled upstream.
+
+repository:
+  url: https://github.com/thanos-community/helm-charts
+  status: active
+  bug-fixes-only: false
+  accepts-change-request: true
+  accepts-automated-change-request: true
+  no-third-party-packages: false
+  core-team:
+    - name: Hamdi LION
+      affiliation: Kapheira
+      email: hamdi.khelil@kapheira.cloud
+      social: https://github.com/hamdikh
+      primary: true
+  documentation:
+    contributing-guide: https://github.com/thanos-community/helm-charts/blob/master/CONTRIBUTING.md
+    review-policy: https://github.com/thanos-community/helm-charts/blob/master/CONTRIBUTING.md#submitting-a-pull-request
+    security-policy: https://github.com/thanos-community/helm-charts/blob/master/SECURITY.md
+    dependency-management-policy: https://github.com/thanos-community/helm-charts/blob/master/SECURITY.md#dependency-management
+  license:
+    url: https://github.com/thanos-community/helm-charts/blob/master/LICENSE
+    expression: Apache-2.0
+  release:
+    automated-pipeline: true
+    changelog: https://github.com/thanos-community/helm-charts/releases/tag/{version}
+    distribution-points:
+      - uri: oci://ghcr.io/thanos-community/helm-charts/thanos
+        comment: OCI registry (Cosign-signed)
+      - uri: https://thanos-community.github.io/helm-charts
+        comment: Classic Helm repository (gh-pages)
+      - uri: https://github.com/thanos-community/helm-charts/releases
+        comment: GitHub Releases with GPG provenance and Cosign bundles
+      - uri: https://artifacthub.io/packages/search?repo=thanos-community
+        comment: Artifact Hub listing
+  security:
+    assessments:
+      self:
+        comment: |
+          A formal self-assessment has not yet been completed.
+    tools:
+      - name: Renovate
+        type: SCA
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: false
+          release: false
+        results: {}
+        comment: |
+          Automated dependency updates for GitHub Actions (digest-pinned), sub-charts and the Thanos image.
+      - name: Dependabot
+        type: SCA
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: false
+          release: false
+        results: {}
+        comment: |
+          Enabled for security updates only; version updates are handled by Renovate.
+      - name: Trivy
+        type: other
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: true
+          release: false
+        results: {}
+        comment: |
+          Kubernetes misconfiguration scan of the rendered charts; results are published to GitHub code scanning.
+      - name: zizmor
+        type: SAST
+        rulesets:
+          - default
+        integration:
+          adhoc: false
+          ci: true
+          release: false
+        results: {}
+        comment: |
+          Static analysis of GitHub Actions workflows; results are published to GitHub code scanning.
+      - name: OpenSSF Scorecard
+        type: other
+        rulesets:
+          - default
+        integration:
+          adhoc: true
+          ci: false
+          release: false
+        results: {}
+        comment: |
+          Weekly supply-chain posture assessment, published to the OpenSSF Scorecard API and GitHub code scanning.
+      - name: Cosign
+        type: other
+        rulesets:
+          - default
+        integration:
+          adhoc: false
+          ci: false
+          release: true
+        results: {}
+        comment: |
+          Keyless signing of chart packages and OCI artifacts during release.
