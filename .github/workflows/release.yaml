@@ -15,13 +15,15 @@ on:
         default: ''
 
 permissions:
-  contents: write
-  id-token: write  # required for cosign OIDC keyless signing
-  packages: write  # required for ghcr.io OCI publishing
+  contents: read
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # create GitHub releases and push to gh-pages
+      id-token: write  # required for cosign OIDC keyless signing
+      packages: write  # required for ghcr.io OCI publishing
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -116,7 +118,7 @@ jobs:
           for pkg in .cr-release-packages/*.tgz; do
             cosign sign-blob \
               --yes \
-              --bundle "${pkg}.cosign.bundle" \
+              --bundle "${pkg}.sigstore.json" \
               "${pkg}"
           done
 
@@ -152,11 +154,13 @@ jobs:
             helm sigstore upload "${pkg}"
           done
 
+      # The .sigstore.json extension is what OpenSSF Scorecard's Signed-Releases
+      # check recognises as a signature artifact.
       - name: Upload Cosign bundles to GitHub releases
         run: |
           shopt -s nullglob
-          for bundle in .cr-release-packages/*.cosign.bundle; do
-            tag=$(basename "${bundle%.tgz.cosign.bundle}")
+          for bundle in .cr-release-packages/*.sigstore.json; do
+            tag=$(basename "${bundle%.tgz.sigstore.json}")
             gh release upload "${tag}" "${bundle}" --clobber
           done
         env:
