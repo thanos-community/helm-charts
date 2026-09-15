@@ -1,10 +1,18 @@
 # Thanos Community Helm Charts
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/thanos-community/helm-charts?label=release)](https://github.com/thanos-community/helm-charts/releases/latest)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/thanos-community)](https://artifacthub.io/packages/search?repo=thanos-community)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 [![CI](https://github.com/thanos-community/helm-charts/actions/workflows/ci.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/ci.yaml)
 [![Release](https://github.com/thanos-community/helm-charts/actions/workflows/release.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/release.yaml)
+[![Docs](https://github.com/thanos-community/helm-charts/actions/workflows/docs.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/docs.yaml)
 [![Renovate](https://github.com/thanos-community/helm-charts/actions/workflows/renovate.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/renovate.yaml)
+
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/thanos-community/helm-charts/badge)](https://scorecard.dev/viewer/?uri=github.com/thanos-community/helm-charts)
+[![Scorecard](https://github.com/thanos-community/helm-charts/actions/workflows/scorecard.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/scorecard.yaml)
+[![Trivy](https://github.com/thanos-community/helm-charts/actions/workflows/trivy.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/trivy.yaml)
+[![zizmor](https://github.com/thanos-community/helm-charts/actions/workflows/zizmor.yaml/badge.svg)](https://github.com/thanos-community/helm-charts/actions/workflows/zizmor.yaml)
 
 Community-maintained Helm charts for deploying [Thanos](https://thanos.io/) on Kubernetes — a highly available Prometheus setup with long-term storage capabilities.
 
