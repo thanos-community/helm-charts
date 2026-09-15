@@ -1,10 +1,14 @@
-name: Docs
+name: Zizmor
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/**"
   pull_request:
     paths:
-      - "**/*.md"
-      - ".markdownlint.yaml"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 concurrency:
@@ -15,16 +19,16 @@ permissions:
   contents: read
 
 jobs:
-  lint-docs:
+  audit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # upload SARIF to code scanning
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           persist-credentials: false
-      - name: Check documentation formatting (markdownlint)
-        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd  # v23.2.0
-        with:
-          globs: |
-            **/*.md
-            !charts/*/README.md
+
+      - name: Audit GitHub Actions workflows
+        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482  # v0.6.4
