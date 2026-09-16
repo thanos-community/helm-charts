@@ -256,6 +256,39 @@ query:
               pathType: Prefix
 ```
 
+#### File-based endpoint discovery
+
+`autogen` and `static` bake their endpoints into the pod spec, so every change to the store topology is a `helm upgrade` and a restart. `query.endpoints.sdConfig` instead passes `--endpoint.sd-config-file`, which Thanos re-reads at runtime — the right fit when the set of Store API servers changes without the chart knowing, for example sidecars appearing next to new Prometheus instances.
+
+Point it at a ConfigMap somebody else maintains:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      existingConfigMap: thanos-endpoints
+      key: endpoints.yml
+      reloadInterval: 30s
+```
+
+Or let the chart render one from an inline config. The file is Thanos' own `EndpointConfig`, documented under [Per-Endpoint TLS Configuration](https://thanos.io/v0.42/components/query.md/#per-endpoint-tls-configuration) — not the Prometheus target-group format, which belongs to the deprecated `--store.sd-files` flag:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      config: |
+        endpoints:
+          - address: thanos-sidecar-0.prometheus:10901
+          - address: thanos-sidecar-1.prometheus:10901
+```
+
+Three things to keep in mind:
+
+- The ConfigMap is mounted as a directory rather than with `subPath`, because the kubelet only keeps the projected file current without one. With `subPath` the file would freeze at its first version and re-reading it would find nothing new.
+- File SD is additive: `autogen` and `static` endpoints are still passed as `--endpoint` arguments alongside it, and Thanos merges them into the file's list on every reload.
+- gRPC client TLS belongs in this file too, as `default_client_config` or per endpoint as `client_config`. The `--grpc-client-tls-*` flags are deprecated after v0.43.0, and Query already logs a warning pointing here.
+
 ### Receive
 
 The Receive component accepts Prometheus `remote_write` traffic and stores samples locally in a TSDB WAL before shipping blocks to the object store.
