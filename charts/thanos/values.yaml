@@ -49,6 +49,10 @@ global:
   # @default -- {}
   podAnnotations: {}
 
+  # -- (bool) Configure hostUsers applied to every pod. Component-level values override this.
+  # @default -- nil
+  hostUsers: null
+
   # -- Pod-level security context applied to every pod. Component-level values override this.
   # @default -- {}
   podSecurityContext: {}
@@ -593,6 +597,10 @@ bucket:
     # @default -- {}
     resources: {}
 
+    # -- (bool) Configure hostUsers for Bucketweb. Overrides global.hostUsers.
+    # @default -- nil
+    hostUsers: null
+
     # -- Pod security context for Bucketweb. Overrides global.podSecurityContext.
     # @default -- {}
     podSecurityContext: {}
@@ -947,6 +955,10 @@ compactor:
   # -- Resource requests and limits for the Compactor container.
   # @default -- {}
   resources: {}
+
+  # -- (bool) Configure hostUsers for Compactor. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for the Compactor. Overrides global.podSecurityContext.
   podSecurityContext:
@@ -1372,6 +1384,10 @@ query:
   # @default -- {}
   resources: {}
 
+  # -- (bool) Configure hostUsers for Query pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
+
   # -- Pod security context for Query pods. Overrides global.podSecurityContext.
   # @default -- {}
   podSecurityContext: {}
@@ -1685,6 +1701,10 @@ queryFrontend:
   # -- Additional CLI arguments appended to the `thanos query-frontend` command.
   # @default -- []
   extraArgs: []
+
+  # -- (bool) Configure hostUsers for Query Frontend pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # -- Pod security context for Query Frontend pods. Overrides global.podSecurityContext.
   # @default -- {}
@@ -2126,6 +2146,10 @@ storegateway:
   # -- Additional CLI arguments appended to the `thanos store` command.
   # @default -- []
   extraArgs: []
+
+  # -- (bool) Configure hostUsers for StoreGateway pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for Store Gateway pods. Overrides global.podSecurityContext.
   podSecurityContext:
@@ -2642,6 +2666,10 @@ receive:
   # @default -- []
   extraArgs: []
 
+  # -- (bool) Configure hostUsers for Receive pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
+
   # Pod security context for Receive pods. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
@@ -2844,6 +2872,12 @@ receive:
   # ignored in `standalone` mode. Only `persistence` is defaulted by the chart.
   # @default -- see `receive.ingester.persistence.*` below
   ingester:
+
+    # -- (bool) Configure hostUsers for ingester. Overrides global.hostUsers.
+    # @default -- nil
+    hostUsers: null
+
+
     # PersistentVolumeClaim configuration for the Ingester TSDB WAL.
     persistence:
       # -- Enable a PersistentVolumeClaim for the Ingester TSDB WAL.
@@ -3047,6 +3081,10 @@ receive:
     # -- Additional CLI arguments appended to the `thanos receive` command for the Router.
     # @default -- []
     extraArgs: []
+
+    # -- (bool) Configure hostUsers for Router pods. Falls back to receive.hostUsers, then global.hostUsers.
+    # @default -- nil
+    hostUsers: null
 
     # -- Pod security context for Router pods. Falls back to receive.podSecurityContext, then global.podSecurityContext.
     # @default -- {}
@@ -3450,6 +3488,10 @@ ruler:
   # -- Additional CLI arguments appended to the `thanos rule` command.
   # @default -- []
   extraArgs: []
+
+  # -- (bool) Configure hostUsers for Ruler pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for Ruler pods. Overrides global.podSecurityContext.
   podSecurityContext:
