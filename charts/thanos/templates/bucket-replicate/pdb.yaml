@@ -1,0 +1,24 @@
+{{- if and .Values.bucketReplicate.enabled (or .Values.bucketReplicate.pdb.enabled .Values.global.pdb.enabled) -}}
+{{- $minAvail := .Values.bucketReplicate.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
+{{- $maxUnavail := .Values.bucketReplicate.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "thanos.compName" (list . "bucket-replicate") }}
+  namespace: {{ include "thanos.namespace" . }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: bucket-replicate
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketReplicate") | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucket-replicate") | nindent 6 }}
+  {{- if $minAvail }}
+  minAvailable: {{ $minAvail }}
+  {{- else if $maxUnavail }}
+  maxUnavailable: {{ $maxUnavail }}
+  {{- end }}
+{{- end -}}

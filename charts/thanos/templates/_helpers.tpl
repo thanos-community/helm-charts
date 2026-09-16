@@ -1053,6 +1053,7 @@ component at a ServiceAccount managed outside this chart.
 {{- $receive := $v.receive | default dict -}}
 {{- $owners := dict
       "bucketweb" ($bucket.bucketweb | default dict)
+      "bucket-replicate" ($v.bucketReplicate | default dict)
       "compactor" ($v.compactor | default dict)
       "query" ($v.query | default dict)
       "query-frontend" ($v.queryFrontend | default dict)

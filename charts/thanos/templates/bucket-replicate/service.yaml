@@ -1,0 +1,30 @@
+{{- if .Values.bucketReplicate.enabled -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "thanos.compName" (list . "bucket-replicate") }}
+  namespace: {{ include "thanos.namespace" . }}
+  labels:
+    app.kubernetes.io/component: bucket-replicate
+    {{- include "thanos.labels" . | nindent 4 }}
+    {{- with .Values.bucketReplicate.service.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketReplicate") | nindent 4 }}
+    {{- with .Values.bucketReplicate.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.bucketReplicate.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.bucketReplicate.service.port }}
+      targetPort: http
+      {{- with .Values.bucketReplicate.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
+  selector:
+    {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucket-replicate") | nindent 4 }}
+{{- end -}}
