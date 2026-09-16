@@ -11,6 +11,27 @@
     "namespaceOverride": {
       "type": "string"
     },
+    "extraResources": {
+      "description": "======================================================================\nExtra resources\nArbitrary manifests managed by this release, for anything the chart does\nnot template itself — an ExternalSecret feeding global.objstore, a Grafana\ndashboard ConfigMap, a component-specific RBAC rule.\n======================================================================\nArbitrary Kubernetes manifests to create alongside the chart resources.\nEach entry is a manifest map, or a multi-line string holding one manifest.\nEvery entry is processed via `tpl` against the chart context, so Helm\ntemplate syntax (`{{ .Release.Name }}`, `{{ include \"thanos.namespace\" . }}`)\nis valid inside it. Nothing is injected: name, namespace and labels are the\nentry's own.",
+      "items": {
+        "anyOf": [
+          {
+            "required": [],
+            "type": "string"
+          },
+          {
+            "additionalProperties": true,
+            "minProperties": 1,
+            "required": [],
+            "type": "object"
+          }
+        ],
+        "required": []
+      },
+      "required": [],
+      "title": "extraResources",
+      "type": "array"
+    },
     "bucket": {
       "additionalProperties": true,
       "description": "======================================================================\nBucket component\nRead-only web UI for inspecting object store blocks.\nOften disabled in production; useful for debugging compaction issues.\n======================================================================\nBucket component group. Contains the Bucketweb UI sub-chart.",

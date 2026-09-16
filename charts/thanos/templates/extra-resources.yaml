@@ -1,0 +1,15 @@
+{{- /*
+Arbitrary user-supplied manifests, rendered verbatim from `extraResources`.
+Each entry is either a manifest map or a multi-line string holding a single
+manifest, and is passed through `tpl` with the chart context, so template
+syntax and the chart helpers are available inside it. The chart injects
+nothing of its own: name, namespace and labels belong to the entry.
+*/ -}}
+{{- range $resource := .Values.extraResources }}
+{{- $manifest := $resource }}
+{{- if not (kindIs "string" $resource) }}
+{{- $manifest = toYaml $resource }}
+{{- end }}
+---
+{{ tpl $manifest $ | trim }}
+{{- end }}

@@ -635,6 +635,41 @@ global:
       componentDown: 5m
 ```
 
+### Extra resources
+
+`extraResources` holds arbitrary manifests that the release creates and deletes along with everything else — an ExternalSecret feeding `global.objstore`, a Grafana dashboard ConfigMap, RBAC for a sidecar. Entries are either manifest maps or multi-line strings holding one manifest each, and both forms are processed via `tpl`, so template syntax and the chart helpers are available inside them:
+
+```yaml
+extraResources:
+  # A map, quoting the templated values so the file stays valid YAML.
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: '{{ `{{ include "thanos.fullname" . }}` }}-dashboards'
+      namespace: '{{ `{{ include "thanos.namespace" . }}` }}'
+      labels:
+        grafana_dashboard: "1"
+    data:
+      thanos-overview.json: |
+        {}
+
+  # A string, where templating needs no quoting and helpers can be indented
+  # into place with nindent.
+  - |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: {{ `{{ include "thanos.fullname" . }}` }}-extra
+      namespace: {{ `{{ include "thanos.namespace" . }}` }}
+      labels:
+        {{ `{{- include "thanos.labels" . | nindent 4 }}` }}
+```
+
+Two things to keep in mind:
+
+- The chart adds nothing to what you write. Name, namespace and labels are the entry's own, so set `metadata.namespace` explicitly — the `thanos.namespace` helper follows `namespaceOverride` — and include the `thanos.labels` helper wherever you want the chart labels.
+- An entry that templates to nothing renders no resource, so a manifest can be made conditional on your own values by wrapping a string entry in an `if` block.
+
 ## Upgrading
 
 Before upgrading, review the [chart changelog](https://github.com/thanos-community/helm-charts/releases) and the [Thanos release notes](https://github.com/thanos-io/thanos/releases).

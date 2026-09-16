@@ -3572,6 +3572,40 @@ ruler:
     maxUnavailable: ""
 
 # ======================================================================
+# Extra resources
+# Arbitrary manifests managed by this release, for anything the chart does
+# not template itself — an ExternalSecret feeding global.objstore, a Grafana
+# dashboard ConfigMap, a component-specific RBAC rule.
+# ======================================================================
+# -- Arbitrary Kubernetes manifests to create alongside the chart resources.
+# Each entry is a manifest map, or a multi-line string holding one manifest.
+# Every entry is processed via `tpl` against the chart context, so Helm
+# template syntax (`{{ .Release.Name }}`, `{{ include "thanos.namespace" . }}`)
+# is valid inside it. Nothing is injected: name, namespace and labels are the
+# entry's own.
+# @default -- []
+extraResources: []
+# Example:
+# extraResources:
+#   - apiVersion: v1
+#     kind: ConfigMap
+#     metadata:
+#       name: '{{ include "thanos.fullname" . }}-extra'
+#       namespace: '{{ include "thanos.namespace" . }}'
+#       labels:
+#         {{- include "thanos.labels" . | nindent 8 }}
+#     data:
+#       key: value
+#   - |
+#     apiVersion: v1
+#     kind: Secret
+#     metadata:
+#       name: {{ include "thanos.fullname" . }}-extra
+#       namespace: {{ include "thanos.namespace" . }}
+#     stringData:
+#       token: changeme
+
+# ======================================================================
 # RustFS subchart (optional local S3-compatible object store)
 # Disabled by default. Enable in CI or development environments where no
 # external object store is available. See charts/thanos/ci/ci-values.yaml

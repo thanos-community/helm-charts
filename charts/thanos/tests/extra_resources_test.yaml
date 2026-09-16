@@ -1,0 +1,184 @@
+suite: extra resources
+
+# Covers `extraResources`: arbitrary manifests managed by the release.
+# Entries are maps or multi-line strings, both processed via `tpl`, and are
+# rendered verbatim — the chart injects no name, namespace or labels.
+
+templates:
+  - extra-resources.yaml
+
+tests:
+  # -- Default -----------------------------------------------------------
+
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders nothing for an empty list
+    set:
+      extraResources: []
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Map entries -------------------------------------------------------
+
+  - it: renders a manifest given as a map
+    set:
+      extraResources:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-extra-configmap
+            namespace: my-extra-ns
+          data:
+            key: value
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: my-extra-configmap
+      - equal:
+          path: metadata.namespace
+          value: my-extra-ns
+      - equal:
+          path: data.key
+          value: value
+
+  - it: runs map entries through tpl
+    release:
+      name: my-release
+      namespace: my-release-ns
+    set:
+      extraResources:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: '{{ include "thanos.fullname" . }}-extra'
+            namespace: '{{ include "thanos.namespace" . }}'
+          data:
+            release: "{{ .Release.Name }}"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-release-thanos-extra
+      - equal:
+          path: metadata.namespace
+          value: my-release-ns
+      - equal:
+          path: data.release
+          value: my-release
+
+  - it: adds no labels or annotations of its own
+    set:
+      extraResources:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: my-extra-configmap
+          data:
+            key: value
+    asserts:
+      - notExists:
+          path: metadata.labels
+      - notExists:
+          path: metadata.annotations
+
+  # -- String entries ----------------------------------------------------
+
+  - it: renders a manifest given as a string
+    set:
+      extraResources:
+        - |
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: my-extra-sa
+            namespace: my-extra-ns
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ServiceAccount
+      - equal:
+          path: metadata.name
+          value: my-extra-sa
+      - equal:
+          path: metadata.namespace
+          value: my-extra-ns
+
+  - it: runs string entries through tpl
+    release:
+      name: my-release
+      namespace: my-release-ns
+    set:
+      extraResources:
+        - |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: {{ include "thanos.fullname" . }}-extra
+            namespace: {{ include "thanos.namespace" . }}
+            labels:
+              {{- include "thanos.labels" . | nindent 4 }}
+          data:
+            release: {{ .Release.Name }}
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-release-thanos-extra
+      - equal:
+          path: metadata.namespace
+          value: my-release-ns
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: thanos
+      - equal:
+          path: data.release
+          value: my-release
+
+  - it: skips a string entry that templates to nothing
+    set:
+      extraResources:
+        - |
+          {{- if false }}
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: never-rendered
+          {{- end }}
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  # -- Multiple entries --------------------------------------------------
+
+  - it: renders every entry, mixing maps and strings
+    set:
+      extraResources:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: first-extra
+        - |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: second-extra
+          stringData:
+            token: changeme
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: metadata.name
+          value: first-extra
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: second-extra
+        documentIndex: 1

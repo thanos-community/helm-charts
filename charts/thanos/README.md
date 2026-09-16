@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.44.0](https://img.shields.io/badge/Version-0.44.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.45.0](https://img.shields.io/badge/Version-0.45.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -647,6 +647,41 @@ global:
       componentDown: 5m
 ```
 
+### Extra resources
+
+`extraResources` holds arbitrary manifests that the release creates and deletes along with everything else — an ExternalSecret feeding `global.objstore`, a Grafana dashboard ConfigMap, RBAC for a sidecar. Entries are either manifest maps or multi-line strings holding one manifest each, and both forms are processed via `tpl`, so template syntax and the chart helpers are available inside them:
+
+```yaml
+extraResources:
+  # A map, quoting the templated values so the file stays valid YAML.
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: '{{ include "thanos.fullname" . }}-dashboards'
+      namespace: '{{ include "thanos.namespace" . }}'
+      labels:
+        grafana_dashboard: "1"
+    data:
+      thanos-overview.json: |
+        {}
+
+  # A string, where templating needs no quoting and helpers can be indented
+  # into place with nindent.
+  - |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: {{ include "thanos.fullname" . }}-extra
+      namespace: {{ include "thanos.namespace" . }}
+      labels:
+        {{- include "thanos.labels" . | nindent 4 }}
+```
+
+Two things to keep in mind:
+
+- The chart adds nothing to what you write. Name, namespace and labels are the entry's own, so set `metadata.namespace` explicitly — the `thanos.namespace` helper follows `namespaceOverride` — and include the `thanos.labels` helper wherever you want the chart labels.
+- An entry that templates to nothing renders no resource, so a manifest can be made conditional on your own values by wrapping a string entry in an `if` block.
+
 ## Upgrading
 
 Before upgrading, review the [chart changelog](https://github.com/thanos-community/helm-charts/releases) and the [Thanos release notes](https://github.com/thanos-io/thanos/releases).
@@ -917,6 +952,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.vpa.minAllowed.memory | string | `"512Mi"` | Minimum memory resource enforced by the Compactor VPA. |
 | compactor.vpa.targetKind | string | `"StatefulSet"` | Kubernetes workload kind targeted by the Compactor VPA. |
 | compactor.vpa.updateMode | string | `"Auto"` | VPA update mode for the Compactor. One of Auto, Off, or Initial. |
+| extraResources | list | [] | Arbitrary Kubernetes manifests to create alongside the chart resources. Each entry is a manifest map, or a multi-line string holding one manifest. Every entry is processed via `tpl` against the chart context, so Helm template syntax (`{{ .Release.Name }}`, `{{ include "thanos.namespace" . }}`) is valid inside it. Nothing is injected: name, namespace and labels are the entry's own. |
 | fullnameOverride | string | `""` | Fully override the generated resource name (`thanos.fullname`). Empty uses `<release>-<chart>`. |
 | global.affinity | object | {} | Affinity rules applied to every pod by default. |
 | global.clusterDomain | string | `"cluster.local"` | Cluster DNS domain, used when constructing in-cluster endpoints. |
