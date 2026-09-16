@@ -225,6 +225,16 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: query-frontend/deployment.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
   - it: applies pod security context
     template: query-frontend/deployment.yaml
     set:

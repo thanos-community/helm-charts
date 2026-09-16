@@ -454,6 +454,67 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
+  - it: applies host users in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
+  - it: applies global host users
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
+  - it: applies host users when overriden
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.hostUsers: false
+      receive.hostUsers: true
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: true
+
+  - it: applies host users when overriden
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      global.hostUsers: false
+      receive.hostUsers: true
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: true
+
+  - it: Do not render host users when not set explicitly
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.hostUsers
+
   - it: applies pod security context
     template: receive/statefulset.yaml
     set:

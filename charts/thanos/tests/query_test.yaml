@@ -376,6 +376,16 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: query/deployment.yaml
+    set:
+      query.enabled: true
+      query.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
   - it: applies pod security context
     template: query/deployment.yaml
     set:

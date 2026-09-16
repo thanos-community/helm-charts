@@ -403,13 +403,18 @@
               "title": "persistence",
               "type": "object"
             },
-            "podSecurityContext": {
-              "additionalProperties": true,
-              "description": "Pod security context for Bucketweb. Overrides global.podSecurityContext.",
-              "required": [],
-              "title": "podSecurityContext",
-              "type": "object"
+            "hostUsers": {
+              "description": "Configure hostUsers for Bucketweb. Overrides global.hostUsers.",
+              "title": "hostUsers",
+              "type": ["boolean", "null"]
             },
+              "podSecurityContext": {
+                "additionalProperties": true,
+                "description": "Pod security context for Bucketweb. Overrides global.podSecurityContext.",
+                "required": [],
+                "title": "podSecurityContext",
+                "type": "object"
+              },
             "priorityClassName": {
               "default": "",
               "description": "Priority class name for Bucketweb pods.",
@@ -1351,6 +1356,11 @@
           "title": "persistence",
           "type": "object"
         },
+        "hostUsers": {
+          "description": "Configure hostUsers for Compactor. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
+        },
         "podSecurityContext": {
           "additionalProperties": true,
           "description": "Pod security context for the Compactor. Overrides global.podSecurityContext.",
@@ -2266,6 +2276,11 @@
           "required": [],
           "title": "podAnnotations",
           "type": "object"
+        },
+        "hostUsers": {
+          "description": "Configure hostUsers applied to every pod. Component-level values override this.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
         },
         "podSecurityContext": {
           "additionalProperties": true,
@@ -3406,6 +3421,11 @@
           "title": "pdb",
           "type": "object"
         },
+        "hostUsers": {
+          "description": "Configure hostUsers for Query pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
+        },
         "podSecurityContext": {
           "additionalProperties": true,
           "description": "Pod security context for Query pods. Overrides global.podSecurityContext.",
@@ -4344,6 +4364,11 @@
           ],
           "title": "pdb",
           "type": "object"
+        },
+        "hostUsers": {
+          "description": "Configure hostUsers for Query Frontend pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
         },
         "podSecurityContext": {
           "additionalProperties": true,
@@ -5794,6 +5819,11 @@
           "title": "persistence",
           "type": "object"
         },
+        "hostUsers": {
+          "description": "Configure hostUsers for Receive pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
+        },
         "podSecurityContext": {
           "additionalProperties": true,
           "description": "Pod security context for Receive pods. Overrides global.podSecurityContext.",
@@ -7040,6 +7070,11 @@
           ],
           "title": "persistence",
           "type": "object"
+        },
+        "hostUsers": {
+          "description": "Configure hostUsers for Ruler pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
         },
         "podSecurityContext": {
           "additionalProperties": true,
@@ -8467,6 +8502,11 @@
           ],
           "title": "persistence",
           "type": "object"
+        },
+        "hostUsers": {
+          "description": "Configure hostUsers for StoreGateway pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
         },
         "podSecurityContext": {
           "additionalProperties": true,

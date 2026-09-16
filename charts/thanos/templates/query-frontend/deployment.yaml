@@ -34,6 +34,7 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "query-frontend") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "queryFrontend") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podHostUsers" (dict "root" . "key" "queryFrontend") | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "queryFrontend") | nindent 6 }}
       containers:
         - name: query-frontend

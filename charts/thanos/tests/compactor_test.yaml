@@ -393,6 +393,16 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
   - it: applies pod security context
     template: compactor/statefulset.yaml
     set:
