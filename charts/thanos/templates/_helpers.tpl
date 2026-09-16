@@ -379,10 +379,20 @@ Usage:
 {{- end }}
 {{- end }}
 
+{{- /*
+Render the `volumes:` key, or nothing when there is nothing to put under it.
+`items` carries the component's own volumes as rendered YAML and is optional;
+they come first, then global, parent and component `extraVolumes`. Without it a
+component whose own volumes are conditional would need its own emptiness check.
+Usage:
+  {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "query") | nindent 6 }}
+  {{- include "thanos.extraVolumesBlock" (dict "root" . "key" "queryFrontend" "items" $own) | nindent 6 }}
+*/ -}}
 {{- define "thanos.extraVolumesBlock" -}}
 {{- $root := .root -}}
 {{- $key := .key -}}
 {{- $parent := .parent | default "" -}}
+{{- $items := .items | default "" -}}
 {{- $par := dict -}}
 {{- $comp := dict -}}
 {{- if $parent -}}
@@ -395,8 +405,11 @@ Usage:
 {{- $volsGlob := $glob.extraVolumes | default list -}}
 {{- $volsPar := $par.extraVolumes | default list -}}
 {{- $volsComp := $comp.extraVolumes | default list -}}
-{{- if or (gt (len $volsGlob) 0) (gt (len $volsPar) 0) (gt (len $volsComp) 0) }}
+{{- if or $items (gt (len $volsGlob) 0) (gt (len $volsPar) 0) (gt (len $volsComp) 0) -}}
 volumes:
+  {{- with $items }}
+  {{- . | nindent 2 }}
+  {{- end }}
   {{- include "thanos.extraVolumeItems" (dict "root" $root "key" $key "parent" $parent) | nindent 2 }}
 {{- end }}
 {{- end }}
@@ -434,10 +447,16 @@ Usage:
 {{- end }}
 {{- end }}
 
+{{- /*
+Render the `volumeMounts:` key, or nothing when there is nothing to put under
+it. `items` carries the component's own mounts as rendered YAML and is optional;
+same ordering and reasoning as `thanos.extraVolumesBlock`.
+*/ -}}
 {{- define "thanos.extraMountsBlock" -}}
 {{- $root := .root -}}
 {{- $key := .key -}}
 {{- $parent := .parent | default "" -}}
+{{- $items := .items | default "" -}}
 {{- $par := dict -}}
 {{- $comp := dict -}}
 {{- if $parent -}}
@@ -450,8 +469,11 @@ Usage:
 {{- $mtsGlob := $glob.extraVolumeMounts | default list -}}
 {{- $mtsPar := $par.extraVolumeMounts | default list -}}
 {{- $mtsComp := $comp.extraVolumeMounts | default list -}}
-{{- if or (gt (len $mtsGlob) 0) (gt (len $mtsPar) 0) (gt (len $mtsComp) 0) }}
+{{- if or $items (gt (len $mtsGlob) 0) (gt (len $mtsPar) 0) (gt (len $mtsComp) 0) -}}
 volumeMounts:
+  {{- with $items }}
+  {{- . | nindent 2 }}
+  {{- end }}
   {{- include "thanos.extraMountItems" (dict "root" $root "key" $key "parent" $parent) | nindent 2 }}
 {{- end }}
 {{- end }}
