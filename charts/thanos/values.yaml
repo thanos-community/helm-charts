@@ -49,6 +49,10 @@ global:
   # @default -- {}
   podAnnotations: {}
 
+  # -- Configure hostUsers applied to every pod. Component-level values override this.
+  # @default -- nil
+  hostUsers: null
+
   # -- Pod-level security context applied to every pod. Component-level values override this.
   # @default -- {}
   podSecurityContext: {}
@@ -592,6 +596,10 @@ bucket:
     # @default -- {}
     resources: {}
 
+    # -- Configure hostUsers for Bucketweb. Overrides global.hostUsers.
+    # @default -- nil
+    hostUsers: null
+
     # -- Pod security context for Bucketweb. Overrides global.podSecurityContext.
     # @default -- {}
     podSecurityContext: {}
@@ -946,6 +954,10 @@ compactor:
   # -- Resource requests and limits for the Compactor container.
   # @default -- {}
   resources: {}
+
+  # -- Configure hostUsers for Compactor. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for the Compactor. Overrides global.podSecurityContext.
   podSecurityContext:
@@ -1337,6 +1349,10 @@ query:
   # @default -- {}
   resources: {}
 
+  # -- Configure hostUsers for Query pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
+
   # -- Pod security context for Query pods. Overrides global.podSecurityContext.
   # @default -- {}
   podSecurityContext: {}
@@ -1649,6 +1665,10 @@ queryFrontend:
   # -- Additional CLI arguments appended to the `thanos query-frontend` command.
   # @default -- []
   extraArgs: []
+
+  # -- Configure hostUsers for Query Frontend pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # -- Pod security context for Query Frontend pods. Overrides global.podSecurityContext.
   # @default -- {}
@@ -2080,6 +2100,10 @@ storegateway:
   # -- Additional CLI arguments appended to the `thanos store` command.
   # @default -- []
   extraArgs: []
+
+  # -- Configure hostUsers for Store pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for Store Gateway pods. Overrides global.podSecurityContext.
   podSecurityContext:
@@ -2588,6 +2612,10 @@ receive:
   # @default -- []
   extraArgs: []
 
+  # -- Configure hostUsers for Receive pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
+
   # Pod security context for Receive pods. Overrides global.podSecurityContext.
   podSecurityContext:
     fsGroup: 1000
@@ -2994,6 +3022,10 @@ receive:
     # @default -- []
     extraArgs: []
 
+    # -- Configure hostUsers for Router pods. Overrides global.hostUsers.
+    # @default -- nil
+    hostUsers: null
+
     # -- Pod security context for Router pods. Falls back to receive.podSecurityContext, then global.podSecurityContext.
     # @default -- {}
     podSecurityContext: {}
@@ -3396,6 +3428,10 @@ ruler:
   # -- Additional CLI arguments appended to the `thanos rule` command.
   # @default -- []
   extraArgs: []
+
+  # -- Configure hostUsers for Ruler pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
 
   # Pod security context for Ruler pods. Overrides global.podSecurityContext.
   podSecurityContext:
