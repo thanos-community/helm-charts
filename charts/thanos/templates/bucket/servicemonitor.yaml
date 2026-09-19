@@ -11,6 +11,8 @@ metadata:
     {{- if .Values.bucket.bucketweb.serviceMonitor.labels }}{{ toYaml .Values.bucket.bucketweb.serviceMonitor.labels | nindent 4 }}{{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "bucketweb") | nindent 4 }}
+    {{- with .Values.global.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.bucket.bucketweb.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
 spec:
   namespaceSelector:
     matchNames:
