@@ -11,6 +11,8 @@ metadata:
     {{- if .Values.ruler.serviceMonitor.labels }}{{ toYaml .Values.ruler.serviceMonitor.labels | nindent 4 }}{{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "ruler") | nindent 4 }}
+    {{- with .Values.global.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.ruler.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
 spec:
   namespaceSelector:
     matchNames:
