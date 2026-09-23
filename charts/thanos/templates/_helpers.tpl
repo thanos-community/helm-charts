@@ -1236,6 +1236,10 @@ spec:
     - backendRefs:
         - name: {{ include "thanos.compName" (list $root $comp) }}
           port: {{ $port }}
+      {{- with $cfg.matches }}
+      matches:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end -}}
 
 {{/*

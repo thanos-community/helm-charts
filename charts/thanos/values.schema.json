@@ -2943,6 +2943,15 @@
               "title": "hostnames",
               "type": "array"
             },
+            "matches": {
+              "description": "Gateway matches for the Query GRPCRoute rules.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "matches",
+              "type": "array"
+            },
             "parentRefs": {
               "description": "Gateway parentRefs for the Query GRPCRoute.",
               "items": {
@@ -4966,6 +4975,15 @@
               },
               "required": [],
               "title": "hostnames",
+              "type": "array"
+            },
+            "matches": {
+              "description": "Gateway matches for the Receive GRPCRoute rules.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "matches",
               "type": "array"
             },
             "parentRefs": {
@@ -7939,6 +7957,15 @@
               },
               "required": [],
               "title": "hostnames",
+              "type": "array"
+            },
+            "matches": {
+              "description": "Gateway matches for the Store Gateway GRPCRoute rules.",
+              "items": {
+                "required": []
+              },
+              "required": [],
+              "title": "matches",
               "type": "array"
             },
             "parentRefs": {
