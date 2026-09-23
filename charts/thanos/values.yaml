@@ -1287,6 +1287,14 @@ query:
     # -- Hostnames to match on the Query GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Query GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # HorizontalPodAutoscaler configuration for the Query component.
   autoscaling:
@@ -2059,6 +2067,14 @@ storegateway:
     # -- Hostnames to match on the Store Gateway GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Store Gateway GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # HorizontalPodAutoscaler configuration for the Store Gateway.
   autoscaling:
@@ -2563,6 +2579,14 @@ receive:
     # -- Hostnames to match on the Receive GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Receive GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # VerticalPodAutoscaler configuration for the Receive StatefulSet.
   vpa:
