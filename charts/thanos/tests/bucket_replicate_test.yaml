@@ -1,0 +1,258 @@
+suite: bucket replicate component
+
+tests:
+  # -- Enablement -------------------------------------------------------
+
+  - it: does not render when disabled
+    template: bucket-replicate/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a Deployment when enabled
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-bucket-replicate
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: bucket-replicate
+
+  # -- Command and object stores -----------------------------------------
+
+  - it: runs tools bucket replicate against both object stores
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args[0]
+          value: tools
+      - equal:
+          path: spec.template.spec.containers[0].args[1]
+          value: bucket
+      - equal:
+          path: spec.template.spec.containers[0].args[2]
+          value: replicate
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore.config-file=/etc/thanos/objstore.yml
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --objstore-to.config-file=/etc/thanos/objstore-to.yml
+
+  - it: mounts the source and destination object store Secrets
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.objstoreTo.secretName: dr-bucket
+      bucketReplicate.objstoreTo.secretKey: dr.yml
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: objstore-to
+            secret:
+              secretName: dr-bucket
+              items:
+                - key: dr.yml
+                  path: objstore-to.yml
+
+  # -- Filtering flags ----------------------------------------------------
+
+  - it: passes no filtering flags by default
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --compaction-min=1
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --ignore-marked-for-deletion
+
+  - it: renders resolutions, compaction levels and matchers
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.resolutions:
+        - 0s
+        - 5m
+      bucketReplicate.compaction.levels:
+        - 1
+        - 2
+      bucketReplicate.matcher: cluster="eu-west-1"
+      bucketReplicate.minTime: "-6w"
+      bucketReplicate.ignoreMarkedForDeletion: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --resolution=0s
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --compaction=2
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --matcher=cluster="eu-west-1"
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --min-time=-6w
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --ignore-marked-for-deletion
+
+  - it: renders compaction bounds
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.compaction.min: 1
+      bucketReplicate.compaction.max: 4
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --compaction-min=1
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --compaction-max=4
+
+  # -- Destination Secret --------------------------------------------------
+
+  - it: creates no destination Secret by default
+    template: bucket-replicate/secret-objstore-to.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: creates the destination Secret when opted in
+    template: bucket-replicate/secret-objstore-to.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.objstoreTo.createSecret: true
+      bucketReplicate.objstoreTo.config: |
+        type: S3
+        config:
+          bucket: dr-copy
+    asserts:
+      - isKind:
+          of: Secret
+      - equal:
+          path: metadata.name
+          value: thanos-objstore-to
+      - matchRegex:
+          path: stringData["objstore.yml"]
+          pattern: 'bucket: dr-copy'
+
+  # -- Surrounding objects --------------------------------------------------
+
+  - it: renders a Service for metrics and probes
+    template: bucket-replicate/service.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - isKind:
+          of: Service
+      - contains:
+          path: spec.ports
+          content:
+            name: http
+            port: 10902
+            targetPort: http
+
+  - it: renders a NetworkPolicy when network policies are on
+    template: bucket-replicate/networkpolicy.yaml
+    set:
+      bucketReplicate.enabled: true
+      global.networkPolicies: true
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - contains:
+          path: spec.ingress[0].ports
+          content:
+            port: http
+
+  - it: renders a PodDisruptionBudget when enabled
+    template: bucket-replicate/pdb.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.pdb.enabled: true
+      bucketReplicate.pdb.minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: renders a ServiceMonitor when enabled
+    template: bucket-replicate/servicemonitor.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].port
+          value: http
+
+  - it: uses the chart-wide ServiceAccount unless it gets its own
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-thanos-thanos
+
+  - it: uses a dedicated ServiceAccount when asked for one
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.serviceAccount.create: true
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: RELEASE-NAME-thanos-bucket-replicate
+
+  # -- Alerting rules --------------------------------------------------------
+
+  - it: keeps the bucket-replicate rule group out while the component is off
+    template: prometheusrule/rule.yaml
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-bucket-replicate
+          any: true
+
+  - it: renders the bucket-replicate rule group once the component is on
+    template: prometheusrule/rule.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - contains:
+          path: spec.groups
+          content:
+            name: thanos-bucket-replicate
+          any: true
+
+  - it: lets an explicit group toggle override the component
+    template: prometheusrule/rule.yaml
+    set:
+      bucketReplicate.enabled: true
+      global.thanosRules.groups.thanosBucketReplicate.enabled: false
+    asserts:
+      - notContains:
+          path: spec.groups
+          content:
+            name: thanos-bucket-replicate
+          any: true

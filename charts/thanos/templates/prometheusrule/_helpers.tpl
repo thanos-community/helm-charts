@@ -59,12 +59,13 @@ Usage:
 {{- $bucketRepl := $groups.thanosBucketReplicate | default dict -}}
 {{- $absent := $groups.thanosComponentAbsent | default dict -}}
 {{- /* Resolve `enabled` per group. Each group's own toggle defaults to
-       true (false for sidecar/bucketReplicate which have no component
-       in this chart). For groups that map to a chart component, the
-       group is also AND-ed with that component's top-level `enabled`
-       flag, so disabling a component (e.g. ruler.enabled=false) also
-       silences its rule group and its ThanosXIsDown absent alert. */ -}}
-{{- $defaults := dict "compact" true "query" true "receive" true "sidecar" false "store" true "rule" true "bucketRepl" false "absent" true -}}
+       true (false for sidecar, which has no component in this chart).
+       For groups that map to a chart component, the group is also
+       AND-ed with that component's top-level `enabled` flag, so
+       disabling a component (e.g. ruler.enabled=false) also silences
+       its rule group and its ThanosXIsDown absent alert. */ -}}
+{{- $brEn := and (hasKey .Values "bucketReplicate") (default false (index .Values "bucketReplicate" "enabled")) -}}
+{{- $defaults := dict "compact" true "query" true "receive" true "sidecar" false "store" true "rule" true "bucketRepl" $brEn "absent" true -}}
 {{- $compEn  := and (hasKey .Values "compactor")    (default false (index .Values "compactor"    "enabled")) -}}
 {{- $qEn     := and (hasKey .Values "query")        (default false (index .Values "query"        "enabled")) -}}
 {{- $rcEn    := and (hasKey .Values "receive")      (default false (index .Values "receive"      "enabled")) -}}
@@ -74,7 +75,7 @@ Usage:
 {{- $enabled := dict -}}
 {{- range $k, $g := dict "compact" $compact "query" $query "receive" $receive "sidecar" $sidecar "store" $store "rule" $rule "bucketRepl" $bucketRepl "absent" $absent -}}
 {{- $own := index $defaults $k -}}
-{{- if hasKey $g "enabled" -}}{{- $own = $g.enabled -}}{{- end -}}
+{{- if and (hasKey $g "enabled") (not (kindIs "invalid" $g.enabled)) -}}{{- $own = $g.enabled -}}{{- end -}}
 {{- if hasKey $componentGate $k -}}
 {{- $_ := set $enabled $k (and $own (index $componentGate $k)) -}}
 {{- else -}}
