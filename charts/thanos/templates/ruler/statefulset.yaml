@@ -39,6 +39,9 @@ spec:
       {{- else }}
       {{- $_ := set $anns "checksum/objstore-configuration" (.Values.global.objstore.config | sha256sum) -}}
       {{- end }}
+      {{- $_ := set $anns "checksum/rules" (include (print $.Template.BasePath "/ruler/configmaprules.yaml") . | sha256sum) -}}
+      {{- $_ := set $anns "checksum/query-configuration" (include (print $.Template.BasePath "/ruler/configmap-query.yaml") . | sha256sum) -}}
+      {{- $_ := set $anns "checksum/alertmanagers-configuration" (include (print $.Template.BasePath "/ruler/configmap-alertmanagers.yaml") . | sha256sum) -}}
       {{- with .Values.global.podAnnotations }}
       {{- $anns = merge $anns . -}}
       {{- end }}
