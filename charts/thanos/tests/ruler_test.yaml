@@ -272,6 +272,18 @@ tests:
       - exists:
           path: spec.template.metadata.annotations["checksum/objstore-configuration"]
 
+  - it: restarts pods when the rules, query or alertmanagers config changes
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/rules"]
+      - exists:
+          path: spec.template.metadata.annotations["checksum/query-configuration"]
+      - exists:
+          path: spec.template.metadata.annotations["checksum/alertmanagers-configuration"]
+
   # -- Annotations and labels -----------------------------------------
 
   - it: applies component annotations
