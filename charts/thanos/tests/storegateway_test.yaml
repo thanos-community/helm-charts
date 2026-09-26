@@ -399,6 +399,26 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
+  - it: applies host users
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
   - it: applies pod security context
     template: storegateway/statefulset.yaml
     set:

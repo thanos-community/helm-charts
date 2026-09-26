@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.46.0](https://img.shields.io/badge/Version-0.46.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.47.0](https://img.shields.io/badge/Version-0.47.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -785,6 +785,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.extraInitContainers | list | [] | Extra init containers for Bucketweb pods. |
 | bucket.bucketweb.extraVolumeMounts | list | [] | Extra volume mounts for the Bucketweb container. |
 | bucket.bucketweb.extraVolumes | list | [] | Extra volumes for Bucketweb pods. |
+| bucket.bucketweb.hostUsers | bool | nil | Configure hostUsers for Bucketweb. Overrides global.hostUsers. |
 | bucket.bucketweb.httpRoute.annotations | object | {} | Annotations for the HTTPRoute resource. |
 | bucket.bucketweb.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Bucketweb (alternative to Ingress). |
 | bucket.bucketweb.httpRoute.extraRules | list | [] | Additional custom rules for Bucketweb HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -867,6 +868,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.extraInitContainers | list | [] | Extra init containers for the Compactor pod. |
 | compactor.extraVolumeMounts | list | [] | Extra volume mounts for the Compactor container. |
 | compactor.extraVolumes | list | [] | Extra volumes for Compactor pods. |
+| compactor.hostUsers | bool | nil | Configure hostUsers for Compactor. Overrides global.hostUsers. |
 | compactor.httpRoute.annotations | object | {} | Annotations for the Compactor HTTPRoute resource. |
 | compactor.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Compactor HTTP endpoint. |
 | compactor.httpRoute.extraRules | list | [] | Additional custom rules for Compactor HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -965,6 +967,7 @@ The table below documents all available values. Top-level keys group settings by
 | global.extraInitContainers | list | [] | Extra init containers added to every pod by default. |
 | global.extraVolumeMounts | list | [] | Additional volume mounts added to every main container by default. |
 | global.extraVolumes | list | [] | Additional volumes available to every pod by default. |
+| global.hostUsers | bool | nil | Configure hostUsers applied to every pod. Component-level values override this. |
 | global.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy applied to every container. One of Always, IfNotPresent, Never. |
 | global.image.registry | string | `"quay.io"` | Docker registry for Thanos images (e.g. quay.io). Empty means default registry. |
 | global.image.repository | string | `"thanos/thanos"` | Docker repository for all Thanos containers by default. |
@@ -1078,6 +1081,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Query gRPC Store API endpoint. |
 | query.grpcRoute.hostnames | list | [] | Hostnames to match on the Query GRPCRoute. |
 | query.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Query GRPCRoute. |
+| query.hostUsers | bool | nil | Configure hostUsers for Query pods. Overrides global.hostUsers. |
 | query.httpRoute.annotations | object | {} | Annotations for the Query HTTPRoute resource. |
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
 | query.httpRoute.extraRules | list | [] | Additional custom rules for Query HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -1183,6 +1187,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.extraInitContainers | list | [] | Extra init containers for Query Frontend pods. |
 | queryFrontend.extraVolumeMounts | list | [] | Extra volume mounts for the Query Frontend container. |
 | queryFrontend.extraVolumes | list | [] | Extra volumes for Query Frontend pods. |
+| queryFrontend.hostUsers | bool | nil | Configure hostUsers for Query Frontend pods. Overrides global.hostUsers. |
 | queryFrontend.httpRoute.annotations | object | {} | Annotations for the Query Frontend HTTPRoute resource. |
 | queryFrontend.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for Query Frontend. |
 | queryFrontend.httpRoute.extraRules | list | [] | Additional custom rules for Query Frontend HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -1273,6 +1278,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.hashrings.external.key | string | `"hashrings.json"` | Key inside that ConfigMap holding the hashring JSON. |
 | receive.hashrings.refreshInterval | string | `""` | How often Receive re-reads the hashring file, as a Go duration. Empty leaves the Thanos default. Only useful when the file changes at runtime. |
 | receive.hashrings.static | list | [] | Optional static hashring configuration. When non-empty this overrides `autogen` and gives full control over ring topology. |
+| receive.hostUsers | bool | nil | Configure hostUsers for Receive pods. Overrides global.hostUsers. |
 | receive.httpRoute.annotations | object | {} | Annotations for the Receive HTTPRoute resource. |
 | receive.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Receive HTTP endpoint. |
 | receive.httpRoute.extraRules | list | [] | Additional custom rules for Receive HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -1367,6 +1373,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.extraInitContainers | list | [] | Extra init containers for Router pods. |
 | receive.router.extraVolumeMounts | list | [] | Extra volume mounts for the Router container. |
 | receive.router.extraVolumes | list | [] | Extra volumes for Router pods. |
+| receive.router.hostUsers | bool | nil | Configure hostUsers for Router pods. Overrides global.hostUsers. |
 | receive.router.httpRoute.annotations | object | {} | Annotations for the Router HTTPRoute resource. |
 | receive.router.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Router HTTP endpoint. |
 | receive.router.httpRoute.extraRules | list | [] | Additional custom rules for Router HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -1505,6 +1512,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.extraInitContainers | list | [] | Extra init containers for Ruler pods. |
 | ruler.extraVolumeMounts | list | [] | Extra volume mounts for the Ruler container. |
 | ruler.extraVolumes | list | [] | Extra volumes for Ruler pods. |
+| ruler.hostUsers | bool | nil | Configure hostUsers for Ruler pods. Overrides global.hostUsers. |
 | ruler.httpRoute.annotations | object | {} | Annotations for the Ruler HTTPRoute resource. |
 | ruler.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Ruler HTTP endpoint. |
 | ruler.httpRoute.extraRules | list | [] | Additional custom rules for Ruler HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |
@@ -1618,6 +1626,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Store Gateway gRPC Store API endpoint. |
 | storegateway.grpcRoute.hostnames | list | [] | Hostnames to match on the Store Gateway GRPCRoute. |
 | storegateway.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway GRPCRoute. |
+| storegateway.hostUsers | bool | nil | Configure hostUsers for StoreGateway pods. Overrides global.hostUsers. |
 | storegateway.httpRoute.annotations | object | {} | Annotations for the Store Gateway HTTPRoute resource. |
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
 | storegateway.httpRoute.extraRules | list | [] | Additional custom rules for Store Gateway HTTPRoute Each item should be a complete HTTPRouteRule object with its own backendRefs, matches, filters, etc. |

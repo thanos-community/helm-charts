@@ -228,6 +228,17 @@ tests:
           path: spec.template.spec.containers[0].securityContext.runAsUser
           value: 1001
 
+  - it: applies host users
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
   - it: applies pod security context
     template: bucket/deployment.yaml
     set:
