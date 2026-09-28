@@ -16,7 +16,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if not .Values.queryFrontend.autoscaling.enabled }}
   replicas: {{ .Values.queryFrontend.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "query-frontend") | nindent 6 }}

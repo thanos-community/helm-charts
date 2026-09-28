@@ -647,7 +647,7 @@
             },
             "replicaCount": {
               "default": 1,
-              "description": "Number of Bucketweb pod replicas.",
+              "description": "Number of Bucketweb pod replicas. Ignored when `bucket.bucketweb.autoscaling.enabled`\nis true, because the HorizontalPodAutoscaler then owns the replica count.",
               "required": [],
               "title": "replicaCount",
               "type": "integer"
@@ -3650,7 +3650,7 @@
         },
         "replicaCount": {
           "default": 2,
-          "description": "Number of Query pod replicas. Two or more is recommended for HA.",
+          "description": "Number of Query pod replicas. Two or more is recommended for HA.\nIgnored when `query.autoscaling.enabled` is true, because the\nHorizontalPodAutoscaler then owns the replica count.",
           "required": [],
           "title": "replicaCount",
           "type": "integer"
@@ -4589,7 +4589,7 @@
         },
         "replicaCount": {
           "default": 2,
-          "description": "Number of Query Frontend pod replicas.",
+          "description": "Number of Query Frontend pod replicas. Ignored when `queryFrontend.autoscaling.enabled`\nis true, because the HorizontalPodAutoscaler then owns the replica count.",
           "required": [],
           "title": "replicaCount",
           "type": "integer"
@@ -8736,7 +8736,7 @@
         },
         "replicaCount": {
           "default": 2,
-          "description": "Number of Store Gateway pod replicas. Two or more is recommended for HA.",
+          "description": "Number of Store Gateway pod replicas. Two or more is recommended for HA.\nIn sharded mode this is the replica count *per shard*. Ignored when\n`storegateway.autoscaling.enabled` is true, because the HorizontalPodAutoscaler\nthen owns the replica count.",
           "required": [],
           "title": "replicaCount",
           "type": "integer"
