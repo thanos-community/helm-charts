@@ -681,6 +681,14 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
+### Upgrading to 0.46.1 — `replicas` under autoscaling
+
+Query, Query Frontend, Store Gateway and Bucketweb no longer render `spec.replicas` when their `autoscaling.enabled` is true. Previously the chart rendered `replicaCount` next to the HorizontalPodAutoscaler, so every `helm upgrade` could reset the count the HPA had chosen, and a GitOps controller that corrects drift — Flux with `driftDetection` enabled, Argo CD with self-heal — reset it on every reconcile, fighting the HPA indefinitely. Components without autoscaling are unaffected.
+
+The first upgrade can briefly scale an autoscaled workload down to one pod. Helm removes a field it set before, and Kubernetes defaults a missing `spec.replicas` to 1 until the HPA restores its count on the next sync, 15 seconds by default. For a Store Gateway that means every pod but `-0` terminates and reloads its index headers when it comes back. Server-side apply, which Helm 4 and the Flux helm-controller use, leaves the field alone if the HPA has changed the count since the last upgrade, because the HPA then owns it. See [Migrating Deployments and StatefulSets to horizontal autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling).
+
+If you worked around the old behaviour with a drift-detection exclusion for `/spec/replicas`, it can be removed after upgrading.
+
 ### Upgrading to 0.38.0 — `global.storageClass`
 
 `global.storageClass` is new in 0.38.0 and is used as the fallback `storageClassName` for every PersistentVolumeClaim the chart creates — Compactor, Receive, Ruler and Store Gateway. A component's own `persistence.storageClass` still wins, and when both are empty nothing is rendered, so an install that never set either keeps using the cluster default StorageClass and is unaffected.

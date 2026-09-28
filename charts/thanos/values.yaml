@@ -465,7 +465,8 @@ bucket:
     # -- Enable the Bucketweb deployment (read-only object store browser).
     enabled: false
 
-    # -- Number of Bucketweb pod replicas.
+    # -- Number of Bucketweb pod replicas. Ignored when `bucket.bucketweb.autoscaling.enabled`
+    # is true, because the HorizontalPodAutoscaler then owns the replica count.
     replicaCount: 1
 
     # Kubernetes Service configuration for Bucketweb.
@@ -1132,6 +1133,8 @@ query:
   enabled: true
 
   # -- Number of Query pod replicas. Two or more is recommended for HA.
+  # Ignored when `query.autoscaling.enabled` is true, because the
+  # HorizontalPodAutoscaler then owns the replica count.
   replicaCount: 2
 
   # Kubernetes Service configuration for the Query component.
@@ -1544,7 +1547,8 @@ queryFrontend:
   # -- Enable the Query Frontend Deployment.
   enabled: false
 
-  # -- Number of Query Frontend pod replicas.
+  # -- Number of Query Frontend pod replicas. Ignored when `queryFrontend.autoscaling.enabled`
+  # is true, because the HorizontalPodAutoscaler then owns the replica count.
   replicaCount: 2
 
   # -- Downstream URL of the Query component. Leave empty to use the
@@ -1859,7 +1863,9 @@ storegateway:
   enabled: true
 
   # -- Number of Store Gateway pod replicas. Two or more is recommended for HA.
-  # In sharded mode this is the replica count *per shard*.
+  # In sharded mode this is the replica count *per shard*. Ignored when
+  # `storegateway.autoscaling.enabled` is true, because the HorizontalPodAutoscaler
+  # then owns the replica count.
   replicaCount: 2
 
   # -- Minimum number of seconds for which a newly created Store Gateway Pod must

@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.46.0](https://img.shields.io/badge/Version-0.46.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.46.1](https://img.shields.io/badge/Version-0.46.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -693,6 +693,14 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
+### Upgrading to 0.46.1 — `replicas` under autoscaling
+
+Query, Query Frontend, Store Gateway and Bucketweb no longer render `spec.replicas` when their `autoscaling.enabled` is true. Previously the chart rendered `replicaCount` next to the HorizontalPodAutoscaler, so every `helm upgrade` could reset the count the HPA had chosen, and a GitOps controller that corrects drift — Flux with `driftDetection` enabled, Argo CD with self-heal — reset it on every reconcile, fighting the HPA indefinitely. Components without autoscaling are unaffected.
+
+The first upgrade can briefly scale an autoscaled workload down to one pod. Helm removes a field it set before, and Kubernetes defaults a missing `spec.replicas` to 1 until the HPA restores its count on the next sync, 15 seconds by default. For a Store Gateway that means every pod but `-0` terminates and reloads its index headers when it comes back. Server-side apply, which Helm 4 and the Flux helm-controller use, leaves the field alone if the HPA has changed the count since the last upgrade, because the HPA then owns it. See [Migrating Deployments and StatefulSets to horizontal autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling).
+
+If you worked around the old behaviour with a drift-detection exclusion for `/spec/replicas`, it can be removed after upgrading.
+
 ### Upgrading to 0.38.0 — `global.storageClass`
 
 `global.storageClass` is new in 0.38.0 and is used as the fallback `storageClassName` for every PersistentVolumeClaim the chart creates — Compactor, Receive, Ruler and Store Gateway. A component's own `persistence.storageClass` still wins, and when both are empty nothing is rendered, so an install that never set either keeps using the cluster default StorageClass and is unaffected.
@@ -830,7 +838,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the startup probe. |
 | bucket.bucketweb.probes.startup.successThreshold | int | `1` | Consecutive successes required before the startup probe is considered passed. |
 | bucket.bucketweb.probes.startup.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
-| bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. |
+| bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. Ignored when `bucket.bucketweb.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | bucket.bucketweb.resources | object | {} | Resource requests and limits for the Bucketweb container. |
 | bucket.bucketweb.service.annotations | object | {} | Extra annotations for the Bucketweb Service. |
 | bucket.bucketweb.service.labels | object | {} | Extra labels for the Bucketweb Service. |
@@ -1136,7 +1144,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query startup probe. |
 | query.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query startup probe is considered passed. |
 | query.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query startup probe times out. |
-| query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
+| query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. Ignored when `query.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | query.replicaLabels[0] | string | `"prometheus_replica"` |  |
 | query.replicaLabels[1] | string | `"receive_replica"` |  |
 | query.replicaLabels[2] | string | `"ruler_replica"` |  |
@@ -1227,7 +1235,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query Frontend startup probe. |
 | queryFrontend.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query Frontend startup probe is considered passed. |
 | queryFrontend.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query Frontend startup probe times out. |
-| queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. |
+| queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. Ignored when `queryFrontend.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | queryFrontend.resources | object | {} | Resource requests and limits for the Query Frontend container. |
 | queryFrontend.service.annotations | object | {} | Extra annotations for the Query Frontend Service. |
 | queryFrontend.service.labels | object | {} | Extra labels for the Query Frontend Service. |
@@ -1684,7 +1692,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Store Gateway startup probe. |
 | storegateway.probes.startup.successThreshold | int | `1` | Consecutive successes before the Store Gateway startup probe is considered passed. |
 | storegateway.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Store Gateway startup probe times out. |
-| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. |
+| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. Ignored when `storegateway.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | storegateway.resources | object | {} | Resource requests and limits for the Store Gateway container. |
 | storegateway.service.annotations | object | {} | Extra annotations for the Store Gateway Service. |
 | storegateway.service.grpcNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Store Gateway gRPC port. Ignored when sharding is enabled. |
