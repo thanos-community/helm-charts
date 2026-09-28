@@ -88,6 +88,47 @@ app.kubernetes.io/part-of: thanos
 {{- end }}
 
 {{- /*
+Set a pod-level hostUsers parameter with component → (optional parent) → global fallback.
+Usage:
+  {{ include "thanos.podHostUsers" (dict "root" . "key" "compactor") }}
+  {{ include "thanos.podHostUsers" (dict "root" . "key" "router" "parent" "receive") }}
+*/ -}}
+{{- define "thanos.podHostUsers" -}}
+{{- $root := .root -}}
+{{- $key := .key -}}
+{{- $parent := .parent | default "" -}}
+{{- $par := dict -}}
+{{- $comp := dict -}}
+
+{{- if $parent -}}
+  {{- $par = index $root.Values $parent | default dict -}}
+  {{- $comp = index $par $key | default dict -}}
+{{- else -}}
+  {{- $comp = index $root.Values $key | default dict -}}
+{{- end -}}
+
+{{- $global := $root.Values.global | default dict -}}
+
+{{- $found := false -}}
+{{- $hu := false -}}
+
+{{- if and (hasKey $comp "hostUsers") (not (kindIs "invalid" $comp.hostUsers)) -}}
+  {{- $found = true -}}
+  {{- $hu = $comp.hostUsers -}}
+{{- else if and (hasKey $par "hostUsers") (not (kindIs "invalid" $par.hostUsers)) -}}
+  {{- $found = true -}}
+  {{- $hu = $par.hostUsers -}}
+{{- else if and (hasKey $global "hostUsers") (not (kindIs "invalid" $global.hostUsers)) -}}
+  {{- $found = true -}}
+  {{- $hu = $global.hostUsers -}}
+{{- end -}}
+
+{{- if and $found (not (kindIs "invalid" $hu)) -}}
+hostUsers: {{ $hu }}
+{{- end -}}
+{{- end -}}
+
+{{- /*
 Render a pod-level securityContext block with component → (optional parent) → global fallback.
 Usage:
   {{ include "thanos.podSC" (dict "root" . "key" "compactor") }}

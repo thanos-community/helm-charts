@@ -38,6 +38,7 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "query") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "query") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podHostUsers" (dict "root" . "key" "query") | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "query") | nindent 6 }}
       containers:
         - name: query
