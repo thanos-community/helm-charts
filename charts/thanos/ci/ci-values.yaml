@@ -64,3 +64,20 @@ query:
       config: |
         endpoints:
           - address: '{{ include "thanos.compName" (list . "storegateway") }}:10901'
+
+# Extra resources via `extraDeploy`. Only core kinds: CRDs (Istio, ESO) are not
+# installed in the CI cluster.
+extraDeploy:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: '{{ .Release.Name }}-extra-map'
+    data:
+      source: map
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ .Release.Name }}-extra-string
+    data:
+      source: string

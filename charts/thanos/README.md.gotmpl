@@ -628,6 +628,32 @@ ruler:
     name: my-externally-managed-sa
 ```
 
+### Extra resources (`extraDeploy`)
+
+Deploy any additional Kubernetes resources (Istio `VirtualService`, `ExternalSecret`, ...) with the release.
+Items are plain YAML manifests and are rendered through `tpl`:
+
+```yaml
+extraDeploy:
+  - apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    metadata:
+      name: thanos-query
+      namespace: monitoring
+    spec:
+      hosts: [thanos.example.com]
+      http:
+        - route:
+            - destination:
+                host: '{{ `{{ .Release.Name }}` }}-thanos-query'
+  # A string item is also accepted
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ `{{ .Release.Name }}` }}-extra
+```
+
 ### Monitoring (ServiceMonitor)
 
 Enable Prometheus scraping for each component by enabling its `serviceMonitor`:

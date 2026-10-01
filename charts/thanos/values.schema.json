@@ -11,6 +11,12 @@
     "namespaceOverride": {
       "type": "string"
     },
+    "extraDeploy": {
+      "type": "array",
+      "items": {
+        "type": ["object", "string"]
+      }
+    },
     "bucket": {
       "additionalProperties": true,
       "description": "======================================================================\nBucket component\nRead-only web UI for inspecting object store blocks.\nOften disabled in production; useful for debugging compaction issues.\n======================================================================\nBucket component group. Contains the Bucketweb UI sub-chart.",

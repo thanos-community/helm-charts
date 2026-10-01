@@ -1,0 +1,8 @@
+{{- /*
+Arbitrary extra Kubernetes resources from `extraDeploy`. Each item is either a
+YAML map or a string; both go through `tpl`, so `{{ .Release.Name }}` etc. work.
+*/ -}}
+{{- range .Values.extraDeploy }}
+---
+{{ tpl (ternary . (toYaml .) (kindIs "string" .)) $ }}
+{{- end }}

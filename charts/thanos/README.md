@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.46.0](https://img.shields.io/badge/Version-0.46.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.47.0](https://img.shields.io/badge/Version-0.47.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -640,6 +640,32 @@ ruler:
     name: my-externally-managed-sa
 ```
 
+### Extra resources (`extraDeploy`)
+
+Deploy any additional Kubernetes resources (Istio `VirtualService`, `ExternalSecret`, ...) with the release.
+Items are plain YAML manifests and are rendered through `tpl`:
+
+```yaml
+extraDeploy:
+  - apiVersion: networking.istio.io/v1
+    kind: VirtualService
+    metadata:
+      name: thanos-query
+      namespace: monitoring
+    spec:
+      hosts: [thanos.example.com]
+      http:
+        - route:
+            - destination:
+                host: '{{ .Release.Name }}-thanos-query'
+  # A string item is also accepted
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: {{ .Release.Name }}-extra
+```
+
 ### Monitoring (ServiceMonitor)
 
 Enable Prometheus scraping for each component by enabling its `serviceMonitor`:
@@ -950,6 +976,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.vpa.minAllowed.memory | string | `"512Mi"` | Minimum memory resource enforced by the Compactor VPA. |
 | compactor.vpa.targetKind | string | `"StatefulSet"` | Kubernetes workload kind targeted by the Compactor VPA. |
 | compactor.vpa.updateMode | string | `"Auto"` | VPA update mode for the Compactor. One of Auto, Off, or Initial. |
+| extraDeploy | list | `[]` | Extra Kubernetes resources to deploy with the release (e.g. Istio VirtualService, ExternalSecret). Each item is a plain YAML manifest (map) or a string; both are rendered through `tpl`, so `{{ .Release.Name }}` and other template expressions are allowed. `metadata.namespace` is not set automatically. |
 | fullnameOverride | string | `""` | Fully override the generated resource name (`thanos.fullname`). Empty uses `<release>-<chart>`. |
 | global.affinity | object | {} | Affinity rules applied to every pod by default. |
 | global.clusterDomain | string | `"cluster.local"` | Cluster DNS domain, used when constructing in-cluster endpoints. |

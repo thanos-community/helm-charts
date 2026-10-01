@@ -3647,3 +3647,12 @@ kube-prometheus-stack:
   # -- Enable the kube-prometheus-stack subchart. Deploys Prometheus Operator
   # and associated components into the same namespace as Thanos.
   enabled: false
+
+# ======================================================================
+# Extra resources
+# Arbitrary additional Kubernetes resources deployed with the release.
+# ======================================================================
+# -- (list) Extra Kubernetes resources to deploy with the release (e.g. Istio VirtualService, ExternalSecret).
+# Each item is a plain YAML manifest (map) or a string; both are rendered through `tpl`, so
+# `{{ .Release.Name }}` and other template expressions are allowed. `metadata.namespace` is not set automatically.
+extraDeploy: []

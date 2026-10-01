@@ -1,0 +1,65 @@
+suite: extraDeploy
+
+templates:
+  - extra-deploy.yaml
+
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders CRD-backed resources given as YAML maps
+    set:
+      extraDeploy:
+        - apiVersion: networking.istio.io/v1
+          kind: VirtualService
+          metadata:
+            name: thanos-query
+          spec:
+            hosts: [thanos.example.com]
+        - apiVersion: external-secrets.io/v1
+          kind: ExternalSecret
+          metadata:
+            name: thanos-objstore
+          spec:
+            secretStoreRef:
+              name: vault
+              kind: ClusterSecretStore
+    asserts:
+      - hasDocuments:
+          count: 2
+      - documentIndex: 0
+        isKind:
+          of: VirtualService
+      - documentIndex: 0
+        equal:
+          path: spec.hosts[0]
+          value: thanos.example.com
+      - documentIndex: 1
+        isKind:
+          of: ExternalSecret
+
+  - it: templates map and string items with tpl
+    set:
+      extraDeploy:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: '{{ .Release.Name }}-map'
+        - |
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: {{ .Release.Name }}-string
+    release:
+      name: rel
+    asserts:
+      - documentIndex: 0
+        equal:
+          path: metadata.name
+          value: rel-map
+      - documentIndex: 1
+        equal:
+          path: metadata.name
+          value: rel-string
