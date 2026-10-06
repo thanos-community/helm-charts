@@ -98,6 +98,8 @@ Context (.):
         (up{job=~"{{ .jpReceive }}"} - 1)
         + on (job, instance)
         (sum by (job, instance) (increase(thanos_shipper_uploads_total{job=~"{{ .jpReceive }}"}[3h])) == 0)
+        and on (job, instance)
+        (time() - process_start_time_seconds{job=~"{{ .jpReceive }}"} > 3 * 3600)
       for: 3h
       labels:
         {{- include "thanos.rules.alertLabels" (list .sCrit .grLab .rcLab) | nindent 8 }}
