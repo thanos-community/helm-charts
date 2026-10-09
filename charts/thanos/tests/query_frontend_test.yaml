@@ -32,6 +32,16 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: leaves replicas to the HPA when autoscaling is enabled
+    template: query-frontend/deployment.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.replicaCount: 3
+      queryFrontend.autoscaling.enabled: true
+    asserts:
+      - notExists:
+          path: spec.replicas
+
   - it: uses the global image repository and app version
     template: query-frontend/deployment.yaml
     set:
