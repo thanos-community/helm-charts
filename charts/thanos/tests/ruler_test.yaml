@@ -272,17 +272,74 @@ tests:
       - exists:
           path: spec.template.metadata.annotations["checksum/objstore-configuration"]
 
-  - it: restarts pods when the rules, query or alertmanagers config changes
+  - it: hashes the rendered rules, query and alertmanagers config
     template: ruler/statefulset.yaml
     set:
       ruler.enabled: true
     asserts:
-      - exists:
+      - equal:
           path: spec.template.metadata.annotations["checksum/rules"]
-      - exists:
+          value: 6bd776e7544e0b01e2787cf4c29a2eaf38b5537ef7fa6980c306201918fe0c59
+      - equal:
           path: spec.template.metadata.annotations["checksum/query-configuration"]
-      - exists:
+          value: 7ade04fe6371c0b7abb814f4509abd0d62738e962488f7ab0e7db1caafa4e421
+      - equal:
           path: spec.template.metadata.annotations["checksum/alertmanagers-configuration"]
+          value: 5c51a5de39caf01745906341e7ef3ffa8238ace279fbc316d8b0e95bef8fa984
+
+  - it: changes only checksum/rules when the rules change
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.rules:
+        other.yaml: |
+          groups: []
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["checksum/rules"]
+          value: f73868463e9851abb5ab168849bbcb4ad10158c2297b78824a2febe34a932ce5
+      - equal:
+          path: spec.template.metadata.annotations["checksum/query-configuration"]
+          value: 7ade04fe6371c0b7abb814f4509abd0d62738e962488f7ab0e7db1caafa4e421
+      - equal:
+          path: spec.template.metadata.annotations["checksum/alertmanagers-configuration"]
+          value: 5c51a5de39caf01745906341e7ef3ffa8238ace279fbc316d8b0e95bef8fa984
+
+  - it: changes only checksum/query-configuration when the query URLs change
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.query.urls:
+        - http://other-query:9090
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["checksum/rules"]
+          value: 6bd776e7544e0b01e2787cf4c29a2eaf38b5537ef7fa6980c306201918fe0c59
+      - equal:
+          path: spec.template.metadata.annotations["checksum/query-configuration"]
+          value: 2721a66de0d68354250964145b0862bc4da0fbc428af9106e37dd675c51db4f9
+      - equal:
+          path: spec.template.metadata.annotations["checksum/alertmanagers-configuration"]
+          value: 5c51a5de39caf01745906341e7ef3ffa8238ace279fbc316d8b0e95bef8fa984
+
+  - it: changes only checksum/alertmanagers-configuration when the alertmanagers config changes
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.alertmanagers.config: |
+        alertmanagers:
+          - static_configs:
+              - other-am:9093
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations["checksum/rules"]
+          value: 6bd776e7544e0b01e2787cf4c29a2eaf38b5537ef7fa6980c306201918fe0c59
+      - equal:
+          path: spec.template.metadata.annotations["checksum/query-configuration"]
+          value: 7ade04fe6371c0b7abb814f4509abd0d62738e962488f7ab0e7db1caafa4e421
+      - equal:
+          path: spec.template.metadata.annotations["checksum/alertmanagers-configuration"]
+          value: 83694247b8ad3c3eaa495ad4b4db661576cdeba822b0d0730279f82fb9b624ca
 
   # -- Annotations and labels -----------------------------------------
 
