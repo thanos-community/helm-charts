@@ -35,6 +35,7 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "bucketweb") }}
       {{- include "thanos.affinity" (dict "Values" $ctx.Values "component" "bucketweb") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podHostUsers" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" $ctx "key" "bucketweb") | nindent 6 }}
       containers:
         - name: bucketweb
