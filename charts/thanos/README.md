@@ -1077,6 +1077,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.grpcRoute.annotations | object | {} | Annotations for the Query GRPCRoute resource. |
 | query.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Query gRPC Store API endpoint. |
 | query.grpcRoute.hostnames | list | [] | Hostnames to match on the Query GRPCRoute. |
+| query.grpcRoute.matches | list | [] | Gateway matches for the Query GRPCRoute rules. |
 | query.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Query GRPCRoute. |
 | query.httpRoute.annotations | object | {} | Annotations for the Query HTTPRoute resource. |
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
@@ -1264,6 +1265,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.grpcRoute.annotations | object | {} | Annotations for the Receive GRPCRoute resource. |
 | receive.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Receive gRPC Store API endpoint. |
 | receive.grpcRoute.hostnames | list | [] | Hostnames to match on the Receive GRPCRoute. |
+| receive.grpcRoute.matches | list | [] | Gateway matches for the Receive GRPCRoute rules. |
 | receive.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Receive GRPCRoute. |
 | receive.hashrings.algorithm | string | `"ketama"` | Hashring algorithm. `ketama` is consistent hashing; `hashmod` is the legacy one and reshuffles nearly every series when the ring changes. |
 | receive.hashrings.autogen.enabled | bool | `true` | Auto-generate a single default hashring whose endpoints are derived from the StatefulSet pod DNS names: `<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`. |
@@ -1617,6 +1619,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.grpcRoute.annotations | object | {} | Annotations for the Store Gateway GRPCRoute resource. |
 | storegateway.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Store Gateway gRPC Store API endpoint. |
 | storegateway.grpcRoute.hostnames | list | [] | Hostnames to match on the Store Gateway GRPCRoute. |
+| storegateway.grpcRoute.matches | list | [] | Gateway matches for the Store Gateway GRPCRoute rules. |
 | storegateway.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway GRPCRoute. |
 | storegateway.httpRoute.annotations | object | {} | Annotations for the Store Gateway HTTPRoute resource. |
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
