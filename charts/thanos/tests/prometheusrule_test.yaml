@@ -313,6 +313,12 @@ tests:
           path: spec.groups[?(@.name == "thanos-query")].rules[?(@.alert == "ThanosQueryHttpRequestQueryErrorRateHigh")].expr
           pattern: 'job=~"\.\*thanos\.\*query\.\*"'
 
+  - it: skips ThanosReceiveNoUpload for receivers younger than the upload window
+    asserts:
+      - matchRegex:
+          path: spec.groups[?(@.name == "thanos-receive")].rules[?(@.alert == "ThanosReceiveNoUpload")].expr
+          pattern: 'time\(\) - process_start_time_seconds\{job=~"\.\*thanos\.\*receive\.\*"\} > 3 \* 3600'
+
   - it: honors a custom jobPattern per group
     set:
       global.thanosRules.groups.thanosCompact.jobPattern: thanos-compactor
