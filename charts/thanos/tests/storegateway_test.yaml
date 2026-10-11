@@ -1526,6 +1526,57 @@ tests:
           content: --min-time=-2w
         documentIndex: 1
 
+  - it: applies per-partition resources and falls back to storegateway.resources
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.resources:
+        requests:
+          memory: 1Gi
+      storegateway.sharded.timePartitioning:
+        - min: "-6w"
+          max: "-2w"
+          resources:
+            requests:
+              memory: 8Gi
+            limits:
+              memory: 16Gi
+        - min: "-2w"
+          max: ""
+    asserts:
+      - hasDocuments:
+          count: 4
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              memory: 8Gi
+            limits:
+              memory: 16Gi
+        documentIndex: 0
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              memory: 8Gi
+            limits:
+              memory: 16Gi
+        documentIndex: 1
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              memory: 1Gi
+        documentIndex: 2
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              memory: 1Gi
+        documentIndex: 3
+
   - it: renders the cross-product of time partitions and hash shards
     template: storegateway/statefulset.yaml
     set:

@@ -8969,7 +8969,7 @@
               "type": "object"
             },
             "timePartitioning": {
-              "description": "Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open.",
+              "description": "Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open. An entry may also set `resources`, which replaces `storegateway.resources` for that partition's shards (recent partitions usually need more memory than old ones).",
               "items": {
                 "required": []
               },
