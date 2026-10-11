@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.47.2](https://img.shields.io/badge/Version-0.47.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.48.0](https://img.shields.io/badge/Version-0.48.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -870,6 +870,17 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.affinity | object | {} | Affinity rules for Compactor pod scheduling. |
 | compactor.annotations | object | {} | Extra annotations applied to Compactor resources. |
 | compactor.containerSecurityContext | object | {} | Container security context for the Compactor. Overrides global.containerSecurityContext. |
+| compactor.cronJob.activeDeadlineSeconds | string | null | Maximum duration of one run in seconds. Unset when null. |
+| compactor.cronJob.backoffLimit | int | `0` | Job retries before it is marked failed. |
+| compactor.cronJob.concurrencyPolicy | string | `"Forbid"` | Concurrency policy. Keep `Forbid`: two compactors on the same bucket corrupt it. |
+| compactor.cronJob.enabled | bool | `false` | Render a CronJob instead of the Compactor StatefulSet. |
+| compactor.cronJob.failedJobsHistoryLimit | int | `3` | Number of failed finished Jobs to keep. |
+| compactor.cronJob.restartPolicy | string | `"OnFailure"` | Pod restart policy of the Job (`OnFailure` or `Never`). |
+| compactor.cronJob.schedule | string | `"0 */6 * * *"` | Cron schedule of the compaction runs. |
+| compactor.cronJob.startingDeadlineSeconds | string | null | Deadline in seconds to start a missed run. Unset when null. |
+| compactor.cronJob.successfulJobsHistoryLimit | int | `1` | Number of successful finished Jobs to keep. |
+| compactor.cronJob.suspend | bool | `false` | Suspend the schedule without deleting the CronJob. |
+| compactor.cronJob.timeZone | string | `""` | Time zone of the schedule (CronJob `spec.timeZone`). Empty uses the kube-controller-manager time zone. |
 | compactor.dnsConfig | object | {} | DNS configuration for Compactor pods. Overrides global.dnsConfig. |
 | compactor.enabled | bool | `true` | Enable the Compactor StatefulSet. |
 | compactor.extraArgs[0] | string | `"--log.level=info"` |  |
