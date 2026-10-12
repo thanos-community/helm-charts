@@ -1,4 +1,4 @@
-{{- if and .Values.compactor.enabled (or .Values.compactor.pdb.enabled .Values.global.pdb.enabled) }}
+{{- if and .Values.compactor.enabled (not .Values.compactor.cronJob.enabled) (or .Values.compactor.pdb.enabled .Values.global.pdb.enabled) }}
 {{- $minAvail := .Values.compactor.pdb.minAvailable | default .Values.global.pdb.minAvailable -}}
 {{- $maxUnavail := .Values.compactor.pdb.maxUnavailable | default .Values.global.pdb.maxUnavailable -}}
 apiVersion: policy/v1

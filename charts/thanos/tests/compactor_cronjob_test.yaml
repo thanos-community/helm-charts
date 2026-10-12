@@ -1,0 +1,165 @@
+suite: compactor cronjob mode
+
+tests:
+  - it: renders a CronJob instead of the StatefulSet
+    templates:
+      - compactor/cronjob.yaml
+      - compactor/statefulset.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.cronJob.schedule: "0 */6 * * *"
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: compactor/cronjob.yaml
+      - hasDocuments:
+          count: 0
+        template: compactor/statefulset.yaml
+      - isKind:
+          of: CronJob
+        template: compactor/cronjob.yaml
+      - equal:
+          path: spec.schedule
+          value: "0 */6 * * *"
+        template: compactor/cronjob.yaml
+      - equal:
+          path: spec.concurrencyPolicy
+          value: Forbid
+        template: compactor/cronjob.yaml
+
+  - it: does not render the CronJob by default
+    template: compactor/cronjob.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: runs one compaction pass and exits (no --wait)
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+    asserts:
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].args
+          content: compact
+      - notContains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].args
+          content: --wait
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.restartPolicy
+          value: OnFailure
+
+  - it: uses a generic ephemeral volume when persistence is enabled
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.size: 50Gi
+      compactor.persistence.storageClass: fast
+    asserts:
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.volumes[?(@.name == "data")].ephemeral.volumeClaimTemplate.spec
+          value:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: fast
+            resources:
+              requests:
+                storage: 50Gi
+
+  - it: mounts the existing claim when one is given
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.persistence.enabled: true
+      compactor.persistence.existingClaim: compactor-data
+    asserts:
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.volumes
+          content:
+            name: data
+            persistentVolumeClaim:
+              claimName: compactor-data
+
+  - it: uses an emptyDir when persistence is disabled
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.persistence.enabled: false
+    asserts:
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.volumes
+          content:
+            name: data
+            emptyDir: {}
+
+  - it: passes the job knobs through
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.cronJob.suspend: true
+      compactor.cronJob.timeZone: Europe/Paris
+      compactor.cronJob.startingDeadlineSeconds: 300
+      compactor.cronJob.successfulJobsHistoryLimit: 2
+      compactor.cronJob.failedJobsHistoryLimit: 5
+      compactor.cronJob.backoffLimit: 1
+      compactor.cronJob.activeDeadlineSeconds: 7200
+    asserts:
+      - equal:
+          path: spec.suspend
+          value: true
+      - equal:
+          path: spec.timeZone
+          value: Europe/Paris
+      - equal:
+          path: spec.startingDeadlineSeconds
+          value: 300
+      - equal:
+          path: spec.successfulJobsHistoryLimit
+          value: 2
+      - equal:
+          path: spec.failedJobsHistoryLimit
+          value: 5
+      - equal:
+          path: spec.jobTemplate.spec.backoffLimit
+          value: 1
+      - equal:
+          path: spec.jobTemplate.spec.activeDeadlineSeconds
+          value: 7200
+
+  - it: keeps retention, extraArgs and resources in the job pod
+    template: compactor/cronjob.yaml
+    set:
+      compactor.cronJob.enabled: true
+      compactor.retention.resolutionRaw: 45d
+      compactor.extraArgs:
+        - --wait-interval=2m
+      compactor.resources:
+        requests:
+          memory: 2Gi
+    asserts:
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].args
+          content: --retention.resolution-raw=45d
+      - contains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].args
+          content: --wait-interval=2m
+      - equal:
+          path: spec.jobTemplate.spec.template.spec.containers[0].resources
+          value:
+            requests:
+              memory: 2Gi
+
+  - it: skips the PDB and the VPA, which target long-running pods
+    templates:
+      - compactor/pdb.yaml
+      - compactor/vpa.yaml
+    capabilities:
+      apiVersions:
+        - autoscaling.k8s.io/v1/VerticalPodAutoscaler
+    set:
+      compactor.cronJob.enabled: true
+      compactor.pdb.enabled: true
+      compactor.vpa.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 0

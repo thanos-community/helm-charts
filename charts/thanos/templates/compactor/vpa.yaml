@@ -1,4 +1,4 @@
-{{- if and .Values.compactor.enabled .Values.compactor.vpa.enabled (semverCompare ">=1.16-0" .Capabilities.KubeVersion.GitVersion) (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1/VerticalPodAutoscaler") }}
+{{- if and .Values.compactor.enabled (not .Values.compactor.cronJob.enabled) .Values.compactor.vpa.enabled (semverCompare ">=1.16-0" .Capabilities.KubeVersion.GitVersion) (.Capabilities.APIVersions.Has "autoscaling.k8s.io/v1/VerticalPodAutoscaler") }}
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
@@ -28,7 +28,7 @@ spec:
           cpu: {{ .Values.compactor.vpa.maxAllowed.cpu | default "4" }}
           memory: {{ .Values.compactor.vpa.maxAllowed.memory | default "8Gi" }}
 {{- else }}
-{{- if and .Values.compactor.enabled .Values.compactor.vpa.enabled }}
+{{- if and .Values.compactor.enabled (not .Values.compactor.cronJob.enabled) .Values.compactor.vpa.enabled }}
 {{- printf "# WARNING: VerticalPodAutoscaler CRD not detected on this cluster. Skipping VPA creation for compactor." }}
 {{- end }}
 {{- end }}

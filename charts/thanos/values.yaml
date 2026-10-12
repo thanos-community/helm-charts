@@ -791,6 +791,40 @@ compactor:
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
 
+  # Run the Compactor as a CronJob instead of a StatefulSet: each run does one
+  # compaction pass (no `--wait`) and exits, so the pod and, with
+  # `persistence.enabled`, its working volume only exist while a run is in
+  # progress. The volume becomes a generic ephemeral volume sized by
+  # `persistence.size`; `persistence.existingClaim` is mounted as is. The PDB
+  # and the VPA are not rendered in this mode.
+  cronJob:
+    # -- Render a CronJob instead of the Compactor StatefulSet.
+    enabled: false
+    # -- Cron schedule of the compaction runs.
+    schedule: "0 */6 * * *"
+    # -- Time zone of the schedule (CronJob `spec.timeZone`). Empty uses the
+    # kube-controller-manager time zone.
+    timeZone: ""
+    # -- Concurrency policy. Keep `Forbid`: two compactors on the same bucket
+    # corrupt it.
+    concurrencyPolicy: Forbid
+    # -- Suspend the schedule without deleting the CronJob.
+    suspend: false
+    # -- Deadline in seconds to start a missed run. Unset when null.
+    # @default -- null
+    startingDeadlineSeconds: null
+    # -- Number of successful finished Jobs to keep.
+    successfulJobsHistoryLimit: 1
+    # -- Number of failed finished Jobs to keep.
+    failedJobsHistoryLimit: 3
+    # -- Job retries before it is marked failed.
+    backoffLimit: 0
+    # -- Maximum duration of one run in seconds. Unset when null.
+    # @default -- null
+    activeDeadlineSeconds: null
+    # -- Pod restart policy of the Job (`OnFailure` or `Never`).
+    restartPolicy: OnFailure
+
   # PersistentVolumeClaim configuration for the Compactor working directory.
   persistence:
     # -- Enable a PersistentVolumeClaim for the Compactor working directory.

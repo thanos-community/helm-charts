@@ -1,0 +1,43 @@
+{{- if and .Values.compactor.enabled .Values.compactor.cronJob.enabled }}
+{{- $cj := .Values.compactor.cronJob }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "thanos.compName" (list . "compactor") }}
+  namespace: {{ include "thanos.namespace" . }}
+  labels:
+    {{- include "thanos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: compactor
+    {{- with .Values.compactor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- include "thanos.annotations" (dict "Values" .Values "component" "compactor") | nindent 4 }}
+    {{- with .Values.compactor.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  schedule: {{ $cj.schedule | quote }}
+  {{- with $cj.timeZone }}
+  timeZone: {{ . | quote }}
+  {{- end }}
+  concurrencyPolicy: {{ $cj.concurrencyPolicy }}
+  suspend: {{ $cj.suspend }}
+  {{- if not (kindIs "invalid" $cj.startingDeadlineSeconds) }}
+  startingDeadlineSeconds: {{ $cj.startingDeadlineSeconds }}
+  {{- end }}
+  successfulJobsHistoryLimit: {{ $cj.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $cj.failedJobsHistoryLimit }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "thanos.labels" . | nindent 8 }}
+        app.kubernetes.io/component: compactor
+    spec:
+      backoffLimit: {{ $cj.backoffLimit }}
+      {{- if not (kindIs "invalid" $cj.activeDeadlineSeconds) }}
+      activeDeadlineSeconds: {{ $cj.activeDeadlineSeconds }}
+      {{- end }}
+      template:
+        {{- include "thanos.compactor.podTemplate" (dict "root" . "cron" true) | nindent 8 }}
+{{- end }}

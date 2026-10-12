@@ -1617,6 +1617,107 @@
           "title": "minReadySeconds",
           "type": "integer"
         },
+          "cronJob": {
+            "additionalProperties": false,
+            "description": "Run the Compactor as a CronJob instead of a StatefulSet.",
+            "properties": {
+              "activeDeadlineSeconds": {
+                "default": null,
+                "description": "Maximum duration of one run in seconds. Unset when null.",
+                "required": [],
+                "title": "activeDeadlineSeconds",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "backoffLimit": {
+                "default": 0,
+                "description": "Job retries before it is marked failed.",
+                "required": [],
+                "title": "backoffLimit",
+                "type": "integer"
+              },
+              "concurrencyPolicy": {
+                "default": "Forbid",
+                "description": "Concurrency policy. Keep `Forbid`: two compactors on the same bucket\ncorrupt it.",
+                "required": [],
+                "title": "concurrencyPolicy",
+                "type": "string",
+                "enum": [
+                  "Allow",
+                  "Forbid",
+                  "Replace"
+                ]
+              },
+              "enabled": {
+                "default": false,
+                "description": "Render a CronJob instead of the Compactor StatefulSet.",
+                "required": [],
+                "title": "enabled",
+                "type": "boolean"
+              },
+              "failedJobsHistoryLimit": {
+                "default": 3,
+                "description": "Number of failed finished Jobs to keep.",
+                "required": [],
+                "title": "failedJobsHistoryLimit",
+                "type": "integer"
+              },
+              "restartPolicy": {
+                "default": "OnFailure",
+                "description": "Pod restart policy of the Job (`OnFailure` or `Never`).",
+                "required": [],
+                "title": "restartPolicy",
+                "type": "string",
+                "enum": [
+                  "OnFailure",
+                  "Never"
+                ]
+              },
+              "schedule": {
+                "default": "0 */6 * * *",
+                "description": "Cron schedule of the compaction runs.",
+                "required": [],
+                "title": "schedule",
+                "type": "string"
+              },
+              "startingDeadlineSeconds": {
+                "default": null,
+                "description": "Deadline in seconds to start a missed run. Unset when null.",
+                "required": [],
+                "title": "startingDeadlineSeconds",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "successfulJobsHistoryLimit": {
+                "default": 1,
+                "description": "Number of successful finished Jobs to keep.",
+                "required": [],
+                "title": "successfulJobsHistoryLimit",
+                "type": "integer"
+              },
+              "suspend": {
+                "default": false,
+                "description": "Suspend the schedule without deleting the CronJob.",
+                "required": [],
+                "title": "suspend",
+                "type": "boolean"
+              },
+              "timeZone": {
+                "default": "",
+                "description": "Time zone of the schedule (CronJob `spec.timeZone`). Empty uses the\nkube-controller-manager time zone.",
+                "required": [],
+                "title": "timeZone",
+                "type": "string"
+              }
+            },
+            "required": [],
+            "title": "cronJob",
+            "type": "object"
+          },
         "replicaCount": {
           "default": 1,
           "description": "Number of Compactor replicas. Must remain 1 — running multiple\ncompactors against the same bucket causes data corruption.",
