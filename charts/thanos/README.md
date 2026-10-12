@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.47.2](https://img.shields.io/badge/Version-0.47.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.48.0](https://img.shields.io/badge/Version-0.48.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -1726,7 +1726,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.sharded.enabled | bool | `false` | Enable sharded Store Gateway deployments (one StatefulSet per shard). |
 | storegateway.sharded.hashPartitioning.extraRelabelingConfigs | list | [] | Extra relabeling rules prepended to the generated hashmod/keep pair in each shard's `--selector.relabel-config` (e.g. to drop blocks by external labels before hashing). |
 | storegateway.sharded.hashPartitioning.shards | int | `1` | Number of hash shards. A value greater than 1 enables hash partitioning; the default of 1 disables it (a single hash shard is equivalent to no hash partitioning — use time partitioning only). |
-| storegateway.sharded.timePartitioning | list | [] | Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open. |
+| storegateway.sharded.timePartitioning | list | [] | Time-based partitioning. A list of `{ min, max }` ranges; each entry becomes a shard (or, combined with `hashPartitioning.shards`, a set of shards) restricted to that range via `--min-time` / `--max-time`. Values accept Thanos time formats (RFC3339 or relative durations like `-6w`); an empty string leaves that bound open. An entry may also set `resources`, which replaces `storegateway.resources` for that partition's shards (recent partitions usually need more memory than old ones). |
 | storegateway.tolerations | list | [] | Tolerations for Store Gateway pod scheduling. |
 | storegateway.topologySpreadConstraints | list | [] | Topology spread constraints for Store Gateway pods. |
 

@@ -958,6 +958,7 @@ shards (hashmod on __block_id). Either dimension may be used on its own.
       {{- $shard := dict "index" $index "name" (printf "%s-%d" $base $index) "isSharded" true -}}
       {{- if and $useTime $tp.min -}}{{- $_ := set $shard "minTime" $tp.min -}}{{- end -}}
       {{- if and $useTime $tp.max -}}{{- $_ := set $shard "maxTime" $tp.max -}}{{- end -}}
+      {{- if and $useTime $tp.resources -}}{{- $_ := set $shard "resources" $tp.resources -}}{{- end -}}
       {{- $rc := list -}}
       {{- range $extra -}}{{- $rc = append $rc . -}}{{- end -}}
       {{- if $useHash -}}
