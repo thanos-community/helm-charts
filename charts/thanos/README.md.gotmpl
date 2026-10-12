@@ -681,6 +681,12 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
+### Upgrading to 0.47.2: Ruler rolls on config changes
+
+The Ruler StatefulSet now carries `checksum/rules`, `checksum/query-configuration` and `checksum/alertmanagers-configuration` pod annotations, so a change to `ruler.rules`, `ruler.query.urls` or `ruler.alertmanagers.config` restarts the Ruler instead of leaving it on the old config until something else restarts it.
+
+Because the annotations are new, the first upgrade rolls the Ruler once even if none of those values changed. In stateless mode (`ruler.remoteWrite.enabled: true`) the Ruler keeps no local TSDB, so pending alerts lose their `for` progress on that restart and fire late by up to their `for` duration.
+
 ### Upgrading to 0.46.1 — `replicas` under autoscaling
 
 Query, Query Frontend, Store Gateway and Bucketweb no longer render `spec.replicas` when their `autoscaling.enabled` is true. Previously the chart rendered `replicaCount` next to the HorizontalPodAutoscaler, so every `helm upgrade` could reset the count the HPA had chosen, and a GitOps controller that corrects drift — Flux with `driftDetection` enabled, Argo CD with self-heal — reset it on every reconcile, fighting the HPA indefinitely. Components without autoscaling are unaffected.
