@@ -3,7 +3,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "thanos.compName" (list . "query") }}
-  namespace: {{ include "thanos.namespace" . }}
+  namespace: {{ default (include "thanos.namespace" .) .Values.global.serviceMonitor.namespace }}
   labels:
     {{- include "thanos.labels" $ | nindent 4 }}
     app.kubernetes.io/component: query
