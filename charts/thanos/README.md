@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.44.1](https://img.shields.io/badge/Version-0.44.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.47.2](https://img.shields.io/badge/Version-0.47.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -267,6 +267,39 @@ query:
             - path: /
               pathType: Prefix
 ```
+
+#### File-based endpoint discovery
+
+`autogen` and `static` bake their endpoints into the pod spec, so every change to the store topology is a `helm upgrade` and a restart. `query.endpoints.sdConfig` instead passes `--endpoint.sd-config-file`, which Thanos re-reads at runtime — the right fit when the set of Store API servers changes without the chart knowing, for example sidecars appearing next to new Prometheus instances.
+
+Point it at a ConfigMap somebody else maintains:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      existingConfigMap: thanos-endpoints
+      key: endpoints.yml
+      reloadInterval: 30s
+```
+
+Or let the chart render one from an inline config. The file is Thanos' own `EndpointConfig`, documented under [Per-Endpoint TLS Configuration](https://thanos.io/v0.42/components/query.md/#per-endpoint-tls-configuration) — not the Prometheus target-group format, which belongs to the deprecated `--store.sd-files` flag:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      config: |
+        endpoints:
+          - address: thanos-sidecar-0.prometheus:10901
+          - address: thanos-sidecar-1.prometheus:10901
+```
+
+Three things to keep in mind:
+
+- The ConfigMap is mounted as a directory rather than with `subPath`, because the kubelet only keeps the projected file current without one. With `subPath` the file would freeze at its first version and re-reading it would find nothing new.
+- File SD is additive: `autogen` and `static` endpoints are still passed as `--endpoint` arguments alongside it, and Thanos merges them into the file's list on every reload.
+- gRPC client TLS belongs in this file too, as `default_client_config` or per endpoint as `client_config`. The `--grpc-client-tls-*` flags are deprecated after v0.43.0, and Query already logs a warning pointing here.
 
 ### Receive
 
@@ -660,6 +693,20 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
+### Upgrading to 0.47.2: Ruler rolls on config changes
+
+The Ruler StatefulSet now carries `checksum/rules`, `checksum/query-configuration` and `checksum/alertmanagers-configuration` pod annotations, so a change to `ruler.rules`, `ruler.query.urls` or `ruler.alertmanagers.config` restarts the Ruler instead of leaving it on the old config until something else restarts it.
+
+Because the annotations are new, the first upgrade rolls the Ruler once even if none of those values changed. In stateless mode (`ruler.remoteWrite.enabled: true`) the Ruler keeps no local TSDB, so pending alerts lose their `for` progress on that restart and fire late by up to their `for` duration.
+
+### Upgrading to 0.46.1 — `replicas` under autoscaling
+
+Query, Query Frontend, Store Gateway and Bucketweb no longer render `spec.replicas` when their `autoscaling.enabled` is true. Previously the chart rendered `replicaCount` next to the HorizontalPodAutoscaler, so every `helm upgrade` could reset the count the HPA had chosen, and a GitOps controller that corrects drift — Flux with `driftDetection` enabled, Argo CD with self-heal — reset it on every reconcile, fighting the HPA indefinitely. Components without autoscaling are unaffected.
+
+The first upgrade can briefly scale an autoscaled workload down to one pod. Helm removes a field it set before, and Kubernetes defaults a missing `spec.replicas` to 1 until the HPA restores its count on the next sync, 15 seconds by default. For a Store Gateway that means every pod but `-0` terminates and reloads its index headers when it comes back. Server-side apply, which Helm 4 and the Flux helm-controller use, leaves the field alone if the HPA has changed the count since the last upgrade, because the HPA then owns it. See [Migrating Deployments and StatefulSets to horizontal autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling).
+
+If you worked around the old behaviour with a drift-detection exclusion for `/spec/replicas`, it can be removed after upgrading.
+
 ### Upgrading to 0.38.0 — `global.storageClass`
 
 `global.storageClass` is new in 0.38.0 and is used as the fallback `storageClassName` for every PersistentVolumeClaim the chart creates — Compactor, Receive, Ruler and Store Gateway. A component's own `persistence.storageClass` still wins, and when both are empty nothing is rendered, so an install that never set either keeps using the cluster default StorageClass and is unaffected.
@@ -797,7 +844,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the startup probe. |
 | bucket.bucketweb.probes.startup.successThreshold | int | `1` | Consecutive successes required before the startup probe is considered passed. |
 | bucket.bucketweb.probes.startup.timeoutSeconds | int | `5` | Seconds after which the probe times out. |
-| bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. |
+| bucket.bucketweb.replicaCount | int | `1` | Number of Bucketweb pod replicas. Ignored when `bucket.bucketweb.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | bucket.bucketweb.resources | object | {} | Resource requests and limits for the Bucketweb container. |
 | bucket.bucketweb.service.annotations | object | {} | Extra annotations for the Bucketweb Service. |
 | bucket.bucketweb.service.labels | object | {} | Extra labels for the Bucketweb Service. |
@@ -1029,6 +1076,10 @@ The table below documents all available values. Top-level keys group settings by
 | query.dnsConfig | object | {} | DNS configuration for Query pods. Overrides global.dnsConfig. |
 | query.enabled | bool | `true` | Enable the Query Deployment. |
 | query.endpoints.autogen.enabled | bool | `true` | Auto-generate endpoint arguments for the in-chart components (Receive, Store Gateway, Ruler). These use the dnssrv+_grpc._tcp.<svc>.<namespace>.svc.<cluster-domain> format. |
+| query.endpoints.sdConfig.config | string | "" | Inline endpoint config in the Thanos `EndpointConfig` format, rendered into a ConfigMap when `existingConfigMap` is empty. Processed via `tpl`. |
+| query.endpoints.sdConfig.existingConfigMap | string | `""` | Existing ConfigMap holding the endpoint definitions. Takes precedence over `config` and is never written by the chart. |
+| query.endpoints.sdConfig.key | string | `"endpoints.yml"` | Key inside the ConfigMap holding the endpoint definitions. |
+| query.endpoints.sdConfig.reloadInterval | string | `""` | How often Query re-reads the endpoint definitions. Empty leaves the Thanos default. |
 | query.endpoints.static | list | [] | Optional static endpoint arguments. When non-empty will be added as extra endpoints. When `query.endpoints.autogen.enabled` is `false`, these will give you full control over the endpoints. |
 | query.extraArgs[0] | string | `"--log.level=info"` |  |
 | query.extraContainers | list | [] | Extra sidecar containers for Query pods. |
@@ -1040,6 +1091,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.grpcRoute.annotations | object | {} | Annotations for the Query GRPCRoute resource. |
 | query.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Query gRPC Store API endpoint. |
 | query.grpcRoute.hostnames | list | [] | Hostnames to match on the Query GRPCRoute. |
+| query.grpcRoute.matches | list | [] | Gateway matches for the Query GRPCRoute rules. |
 | query.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Query GRPCRoute. |
 | query.httpRoute.annotations | object | {} | Annotations for the Query HTTPRoute resource. |
 | query.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Query HTTP endpoint. |
@@ -1099,7 +1151,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query startup probe. |
 | query.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query startup probe is considered passed. |
 | query.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query startup probe times out. |
-| query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. |
+| query.replicaCount | int | `2` | Number of Query pod replicas. Two or more is recommended for HA. Ignored when `query.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | query.replicaLabels[0] | string | `"prometheus_replica"` |  |
 | query.replicaLabels[1] | string | `"receive_replica"` |  |
 | query.replicaLabels[2] | string | `"ruler_replica"` |  |
@@ -1190,7 +1242,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Query Frontend startup probe. |
 | queryFrontend.probes.startup.successThreshold | int | `1` | Consecutive successes before the Query Frontend startup probe is considered passed. |
 | queryFrontend.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Query Frontend startup probe times out. |
-| queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. |
+| queryFrontend.replicaCount | int | `2` | Number of Query Frontend pod replicas. Ignored when `queryFrontend.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | queryFrontend.resources | object | {} | Resource requests and limits for the Query Frontend container. |
 | queryFrontend.service.annotations | object | {} | Extra annotations for the Query Frontend Service. |
 | queryFrontend.service.labels | object | {} | Extra labels for the Query Frontend Service. |
@@ -1227,6 +1279,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.grpcRoute.annotations | object | {} | Annotations for the Receive GRPCRoute resource. |
 | receive.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Receive gRPC Store API endpoint. |
 | receive.grpcRoute.hostnames | list | [] | Hostnames to match on the Receive GRPCRoute. |
+| receive.grpcRoute.matches | list | [] | Gateway matches for the Receive GRPCRoute rules. |
 | receive.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Receive GRPCRoute. |
 | receive.hashrings.algorithm | string | `"ketama"` | Hashring algorithm. `ketama` is consistent hashing; `hashmod` is the legacy one and reshuffles nearly every series when the ring changes. |
 | receive.hashrings.autogen.enabled | bool | `true` | Auto-generate a single default hashring whose endpoints are derived from the StatefulSet pod DNS names: `<pod-0>.<headless-svc>:10901 ... <pod-N>.<headless-svc>:10901`. |
@@ -1580,6 +1633,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.grpcRoute.annotations | object | {} | Annotations for the Store Gateway GRPCRoute resource. |
 | storegateway.grpcRoute.enabled | bool | `false` | Enable a Gateway API GRPCRoute for the Store Gateway gRPC Store API endpoint. |
 | storegateway.grpcRoute.hostnames | list | [] | Hostnames to match on the Store Gateway GRPCRoute. |
+| storegateway.grpcRoute.matches | list | [] | Gateway matches for the Store Gateway GRPCRoute rules. |
 | storegateway.grpcRoute.parentRefs | list | [] | Gateway parentRefs for the Store Gateway GRPCRoute. |
 | storegateway.httpRoute.annotations | object | {} | Annotations for the Store Gateway HTTPRoute resource. |
 | storegateway.httpRoute.enabled | bool | `false` | Enable a Gateway API HTTPRoute for the Store Gateway HTTP endpoint. |
@@ -1647,7 +1701,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.probes.startup.periodSeconds | int | `5` | How often (seconds) to run the Store Gateway startup probe. |
 | storegateway.probes.startup.successThreshold | int | `1` | Consecutive successes before the Store Gateway startup probe is considered passed. |
 | storegateway.probes.startup.timeoutSeconds | int | `5` | Seconds after which the Store Gateway startup probe times out. |
-| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. |
+| storegateway.replicaCount | int | `2` | Number of Store Gateway pod replicas. Two or more is recommended for HA. In sharded mode this is the replica count *per shard*. Ignored when `storegateway.autoscaling.enabled` is true, because the HorizontalPodAutoscaler then owns the replica count. |
 | storegateway.resources | object | {} | Resource requests and limits for the Store Gateway container. |
 | storegateway.service.annotations | object | {} | Extra annotations for the Store Gateway Service. |
 | storegateway.service.grpcNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Store Gateway gRPC port. Ignored when sharding is enabled. |

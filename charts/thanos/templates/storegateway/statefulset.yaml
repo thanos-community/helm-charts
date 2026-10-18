@@ -22,7 +22,9 @@ metadata:
     {{- end }}
 spec:
   serviceName: {{ include "thanos.compName" (list $ "storegateway") }}
+  {{- if not $.Values.storegateway.autoscaling.enabled }}
   replicas: {{ $.Values.storegateway.replicaCount }}
+  {{- end }}
   {{- if $.Values.storegateway.minReadySeconds }}
   minReadySeconds: {{ $.Values.storegateway.minReadySeconds }}
   {{- end }}
