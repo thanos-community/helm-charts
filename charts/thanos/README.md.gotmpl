@@ -256,6 +256,39 @@ query:
               pathType: Prefix
 ```
 
+#### File-based endpoint discovery
+
+`autogen` and `static` bake their endpoints into the pod spec, so every change to the store topology is a `helm upgrade` and a restart. `query.endpoints.sdConfig` instead passes `--endpoint.sd-config-file`, which Thanos re-reads at runtime — the right fit when the set of Store API servers changes without the chart knowing, for example sidecars appearing next to new Prometheus instances.
+
+Point it at a ConfigMap somebody else maintains:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      existingConfigMap: thanos-endpoints
+      key: endpoints.yml
+      reloadInterval: 30s
+```
+
+Or let the chart render one from an inline config. The file is Thanos' own `EndpointConfig`, documented under [Per-Endpoint TLS Configuration](https://thanos.io/v0.42/components/query.md/#per-endpoint-tls-configuration) — not the Prometheus target-group format, which belongs to the deprecated `--store.sd-files` flag:
+
+```yaml
+query:
+  endpoints:
+    sdConfig:
+      config: |
+        endpoints:
+          - address: thanos-sidecar-0.prometheus:10901
+          - address: thanos-sidecar-1.prometheus:10901
+```
+
+Three things to keep in mind:
+
+- The ConfigMap is mounted as a directory rather than with `subPath`, because the kubelet only keeps the projected file current without one. With `subPath` the file would freeze at its first version and re-reading it would find nothing new.
+- File SD is additive: `autogen` and `static` endpoints are still passed as `--endpoint` arguments alongside it, and Thanos merges them into the file's list on every reload.
+- gRPC client TLS belongs in this file too, as `default_client_config` or per endpoint as `client_config`. The `--grpc-client-tls-*` flags are deprecated after v0.43.0, and Query already logs a warning pointing here.
+
 ### Receive
 
 The Receive component accepts Prometheus `remote_write` traffic and stores samples locally in a TSDB WAL before shipping blocks to the object store.
@@ -647,6 +680,20 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
+
+### Upgrading to 0.47.2: Ruler rolls on config changes
+
+The Ruler StatefulSet now carries `checksum/rules`, `checksum/query-configuration` and `checksum/alertmanagers-configuration` pod annotations, so a change to `ruler.rules`, `ruler.query.urls` or `ruler.alertmanagers.config` restarts the Ruler instead of leaving it on the old config until something else restarts it.
+
+Because the annotations are new, the first upgrade rolls the Ruler once even if none of those values changed. In stateless mode (`ruler.remoteWrite.enabled: true`) the Ruler keeps no local TSDB, so pending alerts lose their `for` progress on that restart and fire late by up to their `for` duration.
+
+### Upgrading to 0.46.1 — `replicas` under autoscaling
+
+Query, Query Frontend, Store Gateway and Bucketweb no longer render `spec.replicas` when their `autoscaling.enabled` is true. Previously the chart rendered `replicaCount` next to the HorizontalPodAutoscaler, so every `helm upgrade` could reset the count the HPA had chosen, and a GitOps controller that corrects drift — Flux with `driftDetection` enabled, Argo CD with self-heal — reset it on every reconcile, fighting the HPA indefinitely. Components without autoscaling are unaffected.
+
+The first upgrade can briefly scale an autoscaled workload down to one pod. Helm removes a field it set before, and Kubernetes defaults a missing `spec.replicas` to 1 until the HPA restores its count on the next sync, 15 seconds by default. For a Store Gateway that means every pod but `-0` terminates and reloads its index headers when it comes back. Server-side apply, which Helm 4 and the Flux helm-controller use, leaves the field alone if the HPA has changed the count since the last upgrade, because the HPA then owns it. See [Migrating Deployments and StatefulSets to horizontal autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#migrating-deployments-and-statefulsets-to-horizontal-autoscaling).
+
+If you worked around the old behaviour with a drift-detection exclusion for `/spec/replicas`, it can be removed after upgrading.
 
 ### Upgrading to 0.38.0 — `global.storageClass`
 

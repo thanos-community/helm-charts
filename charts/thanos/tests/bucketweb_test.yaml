@@ -44,6 +44,17 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: leaves replicas to the HPA when autoscaling is enabled
+    template: bucket/deployment.yaml
+    set:
+      bucket.enabled: true
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.replicaCount: 3
+      bucket.bucketweb.autoscaling.enabled: true
+    asserts:
+      - notExists:
+          path: spec.replicas
+
   - it: uses the global image repository and app version
     template: bucket/deployment.yaml
     set:

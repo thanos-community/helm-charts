@@ -32,6 +32,30 @@ tests:
           path: spec.replicas
           value: 3
 
+  - it: leaves replicas to the HPA when autoscaling is enabled
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.replicaCount: 3
+      storegateway.autoscaling.enabled: true
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: leaves replicas to the per-shard HPAs when sharded with autoscaling
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.replicaCount: 3
+      storegateway.autoscaling.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+    asserts:
+      - hasDocuments:
+          count: 2
+      - notExists:
+          path: spec.replicas
+
   - it: renders minReadySeconds when set
     template: storegateway/statefulset.yaml
     set:

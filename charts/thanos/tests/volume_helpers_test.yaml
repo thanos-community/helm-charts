@@ -1,0 +1,93 @@
+suite: composable volume and mount helpers
+
+templates:
+  - query-frontend/deployment.yaml
+
+tests:
+  - it: renders neither key when the component has nothing of its own and no extras
+    set:
+      queryFrontend.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.volumes
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+
+  - it: renders the component's own entries alone
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.cacheConfig: |
+        type: IN-MEMORY
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: cache
+              configMap:
+                name: RELEASE-NAME-thanos-query-frontend-cache
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: cache
+              mountPath: /etc/thanos/cache.yaml
+              subPath: cache.yaml
+
+  - it: renders the extras alone
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.extraVolumes:
+        - name: extra
+          emptyDir: {}
+      queryFrontend.extraVolumeMounts:
+        - name: extra
+          mountPath: /extra
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: extra
+              emptyDir: {}
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: extra
+              mountPath: /extra
+
+  - it: puts the component's own entries before global and component extras
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.cacheConfig: |
+        type: IN-MEMORY
+      global.extraVolumes:
+        - name: gextra
+          emptyDir: {}
+      global.extraVolumeMounts:
+        - name: gextra
+          mountPath: /gextra
+      queryFrontend.extraVolumes:
+        - name: cextra
+          emptyDir: {}
+      queryFrontend.extraVolumeMounts:
+        - name: cextra
+          mountPath: /cextra
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes
+          value:
+            - name: cache
+              configMap:
+                name: RELEASE-NAME-thanos-query-frontend-cache
+            - name: gextra
+              emptyDir: {}
+            - name: cextra
+              emptyDir: {}
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts
+          value:
+            - name: cache
+              mountPath: /etc/thanos/cache.yaml
+              subPath: cache.yaml
+            - name: gextra
+              mountPath: /gextra
+            - name: cextra
+              mountPath: /cextra

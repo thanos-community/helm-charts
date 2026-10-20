@@ -465,7 +465,8 @@ bucket:
     # -- Enable the Bucketweb deployment (read-only object store browser).
     enabled: false
 
-    # -- Number of Bucketweb pod replicas.
+    # -- Number of Bucketweb pod replicas. Ignored when `bucket.bucketweb.autoscaling.enabled`
+    # is true, because the HorizontalPodAutoscaler then owns the replica count.
     replicaCount: 1
 
     # Kubernetes Service configuration for Bucketweb.
@@ -1132,6 +1133,8 @@ query:
   enabled: true
 
   # -- Number of Query pod replicas. Two or more is recommended for HA.
+  # Ignored when `query.autoscaling.enabled` is true, because the
+  # HorizontalPodAutoscaler then owns the replica count.
   replicaCount: 2
 
   # Kubernetes Service configuration for the Query component.
@@ -1287,6 +1290,14 @@ query:
     # -- Hostnames to match on the Query GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Query GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # HorizontalPodAutoscaler configuration for the Query component.
   autoscaling:
@@ -1318,6 +1329,30 @@ query:
     #   - thanos-receive.cluster1.internal:443
     #   - thanos-gateway.cluster2.internal:443
     #   - thanos-gateway.cluster3.internal:443
+
+    # File-based endpoint discovery, re-read at runtime instead of baked into
+    # the pod spec like `autogen` and `static`.
+    sdConfig:
+      # -- Existing ConfigMap holding the endpoint definitions. Takes
+      # precedence over `config` and is never written by the chart.
+      existingConfigMap: ""
+      # -- Key inside the ConfigMap holding the endpoint definitions.
+      key: endpoints.yml
+      # -- Inline endpoint config in the Thanos `EndpointConfig` format, rendered
+      # into a ConfigMap when `existingConfigMap` is empty. Processed via `tpl`.
+      # @default -- ""
+      config: ""
+      # -- How often Query re-reads the endpoint definitions. Empty leaves the
+      # Thanos default.
+      reloadInterval: ""
+    # Example. `default_client_config` and the per-endpoint `client_config` also
+    # live in this file; the `--grpc-client-tls-*` flags are deprecated in favour
+    # of them.
+    # sdConfig:
+    #   config: |
+    #     endpoints:
+    #       - address: thanos-sidecar-0.prometheus:10901
+    #       - address: thanos-sidecar-1.prometheus:10901
 
   # -- Deprecated. Use `query.endpoints.static[]` instead.
   # @default -- []
@@ -1520,7 +1555,8 @@ queryFrontend:
   # -- Enable the Query Frontend Deployment.
   enabled: false
 
-  # -- Number of Query Frontend pod replicas.
+  # -- Number of Query Frontend pod replicas. Ignored when `queryFrontend.autoscaling.enabled`
+  # is true, because the HorizontalPodAutoscaler then owns the replica count.
   replicaCount: 2
 
   # -- Downstream URL of the Query component. Leave empty to use the
@@ -1835,7 +1871,9 @@ storegateway:
   enabled: true
 
   # -- Number of Store Gateway pod replicas. Two or more is recommended for HA.
-  # In sharded mode this is the replica count *per shard*.
+  # In sharded mode this is the replica count *per shard*. Ignored when
+  # `storegateway.autoscaling.enabled` is true, because the HorizontalPodAutoscaler
+  # then owns the replica count.
   replicaCount: 2
 
   # -- Minimum number of seconds for which a newly created Store Gateway Pod must
@@ -2035,6 +2073,14 @@ storegateway:
     # -- Hostnames to match on the Store Gateway GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Store Gateway GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # HorizontalPodAutoscaler configuration for the Store Gateway.
   autoscaling:
@@ -2539,6 +2585,14 @@ receive:
     # -- Hostnames to match on the Receive GRPCRoute.
     # @default -- []
     hostnames: []
+    # -- Gateway matches for the Receive GRPCRoute rules.
+    # @default -- []
+    matches: []
+    # Example:
+    # matches:
+    #   - headers:
+    #       - name: content-type
+    #         value: application/grpc
 
   # VerticalPodAutoscaler configuration for the Receive StatefulSet.
   vpa:

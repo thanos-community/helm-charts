@@ -56,3 +56,11 @@ storegateway:
 
 query:
   replicaCount: 1
+  # Exercise file-based endpoint discovery in CI: without this, `ct install`
+  # never starts Query with --endpoint.sd-config-file and a malformed config
+  # would go unnoticed. Rendered via `tpl`, so chart helpers are available.
+  endpoints:
+    sdConfig:
+      config: |
+        endpoints:
+          - address: '{{ include "thanos.compName" (list . "storegateway") }}:10901'
