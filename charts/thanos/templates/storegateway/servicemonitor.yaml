@@ -11,6 +11,8 @@ metadata:
     {{- if .Values.storegateway.serviceMonitor.labels }}{{ toYaml .Values.storegateway.serviceMonitor.labels | nindent 4 }}{{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "storegateway") | nindent 4 }}
+    {{- with .Values.global.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.storegateway.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
 spec:
   namespaceSelector:
     matchNames:

@@ -13,6 +13,8 @@ metadata:
     {{- if $sm.labels }}{{ toYaml $sm.labels | nindent 4 }}{{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "receive") | nindent 4 }}
+    {{- with .Values.global.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
+    {{- with $sm.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
 spec:
   namespaceSelector:
     matchNames:

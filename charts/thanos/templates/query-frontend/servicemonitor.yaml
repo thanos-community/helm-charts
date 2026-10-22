@@ -11,6 +11,8 @@ metadata:
     {{- if .Values.queryFrontend.serviceMonitor.labels }}{{ toYaml .Values.queryFrontend.serviceMonitor.labels | nindent 4 }}{{- end }}
   annotations:
     {{- include "thanos.annotations" (dict "Values" .Values "component" "query-frontend") | nindent 4 }}
+    {{- with .Values.global.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
+    {{- with .Values.queryFrontend.serviceMonitor.annotations }}{{ toYaml . | nindent 4 }}{{- end }}
 spec:
   namespaceSelector:
     matchNames:

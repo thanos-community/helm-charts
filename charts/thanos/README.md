@@ -693,7 +693,7 @@ helm upgrade thanos oci://ghcr.io/thanos-community/helm-charts/thanos \
 > [!WARNING]
 > Registry now lives in `global.image.registry`, repository must be the path without the registry host, and tag defaults to the chart `appVersion`.
 
-### Upgrading to 0.47.2: Ruler rolls on config changes
+### Upgrading to 0.47.3: Ruler rolls on config changes
 
 The Ruler StatefulSet now carries `checksum/rules`, `checksum/query-configuration` and `checksum/alertmanagers-configuration` pod annotations, so a change to `ruler.rules`, `ruler.query.urls` or `ruler.alertmanagers.config` restarts the Ruler instead of leaving it on the old config until something else restarts it.
 
