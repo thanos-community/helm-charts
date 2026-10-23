@@ -18,6 +18,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ $rt.service.type | default "ClusterIP" }}
+  {{- with $rt.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ $rt.service.httpPort | default 10902 }}

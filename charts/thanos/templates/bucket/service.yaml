@@ -17,6 +17,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ .Values.bucket.bucketweb.service.type }}
+  {{- with .Values.bucket.bucketweb.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ .Values.bucket.bucketweb.service.port }}

@@ -484,6 +484,12 @@ bucket:
       # Kubernetes allocate one from the node-port range.
       # @default -- `null` (allocated by Kubernetes)
       nodePort: null
+      # -- Source CIDRs allowed through the Bucketweb load balancer. Requires
+      # `type: LoadBalancer`; the API server rejects it on any other type.
+      # Enforced by the cloud provider; empty leaves the load balancer open
+      # to any source.
+      # @default -- `[]` (any source)
+      loadBalancerSourceRanges: []
       # -- Extra annotations for the Bucketweb Service.
       # @default -- {}
       annotations: {}
@@ -828,6 +834,12 @@ compactor:
     # Kubernetes allocate one from the node-port range.
     # @default -- `null` (allocated by Kubernetes)
     nodePort: null
+    # -- Source CIDRs allowed through the Compactor load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Compactor Service.
     # @default -- {}
     annotations: {}
@@ -1165,6 +1177,12 @@ query:
     # -- Static node port for the Query gRPC port.
     # @default -- `null` (allocated by Kubernetes)
     grpcNodePort: null
+    # -- Source CIDRs allowed through the Query load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Query Service.
     # @default -- {}
     annotations: {}
@@ -1594,6 +1612,12 @@ queryFrontend:
     # Kubernetes allocate one from the node-port range.
     # @default -- `null` (allocated by Kubernetes)
     nodePort: null
+    # -- Source CIDRs allowed through the Query Frontend load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Query Frontend Service.
     # @default -- {}
     annotations: {}
@@ -1955,6 +1979,12 @@ storegateway:
     # sharding is enabled.
     # @default -- `null` (allocated by Kubernetes)
     grpcNodePort: null
+    # -- Source CIDRs allowed through the Store Gateway load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Store Gateway Service.
     # @default -- {}
     annotations: {}
@@ -2453,6 +2483,12 @@ receive:
     # -- Static node port for the Receive remote-write port.
     # @default -- `null` (allocated by Kubernetes)
     remoteWriteNodePort: null
+    # -- Source CIDRs allowed through the Receive load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Receive Service.
     # @default -- {}
     annotations: {}
@@ -2947,6 +2983,12 @@ receive:
       # -- Static node port for the Router remote-write port.
       # @default -- `null` (allocated by Kubernetes)
       remoteWriteNodePort: null
+      # -- Source CIDRs allowed through the Router load balancer. Requires
+      # `type: LoadBalancer`; the API server rejects it on any other type.
+      # Enforced by the cloud provider; empty leaves the load balancer open
+      # to any source.
+      # @default -- `[]` (any source)
+      loadBalancerSourceRanges: []
       # -- Extra annotations for the Router Service.
       # @default -- {}
       annotations: {}
@@ -3394,6 +3436,12 @@ ruler:
     # Kubernetes allocate one from the node-port range.
     # @default -- `null` (allocated by Kubernetes)
     httpNodePort: null
+    # -- Source CIDRs allowed through the Ruler load balancer. Requires
+    # `type: LoadBalancer`; the API server rejects it on any other type.
+    # Enforced by the cloud provider; empty leaves the load balancer open
+    # to any source.
+    # @default -- `[]` (any source)
+    loadBalancerSourceRanges: []
     # -- Extra annotations for the Ruler Service.
     # @default -- {}
     annotations: {}

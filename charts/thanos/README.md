@@ -1,6 +1,6 @@
 # Thanos Helm Chart
 
-![Version: 0.48.0](https://img.shields.io/badge/Version-0.48.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
+![Version: 0.49.0](https://img.shields.io/badge/Version-0.49.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v0.42.4](https://img.shields.io/badge/AppVersion-v0.42.4-informational?style=flat-square)
 
 <p align="center"><img src="../../docs/imgs/thanos_logo_full.svg" alt="Thanos Logo" width="300"/></p>
 
@@ -849,6 +849,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucket.bucketweb.resources | object | {} | Resource requests and limits for the Bucketweb container. |
 | bucket.bucketweb.service.annotations | object | {} | Extra annotations for the Bucketweb Service. |
 | bucket.bucketweb.service.labels | object | {} | Extra labels for the Bucketweb Service. |
+| bucket.bucketweb.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Bucketweb load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | bucket.bucketweb.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Bucketweb HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | bucket.bucketweb.service.port | int | `10902` | HTTP port exposed by the Bucketweb Service. |
 | bucket.bucketweb.service.type | string | `"ClusterIP"` | Kubernetes Service type for Bucketweb. |
@@ -941,6 +942,7 @@ The table below documents all available values. Top-level keys group settings by
 | compactor.retention.resolutionRaw | string | `"30d"` | Retention for raw resolution blocks (--retention.resolution-raw). |
 | compactor.service.annotations | object | {} | Extra annotations for the Compactor Service. |
 | compactor.service.labels | object | {} | Extra labels for the Compactor Service. |
+| compactor.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Compactor load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | compactor.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Compactor HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | compactor.service.port | int | `10902` | HTTP port exposed by the Compactor Service. |
 | compactor.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Compactor HTTP endpoint. |
@@ -1166,6 +1168,7 @@ The table below documents all available values. Top-level keys group settings by
 | query.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Query HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | query.service.httpPort | int | `9090` | HTTP/PromQL port exposed by the Query Service. |
 | query.service.labels | object | {} | Extra labels for the Query Service. |
+| query.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Query load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | query.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Query component. |
 | query.serviceAccount.annotations | object | {} | Extra annotations for the Query ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Query. Requires `create`. |
 | query.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Query pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
@@ -1251,6 +1254,7 @@ The table below documents all available values. Top-level keys group settings by
 | queryFrontend.resources | object | {} | Resource requests and limits for the Query Frontend container. |
 | queryFrontend.service.annotations | object | {} | Extra annotations for the Query Frontend Service. |
 | queryFrontend.service.labels | object | {} | Extra labels for the Query Frontend Service. |
+| queryFrontend.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Query Frontend load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | queryFrontend.service.nodePort | string | `null` (allocated by Kubernetes) | Static node port for the Query Frontend HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | queryFrontend.service.port | int | `9090` | HTTP port exposed by the Query Frontend Service. |
 | queryFrontend.service.type | string | `"ClusterIP"` | Kubernetes Service type for Query Frontend. |
@@ -1449,6 +1453,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.router.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Router HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | receive.router.service.httpPort | int | `10902` | HTTP port exposed by the Router Service (metrics, probes). |
 | receive.router.service.labels | object | {} | Extra labels for the Router Service. |
+| receive.router.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Router load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | receive.router.service.remoteWriteNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Router remote-write port. |
 | receive.router.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Router Service. |
 | receive.router.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Router component. |
@@ -1480,6 +1485,7 @@ The table below documents all available values. Top-level keys group settings by
 | receive.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Receive HTTP port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | receive.service.httpPort | int | `10902` | HTTP port exposed by the Receive Service. |
 | receive.service.labels | object | {} | Extra labels for the Receive Service. |
+| receive.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Receive load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | receive.service.remoteWriteNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Receive remote-write port. |
 | receive.service.remoteWritePort | int | `10908` | Remote-write ingestion port exposed by the Receive Service. |
 | receive.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Receive component. |
@@ -1596,6 +1602,7 @@ The table below documents all available values. Top-level keys group settings by
 | ruler.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Ruler HTTP port. The gRPC port is only exposed on the headless Service, which never has node ports. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | ruler.service.httpPort | int | `10902` | HTTP port exposed by the Ruler Service. |
 | ruler.service.labels | object | {} | Extra labels for the Ruler Service. |
+| ruler.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Ruler load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | ruler.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Ruler component. |
 | ruler.serviceAccount.annotations | object | {} | Extra annotations for the Ruler ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Ruler. Requires `create`. |
 | ruler.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Ruler pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
@@ -1719,6 +1726,7 @@ The table below documents all available values. Top-level keys group settings by
 | storegateway.service.httpNodePort | string | `null` (allocated by Kubernetes) | Static node port for the Store Gateway HTTP port. Ignored when sharding is enabled, because the aggregate Service is headless then and the per-shard Services cannot share a single node port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range. |
 | storegateway.service.httpPort | int | `10902` | HTTP port exposed by the Store Gateway Service. |
 | storegateway.service.labels | object | {} | Extra labels for the Store Gateway Service. |
+| storegateway.service.loadBalancerSourceRanges | list | `[]` (any source) | Source CIDRs allowed through the Store Gateway load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source. |
 | storegateway.service.type | string | `"ClusterIP"` | Kubernetes Service type for the Store Gateway. |
 | storegateway.serviceAccount.annotations | object | {} | Extra annotations for the Store Gateway ServiceAccount, merged on top of `global.serviceAccount.annotations`. Use it to scope an IRSA or Workload Identity binding to Store Gateway. Requires `create`. |
 | storegateway.serviceAccount.automountServiceAccountToken | string | `null` (inherit `global.serviceAccount.automountServiceAccountToken`) | Mount the ServiceAccount token into Store Gateway pods. Null inherits `global.serviceAccount.automountServiceAccountToken`. Requires `create`. |
