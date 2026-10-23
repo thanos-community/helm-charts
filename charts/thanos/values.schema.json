@@ -704,6 +704,16 @@
                     "integer",
                     "null"
                   ]
+                },
+                "loadBalancerSourceRanges": {
+                  "default": [],
+                  "description": "Source CIDRs allowed through the Bucketweb load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "required": [],
+                  "title": "loadBalancerSourceRanges",
+                  "type": "array"
                 }
               },
               "required": [
@@ -1681,6 +1691,16 @@
                 "integer",
                 "null"
               ]
+            },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Compactor load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
             }
           },
           "required": [
@@ -3762,6 +3782,16 @@
                 "integer",
                 "null"
               ]
+            },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Query load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
             }
           },
           "required": [
@@ -4675,6 +4705,16 @@
                 "integer",
                 "null"
               ]
+            },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Query Frontend load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
             }
           },
           "required": [
@@ -6206,6 +6246,16 @@
                 "null"
               ]
             },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Receive load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
+            },
             "remoteWriteNodePort": {
               "description": "Static node port for the remote-write port. Only honoured when `type` is NodePort or LoadBalancer; null lets Kubernetes allocate one from the node-port range.",
               "required": [],
@@ -7508,6 +7558,16 @@
                 "integer",
                 "null"
               ]
+            },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Ruler load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
             }
           },
           "required": [
@@ -8871,6 +8931,16 @@
                 "integer",
                 "null"
               ]
+            },
+            "loadBalancerSourceRanges": {
+              "default": [],
+              "description": "Source CIDRs allowed through the Store Gateway load balancer. Requires `type: LoadBalancer`; the API server rejects it on any other type. Enforced by the cloud provider; empty leaves the load balancer open to any source.",
+              "items": {
+                "type": "string"
+              },
+              "required": [],
+              "title": "loadBalancerSourceRanges",
+              "type": "array"
             }
           },
           "required": [

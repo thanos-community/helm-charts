@@ -17,6 +17,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ .Values.storegateway.service.type }}
+  {{- with .Values.storegateway.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if eq (include "thanos.storegateway.sharded" .) "true" }}
   # Headless so that the Query DNS-SRV discovery (dnssrv+_grpc._tcp) resolves
   # every shard pod individually and fans out across all shards.
@@ -72,6 +76,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ $.Values.storegateway.service.type }}
+  {{- with $.Values.storegateway.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ $.Values.storegateway.service.httpPort }}

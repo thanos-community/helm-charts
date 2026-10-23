@@ -17,6 +17,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ .Values.compactor.service.type }}
+  {{- with .Values.compactor.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ .Values.compactor.service.port }}

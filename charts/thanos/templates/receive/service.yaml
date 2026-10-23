@@ -18,6 +18,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ $cfg.service.type }}
+  {{- with $cfg.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ $cfg.service.httpPort }}

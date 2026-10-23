@@ -1,0 +1,179 @@
+suite: service load balancer source ranges
+
+tests:
+  # -- Bucketweb ------------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the bucketweb service
+    template: bucket/service.yaml
+    set:
+      bucket.bucketweb.enabled: true
+      bucket.bucketweb.service.type: LoadBalancer
+      bucket.bucketweb.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  - it: omits loadBalancerSourceRanges on the bucketweb service by default
+    template: bucket/service.yaml
+    set:
+      bucket.bucketweb.enabled: true
+    asserts:
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+
+  # -- Compactor ------------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the compactor service
+    template: compactor/service.yaml
+    set:
+      compactor.enabled: true
+      compactor.service.type: LoadBalancer
+      compactor.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  # -- Query ----------------------------------------------------------
+
+  # The field belongs to the Service spec: the API server drops it, as an
+  # unknown field, from a port.
+  - it: sets loadBalancerSourceRanges on the query service spec, not its ports
+    template: query/service.yaml
+    set:
+      query.enabled: true
+      query.service.type: LoadBalancer
+      query.service.loadBalancerSourceRanges: [10.0.0.0/8, 192.168.0.0/16]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8, 192.168.0.0/16]
+      - notExists:
+          path: spec.ports[0].loadBalancerSourceRanges
+      - notExists:
+          path: spec.ports[1].loadBalancerSourceRanges
+
+  - it: omits loadBalancerSourceRanges on the query service by default
+    template: query/service.yaml
+    set:
+      query.enabled: true
+    asserts:
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+
+  # -- Query Frontend -------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the query-frontend service
+    template: query-frontend/service.yaml
+    set:
+      queryFrontend.enabled: true
+      queryFrontend.service.type: LoadBalancer
+      queryFrontend.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  # -- Receive --------------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the receive service
+    template: receive/service.yaml
+    documentIndex: 0
+    set:
+      receive.enabled: true
+      receive.service.type: LoadBalancer
+      receive.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  - it: never sets loadBalancerSourceRanges on the receive headless service
+    template: receive/service.yaml
+    documentIndex: 1
+    set:
+      receive.enabled: true
+      receive.service.type: LoadBalancer
+      receive.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+
+  # -- Receive Router (split mode) -------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the receive router service
+    template: receive/split/router-service.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.router.service.type: LoadBalancer
+      receive.router.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  # -- Ruler ----------------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the ruler service
+    template: ruler/service.yaml
+    documentIndex: 0
+    set:
+      ruler.enabled: true
+      ruler.service.type: LoadBalancer
+      ruler.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  - it: never sets loadBalancerSourceRanges on the ruler headless service
+    template: ruler/service.yaml
+    documentIndex: 1
+    set:
+      ruler.enabled: true
+      ruler.service.type: LoadBalancer
+      ruler.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.clusterIP
+          value: None
+      - notExists:
+          path: spec.loadBalancerSourceRanges
+
+  # -- Store Gateway --------------------------------------------------
+
+  - it: sets loadBalancerSourceRanges on the storegateway service
+    template: storegateway/service.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: false
+      storegateway.service.type: LoadBalancer
+      storegateway.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]
+
+  # The per-shard Services take the aggregate's `type`, so they need its
+  # allowlist too.
+  - it: sets loadBalancerSourceRanges on the per-shard storegateway services
+    template: storegateway/service.yaml
+    documentIndex: 1
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.service.type: LoadBalancer
+      storegateway.service.loadBalancerSourceRanges: [10.0.0.0/8]
+    asserts:
+      - equal:
+          path: metadata.name
+          value: RELEASE-NAME-thanos-storegateway-0
+      - equal:
+          path: spec.loadBalancerSourceRanges
+          value: [10.0.0.0/8]

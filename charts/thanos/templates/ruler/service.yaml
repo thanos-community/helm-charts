@@ -26,6 +26,10 @@ spec:
   selector:
     {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 4 }}
   type: {{ .Values.ruler.service.type }}
+  {{- with .Values.ruler.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 ---
 # Headless Service backing the StatefulSet: stable per-pod DNS for Query's gRPC
 # fan-out. Like the per-shard Store Gateway Services, it intentionally omits the

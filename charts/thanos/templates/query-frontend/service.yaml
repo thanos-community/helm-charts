@@ -17,6 +17,10 @@ metadata:
     {{- end }}
 spec:
   type: {{ .Values.queryFrontend.service.type }}
+  {{- with .Values.queryFrontend.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
       port: {{ .Values.queryFrontend.service.port }}
