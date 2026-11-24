@@ -663,7 +663,7 @@ global:
     perComponent: true      # <release>-thanos-<component> for every component
 ```
 
-`<component>.serviceAccount` is available on `bucket.bucketweb`, `compactor`, `query`, `queryFrontend`, `storegateway`, `ruler` and `receive` — in split mode on `receive.ingester` and `receive.router` instead of `receive`. All Store Gateway shards share the component ServiceAccount.
+`<component>.serviceAccount` is available on `bucket.bucketweb`, `bucketReplicate`, `compactor`, `query`, `queryFrontend`, `storegateway`, `ruler` and `receive` — in split mode on `receive.ingester` and `receive.router` instead of `receive`. All Store Gateway shards share the component ServiceAccount.
 
 To run a component as a ServiceAccount managed outside the chart, set its `name` without `create`:
 
