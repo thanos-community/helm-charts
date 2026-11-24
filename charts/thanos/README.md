@@ -916,6 +916,7 @@ The table below documents all available values. Top-level keys group settings by
 | bucketReplicate.extraInitContainers | list | [] | Extra init containers. Merged with `global.extraInitContainers`. |
 | bucketReplicate.extraVolumeMounts | list | [] | Extra volume mounts for the container. Merged with `global.extraVolumeMounts`. |
 | bucketReplicate.extraVolumes | list | [] | Extra volumes for the pod. Merged with `global.extraVolumes`. |
+| bucketReplicate.hostUsers | bool | nil | Configure hostUsers for Bucket Replicate pods. Overrides global.hostUsers. |
 | bucketReplicate.ignoreMarkedForDeletion | bool | `false` | Skip blocks that carry a deletion mark. |
 | bucketReplicate.labels | object | {} | Extra labels for the Deployment. |
 | bucketReplicate.matcher | string | `""` | Prometheus matcher limiting replication to blocks whose external labels match, e.g. `cluster="eu-west-1"`. Empty replicates every block. |

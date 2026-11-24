@@ -879,6 +879,10 @@ bucketReplicate:
   # @default -- {}
   resources: {}
 
+  # -- (bool) Configure hostUsers for Bucket Replicate pods. Overrides global.hostUsers.
+  # @default -- nil
+  hostUsers: null
+
   # -- Pod-level securityContext. Falls back to `global.podSecurityContext`.
   # @default -- {}
   podSecurityContext: {}

@@ -1182,6 +1182,11 @@
           "title": "podLabels",
           "type": "object"
         },
+        "hostUsers": {
+          "description": "Configure hostUsers for Bucket Replicate pods. Overrides global.hostUsers.",
+          "title": "hostUsers",
+          "type": ["boolean", "null"]
+        },
         "podSecurityContext": {
           "additionalProperties": true,
           "description": "Pod-level securityContext. Falls back to `global.podSecurityContext`.",

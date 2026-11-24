@@ -38,6 +38,7 @@ spec:
       serviceAccountName: {{ include "thanos.serviceAccountName" (dict "root" . "component" "bucket-replicate") }}
       {{- include "thanos.affinity" (dict "Values" .Values "component" "bucketReplicate") | nindent 6 }}
       {{- include "thanos.imagePullSecrets" . | nindent 6 }}
+      {{- include "thanos.podHostUsers" (dict "root" . "key" "bucketReplicate") | nindent 6 }}
       {{- include "thanos.podSC" (dict "root" . "key" "bucketReplicate") | nindent 6 }}
       containers:
         - name: bucket-replicate

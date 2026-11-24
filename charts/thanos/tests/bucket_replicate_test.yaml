@@ -223,6 +223,35 @@ tests:
           path: spec.template.spec.serviceAccountName
           value: RELEASE-NAME-thanos-bucket-replicate
 
+  - it: leaves hostUsers unset by default
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.hostUsers
+
+  - it: applies global hostUsers
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      global.hostUsers: false
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: false
+
+  - it: lets component hostUsers override the global value
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      global.hostUsers: false
+      bucketReplicate.hostUsers: true
+    asserts:
+      - equal:
+          path: spec.template.spec.hostUsers
+          value: true
+
   # -- Alerting rules --------------------------------------------------------
 
   - it: keeps the bucket-replicate rule group out while the component is off
