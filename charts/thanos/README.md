@@ -573,7 +573,7 @@ bucketReplicate:
 
 Three things to keep in mind:
 
-- Keep `replicaCount` at 1. Several pods replicating the same blocks only duplicates work.
+- Keep `replicaCount` at 1. Several pods replicating the same blocks only duplicates work. The Deployment uses the `Recreate` strategy, so a rollout does not briefly run two replicators either.
 - The chart's `thanos-bucket-replicate` alert group is gated on this component, so enabling it also starts alerting on failed replication runs. Turn the group off again with `global.thanosRules.groups.thanosBucketReplicate.enabled: false`.
 - `--single-run` and `--id` are deliberately not exposed. Both make the process exit after one pass, which a Deployment would restart forever; run those as a `Job` instead.
 

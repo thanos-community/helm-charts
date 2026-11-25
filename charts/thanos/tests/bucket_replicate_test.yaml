@@ -121,6 +121,34 @@ tests:
           path: spec.template.spec.containers[0].args
           content: --compaction-max=4
 
+  - it: keeps matchers and time bounds intact when YAML would split them
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.matcher: 'env=~"a: b|c #d"'
+      bucketReplicate.minTime: "2026-01-01T00:00:00Z"
+      bucketReplicate.maxTime: "-1h"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: '--matcher=env=~"a: b|c #d"'
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --min-time=2026-01-01T00:00:00Z
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --max-time=-1h
+
+  - it: replaces the pod instead of rolling it, so two replicators never overlap
+    template: bucket-replicate/deployment.yaml
+    set:
+      bucketReplicate.enabled: true
+    asserts:
+      - equal:
+          path: spec.strategy
+          value:
+            type: Recreate
+
   # -- Destination Secret --------------------------------------------------
 
   - it: creates no destination Secret by default
@@ -149,6 +177,30 @@ tests:
       - matchRegex:
           path: stringData["objstore.yml"]
           pattern: 'bucket: dr-copy'
+
+  - it: refuses a destination Secret that shares the name of the source Secret
+    template: bucket-replicate/secret-objstore-to.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.objstoreTo.createSecret: true
+      bucketReplicate.objstoreTo.secretName: thanos-objstore
+      global.objstore.createSecret: true
+      global.objstore.secretName: thanos-objstore
+    asserts:
+      - failedTemplate:
+          errorPattern: equals global.objstore.secretName
+
+  - it: allows the same name when the chart does not create the source Secret
+    template: bucket-replicate/secret-objstore-to.yaml
+    set:
+      bucketReplicate.enabled: true
+      bucketReplicate.objstoreTo.createSecret: true
+      bucketReplicate.objstoreTo.secretName: thanos-objstore
+      global.objstore.createSecret: false
+      global.objstore.secretName: thanos-objstore
+    asserts:
+      - isKind:
+          of: Secret
 
   # -- Surrounding objects --------------------------------------------------
 

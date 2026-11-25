@@ -19,6 +19,8 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ $br.replicaCount }}
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "bucket-replicate") | nindent 6 }}
@@ -64,13 +66,13 @@ spec:
             - --compaction-max={{ $br.compaction.max }}
           {{- end }}
           {{- with $br.matcher }}
-            - --matcher={{ . }}
+            - {{ printf "--matcher=%s" . | quote }}
           {{- end }}
           {{- with $br.minTime }}
-            - --min-time={{ . }}
+            - {{ printf "--min-time=%s" . | quote }}
           {{- end }}
           {{- with $br.maxTime }}
-            - --max-time={{ . }}
+            - {{ printf "--max-time=%s" . | quote }}
           {{- end }}
           {{- if $br.ignoreMarkedForDeletion }}
             - --ignore-marked-for-deletion

@@ -783,15 +783,10 @@ bucket:
       maxUnavailable: ""
 
 # ======================================================================
-# Compactor component
-# Compacts, downsamples and deduplicates blocks in the object store.
-# Must run as a singleton — do not set replicaCount above 1.
-# ======================================================================
-# Compactor component — compacts and downsamples blocks. Must run as a singleton.
-# ======================================================================
-# Bucket Replicate component — copies blocks from the object store into a
-# second one (`thanos tools bucket replicate`), for disaster-recovery
-# copies or migrations between providers. Runs continuously.
+# Bucket Replicate component
+# Copies blocks from the object store into a second one
+# (`thanos tools bucket replicate`), for disaster-recovery copies or
+# migrations between providers. Runs continuously.
 # ======================================================================
 bucketReplicate:
   # -- Enable the Bucket Replicate Deployment.
@@ -1050,6 +1045,12 @@ bucketReplicate:
     # -- Maximum unavailable pods. Falls back to `global.pdb.maxUnavailable`.
     maxUnavailable: ""
 
+# ======================================================================
+# Compactor component
+# Compacts, downsamples and deduplicates blocks in the object store.
+# Must run as a singleton — do not set replicaCount above 1.
+# ======================================================================
+# Compactor component — compacts and downsamples blocks. Must run as a singleton.
 compactor:
   # -- Enable the Compactor StatefulSet.
   enabled: true
