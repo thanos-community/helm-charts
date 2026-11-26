@@ -1,8 +1,8 @@
 {{/*
 Render the thanos-bucket-replicate rule group.
 
-Disabled by default in this chart because the bucket-replicate
-component is not deployed here.
+Follows bucketReplicate.enabled by default. Enable it explicitly when
+scraping a bucket-replicate that runs outside this chart.
 
 Context (.):
   ctx.bucketRepl       — group config

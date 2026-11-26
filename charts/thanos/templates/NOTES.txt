@@ -2,6 +2,7 @@ Thanos installed.
 
 Components enabled:
 - bucket: {{ .Values.bucket.enabled }}
+- bucket-replicate: {{ .Values.bucketReplicate.enabled }}
 - compactor: {{ .Values.compactor.enabled }}
 - query: {{ .Values.query.enabled }}
 - query-frontend: {{ .Values.queryFrontend.enabled }}
