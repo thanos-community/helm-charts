@@ -51,6 +51,32 @@ tests:
       - notExists:
           path: spec.minReadySeconds
 
+  - it: renders podManagementPolicy when set
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.podManagementPolicy: Parallel
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: omits podManagementPolicy by default
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+    asserts:
+      - notExists:
+          path: spec.podManagementPolicy
+
+  - it: rejects an unknown podManagementPolicy
+    template: receive/statefulset.yaml
+    set:
+      receive.enabled: true
+      receive.podManagementPolicy: Sequential
+    asserts:
+      - failedTemplate: {}
+
   - it: uses the global image repository and app version
     template: receive/statefulset.yaml
     set:
@@ -1592,6 +1618,17 @@ tests:
       - equal:
           path: spec.minReadySeconds
           value: 45
+
+  - it: renders ingester podManagementPolicy in split mode
+    template: receive/statefulset.yaml
+    values:
+      - _split_defaults.yaml
+    set:
+      receive.ingester.podManagementPolicy: Parallel
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
 
   - it: omits router-only flags from the StatefulSet args in split mode
     template: receive/statefulset.yaml

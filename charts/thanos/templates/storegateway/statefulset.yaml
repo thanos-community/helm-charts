@@ -28,6 +28,9 @@ spec:
   {{- if $.Values.storegateway.minReadySeconds }}
   minReadySeconds: {{ $.Values.storegateway.minReadySeconds }}
   {{- end }}
+  {{- with $.Values.storegateway.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "storegateway") | nindent 6 }}

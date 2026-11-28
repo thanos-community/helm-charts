@@ -25,6 +25,9 @@ spec:
   {{- if $cfg.minReadySeconds }}
   minReadySeconds: {{ $cfg.minReadySeconds }}
   {{- end }}
+  {{- with $cfg.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "receive") | nindent 6 }}

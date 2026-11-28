@@ -75,6 +75,43 @@ tests:
       - notExists:
           path: spec.minReadySeconds
 
+  - it: renders podManagementPolicy when set
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.podManagementPolicy: Parallel
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: omits podManagementPolicy by default
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+    asserts:
+      - notExists:
+          path: spec.podManagementPolicy
+
+  - it: renders podManagementPolicy on every shard
+    template: storegateway/statefulset.yaml
+    set:
+      storegateway.enabled: true
+      storegateway.sharded.enabled: true
+      storegateway.sharded.hashPartitioning.shards: 2
+      storegateway.podManagementPolicy: Parallel
+    asserts:
+      - hasDocuments:
+          count: 2
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+        documentIndex: 0
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+        documentIndex: 1
+
   - it: uses the global image repository and app version
     template: storegateway/statefulset.yaml
     set:

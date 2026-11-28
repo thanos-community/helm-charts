@@ -1066,6 +1066,23 @@ compactor:
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
 
+  # @schema
+  # enum:
+  #   - ""
+  #   - OrderedReady
+  #   - Parallel
+  # @schema
+  # -- How the Compactor StatefulSet creates and removes Pods (StatefulSet
+  # `spec.podManagementPolicy`). `OrderedReady` starts them one at a time in
+  # ordinal order, each waiting for the one before to be Ready, and removes them
+  # in reverse; `Parallel` starts and removes them all at once. It governs
+  # initial creation, scaling and deletion, not rolling updates. Empty omits the
+  # field, which Kubernetes defaults to `OrderedReady`. The field is immutable:
+  # changing it on an installed release needs the StatefulSet deleted first
+  # (`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: ""
+
   # PersistentVolumeClaim configuration for the Compactor working directory.
   persistence:
     # -- Enable a PersistentVolumeClaim for the Compactor working directory.
@@ -2170,6 +2187,23 @@ storegateway:
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
 
+  # @schema
+  # enum:
+  #   - ""
+  #   - OrderedReady
+  #   - Parallel
+  # @schema
+  # -- How the Store Gateway StatefulSet creates and removes Pods (StatefulSet
+  # `spec.podManagementPolicy`). `OrderedReady` starts them one at a time in
+  # ordinal order, each waiting for the one before to be Ready, and removes them
+  # in reverse; `Parallel` starts and removes them all at once. It governs
+  # initial creation, scaling and deletion, not rolling updates. Empty omits the
+  # field, which Kubernetes defaults to `OrderedReady`. The field is immutable:
+  # changing it on an installed release needs the StatefulSet deleted first
+  # (`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: ""
+
   # Sharded Store Gateway topology. When enabled, the chart renders one
   # StatefulSet per shard (named `<fullname>-storegateway-<index>`) so that each
   # shard serves a subset of the object-storage blocks instead of every replica
@@ -2634,6 +2668,24 @@ receive:
   # In `split` mode set `receive.ingester.minReadySeconds` instead.
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
+
+  # @schema
+  # enum:
+  #   - ""
+  #   - OrderedReady
+  #   - Parallel
+  # @schema
+  # -- How the Receive StatefulSet creates and removes Pods (StatefulSet
+  # `spec.podManagementPolicy`). `OrderedReady` starts them one at a time in
+  # ordinal order, each waiting for the one before to be Ready, and removes them
+  # in reverse; `Parallel` starts and removes them all at once. It governs
+  # initial creation, scaling and deletion, not rolling updates. Empty omits the
+  # field, which Kubernetes defaults to `OrderedReady`. The field is immutable:
+  # changing it on an installed release needs the StatefulSet deleted first
+  # (`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).
+  # In `split` mode set `receive.ingester.podManagementPolicy` instead.
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: ""
 
   # -- Optional HTTP header name used to segregate tenants in multi-tenant setups.
   # When set, Receive routes write requests to the correct tenant shard based on this header.
@@ -3123,7 +3175,8 @@ receive:
   # schema requires it to be populated when mode=split.
   #
   # The accepted shape mirrors the top-level `receive.*` fields
-  # (replicaCount, minReadySeconds, tsdb, hashrings, service, ingress, httpRoute, grpcRoute,
+  # (replicaCount, minReadySeconds, podManagementPolicy, tsdb, hashrings, service, ingress,
+  # httpRoute, grpcRoute,
   # vpa, persistence, resources, extraArgs, podSecurityContext,
   # containerSecurityContext, dnsConfig, extraEnv, extraEnvFrom,
   # extraInitContainers, extraContainers, probes, nodeSelector, tolerations,
@@ -3546,6 +3599,23 @@ ruler:
   # Defaults to 0 (available as soon as Ready); the field is omitted when 0.
   # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#minimum-ready-seconds
   minReadySeconds: 0
+
+  # @schema
+  # enum:
+  #   - ""
+  #   - OrderedReady
+  #   - Parallel
+  # @schema
+  # -- How the Ruler StatefulSet creates and removes Pods (StatefulSet
+  # `spec.podManagementPolicy`). `OrderedReady` starts them one at a time in
+  # ordinal order, each waiting for the one before to be Ready, and removes them
+  # in reverse; `Parallel` starts and removes them all at once. It governs
+  # initial creation, scaling and deletion, not rolling updates. Empty omits the
+  # field, which Kubernetes defaults to `OrderedReady`. The field is immutable:
+  # changing it on an installed release needs the StatefulSet deleted first
+  # (`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).
+  # See https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies
+  podManagementPolicy: ""
 
   # Stateless mode: evaluation results are shipped to a remote-write endpoint
   # instead of being uploaded to the object store.
