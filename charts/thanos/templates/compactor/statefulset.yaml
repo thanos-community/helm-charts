@@ -21,6 +21,9 @@ spec:
   {{- if .Values.compactor.minReadySeconds }}
   minReadySeconds: {{ .Values.compactor.minReadySeconds }}
   {{- end }}
+  {{- with .Values.compactor.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "compactor") | nindent 6 }}

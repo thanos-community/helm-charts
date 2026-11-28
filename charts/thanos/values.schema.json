@@ -2059,6 +2059,18 @@
           "title": "minReadySeconds",
           "type": "integer"
         },
+        "podManagementPolicy": {
+          "default": "",
+          "description": "How the Compactor StatefulSet creates and removes Pods (StatefulSet\n`spec.podManagementPolicy`). `OrderedReady` starts them one at a time in\nordinal order, each waiting for the one before to be Ready, and removes them\nin reverse; `Parallel` starts and removes them all at once. It governs\ninitial creation, scaling and deletion, not rolling updates. Empty omits the\nfield, which Kubernetes defaults to `OrderedReady`. The field is immutable:\nchanging it on an installed release needs the StatefulSet deleted first\n(`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies",
+          "enum": [
+            "",
+            "OrderedReady",
+            "Parallel"
+          ],
+          "required": [],
+          "title": "podManagementPolicy",
+          "type": "string"
+        },
         "replicaCount": {
           "default": 1,
           "description": "Number of Compactor replicas. Must remain 1 — running multiple\ncompactors against the same bucket causes data corruption.",
@@ -6540,6 +6552,18 @@
           "title": "minReadySeconds",
           "type": "integer"
         },
+        "podManagementPolicy": {
+          "default": "",
+          "description": "How the Receive StatefulSet creates and removes Pods (StatefulSet\n`spec.podManagementPolicy`). `OrderedReady` starts them one at a time in\nordinal order, each waiting for the one before to be Ready, and removes them\nin reverse; `Parallel` starts and removes them all at once. It governs\ninitial creation, scaling and deletion, not rolling updates. Empty omits the\nfield, which Kubernetes defaults to `OrderedReady`. The field is immutable:\nchanging it on an installed release needs the StatefulSet deleted first\n(`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).\nIn `split` mode set `receive.ingester.podManagementPolicy` instead.\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies",
+          "enum": [
+            "",
+            "OrderedReady",
+            "Parallel"
+          ],
+          "required": [],
+          "title": "podManagementPolicy",
+          "type": "string"
+        },
         "replicaCount": {
           "default": 3,
           "description": "Number of Receive pod replicas. Minimum 3 is recommended for\nreplication factor 2 (write quorum = floor(replicaCount/2)+1).",
@@ -7861,6 +7885,18 @@
           "required": [],
           "title": "minReadySeconds",
           "type": "integer"
+        },
+        "podManagementPolicy": {
+          "default": "",
+          "description": "How the Ruler StatefulSet creates and removes Pods (StatefulSet\n`spec.podManagementPolicy`). `OrderedReady` starts them one at a time in\nordinal order, each waiting for the one before to be Ready, and removes them\nin reverse; `Parallel` starts and removes them all at once. It governs\ninitial creation, scaling and deletion, not rolling updates. Empty omits the\nfield, which Kubernetes defaults to `OrderedReady`. The field is immutable:\nchanging it on an installed release needs the StatefulSet deleted first\n(`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies",
+          "enum": [
+            "",
+            "OrderedReady",
+            "Parallel"
+          ],
+          "required": [],
+          "title": "podManagementPolicy",
+          "type": "string"
         },
         "replicaCount": {
           "default": 2,
@@ -9232,6 +9268,18 @@
           "required": [],
           "title": "minReadySeconds",
           "type": "integer"
+        },
+        "podManagementPolicy": {
+          "default": "",
+          "description": "How the Store Gateway StatefulSet creates and removes Pods (StatefulSet\n`spec.podManagementPolicy`). `OrderedReady` starts them one at a time in\nordinal order, each waiting for the one before to be Ready, and removes them\nin reverse; `Parallel` starts and removes them all at once. It governs\ninitial creation, scaling and deletion, not rolling updates. Empty omits the\nfield, which Kubernetes defaults to `OrderedReady`. The field is immutable:\nchanging it on an installed release needs the StatefulSet deleted first\n(`kubectl delete statefulset --cascade=orphan`, which keeps the Pods and PVCs).\nSee https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#pod-management-policies",
+          "enum": [
+            "",
+            "OrderedReady",
+            "Parallel"
+          ],
+          "required": [],
+          "title": "podManagementPolicy",
+          "type": "string"
         },
         "replicaCount": {
           "default": 2,

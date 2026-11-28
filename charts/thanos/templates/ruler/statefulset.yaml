@@ -22,6 +22,9 @@ spec:
   {{- if .Values.ruler.minReadySeconds }}
   minReadySeconds: {{ .Values.ruler.minReadySeconds }}
   {{- end }}
+  {{- with .Values.ruler.podManagementPolicy }}
+  podManagementPolicy: {{ . }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "thanos.selectorLabels" (dict "root" $ "component" "ruler") | nindent 6 }}

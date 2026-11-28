@@ -51,6 +51,24 @@ tests:
       - notExists:
           path: spec.minReadySeconds
 
+  - it: renders podManagementPolicy when set
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+      ruler.podManagementPolicy: Parallel
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: omits podManagementPolicy by default
+    template: ruler/statefulset.yaml
+    set:
+      ruler.enabled: true
+    asserts:
+      - notExists:
+          path: spec.podManagementPolicy
+
   - it: uses the global image repository and app version
     template: ruler/statefulset.yaml
     set:

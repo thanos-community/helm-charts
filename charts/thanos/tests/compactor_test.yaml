@@ -51,6 +51,24 @@ tests:
       - notExists:
           path: spec.minReadySeconds
 
+  - it: renders podManagementPolicy when set
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+      compactor.podManagementPolicy: Parallel
+    asserts:
+      - equal:
+          path: spec.podManagementPolicy
+          value: Parallel
+
+  - it: omits podManagementPolicy by default
+    template: compactor/statefulset.yaml
+    set:
+      compactor.enabled: true
+    asserts:
+      - notExists:
+          path: spec.podManagementPolicy
+
   - it: uses the global image repository and app version
     template: compactor/statefulset.yaml
     set:
